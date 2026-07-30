@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "Agentic UX Design - Relationship-Centric Interfaces": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "skillPath": "relationship-design/skills/relationship-design/SKILL.md",
+      "computedHash": "73ac671127891854f2bfb4aff991a822d270cf0b7879fc6cfa01e6be78e5cf25"
+    },
     "animation-vocabulary": {
       "source": "emilkowalski/skill",
       "sourceType": "github",
@@ -12,6 +18,18 @@
       "sourceType": "github",
       "skillPath": "skills/apple-design/SKILL.md",
       "computedHash": "0d19303902efa64eace10e6b183eb29ef3220d424c1a7fd1eafc52adde216932"
+    },
+    "bencium-controlled-ux-designer": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "skillPath": "bencium-controlled-ux-designer/skills/bencium-controlled-ux-designer/SKILL.md",
+      "computedHash": "0221b3cc4cbc393a8ecc823cce9eb07ed369fe38c45e65c42fde41b257c481b1"
+    },
+    "bencium-innovative-ux-designer": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "skillPath": "bencium-innovative-ux-designer/skills/bencium-innovative-ux-designer/SKILL.md",
+      "computedHash": "6d5de8eb29c8a3a86683b16031a36c84e132d541c24a3c261efd40e1409305f1"
     },
     "better-accessibility": {
       "source": "jakubkrehel/skills",
@@ -67,11 +85,29 @@
       "skillPath": "skills/find-animation-opportunities/SKILL.md",
       "computedHash": "c6b1d0f6d03a11f8772b1cef4ca5cc88301ae8641ac2697c85ffa87eb458e40a"
     },
+    "human-architect-mindset": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "skillPath": "human-architect-mindset/skills/human-architect-mindset/SKILL.md",
+      "computedHash": "59f31549dfcbd65569a9ddebc2840161a560f6a80844e0046da75f298d340437"
+    },
     "improve-animations": {
       "source": "emilkowalski/skill",
       "sourceType": "github",
       "skillPath": "skills/improve-animations/SKILL.md",
       "computedHash": "9cd956e91139211efa5e17fc5e1675b9a3f711ef38cbc92aa8f3fa5b626b7e12"
+    },
+    "magic-ui": {
+      "source": "magicuidesign/magicui",
+      "sourceType": "github",
+      "skillPath": "skills/magic-ui/SKILL.md",
+      "computedHash": "751895d50c76490c6f92a68cdbe61100bd96b4963d1e91e37b5d82c8df0fc2d7"
+    },
+    "motion-design": {
+      "source": "LottieFiles/motion-design-skill",
+      "sourceType": "github",
+      "skillPath": "skills/motion-design/SKILL.md",
+      "computedHash": "4f16f46c81f25a2a25b7a4720b7ea001e65f384b31b5b7f4b455fef87fbc9016"
     },
     "pick-ui-library": {
       "source": "emilkowalski/skill",
@@ -96,6 +132,12 @@
       "sourceType": "github",
       "skillPath": "skills/shadcn/SKILL.md",
       "computedHash": "f99ef49d9909d380ca683ceb8dc8c25775c20ee38140112c394e037d8c11ee18"
+    },
+    "ui-typography": {
+      "source": "bencium/bencium-marketplace",
+      "sourceType": "github",
+      "skillPath": "typography/skills/typography/SKILL.md",
+      "computedHash": "148e35f41f0a4b317fb83b4efdf7308a829e6dc153f1377d963807ce7b85304e"
     }
   }
 }
