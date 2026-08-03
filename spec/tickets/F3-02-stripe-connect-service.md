@@ -4,17 +4,14 @@
 
 - **Fase**: F3 — Pagos
 - **Spec origen**: `spec/03-payments.md` §2 (`stripe/connect.ts`), §3
-- **Depende de**: `F3-01`, `XC-08` y decisión 3 de `PENDIENTES.md`
+- **Depende de**: `F3-01`, `XC-08`
 - **Tamaño estimado**: M
 
 ## Contexto
 
 Los negocios reciben su dinero en una cuenta Stripe Connect **Express** (MX). La creación de
-la cuenta y el onboarding son resolubles, pero la configuración del calendario de payouts
-está bloqueada por `PENDIENTES.md` decisión 3: Roger debe decidir payouts automáticos o
-manuales y, para retiros manuales, confirmar que la aprobación crea un `Payout`. Este ticket
-no elige una política provisional. No se implementa hasta registrar esa decisión, porque
-crear la cuenta con el calendario equivocado cambia el movimiento real del dinero.
+la cuenta y el onboarding usan el contrato cerrado de XC-08: calendario de payouts manual y
+retiros aprobados por admin que crean un Stripe Payout.
 Este ticket también introduce el tipo `ServiceResult`, la convención de retorno de todos
 los servicios de dominio de F3/F4.
 
@@ -48,8 +45,7 @@ createConnectAccount(deps, input: { businessId: string }):
 // - stripe.accounts.create({ type: "express", country: "MX",
 //     capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
 //     metadata: { businessId } })
-//   La propiedad settings.payouts.schedule se completa SOLO después de resolver
-//   PENDIENTES.md #3 (manual => interval "manual"; automático => política acordada).
+//   settings: { payouts: { schedule: { interval: "manual" } } }.
 //   Crear con idempotencyKey determinística `connect-account-${businessId}`.
 // - Persiste stripeAccountId en Business.
 

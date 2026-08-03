@@ -13,14 +13,14 @@ Cuando llega `payment_intent.succeeded`, se registra el `Payment` en `IN_ESCROW`
 comisión **congelada** en ese instante (`commissionPctApplied` + `commissionCents`), leyendo
 el plan vigente del negocio. Problema detectado: la spec no define qué pasa si el negocio
 no tiene `Subscription` al capturar (p. ej. pago de un link viejo tras cancelación).
-El fallback provisional al plan `basic` de la versión anterior se elimina: Roger debe
-decidir entre rechazar el cobro o agregar `PlatformSettings.defaultCommissionPct`
-(findings #10). No se implementa esa rama inventando una política. El handler puede recibir
+Roger aprobó rechazar la captura cuando no exista una suscripción activa, mediante el
+código estable `BUSINESS_NOT_ACTIVE` (403). No existe fallback a `basic`, porcentaje cero
+ni `PlatformSettings.defaultCommissionPct`. El handler puede recibir
 eventos duplicados: la idempotencia se ancla en el unique `stripePaymentIntentId`.
 
 `XC-25` ya cierra la semántica estructural: `amountCents` es total cobrado,
 `providerAmountCents` es principal y `serviceFeeCentsApplied` es la tarifa congelada. Solo
-la distribución de un refund sobre esos componentes sigue bloqueada por Roger.
+F3-05 consume esos snapshots con distribución proporcional en refunds.
 
 ## Alcance
 
@@ -43,7 +43,10 @@ type CapturePaymentInput = {
 };
 
 capturePayment(deps: { db; stripe }, input: CapturePaymentInput):
-  Promise<ServiceResult<{ paymentId: string }, "INVALID_TARGET">>
+  Promise<ServiceResult<
+    { paymentId: string },
+    "INVALID_TARGET" | "BUSINESS_NOT_ACTIVE"
+  >>
 ```
 
 Pasos (en `db.$transaction`):
@@ -54,6 +57,8 @@ Pasos (en `db.$transaction`):
    existe, pertenece a `businessId`, no tiene otro pago y su monto esperado coincide
    exactamente con `amountCents`. Para link es `PaymentLink.amountCents`; para orden es el
    total de checkout ya persistido. Metadata solo localiza: nunca autoriza tenant ni monto.
+   En la misma resolución, exigir `business.subscription.status === ACTIVE`; ausencia,
+   `PAST_DUE` o `CANCELED` → `BUSINESS_NOT_ACTIVE` (403), sin crear `Payment`.
 3. Si ya existe `Payment` con ese `stripePaymentIntentId` → retornar `svcOk` con su id
    **sin tocar nada** (evento duplicado; no se recalcula comisión ni fechas).
    Si dos transacciones pasan la lectura, capturar `P2002` del create, recargar por
@@ -96,9 +101,9 @@ Orden de resolución, y **este orden es la regla**:
    del proveedor.
 2. Plan vigente del negocio: `db.business.findUnique({ where: { id: businessId },
    select: { subscription: { select: { plan: { select: { commissionPct: true } } } } } })`.
-3. Sin suscripción → **bloqueado por decisión de Roger** (findings #10). No usar
-   silenciosamente el plan `basic`, cero, ni un literal. El ticket solo queda implementable
-   cuando la política y su error estable, si aplica, estén escritos aquí.
+3. Sin suscripción `ACTIVE` → `BUSINESS_NOT_ACTIVE`. No usar silenciosamente el plan
+   `basic`, cero, ni un literal. Esta decisión está cerrada por Roger y el ticket está
+   desbloqueado.
 
 ### Quién paga qué (D2)
 

@@ -6,8 +6,7 @@
 - **Spec origen**: `spec/05-admin.md` §4 (módulo)
 - **Depende de**: `F5-10`, `F5-11`
 - **Tamaño estimado**: L (3–6 h)
-- **Estado**: la lectura es implementable; las acciones de aprobación permanecen
-  deshabilitadas mientras `F5-11` esté bloqueado por `PENDIENTES.md` §3.
+- **Estado**: **DESBLOQUEADO**; las acciones consumen el Payout manual de F5-11/XC-08.
 
 ## Contexto
 

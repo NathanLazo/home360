@@ -7,7 +7,8 @@
 - **Fase**: XC — corrección transversal de specs (aplicar antes de ejecutar F0/F3)
 - **Spec origen**: `spec/03-payments.md` §1, §7 · `spec/02-business-dashboard.md` §1 ·
   `spec/05-admin.md` §3, §4
-- **Depende de**: decisión 1 y decisión 2 de `PENDIENTES.md` resueltas por Roger
+- **Depende de**: decisiones 1 y 2 de `PENDIENTES.md` (**resueltas por Roger**)
+- **Estado**: **DESBLOQUEADO** — saldo neto con comisión proporcional aprobado.
 - **Tamaño estimado**: S
 
 ## Contexto
@@ -16,9 +17,8 @@ F3 §1 define "Disponible = Σ `RELEASED` − Σ retiros `APPROVED|REQUESTED`" s
 suma es bruta o neta de comisión, y F5 §3 introduce pagos `PARTIALLY_REFUNDED` cuyo resto
 "se libera" al negocio pero nunca entra a "Σ `RELEASED`": tras cualquier disputa parcial,
 dinero transferido queda invisible e irretirable. F2 §1 (revenue W3) tiene el mismo hueco.
-Las fórmulas no pueden cerrarse todavía: `PENDIENTES.md` mantiene abiertas tanto la política
-de comisión del reembolso parcial como la semántica exacta de "Disponible". Este ticket es
-el único punto de propagación una vez que Roger elija; **no autoriza escoger por él**.
+Roger aprobó la comisión proporcional y la semántica neta de "Disponible". Este ticket
+registra la rama elegida y es el punto de propagación para sus consumidores.
 
 ## Alcance
 
@@ -31,8 +31,7 @@ el único punto de propagación una vez que Roger elija; **no autoriza escoger p
 
 ## Detalle técnico
 
-Tras documentarse la decisión, reemplazar en `spec/03-payments.md` §1 el bloque de saldos
-por una de estas dos ramas completas; nunca mezclar una fórmula de una rama con la otra.
+Aplicar la rama aprobada de comisión proporcional en todos los consumidores.
 
 Base común:
 
@@ -40,17 +39,24 @@ Base común:
 providerNetCents(p) = monto proveedor no reembolsado − comisión retenida
 
 - Disponible      = Σ providerNetCents(p) para p.status ∈ {RELEASED, PARTIALLY_REFUNDED}
-                    − Σ w.amountCents para w.status ∈ {REQUESTED, APPROVED}
+                    − Σ w.amountCents para
+                      w.status ∈ {REQUESTED, PROCESSING, APPROVED}
 - En escrow       = Σ p.amountCents para p.status = IN_ESCROW
 - Comisión del mes = Σ comisión efectivamente retenida de pagos del mes
 ```
 
-- **Rama A — comisión íntegra**: `commissionCents` permanece congelada; el reembolso parcial
-  no puede exceder el monto del proveedor menos la comisión y el bono D3 se calcula sobre
-  esa comisión íntegra.
-- **Rama B — comisión proporcional**: persistir la comisión efectivamente retenida tras el
-  reembolso, recalcular el bono D3 sobre esa comisión y dejar trazable la comisión original
-  si la auditoría histórica la necesita.
+**Rama aprobada — comisión proporcional**:
+
+```text
+retainedProviderCents = providerAmountCents - providerRefundedCents
+effectiveCommissionCents = round(
+  retainedProviderCents * commissionPctApplied / 100
+)
+providerNetCents = retainedProviderCents - effectiveCommissionCents
+```
+
+Persistir `effectiveCommissionCents` como la comisión efectivamente retenida tras el
+reembolso y recalcular el bono D3 sobre esa misma cantidad. Un refund total aporta cero.
 
 En ambas ramas, `providerNetCents` debe excluir la tarifa plana D2; `XC-25` define la
 descomposición canónica del pago para que la tarifa de servicio nunca aparezca como saldo

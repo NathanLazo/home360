@@ -9,13 +9,11 @@
 
 ## Contexto
 
-Los reembolsos nacen de la resolución de disputas (F5). Este ticket está **bloqueado** por
-`PENDIENTES.md` decisiones 1 y 2, y por la política de reembolso de la tarifa plana
-identificada en `XC-25`. La versión anterior elegía comisión íntegra y una fórmula
-neta provisional; eso inventaba una decisión de negocio. Antes de implementar, Roger debe
-escribir aquí la fórmula de comisión tras refund parcial y la fórmula canónica de
-disponible. También sigue abierta en findings #7 la política para pagos ya `RELEASED`:
-soportar `Transfer Reversal` o rechazarlos. Este ticket no elige ninguna opción.
+Los reembolsos nacen de la resolución de disputas (F5). Roger aprobó comisión proporcional
+y saldo neto XC-03, por lo que este ticket está **DESBLOQUEADO** respecto de
+`PENDIENTES.md` decisiones 1 y 2. La asignación entre principal y tarifa continúa siendo
+explícita en el input. Los pagos ya `RELEASED` permanecen fuera de esta operación hasta que
+otro ticket implemente Transfer Reversal; hoy retornan `PAYMENT_NOT_REFUNDABLE`.
 
 ## Alcance
 
@@ -39,8 +37,7 @@ refundPayment(deps: { db; stripe }, input: {
 
 Invariantes implementables, independientes de la decisión:
 
-1. Cargar Payment (select mínimo). Status ≠ `IN_ESCROW` → `PAYMENT_NOT_REFUNDABLE`,
-   salvo que Roger adopte explícitamente reversals para `RELEASED`.
+1. Cargar Payment (select mínimo). Status ≠ `IN_ESCROW` → `PAYMENT_NOT_REFUNDABLE`.
 2. **Total** (`amountCents` ausente): `stripe.refunds.create({ payment_intent,
    amount: payment.amountCents }, { idempotencyKey: \`refund-full-${paymentId}\` })` →
    `updateMany` condicional (`status: IN_ESCROW`) a
@@ -48,9 +45,17 @@ Invariantes implementables, independientes de la decisión:
    gana: los agregados de F3-06 excluyen `REFUNDED` del mes de comisiones.
 3. **Parcial**: validar componentes enteros no negativos, su suma
    `0 < refundCents < payment.amountCents` y cada uno contra su saldo no reembolsado. La
-   política de Roger determina cuándo puede reembolsarse la tarifa. Crear Refund parcial con
+   asignación principal/tarifa viene explícita del caller autorizado. Crear Refund parcial con
    `idempotencyKey: \`refund-partial-${paymentId}\`` y liberar el resto con la fórmula que
-   resulte de las decisiones 1 y 2.
+   Roger aprobó:
+
+   ```text
+   retainedProviderCents = providerAmountCents - providerRefundedCents
+   effectiveCommissionCents = round(
+     retainedProviderCents * commissionPctApplied / 100
+   )
+   providerNetCents = retainedProviderCents - effectiveCommissionCents
+   ```
 4. Orden crash-safe obligatorio: crear Refund y Transfer con keys determinísticas, y solo
    después persistir **en una transacción local** `providerRefundedCents`,
    `serviceFeeRefundedCents`, su suma `refundedCents`, status
@@ -60,7 +65,8 @@ Invariantes implementables, independientes de la decisión:
 5. Un retry reconcilia operaciones ya creadas por sus idempotency keys. El webhook
    `charge.refunded` puede llegar entre llamadas: F3-09 delega la reconciliación a este
    servicio y no se limita a cambiar el status, porque eso omitiría Transfer y bono.
-6. El bono usa la comisión final decidida en #1. Refund de principal + refund de tarifa +
+6. Persistir `commissionCents = effectiveCommissionCents`; el bono usa esa misma comisión
+   proporcional. Refund de principal + refund de tarifa +
    transfer al negocio + ingreso de plataforma retenido debe conciliar exactamente con
    `amountCents`, sin centavos creados o perdidos.
 
@@ -78,9 +84,8 @@ Invariantes implementables, independientes de la decisión:
 ## Criterios de aceptación
 
 - [ ] `pnpm typecheck` · `pnpm check` · `pnpm build` en verde.
-- [ ] Las decisiones 1 y 2 de `PENDIENTES.md` y la política de refund de tarifa de `XC-25`
-      están copiadas literalmente como fórmulas antes de implementar; no queda política
-      provisional.
+- [ ] Las decisiones 1 y 2 de `PENDIENTES.md` están copiadas literalmente como fórmulas;
+      no queda política provisional.
 - [ ] Revisión manual con fixtures documentada: refund + transfer + comisión final =
       `amountCents` para importes con redondeo.
 - [ ] Firma de `refundPayment` estable para F5 (`resolve-dispute.ts`: FULL_REFUND,

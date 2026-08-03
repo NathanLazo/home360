@@ -77,13 +77,14 @@ model Business {
 - Antes de hacer `businessId` requerido en una BD con filas, la migración de Roger debe:
   agregarlo nullable, backfill desde la orden/link, verificar cero nulos y recién entonces
   aplicar `NOT NULL`. No usar un default de tenant.
-- Cambios condicionados que **no se deciden aquí**:
-  - La distribución de refunds entre principal/tarifa sigue bloqueada por la política que
-    exige `XC-25`; este ticket no altera esos snapshots ni su significado.
-  - F3-08/findings #9: si se conserva Checkout, agregar estado/`expiresAt`; si se adopta
-    Payment Links API, modelar su id persistente.
-  - `PENDIENTES.md` #3: `XC-08`, ejecutado después de este ticket, es el único owner del
-    renombre de id externo y estados de `Withdrawal`; F3-01 no los anticipa.
+- Decisiones posteriores ya cerradas por Roger:
+  - Los refunds distribuyen principal y tarifa proporcionalmente según F3-05; este ticket
+    no altera los snapshots congelados ni su significado.
+  - F3-08 adopta Stripe Payment Links API persistente: `PaymentLinkStatus` es
+    `CREATING|ACTIVE|INACTIVE`, `stripeUrl` es nullable y el id remoto único se llama
+    `stripePaymentLinkId`. `paidAt` conserva el hecho de pago.
+  - `PENDIENTES.md` #3 y XC-08 adoptan Payout manual: `Withdrawal.stripePayoutId` identifica
+    exclusivamente el Payout y el enum incorpora estados de claim/reconciliación.
 
 ## Restricciones no negociables
 

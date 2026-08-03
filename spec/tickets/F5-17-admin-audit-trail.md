@@ -7,8 +7,8 @@
   `spec/05-admin.md` §2–§5
 - **Depende de**: `F5-05`, `F5-06`, `F5-07`, `F5-11`, `F5-13`, `F5-16`
 - **Tamaño estimado**: L (3–6 h)
-- **Estado**: bloqueado transitivamente hasta que `F5-07` y `F5-11` estén resueltos; no
-  entregar una bitácora parcial que omita precisamente las acciones monetarias.
+- **Estado**: **DESBLOQUEADO** respecto de F5-07/F5-11; registrar también las acciones
+  monetarias aprobadas.
 
 ## Contexto
 

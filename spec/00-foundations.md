@@ -41,7 +41,8 @@ enum OrderType { SERVICE PRODUCT }
 enum OrderStatus { PENDING PAID IN_PROGRESS SHIPPING COMPLETED CANCELLED DISPUTED }
 enum PaymentMethod { CARD TRANSFER PAYMENT_LINK }
 enum PaymentStatus { PENDING IN_ESCROW RELEASED REFUNDED PARTIALLY_REFUNDED }
-enum WithdrawalStatus { REQUESTED APPROVED REJECTED }
+enum WithdrawalStatus { REQUESTED PROCESSING APPROVED REJECTED FAILED CANCELED }
+enum PaymentLinkStatus { CREATING ACTIVE INACTIVE }
 enum SubscriptionStatus { ACTIVE PAST_DUE CANCELED }
 enum InvoiceStatus { PAID OPEN VOID }
 enum DisputeStatus { OPEN IN_REVIEW RESOLVED }
@@ -222,16 +223,17 @@ model Payment {
 }
 
 model PaymentLink {
-  id             String    @id @default(cuid())
-  businessId     String
-  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  concept        String
-  amountCents    Int
-  stripeUrl      String
-  stripeSessionId String?  @unique
-  paidAt         DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                  String            @id @default(cuid())
+  businessId          String
+  business            Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  concept             String
+  amountCents         Int
+  status              PaymentLinkStatus @default(CREATING)
+  stripeUrl           String?
+  stripePaymentLinkId String?           @unique
+  paidAt              DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   @@index([businessId])
 }
@@ -245,7 +247,7 @@ model Withdrawal {
   accountLast4     String           // "2210" — jamás la cuenta completa
   status           WithdrawalStatus @default(REQUESTED)
   rejectionReason  String?
-  stripeTransferId String?          @unique
+  stripePayoutId   String?          @unique
   resolvedAt       DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

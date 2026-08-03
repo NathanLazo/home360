@@ -57,13 +57,13 @@ disponible → 409; `STRIPE_ERROR` → 502; inesperado normalizado → 500):
 
 | Procedure | Proc | Detalle |
 |-----------|------|---------|
-| `getBalances` | business | `getBusinessBalances({ db }, { businessId: ctx.business.id })` → `{ availableCents, escrowCents, monthCommissionCents, escrowOrdersCount, loyaltyPendingCents }`; queda bloqueado hasta cerrar PENDIENTES #1–#3 |
+| `getBalances` | business | `getBusinessBalances({ db }, { businessId: ctx.business.id })` → `{ availableCents, escrowCents, monthCommissionCents, escrowOrdersCount, loyaltyPendingCents }`; usa la fórmula neta cerrada de XC-03 |
 | `listTransactions` | business | Query Prisma paginada (take 20 + cursor por `id`, orden `createdAt desc`) sobre `Payment` filtrado por `businessId` del ctx; `select` mínimo con `order { title, customer { name } }` y `paymentLink { concept }`; mapear a fila `{ id, customerName: string \| null, concept, amountCents, method, status, createdAt }` (`concept` = order.title o paymentLink.concept). Resultado `{ items, nextCursor }` |
 | `getConnectStatus` | business | Leer flags locales; si hay cuenta y `onboarding=complete` la mutation/flujo explícito refresca con `getAccountStatus`. Resultado `{ hasAccount, chargesEnabled, payoutsEnabled }`; una query de render no necesita golpear Stripe |
 | `refreshConnectStatus` | business | Llamar `getAccountStatus` tras volver de onboarding y persistir flags; resultado igual a `getConnectStatus`. Rate-limit por usuario/negocio para no convertirlo en proxy abierto a Stripe |
 | `startOnboarding` | active | `createConnectAccount` + `createOnboardingLink` con `returnUrl = {origin}/{locale}/dashboard/payments?onboarding=complete`, `refreshUrl = …?onboarding=refresh` → `{ url }` |
 | `createPaymentLink` | active | schema Zod ↑ → `createPaymentLink` service → `{ id, url }` |
-| `requestWithdrawal` | active | Solo si Roger adopta la rama manual de `XC-08`: schema Zod ↑ → servicio y revalidación server-side contra saldo → `{ id }`. En rama automática no registrar esta procedure. |
+| `requestWithdrawal` | active | Schema Zod ↑ → servicio manual de XC-08 y revalidación server-side contra saldo → `{ id }`. |
 | `confirmDelivery` | user | `{ orderId: z.string().cuid() }`; cargar orden con `where: { id, customerId: ctx.customer.id }` (tenant en query) e incluir `payment { id, status }`; sin orden → `ORDER_NOT_FOUND` 404 (sin revelar existencia ajena); aceptar retry si el payment ya está `RELEASED`; `releasePayment` + `Order.status = COMPLETED` con `updateMany` condicional desde los estados explícitamente entregables |
 
 - `try/catch` con `normalizeError` (F0) en cada procedure; nunca stack traces al cliente.

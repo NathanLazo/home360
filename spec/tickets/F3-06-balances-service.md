@@ -9,13 +9,10 @@
 
 ## Contexto
 
-Los saldos jamás se persisten: se derivan en cada lectura. `escrowCents`,
-`escrowOrdersCount` y `loyaltyPendingCents` son resolubles. `availableCents` y la comisión
-mensual tras refund parcial están **bloqueados** por `PENDIENTES.md` decisiones 1 y 2.
-La versión anterior declaraba canónica una fórmula provisional; se elimina para no decidir
-por Roger. La separación entre total, tarifa y principal ya viene de `XC-25`; `XC-03`,
-`XC-08` y `XC-27` cierran después los estados elegibles sin bloquear las lecturas no
-controvertidas. F3-07 no puede implementarse hasta cerrar esas fórmulas.
+Los saldos jamás se persisten: se derivan en cada lectura. Roger aprobó la fórmula neta de
+XC-03, comisión proporcional y payouts manuales, así que `availableCents` y la comisión
+mensual están **DESBLOQUEADOS**. La separación entre total, tarifa y principal viene de
+`XC-25`; los estados de retiro vienen de `XC-08`.
 
 ## Alcance
 
@@ -38,16 +35,26 @@ getBusinessBalances(deps: { db }, input: { businessId: string; now?: Date }):
 Todas las agregaciones filtran por `payment.businessId` — denormalizado en F3-01 — y no
 traen filas completas:
 
-- `availableCents`: **no implementar hasta resolver PENDIENTES #1–#3**. Después debe usar
-  `providerTransferCents` de `XC-25` y la proyección de `XC-27`. La fórmula debe
-  especificar literalmente qué estados aportan, si el monto es bruto o neto, cómo entra
-  `PARTIALLY_REFUNDED`, qué comisión final se resta y qué estados de retiro reservan/sacan
-  saldo. No clampear negativos: son una inconsistencia que debe aflorar.
+- `availableCents` usa literalmente:
+
+  ```text
+  retainedProviderCents(p) = p.providerAmountCents - p.providerRefundedCents
+  providerNetCents(p) = retainedProviderCents(p) - p.commissionCents
+
+  availableCents = Σ providerNetCents(p)
+    para p.status ∈ {RELEASED, PARTIALLY_REFUNDED}
+    - Σ w.amountCents
+    para w.status ∈ {REQUESTED, PROCESSING, APPROVED}
+  ```
+
+  `commissionCents` ya es la comisión proporcional efectivamente retenida. Retiros
+  `REJECTED|FAILED|CANCELED` no reservan saldo. No clampear negativos: son una
+  inconsistencia que debe aflorar.
 - `escrowCents` = Σ `amountCents` de pagos `IN_ESCROW` (bruto, como muestra el diseño);
   `escrowOrdersCount` = count de esos pagos.
-- `monthCommissionCents`: `REFUNDED` total aporta cero; el tratamiento de
-  `PARTIALLY_REFUNDED` usa exactamente la decisión 1. Definir también el huso horario del
-  mes calendario; hasta entonces no asumir UTC ni zona local del servidor.
+- `monthCommissionCents`: `REFUNDED` total aporta cero y `PARTIALLY_REFUNDED` aporta su
+  `commissionCents` proporcional final. El huso horario del mes debe venir explícito del
+  caller/configuración; no asumir UTC ni zona local del servidor.
 - `loyaltyPendingCents` = Σ `amountCents` de `LoyaltyBonus` del negocio con status
   `PENDING` (D3). Es un **cuarto saldo independiente**: no se suma al disponible ni al
   escrow, porque no se retira por el flujo de `Withdrawal` — lo liquida el admin en vales o
@@ -69,8 +76,8 @@ traen filas completas:
 
 - [ ] `pnpm typecheck` · `pnpm check` · `pnpm build` en verde.
 - [ ] Ninguna columna de saldo persistida; todo derivado por agregación.
-- [ ] Decisiones 1–3 de `PENDIENTES.md` están reflejadas literalmente en las fórmulas antes
-      de implementar `availableCents`.
+- [ ] Decisiones 1–3 de `PENDIENTES.md` están reflejadas literalmente en las fórmulas de
+      `availableCents` y comisión mensual.
 - [ ] Revisión manual con fixtures cubre cada estado de Payment/Withdrawal, límites del mes
       y `PARTIALLY_REFUNDED`; no se agregan tests automatizados.
 

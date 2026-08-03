@@ -63,10 +63,9 @@ reparar ese id.
   `refreshConnectStatus`, invalidar query y mostrar éxito solo si las capacidades reales
   quedaron habilitadas; si no, mantener el Alert con copy accionable.
 - Sin cuenta conectada: cobrar sí, liberar/retirar no — el banner lo comunica (copy i18n).
-- `requestWithdrawal` y el monto disponible permanecen deshabilitados hasta que Roger
-  resuelva `PENDIENTES.md` #1–#3. La UI no presenta una fórmula ni flujo provisional.
-- La creación de links permanece bloqueada hasta cerrar la elección de F3-08
-  (Payment Links API vs. Session expirable/regenerable).
+- `requestWithdrawal` usa el flujo manual de XC-08 y el monto disponible calculado por
+  XC-03; la UI no replica la fórmula.
+- La creación usa Payment Links API persistente según F3-08; solo comparte links `ACTIVE`.
 - i18n: `dashboard.payments.actions.*`, `dashboard.payments.withdraw.*`,
   `dashboard.payments.link.*`, `dashboard.payments.onboarding.*`, `pay.success` / `pay.cancelled`.
 

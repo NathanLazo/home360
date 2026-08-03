@@ -6,8 +6,7 @@
 - **Spec origen**: `spec/05-admin.md` §3 (router), `spec/00-foundations.md` §3 (Dispute, Order.recordingUrl)
 - **Depende de**: `F5-07`
 - **Tamaño estimado**: M (1–3 h)
-- **Estado**: bloqueado transitivamente mientras `F5-07` siga bloqueado. Las queries
-  `list`/`getById` sí pueden implementarse; no exponer `resolve` parcialmente.
+- **Estado**: **DESBLOQUEADO**; `resolve` consume el contrato monetario de F5-07/F3-05.
 
 ## Contexto
 

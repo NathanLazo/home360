@@ -12,7 +12,7 @@ Cliente paga (app móvil / link) ──▶ PaymentIntent en cuenta PLATAFORMA
                                         ▼
             Transfer (principal neto − comisión) ──▶ cuenta Connect del negocio
                                         │  Payment.status = RELEASED
-                 salida bancaria según decisión 3 de PENDIENTES / XC-08
+                 retiro manual aprobado ──▶ Stripe Payout ──▶ banco
 ```
 
 - **Separate charges & transfers**: el cargo entra a la plataforma; el escrow es el saldo
@@ -22,7 +22,7 @@ Cliente paga (app móvil / link) ──▶ PaymentIntent en cuenta PLATAFORMA
 - La comisión se **congela** al crear el `Payment` (`commissionPctApplied` +
   `commissionCents`) leyendo el plan vigente del negocio en ese momento.
 - Reembolsos (total/parcial, desde disputas F5): asignación explícita entre principal y
-  tarifa; la política exacta sigue bloqueada en `PENDIENTES.md`/`XC-25`.
+  tarifa, con comisión proporcional sobre el principal retenido (F3-05/XC-03).
 - Saldos derivados (nunca columna persistida):
   - **Disponible** = proyección de principal neto según `XC-03`, `XC-08` y `XC-27`.
   - **En escrow** = Σ `IN_ESCROW`.
@@ -38,8 +38,8 @@ Todos reciben `stripe` y `db` por parámetro (inyección para tests):
   `releasePayment` (Transfer + RELEASED, transacción), `refundPayment(full|partialCents)`.
   `releasePayment` es la **única** vía de mover dinero al negocio (la usan cliente-confirma,
   auto-release y resolución de disputas).
-- `payments/payment-links.ts` — Stripe Checkout Session (`payment` mode) con
-  `metadata: { paymentLinkId, businessId }`; persiste `PaymentLink`.
+- `payments/payment-links.ts` — Stripe Payment Links API persistente, limitado a una sesión
+  completada, con metadata en el link y el PaymentIntent; persiste `PaymentLink`.
 - `payments/withdrawals.ts` — `requestWithdrawal` (valida saldo disponible ≥ monto →
   `INSUFFICIENT_BALANCE`), `approveWithdrawal` / `rejectWithdrawal` (admin, F5).
 - `payments/balances.ts` — `getBusinessBalances(businessId)`: los 3 saldos derivados en
@@ -72,9 +72,11 @@ Todos reciben `stripe` y `db` por parámetro (inyección para tests):
   duplicados no dobletean):
   - `payment_intent.succeeded` → `capturePayment` (crea/actualiza Payment IN_ESCROW,
     fija `escrowReleaseAt = now + escrowAutoReleaseHours`).
-  - `checkout.session.completed` → marca `PaymentLink.paidAt` + Payment del link.
+  - `checkout.session.completed` → valida `stripePaymentLinkId`, marca `paidAt`, cambia el
+    link a `INACTIVE` y asegura el Payment.
   - `charge.refunded` → sincroniza `refundedCents`/status.
   - `account.updated` → refresca capacidad de payouts del negocio.
+  - `payout.failed` / `payout.canceled` → reconcilia el retiro por `stripePayoutId`.
 - Eventos no manejados → 200 sin efecto. Errores → 500 (Stripe reintenta).
 - **Auto-liberación**: `releaseDuePayments()` en `payments/escrow.ts` libera pagos con
   `escrowReleaseAt <= now`; se expone como route handler `api/cron/release-escrow`
@@ -105,7 +107,7 @@ bloquea client-side y se revalida server-side.
 - `escrow.test.ts` (fakes de stripe/db): comisión congelada aunque el plan cambie después;
   release crea transfer por el neto exacto; refund parcial libera el resto; release
   idempotente (segundo call no transfiere de nuevo).
-- `balances.test.ts`: disponible descuenta retiros REQUESTED y APPROVED.
+- `balances.test.ts`: disponible descuenta retiros REQUESTED, PROCESSING y APPROVED.
 - `withdrawals.test.ts`: `INSUFFICIENT_BALANCE`.
 - Webhook: firma inválida → 400; evento duplicado → sin doble efecto.
 

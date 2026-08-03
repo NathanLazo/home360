@@ -57,9 +57,8 @@ la UI no suma ni deriva nada.
   `INSUFFICIENT_BALANCE`, `NO_CONNECT_ACCOUNT`, `DISPUTE_OPEN`, `PAYMENT_NOT_RELEASABLE`,
   `ORDER_NOT_FOUND` y agregarlos a `errors.json` es/en si faltan).
 - `empty-state.tsx` (F0) cuando no hay transacciones.
-- Mientras `PENDIENTES.md` #1–#3 no estén resueltas, no mostrar un
-  `availableCents` calculado con fórmula provisional ni habilitar el CTA de retiro. El resto
-  de la vista (escrow, transacciones y Connect) puede implementarse.
+- Mostrar `availableCents` desde el servidor con la fórmula neta XC-03; habilitar el CTA de
+  retiro manual solo cuando Connect esté listo y el saldo alcance.
 
 ## Restricciones no negociables
 

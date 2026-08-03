@@ -102,7 +102,7 @@ La selección de disputa vive en `?dispute=<id>` (deep-linkeable desde W9).
 |-----------|-------|------------------|
 | `getKpis` | `{ month? }` | `{ commissionCents (+delta), subscriptionCents, activeBusinesses, escrowCents, escrowOrders, pendingWithdrawalsCents, pendingWithdrawalsCount }` |
 | `listWithdrawals` | `{ status? , cursor? }` | negocio, monto, banco+últimos4, solicitado, estado |
-| `approveWithdrawal` | `{ withdrawalId }` | `{ id }` — llama `approveWithdrawal` de F3 (Transfer/Payout) · `CONFLICT` si negocio suspendido |
+| `approveWithdrawal` | `{ withdrawalId }` | `{ id }` — crea un Stripe Payout manual vía F3 y persiste `stripePayoutId` · `CONFLICT` si negocio suspendido |
 | `rejectWithdrawal` | `{ withdrawalId, reason }` | `{ id }` |
 | `getRevenueBreakdown` | `{ months: 6 }` | serie mensual comisiones vs. suscripciones + `{ commissionCents, subscriptionCents, loyaltyBonusCents }` |
 

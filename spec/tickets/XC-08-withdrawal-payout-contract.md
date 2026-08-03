@@ -5,7 +5,8 @@
 - **Fase**: XC — contrato transversal F0/F3/F5
 - **Spec origen**: `PENDIENTES.md` decisión 3 · `spec/03-payments.md` §1–§4 ·
   `spec/05-admin.md` §4 · `spec/00-foundations.md` §3
-- **Depende de**: `F3-01` y decisión 3 de `PENDIENTES.md` resuelta por Roger
+- **Depende de**: `F3-01` y decisión 3 de `PENDIENTES.md` (**resuelta por Roger**)
+- **Estado**: **DESBLOQUEADO** — payout manual solicitado y aprobado.
 - **Tamaño estimado**: M (1–3 h)
 
 ## Contexto
@@ -13,8 +14,8 @@
 `releasePayment` ya mueve el neto desde la plataforma a la cuenta Connect mediante un
 `Transfer`. Después, F3/F5 llaman “retiro” indistintamente a otro `Transfer` o a un `Payout`,
 y `Withdrawal.stripeTransferId` no identifica de forma fiable qué objeto guarda. Además,
-Stripe Express puede usar payouts automáticos o manuales. Este ticket propaga la opción que
-Roger decida; no autoriza elegirla ni ejecutar operaciones de Stripe.
+Stripe Express puede usar payouts automáticos o manuales. Roger aprobó el flujo manual;
+este ticket fija sus nombres, estados e idempotencia sin ejecutar operaciones de Stripe.
 
 ## Alcance
 
@@ -27,9 +28,9 @@ Roger decida; no autoriza elegirla ni ejecutar operaciones de Stripe.
 
 ## Detalle técnico
 
-Aplicar exactamente una rama, citando la decisión registrada:
+Aplicar la decisión registrada:
 
-### Rama A — payout manual solicitado y aprobado
+### Rama aprobada — payout manual solicitado y aprobado
 
 - `releasePayment` conserva el `Transfer` al liberar escrow.
 - La cuenta Connect se configura con payout schedule manual.
@@ -37,24 +38,21 @@ Aplicar exactamente una rama, citando la decisión registrada:
 - Renombrar el campo a `Withdrawal.stripePayoutId String? @unique`; no guardar un id `po_*`
   bajo un nombre `stripeTransferId`.
 - Idempotency key: `payout-withdrawal-${withdrawalId}`.
-- Máquina terminal: `REQUESTED → APPROVED|REJECTED`; doble resolución → `CONFLICT`.
+- Máquina operativa aprobada:
+  - `REQUESTED → PROCESSING → APPROVED`;
+  - `REQUESTED → REJECTED`;
+  - eventos Stripe absolutos pueden reconciliar `PROCESSING|APPROVED → FAILED|CANCELED`.
+- El disponible reserva `REQUESTED|PROCESSING|APPROVED` y libera
+  `REJECTED|FAILED|CANCELED`; cada retiro se descuenta exactamente una vez.
+- Doble claim o resolución incompatible retorna `CONFLICT`; retries de `PROCESSING` usan la
+  misma idempotency key y convergen al mismo Payout.
 
-### Rama B — payouts automáticos de Stripe
-
-- Stripe controla la salida bancaria; W6 no permite solicitar un payout manual y W12 no
-  ofrece aprobarlo.
-- `Withdrawal` deja de representar una solicitud administrable. Si se conserva como historial
-  sincronizado, documentar su fuente y usar el identificador real del payout; no crear filas
-  `REQUESTED` que nadie pueda ejecutar.
-- Retirar del saldo disponible solo movimientos bancarios cuya semántica esté definida; no
-  descontar simultáneamente un request local y un payout automático.
-
-En ambas ramas:
+Además:
 
 - `Payment.stripeTransferId` sigue representando exclusivamente el Transfer de liberación.
 - El router traduce todos los códigos de dominio a `TrpcResponse` y `errors.json` contiene
   paridad es/en.
-- F5-11 y F3-07 deben describir el mismo objeto y la misma transición.
+- F5-11 y F3-07 deben describir el mismo objeto y la misma máquina de estados.
 
 ## Restricciones no negociables
 
@@ -68,7 +66,7 @@ En ambas ramas:
 
 ## Criterios de aceptación
 
-- [ ] Existe una sola semántica de retiro en F3/F5 y coincide con la decisión de Roger.
+- [ ] Existe una sola semántica de retiro — Payout manual — en F3/F5.
 - [ ] Ningún id de Payout se guarda en un campo llamado Transfer ni viceversa.
 - [ ] El disponible descuenta cada retiro exactamente una vez.
 - [ ] Doble aprobación/rechazo no duplica dinero y retorna un código estable traducido.

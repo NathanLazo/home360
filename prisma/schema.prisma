@@ -89,8 +89,17 @@ enum PaymentStatus {
 
 enum WithdrawalStatus {
   REQUESTED
+  PROCESSING
   APPROVED
   REJECTED
+  FAILED
+  CANCELED
+}
+
+enum PaymentLinkStatus {
+  CREATING
+  ACTIVE
+  INACTIVE
 }
 
 enum SubscriptionStatus {
@@ -535,34 +544,35 @@ model LoyaltyBonus {
 }
 
 model PaymentLink {
-  id              String    @id @default(cuid())
-  businessId      String
-  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  concept         String
-  amountCents     Int
-  stripeUrl       String
-  stripeSessionId String?   @unique
-  paidAt          DateTime?
-  payment         Payment?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                  String            @id @default(cuid())
+  businessId          String
+  business            Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  concept             String
+  amountCents         Int
+  status              PaymentLinkStatus @default(CREATING)
+  stripeUrl           String?
+  stripePaymentLinkId String?           @unique
+  paidAt              DateTime?
+  payment             Payment?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   @@index([businessId])
 }
 
 model Withdrawal {
-  id               String           @id @default(cuid())
-  businessId       String
-  business         Business         @relation(fields: [businessId], references: [id])
-  amountCents      Int
-  bankName         String
-  accountLast4     String
-  status           WithdrawalStatus @default(REQUESTED)
-  rejectionReason  String?
-  stripeTransferId String?          @unique
-  resolvedAt       DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  businessId      String
+  business        Business         @relation(fields: [businessId], references: [id])
+  amountCents     Int
+  bankName        String
+  accountLast4    String
+  status          WithdrawalStatus @default(REQUESTED)
+  rejectionReason String?
+  stripePayoutId  String?          @unique
+  resolvedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([status])
   @@index([businessId])

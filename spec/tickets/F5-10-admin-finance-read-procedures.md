@@ -21,8 +21,7 @@ Capa de datos de W12: KPIs financieros, listado de retiros y desglose de ingreso
    mes" sin excluir reembolsados, pero en un `FULL_REFUND` la plataforma no ganó comisión.
    **Resolución**: `commissionCents` de KPIs y breakdown excluye pagos `REFUNDED`
    y suma el `commissionCents` **persistido** en `PARTIALLY_REFUNDED`. Así la lectura no
-   elige la política abierta: si Roger decide comisión proporcional, F3 actualizará ese
-   campo; si decide íntegra, permanecerá congelado.
+   recalcula la política: F3 actualiza ese campo con la comisión proporcional efectiva.
 3. Este ticket crea la lectura base. `XC-27` se ejecuta después y es la única unidad que
    añade tarifa de servicio neta, ingreso bruto/neto y nombres financieros conciliados con
    W3/W6/W9; no implementar aquí una fórmula paralela mientras siga bloqueada.

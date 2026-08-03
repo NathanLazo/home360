@@ -22,9 +22,8 @@ auto-release, resolución de disputas F5). Dos problemas detectados y resueltos 
 
 La semántica D2 ya está fijada por `XC-25`: la liberación ordinaria usa principal y jamás
 transfiere la tarifa plana. La finalización de un pago parcialmente reembolsado queda
-coordinada con F3-05 y bloqueada por
-`PENDIENTES.md` decisiones 1 y 2: este ticket no decide comisión íntegra/proporcional ni
-la fórmula de disponible.
+coordinada con F3-05: usa el principal retenido y la comisión proporcional aprobada; el
+saldo disponible consume la fórmula neta de XC-03.
 
 ## Alcance
 
@@ -54,8 +53,8 @@ Pasos:
    `NO_CONNECT_ACCOUNT`. Disputa de la orden con status ≠ `RESOLVED` → `DISPUTE_OPEN`.
 3. Para un `IN_ESCROW` sin refund, calcular `netCents` con
    `providerTransferCents(payment)` de `XC-25`; nunca con `amountCents - commissionCents`.
-   Validar `0 < netCents <= providerAmountCents`. La fórmula tras refund parcial
-   se define en F3-05 una vez resuelta `PENDIENTES.md` #1.
+   Validar `0 < netCents <= providerAmountCents`. Tras refund parcial, F3-05 fija
+   `netCents` al principal retenido menos la comisión proporcional efectiva.
 4. `stripe.transfers.create({ amount: netCents, currency: "mxn",
    destination: stripeAccountId, transfer_group: \`payment_${paymentId}\`,
    source_transaction: stripeChargeId,
@@ -87,9 +86,8 @@ Pasos:
    un segundo release no puede crear un segundo bono — capturar la violación de unicidad
    (P2002) y continuar sin error, porque significa "ya estaba devengado".
 
-   El bono se calcula sobre la **comisión efectivamente cobrada**, no sobre el monto. Qué
-   significa "efectivamente cobrada" tras refund parcial está bloqueado por
-   `PENDIENTES.md` #1 y debe quedar idéntico en F3-05/F3-06. El bono **no** entra al saldo
+   El bono se calcula sobre la **comisión efectivamente cobrada**, no sobre el monto. Tras
+   refund parcial es la comisión proporcional efectiva de F3-05/F3-06. El bono **no** entra al saldo
    retirable de escrow: es un saldo aparte que el admin liquida (F5-16).
 
 ```ts

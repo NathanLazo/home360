@@ -6,8 +6,8 @@
 - **Spec origen**: `spec/05-admin.md` §3 (tabla de resoluciones), `spec/03-payments.md` §1–2 (`escrow.ts`: releasePayment/refundPayment), `spec/00-foundations.md` §3 (Dispute, Payment, Order)
 - **Depende de**: `F5-01`, `F0-12`, `F3-04`, `F3-05`, `XC-11`
 - **Tamaño estimado**: L (3–6 h)
-- **Estado**: **BLOQUEADO** por `PENDIENTES.md` §1–§2 (política de comisión y saldo tras
-  reembolso parcial). No implementar la rama `PARTIAL_REFUND` hasta que Roger la cierre.
+- **Estado**: **DESBLOQUEADO**. La rama `PARTIAL_REFUND` consume la comisión proporcional
+  de F3-05 y el saldo neto de XC-03.
 
 ## Contexto
 
@@ -21,10 +21,9 @@ resoluciones moviendo (o no) el dinero vía los servicios de escrow de F3, de fo
    **Resolución**: `PARTIAL_REFUND` y `RELEASE_PAYMENT` → `Order.status = COMPLETED`
    (el servicio se dio/entregó; la disputa se zanjó con dinero); `MORE_EVIDENCE` no toca
    la orden (sigue DISPUTED).
-2. **Comisión en refund parcial** sin especificar. Es una decisión de negocio abierta:
-   comisión íntegra y comisión proporcional producen montos, bonos y saldos distintos.
-   Este ticket **no elige una**. Una vez resuelta, debe consumir la fórmula canónica de
-   F3/XC-03, usar el mismo límite y propagar el mismo código estable que `F3-05`; queda
+2. **Comisión en refund parcial**: se aplica la comisión proporcional aprobada. Este ticket
+   consume la fórmula canónica de F3-05/XC-03, usa el mismo límite y propaga el mismo código
+   estable que `F3-05`; queda
    prohibido reexpresarlo como otro error o recalcular una segunda verdad en F5.
 3. **MORE_EVIDENCE** "permanece IN_REVIEW", pero las disputas nacen OPEN y nada en la spec
    las pasa a IN_REVIEW. **Resolución**: MORE_EVIDENCE hace `status = IN_REVIEW` (desde
@@ -37,9 +36,8 @@ resoluciones moviendo (o no) el dinero vía los servicios de escrow de F3, de fo
 5. Una transacción Prisma no puede volver atómicas llamadas Stripe. No se llama a Stripe
    dentro de una transacción interactiva ni se promete rollback del dinero externo.
    `resolveDispute` delega en los servicios crash-safe e idempotentes de F3 y solo finaliza
-   `Dispute`/`Order` después de comprobar su resultado. F3 debe aceptar replay de la misma
-   operación y reconocer el estado externo/local ya aplicado; si ese contrato no existe,
-   este ticket continúa bloqueado y no simula atomicidad.
+   `Dispute`/`Order` después de comprobar su resultado. F3 acepta replay de la misma
+   operación y reconoce el estado externo/local ya aplicado; F5 no simula atomicidad.
 
 ## Alcance
 
@@ -88,8 +86,8 @@ Flujo:
    Con grabación completa, `justification` es opcional y todas las resoluciones son iguales.
 2. Validaciones por resolución:
    - `PARTIAL_REFUND`: `partialAmountCents` requerido, entero > 0. Límite, cálculo de
-     comisión, neto y código de error vienen **sin traducción** del contrato que Roger
-     cierre en F3-05/XC-03; no implementar mientras el bloqueo siga abierto.
+     comisión proporcional, neto y código de error vienen **sin traducción** de
+     F3-05/XC-03.
    - `FULL_REFUND` / `PARTIAL_REFUND` / `RELEASE_PAYMENT`: sin `Payment` o
      `payment.status !== IN_ESCROW` → `CONFLICT` (cubre auto-release previo).
    - `MORE_EVIDENCE`: sin validación monetaria.
@@ -127,8 +125,8 @@ Flujo:
 
 Verificación manual y por inspección de estado (sin pruebas automatizadas):
 
-- Los caminos no bloqueados producen exactamente los estados de la tabla.
-- Tras cerrar la decisión, `PARTIAL_REFUND` usa exactamente el monto, límite y código de
+- Todos los caminos producen exactamente los estados de la tabla.
+- `PARTIAL_REFUND` usa exactamente el monto, límite y código de
   F3; se comprueba la invariante monetaria definida allí.
 - Doble resolve → `CONFLICT`; resolver con Payment ya RELEASED → `CONFLICT`.
 - `MORE_EVIDENCE` sobre OPEN → IN_REVIEW, sin `resolution`/`resolvedAt`, cero llamadas Stripe.
@@ -154,8 +152,7 @@ Verificación manual y por inspección de estado (sin pruebas automatizadas):
 - [ ] Segundo resolve (mismo u otro admin) → `CONFLICT` sin tocar Stripe.
 - [ ] Sin grabación completa, toda resolución distinta de `FULL_REFUND` exige justificación
       y esta queda persistida junto con el estado de la grabación (D6).
-- [ ] Mientras `PENDIENTES.md` §1–§2 siga abierto, no se implementa ni habilita
-      `PARTIAL_REFUND`.
+- [ ] `PARTIAL_REFUND` usa la comisión proporcional de F3-05 y el balance neto de XC-03.
 
 ## Comandos para Roger (si aplica)
 
@@ -165,4 +162,4 @@ Después de revisar la migración generada para los dos campos de trazabilidad:
 pnpm prisma migrate dev --name add_dispute_resolution_trace
 ```
 
-La verificación manual con Stripe se hace en F5-09, una vez levantado el bloqueo.
+La verificación manual con Stripe se hace en F5-09.

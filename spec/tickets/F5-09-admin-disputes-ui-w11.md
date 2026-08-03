@@ -6,8 +6,7 @@
 - **Spec origen**: `spec/05-admin.md` §3 (módulo), §7 (verificación manual)
 - **Depende de**: `F5-08`
 - **Tamaño estimado**: L (3–6 h)
-- **Estado**: bloqueado transitivamente para habilitar resoluciones monetarias mientras
-  `F5-07` esté bloqueado. La vista de expediente puede construirse en modo lectura.
+- **Estado**: **DESBLOQUEADO**; las resoluciones monetarias consumen F5-07/F3-05.
 
 ## Contexto
 
@@ -70,8 +69,8 @@ Fuera de alcance: router (F5-08), servicio (F5-07), notificaciones a las partes.
   Cuando falta la grabación (D6), "Reembolso total" queda como acción **primaria** y las
   demás como secundarias: la UI empuja hacia la resolución por defecto sin bloquear el
   criterio del admin.
-  Mientras `F5-07` esté bloqueado, las acciones monetarias no se muestran como operativas;
-  la UI no simula una política de refund.
+  Las acciones monetarias usan el resultado autoritativo del servidor; la UI no replica la
+  política de refund.
 - `resolve-dispute-dialog.tsx`: `AlertDialog` por resolución con **resumen del efecto
   monetario** calculado solo para display desde `payment` (ej. parcial: "Se reembolsarán
   $X al cliente y se liberarán $Y − comisión al negocio"); input de monto solo en
@@ -102,7 +101,7 @@ Fuera de alcance: router (F5-08), servicio (F5-07), notificaciones a las partes.
 - [ ] `pnpm typecheck`, `pnpm check` y `pnpm build` en verde.
 - [ ] `/admin/disputes?dispute=<id>` (desde W9) abre el expediente correcto; URL inválida
       muestra empty-state sin romper la lista.
-- [ ] Solo después de cerrar `PENDIENTES.md` §1–§2: resolver una disputa creada con
+- [ ] Resolver una disputa creada con
       PaymentIntent test real mediante reembolso parcial; el monto y código coinciden con
       F3, la disputa pasa a Resueltas y el badge decrementa. No usar filas seed sin objetos
       Stripe.

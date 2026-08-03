@@ -70,24 +70,25 @@ amplios; los ids/metadata desconocidos se tratan como `unknown` + validación Zo
   `metadata.paymentLinkId` → `svcOk` (las sessions de Billing pasan de largo).
   Exigir además `payment_status === "paid"`; una Session completada pero no pagada no
   marca `paidAt`.
-  `updateMany({ where: { id: paymentLinkId, paidAt: null }, data: { paidAt: now } })`
-  solo después de validar link, tenant y monto. Después asegurar el Payment: tomar
+  Exigir que `session.payment_link` sea string y coincida con el
+  `stripePaymentLinkId` persistido. Solo después de validar link, tenant y monto ejecutar
+  `updateMany({ where: { id: paymentLinkId, paidAt: null, status: ACTIVE },
+  data: { paidAt: now, status: INACTIVE } })`. Después asegurar el Payment: tomar
   `session.payment_intent` (string), recuperar el PaymentIntent desde Stripe y llamar
   `capturePayment` con su `amount_received`/`currency` — cubre el orden inverso;
   si el PI event ya lo creó, `capturePayment` retorna sin efecto.
 - `charge.refunded` → localizar Payment por `charge.payment_intent` y reconciliar en
   absoluto (no incremental) **delegando a F3-05**. Para parcial, cambiar solo el status
   puede omitir Transfer y LoyaltyBonus; para un pago ya `RELEASED`, incluso un refund total
-  puede requerir Transfer Reversal. Este handler permanece bloqueado por
-  `PENDIENTES.md` #1–#2 y la decisión de reversals de findings #7.
+  requiere una política separada de Transfer Reversal. Para pagos no liberados, F3-05 aplica
+  la comisión proporcional cerrada y el balance neto de XC-03.
 - `account.updated` → localizar Business por `account.id` (`stripeAccountId`); actualizar
   `chargesEnabled`/`payoutsEnabled` desde `charges_enabled`/`payouts_enabled` (absoluto,
   idempotente). Cuenta desconocida → `svcOk`.
-- Si `PENDIENTES.md` #3 adopta payout manual, consumir `XC-08` y registrar también
-  `payout.failed` y
-  `payout.canceled`, localizar por el id externo persistido y transicionar el retiro al
-  estado decidido para que vuelva a computar como disponible. No confiar en metadata para
-  tenant ni usar `APPROVED` para un payout fallido.
+- `payout.failed` y `payout.canceled` → localizar por `stripePayoutId` persistido y
+  transicionar condicionalmente `PROCESSING|APPROVED` a `FAILED|CANCELED`. Estos estados
+  dejan de reservar saldo según XC-03. No confiar en metadata para tenant ni conservar
+  `APPROVED` para un payout fallido.
 
 ## Restricciones no negociables
 
@@ -108,6 +109,9 @@ amplios; los ids/metadata desconocidos se tratan como `unknown` + validación Zo
       absolutas o condicionales).
 - [ ] El tenant siempre se resuelve desde BD, nunca se confía en metadata para autorizar.
 - [ ] Session `completed` sin `payment_status: paid` no crea Payment ni marca `paidAt`.
+- [ ] Session pagada de un Payment Link válido marca `paidAt`, cambia el link a `INACTIVE`
+      y verifica `session.payment_link` contra `stripePaymentLinkId`.
+- [ ] `payout.failed`/`payout.canceled` reconcilian el retiro por `stripePayoutId`.
 - [ ] Refund parcial se reconcilia como unidad monetaria (Refund, Transfer, Payment y bono),
       no como un cambio aislado de status.
 - [ ] Dispatcher extensible consumido después por F4-05 sin modificar `route.ts`.
