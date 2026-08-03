@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "users": "Users",
+    "disputes": "Disputes",
+    "finance": "Finance",
+    "settings": "Settings"
+  },
+  "sidebar": {
+    "placeholderName": "—",
+    "placeholderInitials": "AD"
+  },
+  "placeholder": {
+    "title": "Administration",
+    "subtitle": "Monitor platform activity and configuration.",
+    "emptyTitle": "The admin overview will be available soon",
+    "emptyDescription": "This is where you'll find platform metrics, recent activity, and tasks that need attention."
+  }
+}

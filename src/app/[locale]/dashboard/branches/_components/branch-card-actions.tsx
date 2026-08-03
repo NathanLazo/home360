@@ -1,0 +1,100 @@
+"use client";
+
+import { useState } from "react";
+import {
+  MoreHorizontalIcon,
+  PauseIcon,
+  PencilIcon,
+  PlayIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import type { BranchListItem } from "./branch.types";
+import { ConfirmDialog } from "~/components/confirm-dialog";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+
+export function BranchCardActions({
+  branch,
+  statusPending,
+  deletePending,
+  onEdit,
+  onStatus,
+  onDelete,
+}: {
+  branch: BranchListItem;
+  statusPending: boolean;
+  deletePending: boolean;
+  onEdit: () => void;
+  onStatus: (status: "ACTIVE" | "PAUSED") => Promise<boolean>;
+  onDelete: () => Promise<boolean>;
+}) {
+  const t = useTranslations("dashboard.branches");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const nextStatus = branch.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="min-h-11 min-w-11"
+            aria-label={t("actions.open", { name: branch.name })}
+          >
+            <MoreHorizontalIcon aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={onEdit}>
+            <PencilIcon aria-hidden="true" />
+            {t("actions.edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={statusPending}
+            onSelect={() => void onStatus(nextStatus)}
+          >
+            {nextStatus === "ACTIVE" ? (
+              <PlayIcon aria-hidden="true" />
+            ) : (
+              <PauseIcon aria-hidden="true" />
+            )}
+            {t(nextStatus === "ACTIVE" ? "actions.activate" : "actions.pause")}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => setConfirmOpen(true)}
+          >
+            <Trash2Icon aria-hidden="true" />
+            {t("actions.delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t("delete.title")}
+        description={t("delete.description", { name: branch.name })}
+        confirmLabel={t("delete.confirm")}
+        cancelLabel={t("delete.cancel")}
+        destructive
+        loading={deletePending}
+        onConfirm={() =>
+          void onDelete().then((ok) => {
+            if (ok) setConfirmOpen(false);
+          })
+        }
+      />
+    </>
+  );
+}

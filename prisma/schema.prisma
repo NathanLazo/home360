@@ -2,64 +2,709 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  BUSINESS
+  CUSTOMER
+  WORKER
+}
 
+enum BusinessType {
+  SERVICES
+  PRODUCTS
+  MIXED
+}
+
+enum BusinessStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum GuaranteeType {
+  DEPOSIT
+  VERIFICATION
+  INSURANCE_PER_SERVICE
+  REGISTERED_ASSET
+  COMBINED
+}
+
+enum BranchStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum OrderType {
+  SERVICE
+  PRODUCT
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  IN_PROGRESS
+  SHIPPING
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum PaymentMethod {
+  CARD
+  TRANSFER
+  PAYMENT_LINK
+}
+
+enum PaymentStatus {
+  PENDING
+  IN_ESCROW
+  RELEASED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum WithdrawalStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum InvoiceStatus {
+  PAID
+  OPEN
+  VOID
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+}
+
+enum DisputeUrgency {
+  NORMAL
+  URGENT
+}
+
+enum DisputeResolution {
+  PARTIAL_REFUND
+  FULL_REFUND
+  RELEASE_PAYMENT
+  MORE_EVIDENCE
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum RequestStatus {
+  OPEN
+  QUOTED
+  ACCEPTED
+  CANCELLED
+  EXPIRED
+}
+
+enum WorkerAvailability {
+  AVAILABLE
+  ON_SERVICE
+  OFF
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum LoyaltyBonusStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum LoyaltyPayoutMethod {
+  VOUCHER
+  TRANSFER
+}
+
+enum DocumentType {
+  ID_DOCUMENT
+  ADDRESS_PROOF
+  INSURANCE_POLICY
+  DEPOSIT_RECEIPT
+  ASSET_TITLE
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 
 // Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? // @db.Text
+  access_token             String? // @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? // @db.Text
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String?              @unique
+  emailVerified       DateTime?
+  image               String?
+  role                UserRole             @default(CUSTOMER)
+  passwordHash        String?
+  sessionsValidFrom   DateTime             @default(now())
+  accounts            Account[]
+  sessions            Session[]
+  business            Business?
+  workerProfile       Worker?
+  orders              Order[]
+  reviews             Review[]
+  serviceRequests     ServiceRequest[]
+  reviewedDocuments   BusinessDocument[]
+  passwordResetTokens PasswordResetToken[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
+}
+
+model Business {
+  id              String             @id @default(cuid())
+  name            String
+  type            BusinessType
+  status          BusinessStatus     @default(PENDING)
+  guaranteeType   GuaranteeType
+  guaranteeNotes  String?
+  statusReason    String?
+  ownerId         String             @unique
+  owner           User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  stripeAccountId String?            @unique
+  chargesEnabled  Boolean            @default(false)
+  payoutsEnabled  Boolean            @default(false)
+  branches        Branch[]
+  workers         Worker[]
+  services        Service[]
+  products        Product[]
+  orders          Order[]
+  payments        Payment[]
+  paymentLinks    PaymentLink[]
+  withdrawals     Withdrawal[]
+  subscription    Subscription?
+  disputes        Dispute[]
+  quotes          Quote[]
+  documents       BusinessDocument[]
+  loyaltyBonuses  LoyaltyBonus[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status])
+}
+
+model Branch {
+  id               String         @id @default(cuid())
+  name             String
+  address          String
+  managerName      String?
+  coverageRadiusKm Int            @default(10)
+  status           BranchStatus   @default(ACTIVE)
+  businessId       String
+  business         Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders           Order[]
+  quotes           Quote[]
+  workers          Worker[]
+  productStocks    ProductStock[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([businessId])
+}
+
+model Worker {
+  id               String             @id @default(cuid())
+  userId           String?            @unique
+  user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fullName         String
+  businessId       String
+  business         Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  branchId         String?
+  branch           Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  specialty        String?
+  availability     WorkerAvailability @default(AVAILABLE)
+  ratingAvg        Float?
+  invitedEmail     String?
+  invitationStatus InvitationStatus   @default(ACCEPTED)
+  services         Service[]
+  quotes           Quote[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([businessId])
+  @@index([branchId])
+  @@index([businessId, availability])
+}
+
+model Service {
+  id                 String        @id @default(cuid())
+  name               String
+  category           String
+  basePriceCents     Int
+  durationMinutes    Int
+  durationMaxMinutes Int?
+  status             ServiceStatus @default(ACTIVE)
+  businessId         String
+  business           Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workers            Worker[]
+  orders             Order[]
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([businessId, status])
+  @@index([businessId, category])
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  name           String
+  sku            String
+  category       String
+  priceCents     Int
+  status         ProductStatus   @default(DRAFT)
+  businessId     String
+  business       Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders         Order[]
+  stocks         ProductStock[]
+  orderMaterials OrderMaterial[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([businessId, sku])
+  @@index([businessId, status])
+}
+
+model ProductStock {
+  id                String   @id @default(cuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId          String
+  branch            Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  stock             Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([productId, branchId])
+  @@index([branchId])
+}
+
+// A service request is separate from an Order: accepting one Quote creates an Order,
+// so every Order continues to represent work with a defined business and price.
+model ServiceRequest {
+  id              String        @id @default(cuid())
+  customerId      String
+  customer        User          @relation(fields: [customerId], references: [id])
+  title           String
+  description     String?
+  category        String
+  photoUrls       String[]
+  aiConfidencePct Int?
+  aiDiagnosis     String?
+  aiMinPriceCents Int?
+  aiMaxPriceCents Int?
+  addressLine     String?
+  latitude        Float?
+  longitude       Float?
+  status          RequestStatus @default(OPEN)
+  expiresAt       DateTime?
+  quotes          Quote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([customerId])
+  @@index([status, createdAt])
+  @@index([category])
+}
+
+model Quote {
+  id           String         @id @default(cuid())
+  requestId    String
+  request      ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  businessId   String
+  business     Business       @relation(fields: [businessId], references: [id])
+  branchId     String?
+  branch       Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  workerId     String?
+  worker       Worker?        @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  amountCents  Int
+  message      String?
+  scheduledFor DateTime?
+  status       QuoteStatus    @default(PENDING)
+  order        Order?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([requestId, businessId])
+  @@index([businessId, status])
+  @@index([requestId])
+  @@index([branchId])
+  @@index([workerId])
+}
+
+model Order {
+  id                   String            @id @default(cuid())
+  folio                Int               @unique @default(autoincrement())
+  type                 OrderType
+  title                String
+  status               OrderStatus       @default(PENDING)
+  amountCents          Int
+  customerId           String
+  customer             User              @relation(fields: [customerId], references: [id])
+  businessId           String
+  business             Business          @relation(fields: [businessId], references: [id])
+  branchId             String?
+  branch               Branch?           @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  serviceId            String?
+  service              Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  productId            String?
+  product              Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  quoteId              String?           @unique
+  quote                Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  corporateAccountId   String?
+  corporateAccount     CorporateAccount? @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  quantity             Int               @default(1)
+  recordingUrl         String?
+  recordingDurationSec Int?
+  recordingComplete    Boolean           @default(false)
+  beforeUrls           String[]
+  afterUrls            String[]
+  workNotes            String?
+  materials            OrderMaterial[]
+  payment              Payment?
+  dispute              Dispute?
+  review               Review?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([businessId, status])
+  @@index([businessId, branchId])
+  @@index([customerId])
+  @@index([branchId])
+  @@index([serviceId])
+  @@index([productId])
+  @@index([corporateAccountId])
+}
+
+// Materials are rows instead of JSON so callers get typed selects and an optional Product FK.
+model OrderMaterial {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name           String
+  quantity       Int      @default(1)
+  unitPriceCents Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// This minimal relational anchor makes Order.corporateAccountId a real FK in the initial
+// migration. F7 extends this same model with the complete B2B corporate domain.
+model CorporateAccount {
+  id        String   @id @default(cuid())
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id                      String        @id @default(cuid())
+  orderId                 String?       @unique
+  order                   Order?        @relation(fields: [orderId], references: [id])
+  paymentLinkId           String?       @unique
+  paymentLink             PaymentLink?  @relation(fields: [paymentLinkId], references: [id])
+  businessId              String
+  business                Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  method                  PaymentMethod
+  status                  PaymentStatus @default(PENDING)
+  amountCents             Int
+  providerAmountCents     Int
+  serviceFeeCentsApplied  Int
+  commissionPctApplied    Int
+  commissionCents         Int
+  providerRefundedCents   Int           @default(0)
+  serviceFeeRefundedCents Int           @default(0)
+  refundedCents           Int           @default(0)
+  stripePaymentIntentId   String?       @unique
+  stripeChargeId          String?       @unique
+  stripeTransferId        String?       @unique
+  escrowReleaseAt         DateTime?
+  releasedAt              DateTime?
+  loyaltyBonus            LoyaltyBonus?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([status, escrowReleaseAt])
+  @@index([businessId, status])
+  @@index([businessId, createdAt])
+}
+
+model LoyaltyBonus {
+  id          String               @id @default(cuid())
+  businessId  String
+  business    Business             @relation(fields: [businessId], references: [id])
+  paymentId   String               @unique
+  payment     Payment              @relation(fields: [paymentId], references: [id])
+  amountCents Int
+  pctApplied  Int
+  status      LoyaltyBonusStatus   @default(PENDING)
+  method      LoyaltyPayoutMethod?
+  paidAt      DateTime?
+  notes       String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([businessId, status])
+}
+
+model PaymentLink {
+  id              String    @id @default(cuid())
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  concept         String
+  amountCents     Int
+  stripeUrl       String
+  stripeSessionId String?   @unique
+  paidAt          DateTime?
+  payment         Payment?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([businessId])
+}
+
+model Withdrawal {
+  id               String           @id @default(cuid())
+  businessId       String
+  business         Business         @relation(fields: [businessId], references: [id])
+  amountCents      Int
+  bankName         String
+  accountLast4     String
+  status           WithdrawalStatus @default(REQUESTED)
+  rejectionReason  String?
+  stripeTransferId String?          @unique
+  resolvedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([status])
+  @@index([businessId])
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  name          String
+  priceCents    Int
+  commissionPct Int
+  maxBranches   Int?
+  maxWorkers    Int?
+  maxProducts   Int?
+  stripePriceId String?        @unique
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  businessId           String             @unique
+  business             Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  planId               String
+  plan                 Plan               @relation(fields: [planId], references: [id])
+  status               SubscriptionStatus @default(ACTIVE)
+  renewsAt             DateTime
+  stripeSubscriptionId String?            @unique
+  invoices             Invoice[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([planId])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amountCents     Int
+  status          InvoiceStatus
+  stripeInvoiceId String?       @unique
+  pdfUrl          String?
+  issuedAt        DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([subscriptionId])
+}
+
+model Dispute {
+  id                    String             @id @default(cuid())
+  orderId               String             @unique
+  order                 Order              @relation(fields: [orderId], references: [id])
+  businessId            String
+  business              Business           @relation(fields: [businessId], references: [id])
+  title                 String
+  urgency               DisputeUrgency     @default(NORMAL)
+  status                DisputeStatus      @default(OPEN)
+  customerArgument      String
+  businessArgument      String?
+  evidenceUrls          String[]
+  aiSummary             String?
+  resolution            DisputeResolution?
+  resolutionAmountCents Int?
+  resolvedAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@index([status, urgency])
+  @@index([businessId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String   @unique
+  order      Order    @relation(fields: [orderId], references: [id])
+  customerId String
+  customer   User     @relation(fields: [customerId], references: [id])
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model BusinessDocument {
+  id           String         @id @default(cuid())
+  businessId   String
+  business     Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  type         DocumentType
+  fileUrl      String
+  status       DocumentStatus @default(PENDING)
+  reviewedById String?
+  reviewedBy   User?          @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([businessId, status])
+  @@index([reviewedById])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuthAttempt {
+  id         String   @id @default(cuid())
+  identifier String
+  action     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier, action, createdAt])
+}
+
+model PlatformSettings {
+  id                          Int      @id @default(1)
+  aiConfidenceThresholdPct    Int      @default(85)
+  aiPriceMarginPct            Int      @default(25)
+  aiPricingModel              String   @default("v3.2")
+  aiHumanReviewBelowThreshold Boolean  @default(true)
+  customerServiceFeeCents     Int      @default(2500)
+  loyaltyBonusPct             Int      @default(50)
+  escrowAutoReleaseHours      Int      @default(72)
+  notifyNewRequestRadiusKm    Int      @default(10)
+  notifyPaymentRelease        Boolean  @default(true)
+  notifyRatingReminderHours   Int      @default(24)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 }

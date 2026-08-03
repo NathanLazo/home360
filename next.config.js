@@ -3,8 +3,15 @@
  * for Docker builds.
  */
 import "./src/env.js";
+import createNextIntlPlugin from "next-intl/plugin";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  // `pnpm check` runs the type-aware ESLint CLI. Next's deprecated embedded
+  // runner cannot resolve Resend's `.d.mts` declarations consistently.
+  eslint: { ignoreDuringBuilds: true },
+};
 
-export default config;
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(config);

@@ -1,0 +1,20 @@
+{
+  "appName": "Home 360",
+  "localeSwitcher": {
+    "label": "Idioma",
+    "spanish": "Español",
+    "english": "English"
+  },
+  "userMenu": {
+    "open": "Abrir menú de usuario",
+    "emailUnavailable": "Correo no disponible",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión…",
+    "roles": {
+      "ADMIN": "Administrador",
+      "BUSINESS": "Negocio",
+      "CUSTOMER": "Cliente",
+      "WORKER": "Trabajador"
+    }
+  }
+}

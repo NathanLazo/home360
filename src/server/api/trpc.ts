@@ -11,8 +11,26 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import type { BusinessStatus } from "../../../generated/prisma";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
+
+type BusinessContext = {
+  id: string;
+  status: BusinessStatus;
+  subscription: {
+    plan: {
+      commissionPct: number;
+      maxBranches: number | null;
+      maxWorkers: number | null;
+      maxProducts: number | null;
+    };
+  } | null;
+};
+
+type CustomerContext = {
+  id: string;
+};
 
 /**
  * 1. CONTEXT
@@ -121,7 +139,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.session?.user) {
+    if (!ctx.session?.user || ctx.session.user.authInvalidated) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({
@@ -131,3 +149,85 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export const userProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role !== "CUSTOMER") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  const customer: CustomerContext = {
+    id: ctx.session.user.id,
+  };
+
+  return next({
+    ctx: {
+      ...ctx,
+      customer,
+    },
+  });
+});
+
+export const businessProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    if (ctx.session.user.role !== "BUSINESS") {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    const businessRecord = await ctx.db.business.findUnique({
+      where: {
+        ownerId: ctx.session.user.id,
+      },
+      select: {
+        id: true,
+        status: true,
+        subscription: {
+          select: {
+            plan: {
+              select: {
+                commissionPct: true,
+                maxBranches: true,
+                maxWorkers: true,
+                maxProducts: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!businessRecord) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    const business: BusinessContext = {
+      id: businessRecord.id,
+      status: businessRecord.status,
+      subscription: businessRecord.subscription,
+    };
+
+    return next({
+      ctx: {
+        ...ctx,
+        business,
+      },
+    });
+  },
+);
+
+export const activeBusinessProcedure = businessProcedure.use(
+  ({ ctx, next }) => {
+    if (ctx.business.status !== "ACTIVE") {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return next();
+  },
+);
+
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role !== "ADMIN") {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+
+  return next();
+});

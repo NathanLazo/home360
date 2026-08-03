@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "overview": "Resumen",
+    "users": "Usuarios",
+    "disputes": "Disputas",
+    "finance": "Finanzas",
+    "settings": "Configuración"
+  },
+  "sidebar": {
+    "placeholderName": "—",
+    "placeholderInitials": "AD"
+  },
+  "placeholder": {
+    "title": "Administración",
+    "subtitle": "Supervisa la actividad y configuración de la plataforma.",
+    "emptyTitle": "El resumen administrativo estará disponible pronto",
+    "emptyDescription": "Aquí encontrarás indicadores de la plataforma, actividad reciente y tareas que requieren atención."
+  }
+}
