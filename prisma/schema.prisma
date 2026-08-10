@@ -82,6 +82,8 @@ enum PaymentMethod {
 enum PaymentStatus {
   PENDING
   IN_ESCROW
+  REFUNDING
+  RELEASING
   RELEASED
   REFUNDED
   PARTIALLY_REFUNDED
@@ -494,33 +496,35 @@ model CorporateAccount {
 }
 
 model Payment {
-  id                      String        @id @default(cuid())
-  orderId                 String?       @unique
-  order                   Order?        @relation(fields: [orderId], references: [id])
-  paymentLinkId           String?       @unique
-  paymentLink             PaymentLink?  @relation(fields: [paymentLinkId], references: [id])
-  businessId              String
-  business                Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  method                  PaymentMethod
-  status                  PaymentStatus @default(PENDING)
-  amountCents             Int
-  providerAmountCents     Int
-  serviceFeeCentsApplied  Int
-  commissionPctApplied    Int
-  commissionCents         Int
-  providerRefundedCents   Int           @default(0)
-  serviceFeeRefundedCents Int           @default(0)
-  refundedCents           Int           @default(0)
-  stripePaymentIntentId   String?       @unique
-  stripeChargeId          String?       @unique
-  stripeTransferId        String?       @unique
-  escrowReleaseAt         DateTime?
-  releasedAt              DateTime?
-  loyaltyBonus            LoyaltyBonus?
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  id                       String        @id @default(cuid())
+  orderId                  String?       @unique
+  order                    Order?        @relation(fields: [orderId], references: [id])
+  paymentLinkId            String?       @unique
+  paymentLink              PaymentLink?  @relation(fields: [paymentLinkId], references: [id])
+  businessId               String
+  business                 Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  method                   PaymentMethod
+  status                   PaymentStatus @default(PENDING)
+  amountCents              Int
+  providerAmountCents      Int
+  serviceFeeCentsApplied   Int
+  commissionPctApplied     Int
+  commissionCents          Int
+  providerRefundedCents    Int           @default(0)
+  serviceFeeRefundedCents  Int           @default(0)
+  refundedCents            Int           @default(0)
+  stripePaymentIntentId    String?       @unique
+  stripeChargeId           String?       @unique
+  stripeTransferId         String?       @unique
+  escrowReleaseAt          DateTime?
+  escrowReleaseAttemptedAt DateTime?
+  releasedAt               DateTime?
+  loyaltyBonus             LoyaltyBonus?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
 
   @@index([status, escrowReleaseAt])
+  @@index([status, escrowReleaseAttemptedAt, escrowReleaseAt])
   @@index([businessId, status])
   @@index([businessId, createdAt])
 }
@@ -544,35 +548,38 @@ model LoyaltyBonus {
 }
 
 model PaymentLink {
-  id                  String            @id @default(cuid())
-  businessId          String
-  business            Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  concept             String
-  amountCents         Int
-  status              PaymentLinkStatus @default(CREATING)
-  stripeUrl           String?
-  stripePaymentLinkId String?           @unique
-  paidAt              DateTime?
-  payment             Payment?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  businessId             String
+  business               Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  concept                String
+  amountCents            Int
+  serviceFeeCentsApplied Int
+  successUrl             String
+  status                 PaymentLinkStatus @default(CREATING)
+  stripeUrl              String?
+  stripePaymentLinkId    String?           @unique
+  paidAt                 DateTime?
+  payment                Payment?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   @@index([businessId])
 }
 
 model Withdrawal {
-  id              String           @id @default(cuid())
-  businessId      String
-  business        Business         @relation(fields: [businessId], references: [id])
-  amountCents     Int
-  bankName        String
-  accountLast4    String
-  status          WithdrawalStatus @default(REQUESTED)
-  rejectionReason String?
-  stripePayoutId  String?          @unique
-  resolvedAt      DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                    String           @id @default(cuid())
+  businessId            String
+  business              Business         @relation(fields: [businessId], references: [id])
+  amountCents           Int
+  bankName              String
+  accountLast4          String
+  status                WithdrawalStatus @default(REQUESTED)
+  rejectionReason       String?
+  payoutStripeAccountId String?
+  stripePayoutId        String?          @unique
+  resolvedAt            DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
 
   @@index([status])
   @@index([businessId])

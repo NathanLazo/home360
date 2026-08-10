@@ -80,8 +80,13 @@ amplios; los ids/metadata desconocidos se tratan como `unknown` + validación Zo
 - `charge.refunded` → localizar Payment por `charge.payment_intent` y reconciliar en
   absoluto (no incremental) **delegando a F3-05**. Para parcial, cambiar solo el status
   puede omitir Transfer y LoyaltyBonus; para un pago ya `RELEASED`, incluso un refund total
-  requiere una política separada de Transfer Reversal. Para pagos no liberados, F3-05 aplica
-  la comisión proporcional cerrada y el balance neto de XC-03.
+  se rechaza con `PAYMENT_NOT_REFUNDABLE`: el handler no muta el ledger ni finge recuperar
+  fondos de Connect y retorna error para atención operativa. Transfer Reversal queda en un
+  ticket independiente. Para pagos no liberados, F3-05 aplica la comisión proporcional,
+  devuelve toda la tarifa en un refund total y, en uno parcial, exige la asignación explícita
+  autorizada entre principal y tarifa. El handler reconstruye esa asignación desde la metadata
+  del Refund creada por F3-05 y la valida contra el ledger; un refund parcial externo sin esos
+  componentes no se reparte heurísticamente y retorna error para atención operativa.
 - `account.updated` → localizar Business por `account.id` (`stripeAccountId`); actualizar
   `chargesEnabled`/`payoutsEnabled` desde `charges_enabled`/`payouts_enabled` (absoluto,
   idempotente). Cuenta desconocida → `svcOk`.
@@ -114,6 +119,9 @@ amplios; los ids/metadata desconocidos se tratan como `unknown` + validación Zo
 - [ ] `payout.failed`/`payout.canceled` reconcilian el retiro por `stripePayoutId`.
 - [ ] Refund parcial se reconcilia como unidad monetaria (Refund, Transfer, Payment y bono),
       no como un cambio aislado de status.
+- [ ] Un `charge.refunded` de Payment `RELEASED` no altera el ledger local ni intenta
+      Transfer Reversal; queda señalado como error operativo.
+- [ ] Un refund parcial sin metadata explícita de principal/tarifa no se asigna por inferencia.
 - [ ] Dispatcher extensible consumido después por F4-05 sin modificar `route.ts`.
 
 ## Comandos para Roger (si aplica)

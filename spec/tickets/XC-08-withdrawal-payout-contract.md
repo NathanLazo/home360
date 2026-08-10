@@ -38,6 +38,9 @@ Aplicar la decisión registrada:
 - Renombrar el campo a `Withdrawal.stripePayoutId String? @unique`; no guardar un id `po_*`
   bajo un nombre `stripeTransferId`.
 - Idempotency key: `payout-withdrawal-${withdrawalId}`.
+- El claim `REQUESTED → PROCESSING` congela la cuenta Connect en
+  `Withdrawal.payoutStripeAccountId`. Los guards mutables del negocio aplican antes del
+  claim; un retry `PROCESSING` usa ese snapshot aunque el negocio cambie después.
 - Máquina operativa aprobada:
   - `REQUESTED → PROCESSING → APPROVED`;
   - `REQUESTED → REJECTED`;
@@ -45,7 +48,8 @@ Aplicar la decisión registrada:
 - El disponible reserva `REQUESTED|PROCESSING|APPROVED` y libera
   `REJECTED|FAILED|CANCELED`; cada retiro se descuenta exactamente una vez.
 - Doble claim o resolución incompatible retorna `CONFLICT`; retries de `PROCESSING` usan la
-  misma idempotency key y convergen al mismo Payout.
+  misma idempotency key/cuenta y convergen al mismo Payout. Si la carrera ya observa
+  `APPROVED` con id persistido, devuelve ese éxito sin otra llamada remota.
 
 Además:
 
@@ -75,4 +79,7 @@ Además:
 ## Comandos para Roger (si aplica)
 
 La migración de renombre, si la rama elegida la requiere, la prepara el agente como archivos;
-Roger decide cuándo ejecutarla. No ejecutar comandos Stripe desde este ticket.
+Roger decide cuándo ejecutarla. `payoutStripeAccountId` se agrega nullable. Filas
+`PROCESSING` preexistentes se rellenan solo tras verificar que `Business.stripeAccountId`
+sigue siendo la cuenta usada al reclamar; las demás permanecen para reconciliación manual.
+No ejecutar comandos Stripe desde este ticket.

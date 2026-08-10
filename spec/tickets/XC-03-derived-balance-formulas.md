@@ -41,7 +41,7 @@ providerNetCents(p) = monto proveedor no reembolsado − comisión retenida
 - Disponible      = Σ providerNetCents(p) para p.status ∈ {RELEASED, PARTIALLY_REFUNDED}
                     − Σ w.amountCents para
                       w.status ∈ {REQUESTED, PROCESSING, APPROVED}
-- En escrow       = Σ p.amountCents para p.status = IN_ESCROW
+- En escrow       = Σ p.amountCents para p.status ∈ {IN_ESCROW, REFUNDING, RELEASING}
 - Comisión del mes = Σ comisión efectivamente retenida de pagos del mes
 ```
 
@@ -58,9 +58,11 @@ providerNetCents = retainedProviderCents - effectiveCommissionCents
 Persistir `effectiveCommissionCents` como la comisión efectivamente retenida tras el
 reembolso y recalcular el bono D3 sobre esa misma cantidad. Un refund total aporta cero.
 
-En ambas ramas, `providerNetCents` debe excluir la tarifa plana D2; `XC-25` define la
-descomposición canónica del pago para que la tarifa de servicio nunca aparezca como saldo
-retirable del proveedor.
+`providerNetCents` debe excluir la tarifa plana D2; `XC-25` define la descomposición canónica
+del pago para que la tarifa de servicio nunca aparezca como saldo retirable del proveedor.
+La política aprobada de tarifa no cambia esta fórmula: el refund total devuelve toda la tarifa
+y un refund parcial resta de ingreso de plataforma únicamente la porción explícita persistida
+en `serviceFeeRefundedCents`.
 
 En `spec/02-business-dashboard.md` §1: "revenue = Σ (amountCents − refundedCents) de
 pagos `IN_ESCROW|RELEASED|PARTIALLY_REFUNDED` del periodo", aplicado sobre el monto del
@@ -89,6 +91,8 @@ netas de F3 §1".
 - [ ] La verificación manual de F3 §7 cubre `PARTIALLY_REFUNDED`; no se crean tests.
 - [ ] El devengo D3 en reembolso parcial usa la misma comisión efectivamente retenida que
       W12 y el saldo disponible.
+- [ ] La tarifa reembolsada afecta ingreso de plataforma, nunca `providerNetCents`: total
+      devuelve toda la tarifa y parcial solo la porción explícita.
 
 ## Comandos para Roger (si aplica)
 

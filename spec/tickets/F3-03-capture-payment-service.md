@@ -65,13 +65,17 @@ Pasos (en `db.$transaction`):
    `stripePaymentIntentId` y devolver el mismo éxito; no convertir un duplicado concurrente
    en 500.
 4. Resolver el porcentaje con la función aislada `resolveCommissionPct` (abajo).
-5. Leer `customerServiceFeeCents`, validar
-   `amountCents === providerAmountCents + customerServiceFeeCents`, y persistirlo como
-   `serviceFeeCentsApplied`. `commissionPctApplied = pct`;
+5. Para una orden, leer `customerServiceFeeCents` vigente. Para un link, leer el snapshot
+   `PaymentLink.serviceFeeCentsApplied` creado por F3-08; no reinterpretar un link ya
+   publicado con settings posteriores. Validar
+   `amountCents === providerAmountCents + serviceFeeCentsApplied` y persistir ese valor.
+   `commissionPctApplied = pct`;
    `commissionCents = Math.round(providerAmountCents * pct / 100)`
    (redondeo half-up documentado; único punto del sistema donde se calcula la comisión).
-6. Leer `PlatformSettings.escrowAutoReleaseHours` (default 72 si no existe el singleton) →
-   `escrowReleaseAt = now + hours`.
+6. Leer `PlatformSettings.escrowAutoReleaseHours` del mismo singleton requerido para
+   `customerServiceFeeCents` → `escrowReleaseAt = now + hours`. Si el singleton no existe,
+   retornar `CONFLICT`: no existe fallback de 72 h porque tampoco sería posible congelar
+   de forma autorizada la tarifa de servicio.
 7. `db.payment.create({ status: IN_ESCROW, amountCents, providerAmountCents,
    serviceFeeCentsApplied, commissionPctApplied, commissionCents, businessId, orderId?,
    paymentLinkId?, stripePaymentIntentId,

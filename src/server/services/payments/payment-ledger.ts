@@ -11,9 +11,7 @@ export type PlatformRevenueLedger = Pick<
 >;
 
 /** Principal still owed to the provider after refunds and platform commission. */
-export function providerTransferCents(
-  payment: ProviderTransferLedger,
-): number {
+export function providerTransferCents(payment: ProviderTransferLedger): number {
   return (
     payment.providerAmountCents -
     payment.providerRefundedCents -

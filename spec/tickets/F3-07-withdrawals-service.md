@@ -50,11 +50,15 @@ approveWithdrawal(deps: { db; stripe }, input: { withdrawalId: string }):
     "WITHDRAWAL_NOT_PENDING" | "NO_CONNECT_ACCOUNT" | "BUSINESS_SUSPENDED"
   >>
 // 1. Cargar withdrawal + business { stripeAccountId, payoutsEnabled, status }.
-// 2. Reclamar atómicamente REQUESTED → PROCESSING antes de llamar Stripe.
+// 2. Validar los guards mutables solo en REQUESTED y reclamar atómicamente
+//    REQUESTED → PROCESSING antes de llamar Stripe, congelando al mismo tiempo
+//    payoutStripeAccountId = business.stripeAccountId.
 //    Un retry puede continuar PROCESSING con la misma idempotency key; reject solo acepta
 //    REQUESTED. Esto evita la carrera "admin rechaza mientras otro proceso crea el Payout".
 //    business.status === SUSPENDED → BUSINESS_SUSPENDED (F5 lo mapea a CONFLICT).
 //    Sin cuenta o payoutsEnabled false → NO_CONNECT_ACCOUNT.
+//    PROCESSING nunca reevalúa status/payoutsEnabled/stripeAccountId del negocio: usa
+//    exclusivamente payoutStripeAccountId para recuperar el mismo intento remoto.
 // 3. Crear el Payout manual aprobado:
 //    stripe.payouts.create({ amount: amountCents, currency: "mxn",
 //      metadata: { withdrawalId } },
@@ -64,6 +68,7 @@ approveWithdrawal(deps: { db; stripe }, input: { withdrawalId: string }):
 // 4. Tras crear el Payout, PROCESSING → APPROVED, guardar stripePayoutId y resolvedAt.
 //    Fallo síncrono antes de obtener un Payout deja PROCESSING reintentable con la misma key.
 //    payout.failed/canceled reconcilia PROCESSING|APPROVED → FAILED|CANCELED.
+//    Si una carrera ya dejó APPROVED + stripePayoutId, retornar ese éxito convergente.
 
 rejectWithdrawal(deps: { db }, input: { withdrawalId: string; reason: string }):
   Promise<ServiceResult<{ withdrawalId: string }, "WITHDRAWAL_NOT_PENDING">>
@@ -96,6 +101,8 @@ rejectWithdrawal(deps: { db }, input: { withdrawalId: string; reason: string }):
       restauran correctamente el saldo derivado.
 - [ ] Aprobar y rechazar concurrentemente no puede producir un Payout asociado a un retiro
       `REJECTED`; existe recuperación documentada de `PROCESSING`.
+- [ ] `PROCESSING` usa el snapshot `payoutStripeAccountId`; cambios posteriores del negocio
+      no alteran la cuenta Stripe ni bloquean la reconciliación.
 - [ ] Firma de `approveWithdrawal` estable para F5 (`admin.finance.approveWithdrawal`).
 - [ ] Solo banco + últimos 4 dígitos en BD.
 - [ ] Banco/últimos 4 se presentan como confirmación; Stripe usa la cuenta bancaria por
@@ -103,4 +110,8 @@ rejectWithdrawal(deps: { db }, input: { withdrawalId: string; reason: string }):
 
 ## Comandos para Roger (si aplica)
 
-—
+La migración de `payoutStripeAccountId` es manual. Debe agregarse nullable. Para filas
+`REQUESTED` y terminales queda null. Cada fila `PROCESSING` existente requiere revisión:
+backfill desde `Business.stripeAccountId` únicamente si se verificó que la cuenta no cambió
+desde el claim; si pudo rotar o ya existe un Payout remoto, reconciliar primero contra Stripe
+usando `withdrawalId`/idempotency key. No asignar una cuenta actual sin esa verificación.

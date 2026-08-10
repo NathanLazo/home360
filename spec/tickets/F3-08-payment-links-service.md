@@ -21,7 +21,9 @@ Aunque Stripe genera una Checkout Session al abrir el link, la metadata debe via
 en `payment_intent_data.metadata`: la metadata de la Session no se propaga automáticamente al
 PaymentIntent. `XC-25` resuelve el monto: el negocio introduce `providerAmountCents`; el
 servidor lee `customerServiceFeeCents`, calcula el total y persiste ambos datos para que F3-03
-los valide y congele. La UI nunca envía un total ambiguo.
+los valide y congele. La fila también congela la URL de éxito; ningún parámetro de la
+petición remota se reconstruye desde configuración mutable durante una reconciliación. La UI
+nunca envía un total ambiguo.
 
 ## Alcance
 
@@ -35,14 +37,28 @@ los valide y congele. La UI nunca envía un total ambiguo.
 createPaymentLink(deps: { db; stripe }, input: {
   businessId: string; concept: string; providerAmountCents: number; locale: "es" | "en";
   baseUrl: string;
-}): Promise<ServiceResult<{ paymentLinkId: string; url: string }>>
+}): Promise<PaymentLinkServiceResult>
+
+type PaymentLinkServiceResult =
+  | { ok: true; data: { paymentLinkId: string; url: string } }
+  | {
+      ok: false;
+      code: "STRIPE_ERROR" | "NOT_FOUND" | "CONFLICT";
+      detail?: string;
+      recovery?: { paymentLinkId: string; action: "RECONCILE" };
+    };
+
+reconcilePaymentLink(deps: { db; stripe }, input: {
+  businessId: string; paymentLinkId: string;
+}): Promise<PaymentLinkServiceResult>
 ```
 
 Pasos:
 
 1. Leer la tarifa en servidor y crear la fila local primero:
    `db.paymentLink.create({ businessId, concept, amountCents: providerAmountCents,
-   status: CREATING, stripeUrl: null })`. Su `id` viaja en metadata.
+   serviceFeeCentsApplied, successUrl, status: CREATING, stripeUrl: null })`. Su `id` viaja
+   en metadata. `successUrl` es `${baseUrl}/${locale}/pay/success`, validada y congelada.
 2. Crear o reutilizar el Price requerido por Payment Links API por el total
    `providerAmountCents + serviceFeeCentsApplied`, con moneda `mxn` y nombre `concept`.
 3. Crear el Payment Link remoto con:
@@ -59,6 +75,10 @@ sufijos por recurso (por ejemplo, `payment-link-${paymentLinkId}-price` y
 `payment-link-${paymentLinkId}`). Si Stripe falla después del paso 1, la fila permanece
 `CREATING`, sin URL compartible. Un retry/reconciliador reutiliza las mismas claves y converge
 al mismo Price/Payment Link; nunca crea otra fila ni publica `stripeUrl: null`.
+Si falla Stripe o la publicación local posterior, el fallo incluye
+`recovery: { paymentLinkId, action: "RECONCILE" }`. El caller conserva ese id y llama a
+`reconcilePaymentLink`; no vuelve a invocar `createPaymentLink`. El reconciliador solo recibe
+tenant + id y reconstruye toda la petición desde snapshots de la fila.
 
 Al confirmarse el pago, F3-09 escribe `paidAt` y `status: INACTIVE`. `paidAt` es un hecho de
 pago, no un estado remoto: no existen estados locales `PAID` ni `FAILED` para PaymentLink.
@@ -66,7 +86,8 @@ El límite remoto de una sesión completada evita cobros repetidos incluso antes
 el webhook que desactiva localmente el link.
 
 - Solo el principal es input validado (`providerAmountCents` Int positivo); tarifa y total
-  se calculan server-side y F3-03 los reconcilia con `amount_received`.
+  se calculan server-side. F3-03 usa `PaymentLink.serviceFeeCentsApplied` —no settings
+  vigentes— para reconciliarlos con `amount_received`; las órdenes siguen usando settings.
 - Las páginas públicas mínimas quedan fuera de este ticket (F3-13 agrega placeholders).
 
 ## Restricciones no negociables
@@ -90,7 +111,21 @@ el webhook que desactiva localmente el link.
 - [ ] `restrictions.completed_sessions.limit` es `1`.
 - [ ] Solo `ACTIVE` con URL no nula se presenta como cobrable.
 - [ ] Creación remota idempotente y estado `CREATING` reconciliable ante fallos Stripe/BD.
+- [ ] Reconciliar no recibe locale/base URL/tarifa mutables; usa snapshots locales.
+- [ ] Un fallo posterior a crear la fila retorna su `paymentLinkId` como dato de recuperación.
 
 ## Comandos para Roger (si aplica)
 
-—
+La migración es manual y no forma parte de este ticket. Como `serviceFeeCentsApplied` y
+`successUrl` son nuevos campos `NOT NULL`, Roger debe crearla en etapas:
+
+1. agregarlos temporalmente nullable;
+2. verificar si existen filas `PaymentLink`;
+3. para links `CREATING|ACTIVE`, recuperar tarifa desde metadata y redirect desde el objeto
+   Stripe correspondiente; no usar settings o locale actuales como default silencioso;
+4. para links históricos `INACTIVE`, validar el snapshot contra su `Payment`/metadata o
+   asignar valores explícitos auditados si ya no pueden reconciliarse;
+5. comprobar cero nulos y recién entonces aplicar `NOT NULL`.
+
+En una BD sin filas `PaymentLink`, la migración puede crear ambos campos como `NOT NULL`
+directamente. El agente no crea ni ejecuta esa migración.

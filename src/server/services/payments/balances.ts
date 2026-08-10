@@ -6,6 +6,7 @@ import {
 } from "../../../../generated/prisma";
 
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
+import { providerTransferCents } from "./payment-ledger";
 
 export const FINANCIAL_TIME_ZONE = "America/Chihuahua";
 
@@ -154,7 +155,13 @@ export async function getBusinessBalances(
     deps.db.payment.aggregate({
       where: {
         businessId: input.businessId,
-        status: PaymentStatus.IN_ESCROW,
+        status: {
+          in: [
+            PaymentStatus.IN_ESCROW,
+            PaymentStatus.REFUNDING,
+            PaymentStatus.RELEASING,
+          ],
+        },
       },
       _sum: { amountCents: true },
       _count: { _all: true },
@@ -165,6 +172,8 @@ export async function getBusinessBalances(
         status: {
           in: [
             PaymentStatus.IN_ESCROW,
+            PaymentStatus.REFUNDING,
+            PaymentStatus.RELEASING,
             PaymentStatus.RELEASED,
             PaymentStatus.PARTIALLY_REFUNDED,
           ],
@@ -187,13 +196,14 @@ export async function getBusinessBalances(
     releasedPayments._sum.providerRefundedCents ?? 0;
   const commissionCents = releasedPayments._sum.commissionCents ?? 0;
   const reservedWithdrawalCents = reservedWithdrawals._sum.amountCents ?? 0;
+  const availableProviderCents = providerTransferCents({
+    providerAmountCents,
+    providerRefundedCents,
+    commissionCents,
+  });
 
   return svcOk({
-    availableCents:
-      providerAmountCents -
-      providerRefundedCents -
-      commissionCents -
-      reservedWithdrawalCents,
+    availableCents: availableProviderCents - reservedWithdrawalCents,
     escrowCents: escrowPayments._sum.amountCents ?? 0,
     escrowOrdersCount: escrowPayments._count._all,
     monthCommissionCents: monthCommission._sum.commissionCents ?? 0,

@@ -40,7 +40,7 @@ enum ProductStatus { DRAFT PUBLISHED }
 enum OrderType { SERVICE PRODUCT }
 enum OrderStatus { PENDING PAID IN_PROGRESS SHIPPING COMPLETED CANCELLED DISPUTED }
 enum PaymentMethod { CARD TRANSFER PAYMENT_LINK }
-enum PaymentStatus { PENDING IN_ESCROW RELEASED REFUNDED PARTIALLY_REFUNDED }
+enum PaymentStatus { PENDING IN_ESCROW REFUNDING RELEASING RELEASED REFUNDED PARTIALLY_REFUNDED }
 enum WithdrawalStatus { REQUESTED PROCESSING APPROVED REJECTED FAILED CANCELED }
 enum PaymentLinkStatus { CREATING ACTIVE INACTIVE }
 enum SubscriptionStatus { ACTIVE PAST_DUE CANCELED }
@@ -215,6 +215,7 @@ model Payment {
   stripePaymentIntentId String?       @unique
   stripeTransferId      String?       @unique
   escrowReleaseAt       DateTime?     // fecha de auto-liberación
+  escrowReleaseAttemptedAt DateTime?  // cooldown/rotación crash-safe del cron
   releasedAt            DateTime?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
@@ -223,39 +224,47 @@ model Payment {
 }
 
 model PaymentLink {
-  id                  String            @id @default(cuid())
-  businessId          String
-  business            Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  concept             String
-  amountCents         Int
-  status              PaymentLinkStatus @default(CREATING)
-  stripeUrl           String?
-  stripePaymentLinkId String?           @unique
-  paidAt              DateTime?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  businessId             String
+  business               Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  concept                String
+  amountCents            Int               // principal del proveedor
+  serviceFeeCentsApplied Int               // snapshot al crear el link
+  successUrl             String            // snapshot para reconciliación idempotente
+  status                 PaymentLinkStatus @default(CREATING)
+  stripeUrl              String?
+  stripePaymentLinkId    String?           @unique
+  paidAt                 DateTime?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   @@index([businessId])
 }
 
 model Withdrawal {
-  id               String           @id @default(cuid())
-  businessId       String
-  business         Business         @relation(fields: [businessId], references: [id])
-  amountCents      Int
-  bankName         String           // "BBVA"
-  accountLast4     String           // "2210" — jamás la cuenta completa
-  status           WithdrawalStatus @default(REQUESTED)
-  rejectionReason  String?
-  stripePayoutId   String?          @unique
-  resolvedAt       DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                    String           @id @default(cuid())
+  businessId            String
+  business              Business         @relation(fields: [businessId], references: [id])
+  amountCents           Int
+  bankName              String           // "BBVA"
+  accountLast4          String           // "2210" — jamás la cuenta completa
+  status                WithdrawalStatus @default(REQUESTED)
+  rejectionReason       String?
+  payoutStripeAccountId String?           // snapshot al reclamar PROCESSING
+  stripePayoutId        String?           @unique
+  resolvedAt            DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
 
   @@index([status])
   @@index([businessId])
 }
 ```
+
+Al migrar una BD existente, `serviceFeeCentsApplied` y `successUrl` se agregan primero como
+nullable y se rellenan desde metadata/configuración remota de cada link. No se usa la tarifa,
+locale o base URL actuales como default para filas `CREATING|ACTIVE`; después de verificar
+cero nulos se aplica `NOT NULL`. Si no existen links, pueden crearse no nulos directamente.
 
 ### Suscripción
 

@@ -16,5 +16,15 @@
       "CUSTOMER": "Customer",
       "WORKER": "Worker"
     }
+  },
+  "pay": {
+    "success": {
+      "title": "Payment complete",
+      "description": "Thanks for your payment. The business has been notified and you will receive your receipt by email."
+    },
+    "cancelled": {
+      "title": "Payment cancelled",
+      "description": "No charge was made. You can try again with the same link while it is still active."
+    }
   }
 }

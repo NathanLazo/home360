@@ -9,11 +9,11 @@
 
 ## Contexto
 
-Los reembolsos nacen de la resolución de disputas (F5). Roger aprobó comisión proporcional
-y saldo neto XC-03, por lo que este ticket está **DESBLOQUEADO** respecto de
-`PENDIENTES.md` decisiones 1 y 2. La asignación entre principal y tarifa continúa siendo
-explícita en el input. Los pagos ya `RELEASED` permanecen fuera de esta operación hasta que
-otro ticket implemente Transfer Reversal; hoy retornan `PAYMENT_NOT_REFUNDABLE`.
+Los reembolsos nacen de la resolución de disputas (F5). Roger aprobó comisión proporcional,
+saldo neto XC-03, devolución completa de la tarifa en refund total y devolución parcial de
+tarifa solo cuando el caller autorizado indica expresamente esa porción. Por ello este ticket
+está **DESBLOQUEADO**. Los pagos ya `RELEASED` se rechazan en F3 con
+`PAYMENT_NOT_REFUNDABLE`; un eventual Transfer Reversal pertenece a un ticket separado.
 
 ## Alcance
 
@@ -37,17 +37,29 @@ refundPayment(deps: { db; stripe }, input: {
 
 Invariantes implementables, independientes de la decisión:
 
-1. Cargar Payment (select mínimo). Status ≠ `IN_ESCROW` → `PAYMENT_NOT_REFUNDABLE`.
-2. **Total** (`amountCents` ausente): `stripe.refunds.create({ payment_intent,
-   amount: payment.amountCents }, { idempotencyKey: \`refund-full-${paymentId}\` })` →
-   `updateMany` condicional (`status: IN_ESCROW`) a
-   `{ status: REFUNDED, refundedCents: amountCents }`. Sin Transfer. La comisión no se
-   gana: los agregados de F3-06 excluyen `REFUNDED` del mes de comisiones.
+1. Cargar Payment (select mínimo) y reclamar por CAS `IN_ESCROW → REFUNDING` antes de
+   crear cualquier operación Stripe. Un retry en `REFUNDING` reutiliza las mismas keys;
+   cualquier otro status → `PAYMENT_NOT_REFUNDABLE`.
+   En particular, `RELEASING` ya fue reclamado antes de Stripe y es un punto de no retorno:
+   el reembolso debe esperar la reconciliación a `RELEASED` y no puede competir con el
+   Transfer. El estado final se escribe desde `REFUNDING`, nunca desde una lectura vieja
+   de `IN_ESCROW`.
+2. **Total** (ambos componentes ausentes): `stripe.refunds.create({ payment_intent,
+   amount: payment.amountCents, metadata: { paymentId, providerRefundCents:
+   providerAmountCents, serviceFeeRefundCents: serviceFeeCentsApplied } },
+   { idempotencyKey: \`refund-full-${paymentId}\` })` → `updateMany` condicional
+   (`status: REFUNDING`) a
+   `{ status: REFUNDED, providerRefundedCents: providerAmountCents,
+   serviceFeeRefundedCents: serviceFeeCentsApplied, refundedCents: amountCents,
+   commissionCents: 0 }`. Se devuelve toda la tarifa plana. Sin Transfer ni bono; los
+   agregados de F3-06 excluyen `REFUNDED` del mes de comisiones.
 3. **Parcial**: validar componentes enteros no negativos, su suma
    `0 < refundCents < payment.amountCents` y cada uno contra su saldo no reembolsado. La
-   asignación principal/tarifa viene explícita del caller autorizado. Crear Refund parcial con
-   `idempotencyKey: \`refund-partial-${paymentId}\`` y liberar el resto con la fórmula que
-   Roger aprobó:
+   asignación principal/tarifa viene explícita del caller autorizado: ambos campos deben estar
+   presentes, incluso si uno vale cero. Solo se devuelve la porción de tarifa indicada en
+   `serviceFeeRefundCents`; no hay prorrateo ni inferencia automática. Crear Refund parcial
+   incluyendo ambos componentes y `paymentId` en metadata, con la idempotency key
+   `refund-partial-${paymentId}`, y liberar el resto con la fórmula que Roger aprobó:
 
    ```text
    retainedProviderCents = providerAmountCents - providerRefundedCents
@@ -69,6 +81,8 @@ Invariantes implementables, independientes de la decisión:
    proporcional. Refund de principal + refund de tarifa +
    transfer al negocio + ingreso de plataforma retenido debe conciliar exactamente con
    `amountCents`, sin centavos creados o perdidos.
+7. `RELEASED` siempre retorna `PAYMENT_NOT_REFUNDABLE` sin llamar a Stripe ni modificar el
+   ledger. F3 no intenta `Transfer Reversal`; ese flujo requiere un ticket independiente.
 
 ## Restricciones no negociables
 
@@ -84,7 +98,7 @@ Invariantes implementables, independientes de la decisión:
 ## Criterios de aceptación
 
 - [ ] `pnpm typecheck` · `pnpm check` · `pnpm build` en verde.
-- [ ] Las decisiones 1 y 2 de `PENDIENTES.md` están copiadas literalmente como fórmulas;
+- [ ] Las decisiones 1, 2, 6 y 7 de `PENDIENTES.md` están reflejadas literalmente;
       no queda política provisional.
 - [ ] Revisión manual con fixtures documentada: refund + transfer + comisión final =
       `amountCents` para importes con redondeo.
@@ -92,6 +106,8 @@ Invariantes implementables, independientes de la decisión:
       PARTIAL_REFUND la consumen).
 - [ ] Idempotencia: keys determinísticas y `updateMany` condicional en cada escritura.
 - [ ] Un evento `charge.refunded` intercalado no deja un parcial sin Transfer ni bono.
+- [ ] Refund total devuelve toda la tarifa; parcial devuelve exactamente la porción de tarifa
+      explícita; un pago `RELEASED` se rechaza sin llamar a Stripe.
 
 ## Comandos para Roger (si aplica)
 

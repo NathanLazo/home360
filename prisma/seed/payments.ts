@@ -4,12 +4,14 @@ import {
   OrderStatus,
   PaymentMethod,
   PaymentStatus,
+  WithdrawalStatus,
 } from "../../generated/prisma";
 import type {
   LoyaltyBonus,
   Payment,
   Prisma,
   PrismaClient,
+  Withdrawal,
 } from "../../generated/prisma";
 import type { SeededBusinesses } from "./businesses";
 import type { SeededOrders } from "./orders";
@@ -24,6 +26,7 @@ export type SeedPaymentsInput = {
 export type SeededPayments = {
   payments: readonly Payment[];
   bonuses: readonly LoyaltyBonus[];
+  withdrawals: readonly Withdrawal[];
 };
 
 type PaymentState = {
@@ -186,5 +189,27 @@ export async function seedPayments(
     ),
   );
 
-  return { payments, bonuses };
+  // Manual payout flow fixture: it reserves available balance but deliberately
+  // has no Stripe payout id because no external money movement occurs in seeds.
+  const withdrawalValues = {
+    businessId: businesses.garcia.id,
+    amountCents: 5_000,
+    bankName: "BBVA",
+    accountLast4: "2210",
+    status: WithdrawalStatus.REQUESTED,
+    rejectionReason: null,
+    payoutStripeAccountId: null,
+    stripePayoutId: null,
+    resolvedAt: null,
+  } satisfies Prisma.WithdrawalUncheckedCreateInput;
+  const withdrawal = await prisma.withdrawal.upsert({
+    where: { id: "seed-withdrawal-garcia-requested" },
+    create: {
+      id: "seed-withdrawal-garcia-requested",
+      ...withdrawalValues,
+    },
+    update: withdrawalValues,
+  });
+
+  return { payments, bonuses, withdrawals: [withdrawal] };
 }

@@ -42,6 +42,9 @@ export async function POST(req: Request) {
   un endpoint que mueve dinero nunca puede reutilizar una respuesta cacheada.
 - El endpoint ejecuta un lote acotado de F3-04 y expone `hasMore`; no implementa un bucle
   sin límite dentro de una sola invocación.
+- Los fallos conservan `escrowReleaseAttemptedAt`; F3-04 aplica cooldown y ordena primero
+  timestamps nulos y luego el intento más antiguo. Así los no intentados avanzan y los
+  retries rotan sin que los 100 pagos más antiguos causen starvation.
 - Comparación del secreto en tiempo constante no requerida (token largo aleatorio), pero el
   401 no debe filtrar si el header faltó o no coincidió.
 - Sin `CRON_SECRET` en env → `src/env.js` falla al arrancar (variable requerida).

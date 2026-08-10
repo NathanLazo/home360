@@ -50,8 +50,9 @@ traen filas completas:
   `commissionCents` ya es la comisión proporcional efectivamente retenida. Retiros
   `REJECTED|FAILED|CANCELED` no reservan saldo. No clampear negativos: son una
   inconsistencia que debe aflorar.
-- `escrowCents` = Σ `amountCents` de pagos `IN_ESCROW` (bruto, como muestra el diseño);
-  `escrowOrdersCount` = count de esos pagos.
+- `escrowCents` = Σ `amountCents` de pagos `IN_ESCROW|REFUNDING|RELEASING` (bruto, como muestra el diseño);
+  `escrowOrdersCount` = count de esos pagos. Los estados operativos aún no están disponibles y permanecen
+  en escrow hasta que el Transfer se confirme localmente como `RELEASED`.
 - `monthCommissionCents`: `REFUNDED` total aporta cero y `PARTIALLY_REFUNDED` aporta su
   `commissionCents` proporcional final. El huso horario del mes debe venir explícito del
   caller/configuración; no asumir UTC ni zona local del servidor.

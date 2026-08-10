@@ -20,6 +20,7 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
+    CRON_SECRET: z.string(),
     DATABASE_URL: z.string().url(),
     EMAIL_FROM: z.string().optional(),
     NODE_ENV: z
@@ -50,6 +51,7 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:

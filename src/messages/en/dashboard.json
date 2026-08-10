@@ -185,6 +185,109 @@
       "disputed": "Order disputed"
     }
   },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Review your balance, funds held in escrow, and your transaction history.",
+    "balancesLabel": "Balance summary",
+    "transactions": "Transactions",
+    "loadingBalances": "Loading balances",
+    "loadingTransactions": "Loading transactions",
+    "loadMore": "Load more",
+    "retry": "Try again",
+    "notAvailable": "—",
+    "noConcept": "No concept",
+    "balancesErrorTitle": "We could not load your balances",
+    "balancesErrorDescription": "Check your connection and try again.",
+    "transactionsErrorTitle": "We could not load the transactions",
+    "errorTitle": "We could not open Payments",
+    "errorDescription": "Something went wrong preparing this section. Try again.",
+    "balances": {
+      "available": "Available",
+      "availableHint": "Ready to withdraw",
+      "escrow": "Held in escrow",
+      "escrowOrders": "{count, plural, =0 {No active orders} one {# active order} other {# active orders}}",
+      "commission": "Monthly commission",
+      "commissionHint": "Accrued in the current month"
+    },
+    "columns": {
+      "customer": "Customer",
+      "concept": "Concept",
+      "amount": "Amount",
+      "method": "Method",
+      "status": "Status",
+      "date": "Date"
+    },
+    "methods": {
+      "CARD": "Card",
+      "TRANSFER": "Transfer",
+      "PAYMENT_LINK": "Payment link"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "IN_ESCROW": "In escrow",
+      "RELEASING": "Releasing",
+      "RELEASED": "Released",
+      "REFUNDING": "Refunding",
+      "REFUNDED": "Refunded",
+      "PARTIALLY_REFUNDED": "Partially refunded"
+    },
+    "empty": {
+      "title": "No transactions yet",
+      "description": "Your first payment will show up here with its status and amount."
+    },
+    "unexpectedError": "Something went wrong. Please try again.",
+    "actions": {
+      "createLink": "Create payment link",
+      "withdraw": "Withdraw",
+      "withdrawAmount": "Withdraw {amount}",
+      "withdrawNeedsConnect": "Connect your bank account to withdraw."
+    },
+    "link": {
+      "title": "Create payment link",
+      "description": "Generate a single-use link to charge your customer.",
+      "createdDescription": "Share this link with your customer. It can only be paid once.",
+      "conceptLabel": "Concept",
+      "conceptInvalid": "Enter a concept between 3 and 120 characters.",
+      "amountLabel": "Amount (MXN)",
+      "amountHint": "Use a decimal point and at most two decimals. Example: 1250.00",
+      "amountInvalid": "Enter a valid amount greater than zero, with at most two decimals.",
+      "urlLabel": "Payment link",
+      "singleUseHint": "The link deactivates automatically after the first payment.",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "copyFailed": "We could not copy the link. Select it and copy it manually.",
+      "submit": "Create link",
+      "cancel": "Cancel",
+      "done": "Done",
+      "success": "Payment link created"
+    },
+    "withdraw": {
+      "title": "Request withdrawal",
+      "description": "You have {amount} available to withdraw.",
+      "amountLabel": "Amount to withdraw (MXN)",
+      "amountHint": "Maximum available: {amount}",
+      "amountInvalid": "Enter a valid amount greater than zero, with at most two decimals.",
+      "amountExceedsAvailable": "The amount exceeds your available balance.",
+      "bankLabel": "Bank",
+      "bankInvalid": "Enter your bank name.",
+      "last4Label": "Last 4 digits of the account",
+      "last4Invalid": "Enter exactly 4 digits.",
+      "submit": "Continue",
+      "cancel": "Cancel",
+      "confirmTitle": "Confirm withdrawal",
+      "confirmDescription": "You are requesting a withdrawal of {amount} to {bank} ****{last4}. An administrator must approve it.",
+      "confirmSubmit": "Request withdrawal",
+      "success": "Withdrawal requested. It is pending approval."
+    },
+    "onboarding": {
+      "title": "Connect your account to receive your money",
+      "missing": "You can charge customers, but you need to connect a bank account before releasing or withdrawing funds.",
+      "pending": "Your account is connected but cannot receive deposits yet. Complete the information Stripe is asking for.",
+      "start": "Connect account",
+      "resume": "Complete information",
+      "completed": "Your account can now receive deposits."
+    }
+  },
   "services": {
     "title": "Services",
     "subtitle": "Manage pricing, timing, and workers across your catalog.",
@@ -287,7 +390,10 @@
     "emptyTitle": "No branches yet",
     "emptyDescription": "Create your first branch to define its service coverage.",
     "emptyAction": "Create branch",
-    "status": { "active": "Active", "paused": "Paused" },
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
     "card": {
       "manager": "Manager",
       "unassigned": "Unassigned",

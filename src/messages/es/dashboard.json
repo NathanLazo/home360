@@ -185,6 +185,109 @@
       "disputed": "Orden en disputa"
     }
   },
+  "payments": {
+    "title": "Pagos",
+    "subtitle": "Consulta tu saldo, el dinero en garantía y el historial de transacciones.",
+    "balancesLabel": "Resumen de saldos",
+    "transactions": "Transacciones",
+    "loadingBalances": "Cargando saldos",
+    "loadingTransactions": "Cargando transacciones",
+    "loadMore": "Cargar más",
+    "retry": "Reintentar",
+    "notAvailable": "—",
+    "noConcept": "Sin concepto",
+    "balancesErrorTitle": "No pudimos cargar tus saldos",
+    "balancesErrorDescription": "Revisa tu conexión e inténtalo de nuevo.",
+    "transactionsErrorTitle": "No pudimos cargar las transacciones",
+    "errorTitle": "No pudimos abrir Pagos",
+    "errorDescription": "Ocurrió un problema al preparar esta sección. Inténtalo de nuevo.",
+    "balances": {
+      "available": "Disponible",
+      "availableHint": "Listo para retirar",
+      "escrow": "Retenido en garantía",
+      "escrowOrders": "{count, plural, =0 {Sin órdenes activas} one {# orden activa} other {# órdenes activas}}",
+      "commission": "Comisión del mes",
+      "commissionHint": "Acumulado del mes en curso"
+    },
+    "columns": {
+      "customer": "Cliente",
+      "concept": "Concepto",
+      "amount": "Monto",
+      "method": "Método",
+      "status": "Estado",
+      "date": "Fecha"
+    },
+    "methods": {
+      "CARD": "Tarjeta",
+      "TRANSFER": "Transferencia",
+      "PAYMENT_LINK": "Enlace de pago"
+    },
+    "status": {
+      "PENDING": "Pendiente",
+      "IN_ESCROW": "En garantía",
+      "RELEASING": "Liberando",
+      "RELEASED": "Liberado",
+      "REFUNDING": "Reembolsando",
+      "REFUNDED": "Reembolsado",
+      "PARTIALLY_REFUNDED": "Reembolso parcial"
+    },
+    "empty": {
+      "title": "Aún no hay transacciones",
+      "description": "Cuando recibas tu primer cobro aparecerá aquí con su estado y su monto."
+    },
+    "unexpectedError": "Algo salió mal. Inténtalo de nuevo.",
+    "actions": {
+      "createLink": "Crear link de cobro",
+      "withdraw": "Retirar",
+      "withdrawAmount": "Retirar {amount}",
+      "withdrawNeedsConnect": "Conecta tu cuenta bancaria para poder retirar."
+    },
+    "link": {
+      "title": "Crear link de cobro",
+      "description": "Genera un link de un solo uso para cobrarle a tu cliente.",
+      "createdDescription": "Comparte este link con tu cliente. Solo se puede pagar una vez.",
+      "conceptLabel": "Concepto",
+      "conceptInvalid": "Escribe un concepto de entre 3 y 120 caracteres.",
+      "amountLabel": "Monto (MXN)",
+      "amountHint": "Usa punto decimal y máximo dos decimales. Ejemplo: 1250.00",
+      "amountInvalid": "Escribe un monto válido mayor a cero, con máximo dos decimales.",
+      "urlLabel": "Link de cobro",
+      "singleUseHint": "El link se desactiva automáticamente después del primer pago.",
+      "copy": "Copiar link",
+      "copied": "Link copiado",
+      "copyFailed": "No pudimos copiar el link. Selecciónalo y cópialo manualmente.",
+      "submit": "Crear link",
+      "cancel": "Cancelar",
+      "done": "Listo",
+      "success": "Link de cobro creado"
+    },
+    "withdraw": {
+      "title": "Solicitar retiro",
+      "description": "Tienes {amount} disponibles para retirar.",
+      "amountLabel": "Monto a retirar (MXN)",
+      "amountHint": "Máximo disponible: {amount}",
+      "amountInvalid": "Escribe un monto válido mayor a cero, con máximo dos decimales.",
+      "amountExceedsAvailable": "El monto supera tu saldo disponible.",
+      "bankLabel": "Banco",
+      "bankInvalid": "Escribe el nombre de tu banco.",
+      "last4Label": "Últimos 4 dígitos de la cuenta",
+      "last4Invalid": "Escribe exactamente 4 dígitos.",
+      "submit": "Continuar",
+      "cancel": "Cancelar",
+      "confirmTitle": "Confirmar retiro",
+      "confirmDescription": "Vas a solicitar un retiro de {amount} a {bank} ****{last4}. Un administrador debe aprobarlo.",
+      "confirmSubmit": "Solicitar retiro",
+      "success": "Retiro solicitado. Queda pendiente de aprobación."
+    },
+    "onboarding": {
+      "title": "Conecta tu cuenta para recibir tu dinero",
+      "missing": "Puedes cobrar, pero necesitas conectar una cuenta bancaria antes de liberar o retirar fondos.",
+      "pending": "Tu cuenta está conectada pero aún no puede recibir depósitos. Completa la información que Stripe te pide.",
+      "start": "Conectar cuenta",
+      "resume": "Completar información",
+      "completed": "Tu cuenta ya puede recibir depósitos."
+    }
+  },
   "services": {
     "title": "Servicios",
     "subtitle": "Administra precios, tiempos y trabajadores de tu catálogo.",
@@ -287,7 +390,10 @@
     "emptyTitle": "Aún no hay sucursales",
     "emptyDescription": "Crea tu primera sucursal para definir su cobertura operativa.",
     "emptyAction": "Crear sucursal",
-    "status": { "active": "Activa", "paused": "Pausada" },
+    "status": {
+      "active": "Activa",
+      "paused": "Pausada"
+    },
     "card": {
       "manager": "Encargado",
       "unassigned": "Sin asignar",

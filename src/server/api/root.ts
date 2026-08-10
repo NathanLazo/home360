@@ -3,6 +3,7 @@ import { authRouter } from "~/server/api/routers/auth";
 import { branchRouter } from "~/server/api/routers/branch";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
 import { orderRouter } from "~/server/api/routers/order";
+import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
 import { serviceRouter } from "~/server/api/routers/service";
 import {
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
   health: publicProcedure.query(() => ok({ ready: true }, "API is ready")),
   order: orderRouter,
+  payment: paymentRouter,
   product: productRouter,
   service: serviceRouter,
 });

@@ -16,5 +16,15 @@
       "CUSTOMER": "Cliente",
       "WORKER": "Trabajador"
     }
+  },
+  "pay": {
+    "success": {
+      "title": "¡Pago completado!",
+      "description": "Gracias por tu pago. El negocio ya fue notificado y recibirás tu comprobante por correo."
+    },
+    "cancelled": {
+      "title": "Pago cancelado",
+      "description": "No se realizó ningún cargo. Puedes volver a intentarlo con el mismo link si sigue activo."
+    }
   }
 }

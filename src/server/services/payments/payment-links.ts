@@ -30,17 +30,26 @@ export type CreatePaymentLinkInput = {
 export type ReconcilePaymentLinkInput = {
   businessId: string;
   paymentLinkId: string;
-  locale: "es" | "en";
-  baseUrl: string;
 };
 
 type PaymentLinkResult = { paymentLinkId: string; url: string };
+
+type PaymentLinkBaseResult = ServiceResult<PaymentLinkResult>;
+
+export type PaymentLinkServiceResult =
+  | Extract<PaymentLinkBaseResult, { ok: true }>
+  | (Extract<PaymentLinkBaseResult, { ok: false }> & {
+      /** Identifies an existing CREATING row; callers must reconcile, not create again. */
+      recovery?: { paymentLinkId: string; action: "RECONCILE" };
+    });
 
 type CreatingPaymentLink = {
   id: string;
   businessId: string;
   concept: string;
   amountCents: number;
+  serviceFeeCentsApplied: number;
+  successUrl: string;
 };
 
 function isStripeError(error: unknown): error is Stripe.errors.StripeError {
@@ -74,23 +83,13 @@ function successUrl(baseUrl: string, locale: "es" | "en"): string {
 async function publishPaymentLink(
   { db, stripe }: PaymentLinkServiceDeps,
   paymentLink: CreatingPaymentLink,
-  input: { locale: "es" | "en"; baseUrl: string },
-): Promise<ServiceResult<PaymentLinkResult>> {
-  const settings = await db.platformSettings.findUnique({
-    where: { id: 1 },
-    select: { customerServiceFeeCents: true },
-  });
-
-  if (!settings) {
-    return svcFail("CONFLICT", "Platform settings are not configured");
-  }
-
-  const serviceFeeCentsApplied = settings.customerServiceFeeCents;
-  const totalCents = paymentLink.amountCents + serviceFeeCentsApplied;
+): Promise<PaymentLinkServiceResult> {
+  const totalCents =
+    paymentLink.amountCents + paymentLink.serviceFeeCentsApplied;
 
   if (
-    !Number.isSafeInteger(serviceFeeCentsApplied) ||
-    serviceFeeCentsApplied < 0 ||
+    !Number.isSafeInteger(paymentLink.serviceFeeCentsApplied) ||
+    paymentLink.serviceFeeCentsApplied < 0 ||
     !Number.isSafeInteger(totalCents) ||
     totalCents <= 0 ||
     totalCents > MAX_PRISMA_INT
@@ -102,91 +101,105 @@ async function publishPaymentLink(
     paymentLinkId: paymentLink.id,
     businessId: paymentLink.businessId,
     providerAmountCents: String(paymentLink.amountCents),
-    serviceFeeCentsApplied: String(serviceFeeCentsApplied),
+    serviceFeeCentsApplied: String(paymentLink.serviceFeeCentsApplied),
   };
+  let price: Stripe.Price;
   let stripePaymentLink: Stripe.PaymentLink;
 
   try {
+    price = await stripe.prices.create(
+      {
+        currency: "mxn",
+        unit_amount: totalCents,
+        product_data: { name: paymentLink.concept },
+        metadata,
+      },
+      { idempotencyKey: `payment-link-${paymentLink.id}-price` },
+    );
     stripePaymentLink = await stripe.paymentLinks.create(
       {
-        line_items: [
-          {
-            price_data: {
-              currency: "mxn",
-              unit_amount: totalCents,
-              product_data: { name: paymentLink.concept },
-            },
-            quantity: 1,
-          },
-        ],
+        line_items: [{ price: price.id, quantity: 1 }],
         metadata,
         payment_intent_data: { metadata },
         restrictions: { completed_sessions: { limit: 1 } },
         after_completion: {
           type: "redirect",
-          redirect: { url: successUrl(input.baseUrl, input.locale) },
+          redirect: { url: paymentLink.successUrl },
         },
       },
       { idempotencyKey: `payment-link-${paymentLink.id}` },
     );
   } catch (error) {
     if (isStripeError(error)) {
-      return svcFail("STRIPE_ERROR");
+      return {
+        ok: false,
+        code: "STRIPE_ERROR",
+        recovery: { paymentLinkId: paymentLink.id, action: "RECONCILE" },
+      };
     }
 
     throw error;
   }
 
-  const publication = await db.paymentLink.updateMany({
-    where: {
-      id: paymentLink.id,
-      businessId: paymentLink.businessId,
-      status: PaymentLinkStatus.CREATING,
-      stripePaymentLinkId: null,
-      stripeUrl: null,
-    },
-    data: {
-      stripePaymentLinkId: stripePaymentLink.id,
-      stripeUrl: stripePaymentLink.url,
-      status: PaymentLinkStatus.ACTIVE,
-    },
-  });
-
-  if (publication.count === 1) {
-    return svcOk({
-      paymentLinkId: paymentLink.id,
-      url: stripePaymentLink.url,
+  try {
+    const publication = await db.paymentLink.updateMany({
+      where: {
+        id: paymentLink.id,
+        businessId: paymentLink.businessId,
+        status: PaymentLinkStatus.CREATING,
+        stripePaymentLinkId: null,
+        stripeUrl: null,
+      },
+      data: {
+        stripePaymentLinkId: stripePaymentLink.id,
+        stripeUrl: stripePaymentLink.url,
+        status: PaymentLinkStatus.ACTIVE,
+      },
     });
+
+    if (publication.count === 1) {
+      return svcOk({
+        paymentLinkId: paymentLink.id,
+        url: stripePaymentLink.url,
+      });
+    }
+
+    const current = await db.paymentLink.findFirst({
+      where: { id: paymentLink.id, businessId: paymentLink.businessId },
+      select: {
+        status: true,
+        stripePaymentLinkId: true,
+        stripeUrl: true,
+      },
+    });
+
+    if (!current) {
+      return svcFail("NOT_FOUND");
+    }
+
+    if (
+      current.status === PaymentLinkStatus.ACTIVE &&
+      current.stripePaymentLinkId === stripePaymentLink.id &&
+      current.stripeUrl !== null
+    ) {
+      return svcOk({ paymentLinkId: paymentLink.id, url: current.stripeUrl });
+    }
+
+    return svcFail("CONFLICT");
+  } catch {
+    return {
+      ok: false,
+      code: "CONFLICT",
+      detail: "Payment link was created remotely but local publication failed",
+      recovery: { paymentLinkId: paymentLink.id, action: "RECONCILE" },
+    };
   }
-
-  const current = await db.paymentLink.findFirst({
-    where: { id: paymentLink.id, businessId: paymentLink.businessId },
-    select: {
-      status: true,
-      stripePaymentLinkId: true,
-      stripeUrl: true,
-    },
-  });
-
-  if (!current) {
-    return svcFail("NOT_FOUND");
-  }
-
-  if (
-    current.status === PaymentLinkStatus.ACTIVE &&
-    current.stripePaymentLinkId === stripePaymentLink.id &&
-    current.stripeUrl !== null
-  ) {
-    return svcOk({ paymentLinkId: paymentLink.id, url: current.stripeUrl });
-  }
-
-  return svcFail("CONFLICT");
 }
 
 export async function createPaymentLink(
   deps: PaymentLinkServiceDeps,
   input: CreatePaymentLinkInput,
-): Promise<ServiceResult<PaymentLinkResult>> {
+): Promise<PaymentLinkServiceResult> {
   if (!hasValidCreateInput(input)) {
     return svcFail("CONFLICT", "Invalid payment link input");
   }
@@ -224,6 +237,8 @@ export async function createPaymentLink(
       businessId: input.businessId,
       concept: input.concept,
       amountCents: input.providerAmountCents,
+      serviceFeeCentsApplied: settings.customerServiceFeeCents,
+      successUrl: successUrl(input.baseUrl, input.locale),
       status: PaymentLinkStatus.CREATING,
       stripeUrl: null,
     },
@@ -232,20 +247,21 @@ export async function createPaymentLink(
       businessId: true,
       concept: true,
       amountCents: true,
+      serviceFeeCentsApplied: true,
+      successUrl: true,
     },
   });
 
-  return publishPaymentLink(deps, paymentLink, input);
+  return publishPaymentLink(deps, paymentLink);
 }
 
 export async function reconcilePaymentLink(
   deps: PaymentLinkServiceDeps,
   input: ReconcilePaymentLinkInput,
-): Promise<ServiceResult<PaymentLinkResult>> {
+): Promise<PaymentLinkServiceResult> {
   if (
     input.businessId.trim().length === 0 ||
-    input.paymentLinkId.trim().length === 0 ||
-    !isValidBaseUrl(input.baseUrl)
+    input.paymentLinkId.trim().length === 0
   ) {
     return svcFail("CONFLICT", "Invalid payment link reconciliation input");
   }
@@ -257,6 +273,8 @@ export async function reconcilePaymentLink(
       businessId: true,
       concept: true,
       amountCents: true,
+      serviceFeeCentsApplied: true,
+      successUrl: true,
       status: true,
       stripePaymentLinkId: true,
       stripeUrl: true,
@@ -283,5 +301,5 @@ export async function reconcilePaymentLink(
     return svcFail("CONFLICT");
   }
 
-  return publishPaymentLink(deps, paymentLink, input);
+  return publishPaymentLink(deps, paymentLink);
 }

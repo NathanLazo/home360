@@ -25,7 +25,8 @@ Cliente paga (app móvil / link) ──▶ PaymentIntent en cuenta PLATAFORMA
   tarifa, con comisión proporcional sobre el principal retenido (F3-05/XC-03).
 - Saldos derivados (nunca columna persistida):
   - **Disponible** = proyección de principal neto según `XC-03`, `XC-08` y `XC-27`.
-  - **En escrow** = Σ `IN_ESCROW`.
+  - **En escrow** = Σ `IN_ESCROW|REFUNDING|RELEASING`. Los estados operativos son puntos
+    de no retorno locales previos a confirmar Refund/Transfer y todavía no son saldo disponible.
   - **Comisión del mes** = Σ `commissionCents` de pagos del mes.
 
 ## 2. Servicios (`src/server/services/`)
@@ -39,7 +40,8 @@ Todos reciben `stripe` y `db` por parámetro (inyección para tests):
   `releasePayment` es la **única** vía de mover dinero al negocio (la usan cliente-confirma,
   auto-release y resolución de disputas).
 - `payments/payment-links.ts` — Stripe Payment Links API persistente, limitado a una sesión
-  completada, con metadata en el link y el PaymentIntent; persiste `PaymentLink`.
+  completada, con metadata en el link y el PaymentIntent; persiste `PaymentLink` con snapshots
+  de tarifa y URL de éxito para reconciliación determinista.
 - `payments/withdrawals.ts` — `requestWithdrawal` (valida saldo disponible ≥ monto →
   `INSUFFICIENT_BALANCE`), `approveWithdrawal` / `rejectWithdrawal` (admin, F5).
 - `payments/balances.ts` — `getBusinessBalances(businessId)`: los 3 saldos derivados en

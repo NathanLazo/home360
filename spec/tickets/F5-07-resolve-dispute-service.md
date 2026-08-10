@@ -25,6 +25,9 @@ resoluciones moviendo (o no) el dinero vía los servicios de escrow de F3, de fo
    consume la fórmula canónica de F3-05/XC-03, usa el mismo límite y propaga el mismo código
    estable que `F3-05`; queda
    prohibido reexpresarlo como otro error o recalcular una segunda verdad en F5.
+   La asignación también consume la política aprobada de tarifa: `FULL_REFUND` devuelve toda
+   `serviceFeeCentsApplied`; `PARTIAL_REFUND` exige principal y tarifa separados, y solo
+   devuelve la porción de tarifa autorizada explícitamente, que puede ser cero.
 3. **MORE_EVIDENCE** "permanece IN_REVIEW", pero las disputas nacen OPEN y nada en la spec
    las pasa a IN_REVIEW. **Resolución**: MORE_EVIDENCE hace `status = IN_REVIEW` (desde
    OPEN o IN_REVIEW); **no** persiste `resolution` ni `resolvedAt` (no es una resolución
@@ -32,7 +35,12 @@ resoluciones moviendo (o no) el dinero vía los servicios de escrow de F3, de fo
 4. **Carrera con auto-liberación (F3)**: `releaseDuePayments()` no excluye órdenes
    disputadas en la spec original. `F3-04` ya corrige la implementación excluyendo toda
    disputa no resuelta. F5 mantiene la defensa: toda resolución monetaria exige
-   `Payment.status === IN_ESCROW`; si no → `CONFLICT`.
+   `Payment.status === IN_ESCROW`; si no → `CONFLICT`. `RELEASING` es explícitamente
+   conflicto: la reclamación previa al Transfer es el punto de no retorno y no se puede
+   abrir, reabrir ni resolver una disputa en paralelo con esa operación.
+   La creación o reapertura de una disputa debe, en una transacción serializable, comprobar
+   y escribir condicionalmente el `Payment` todavía `IN_ESCROW` antes de insertar la disputa;
+   una lectura previa sin CAS no coordina la carrera con `releasePayment`.
 5. Una transacción Prisma no puede volver atómicas llamadas Stripe. No se llama a Stripe
    dentro de una transacción interactiva ni se promete rollback del dinero externo.
    `resolveDispute` delega en los servicios crash-safe e idempotentes de F3 y solo finaliza
@@ -61,7 +69,8 @@ Firma:
 type ResolveDisputeInput = {
   disputeId: string;
   resolution: DisputeResolution;          // enum Prisma
-  partialAmountCents?: number;
+  providerRefundCents?: number;
+  serviceFeeRefundCents?: number;
   justification?: string;
 };
 resolveDispute(deps: { db: PrismaClient; stripe: Stripe }, input: ResolveDisputeInput)
@@ -85,9 +94,10 @@ Flujo:
      `recordingCompleteAtResolution`; es la trazabilidad mínima exigida por D6.
    Con grabación completa, `justification` es opcional y todas las resoluciones son iguales.
 2. Validaciones por resolución:
-   - `PARTIAL_REFUND`: `partialAmountCents` requerido, entero > 0. Límite, cálculo de
-     comisión proporcional, neto y código de error vienen **sin traducción** de
-     F3-05/XC-03.
+   - `PARTIAL_REFUND`: `providerRefundCents` y `serviceFeeRefundCents` requeridos como
+     enteros no negativos, aunque uno sea cero; su suma debe ser > 0. Límite, cálculo de
+     comisión proporcional, neto y código de error vienen **sin traducción** de F3-05/XC-03.
+     El admin autoriza así de forma explícita qué porción de tarifa devolver; F5 no la infiere.
    - `FULL_REFUND` / `PARTIAL_REFUND` / `RELEASE_PAYMENT`: sin `Payment` o
      `payment.status !== IN_ESCROW` → `CONFLICT` (cubre auto-release previo).
    - `MORE_EVIDENCE`: sin validación monetaria.
@@ -106,8 +116,8 @@ Flujo:
 
    | Resolución | Dinero (escrow.ts F3, con idempotency key) | Estados finales |
    |---|---|---|
-   | `FULL_REFUND` | `refundPayment` total (`key: dispute:<id>:refund`) | Payment `REFUNDED` (`refundedCents = amountCents`), Order `CANCELLED`, Dispute `RESOLVED` + `resolution` + `resolutionAmountCents = amountCents` + `resolvedAt` |
-   | `PARTIAL_REFUND` | `refundPayment(partial)` + liberación del neto (`key: dispute:<id>:refund` / `:transfer`) | Payment `PARTIALLY_REFUNDED` (`refundedCents = partial`), Order `COMPLETED`, Dispute `RESOLVED` + `resolutionAmountCents = partial` |
+   | `FULL_REFUND` | `refundPayment` total, incluido todo `serviceFeeCentsApplied` (`key: dispute:<id>:refund`) | Payment `REFUNDED` (`providerRefundedCents = providerAmountCents`, `serviceFeeRefundedCents = serviceFeeCentsApplied`, `refundedCents = amountCents`), Order `CANCELLED`, Dispute `RESOLVED` + `resolution` + `resolutionAmountCents = amountCents` + `resolvedAt` |
+   | `PARTIAL_REFUND` | `refundPayment({ providerRefundCents, serviceFeeRefundCents })` + liberación del neto (`key: dispute:<id>:refund` / `:transfer`) | Payment `PARTIALLY_REFUNDED` (`refundedCents = providerRefundCents + serviceFeeRefundCents`), Order `COMPLETED`, Dispute `RESOLVED` + `resolutionAmountCents = refundedCents` |
    | `RELEASE_PAYMENT` | `releasePayment` completo (`key: dispute:<id>:transfer`) | Payment `RELEASED`, Order `COMPLETED`, Dispute `RESOLVED` + `resolutionAmountCents = 0` |
 
    - `releasePayment` de F3 sigue siendo la **única** vía que crea Transfers; si la
@@ -153,6 +163,8 @@ Verificación manual y por inspección de estado (sin pruebas automatizadas):
 - [ ] Sin grabación completa, toda resolución distinta de `FULL_REFUND` exige justificación
       y esta queda persistida junto con el estado de la grabación (D6).
 - [ ] `PARTIAL_REFUND` usa la comisión proporcional de F3-05 y el balance neto de XC-03.
+- [ ] `FULL_REFUND` devuelve toda la tarifa y `PARTIAL_REFUND` pasa a F3 la asignación
+      explícita principal/tarifa; Payment `RELEASED` se rechaza sin Transfer Reversal.
 
 ## Comandos para Roger (si aplica)
 

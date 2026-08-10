@@ -47,28 +47,35 @@ Pasos:
    `business { stripeAccountId, payoutsEnabled }` y
    `order { dispute { status } }` (select mínimo).
 2. Guardas: `RELEASED` con `stripeTransferId` retorna éxito con ese mismo id (retry
-   idempotente); cualquier otro status distinto de `IN_ESCROW` retorna
-   `PAYMENT_NOT_RELEASABLE`. Sin `stripeChargeId` → `PAYMENT_NOT_RELEASABLE`. Sin
+   idempotente); `RELEASING` reanuda el mismo intento con la misma key; cualquier otro
+   status distinto de `IN_ESCROW` retorna `PAYMENT_NOT_RELEASABLE`. Sin
+   `stripeChargeId` → `PAYMENT_NOT_RELEASABLE`. Sin
    `stripeAccountId` o `payoutsEnabled === false` →
    `NO_CONNECT_ACCOUNT`. Disputa de la orden con status ≠ `RESOLVED` → `DISPUTE_OPEN`.
 3. Para un `IN_ESCROW` sin refund, calcular `netCents` con
    `providerTransferCents(payment)` de `XC-25`; nunca con `amountCents - commissionCents`.
    Validar `0 < netCents <= providerAmountCents`. Tras refund parcial, F3-05 fija
    `netCents` al principal retenido menos la comisión proporcional efectiva.
-4. `stripe.transfers.create({ amount: netCents, currency: "mxn",
+4. Antes de Stripe, reclamar por CAS `IN_ESCROW → RELEASING` con predicados en la misma
+   escritura: ledger sin refunds, `stripeTransferId: null` y orden sin disputa abierta.
+   Este CAS es el punto de no retorno. Refunds futuros deben reclamar
+   `IN_ESCROW → REFUNDING`; crear/reabrir disputa debe escribir el Payment `IN_ESCROW` y
+   la disputa en una transacción serializable para competir con este CAS.
+5. `stripe.transfers.create({ amount: netCents, currency: "mxn",
    destination: stripeAccountId, transfer_group: \`payment_${paymentId}\`,
    source_transaction: stripeChargeId,
-   metadata: { paymentId } }, { idempotencyKey: \`transfer-release-${paymentId}\` })`.
+   metadata: { paymentId } }, { idempotencyKey: \`transfer-payment-${paymentId}\` })`.
    **El Transfer se crea antes de escribir en BD**: si la escritura falla, el retry con la
    misma key no duplica dinero.
-5. En una transacción local, ejecutar el `updateMany` condicional y crear el
+6. En una transacción local, ejecutar el `updateMany` condicional
+   `RELEASING → RELEASED` y crear el
    `LoyaltyBonus`. Si `count === 0`, recargar el pago: si ya está `RELEASED` y conserva el
    mismo `stripeTransferId`, retornar éxito idempotente; cualquier otro estado es conflicto.
    Así un crash posterior al Transfer puede recuperarse y un consumidor (F3-11) puede
    completar su propia escritura sin quedar atascado.
-6. Si el pago tiene `orderId` y la orden estaba `PAID`/`IN_PROGRESS`/`SHIPPING` no se toca
+7. Si el pago tiene `orderId` y la orden estaba `PAID`/`IN_PROGRESS`/`SHIPPING` no se toca
    aquí (el estado de orden lo maneja quien invoca: confirmDelivery marca COMPLETED en F3-11).
-7. **Devengar el bono de lealtad** (D3), en la misma escritura que el paso 5:
+8. **Devengar el bono de lealtad** (D3), en la misma escritura que el paso 6:
 
    ```ts
    db.loyaltyBonus.create({
@@ -95,12 +102,16 @@ releaseDuePayments(deps: { db; stripe }, input?: { now?: Date }):
   Promise<ServiceResult<{ released: number; failed: number; hasMore: boolean }>>
 ```
 
-- Query: `status: IN_ESCROW`, `escrowReleaseAt <= now`, y un predicado relacional explícito
+- Query: `status ∈ {IN_ESCROW, RELEASING}`, `escrowReleaseAt <= now`, cooldown de cinco
+  minutos sobre `escrowReleaseAttemptedAt`, y un predicado relacional explícito
   que incluye pagos de link (`orderId: null`) y órdenes sin disputa/resueltas, pero excluye
   disputa no resuelta. No usar un `NOT` ambiguo sobre relación nullable.
-  `orderBy: [{ escrowReleaseAt: "asc" }, { id: "asc" }]`, con lote
+  Ordenar por `escrowReleaseAttemptedAt ASC NULLS FIRST`, luego
+  `escrowReleaseAt ASC, id ASC`, con lote
   acotado (máximo 100). Iterar llamando `releasePayment`; un fallo individual no aborta el
-  lote (acumula `failed`, log server-side sin datos sensibles). `hasMore` indica que el cron
+  lote (acumula `failed`, log server-side sin datos sensibles). El timestamp y el orden
+  hacen que los no intentados avancen y luego roten los retries, evitando starvation.
+  `hasMore` indica que el cron
   debe volver a invocarse; nunca cargar todos los vencidos en memoria ni exceder el timeout.
 
 ## Restricciones no negociables

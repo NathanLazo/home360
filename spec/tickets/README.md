@@ -36,25 +36,25 @@ con stock y umbral propios; `Product` conserva solo el catálogo (SKU, nombre, p
 categoría, estado). Los servicios **no** llevan relación con sucursal: su cobertura se deriva
 del radio de la sucursal y de los trabajadores asignados. Ver `F0-12` y `F2-07`…`F2-09`.
 
-## Antes de escribir código: decisiones pendientes
+## Antes de escribir código: estado de decisiones
 
-Las cuatro decisiones de negocio sobre disputas, reembolsos, retiros y cobro de suscripciones
-viven en [`PENDIENTES.md`](../../PENDIENTES.md), en la raíz del repo, con el contexto para
-decidirlas. **No bloquean F0–F2**; empiezan a estorbar en F3.
+Las decisiones cerradas sobre pagos viven en [`PENDIENTES.md`](../../PENDIENTES.md), en la
+raíz del repo, como contrato normativo. La tabla conserva además gates independientes que
+siguen abiertos para fases posteriores.
 
 La tabla de abajo es el detalle técnico de las mismas, más lo ya resuelto.
 
 | # | Decisión | Dónde |
 |---|----------|-------|
-| 1 | Fórmula exacta de "Disponible": bruta o neta, y qué pasa con `PARTIALLY_REFUNDED` | `XC-03`, `F3-F4-findings` #2 |
-| 2 | Comisión en reembolso parcial: íntegra o proporcional; los tickets ya no eligen por Roger | `XC-03`, `F3-05`, `F5-07` |
-| 3 | Retiros: payouts automáticos o solicitud manual con `Payout`; XC-08 propaga la rama elegida | `XC-08`, `F3-02`, `F3-07`, `F5-11` |
+| 1 | ~~Fórmula de Disponible~~ — **resuelto**: neta XC-03 e incluye `PARTIALLY_REFUNDED` | `XC-03`, `F3-F4-findings` #2 |
+| 2 | ~~Comisión en reembolso parcial~~ — **resuelto**: proporcional al principal retenido | `XC-03`, `F3-05`, `F5-07` |
+| 3 | ~~Retiros~~ — **resuelto**: solicitud manual y aprobación mediante `Payout` | `XC-08`, `F3-02`, `F3-07`, `F5-11` |
 | 4 | Cobro de la suscripción: no existe recolección de método de pago (sin Portal/Elements nunca cobra) | `F3-F4-findings` #13 |
 | 5 | Onboarding Connect: quitar la "cuenta placeholder" de `approveBusiness` o cambiar la condición del banner | `F5-findings` F5-1 |
-| 6 | Refund de la tarifa plana: cuándo y cuánto de `serviceFeeCentsApplied` se devuelve | `XC-25`, `F3-05` |
-| 7 | API de links de cobro: Payment Links persistente o Checkout regenerable | `F3-08` |
-| 8 | Pago ya liberado: rechazar refund o usar Transfer Reversal | `F3-05`, `F3-09` |
-| 9 | Cuenta sin suscripción al capturar: rechazar o comisión default explícita | `F3-03` |
+| 6 | ~~Refund de tarifa plana~~ — **resuelto**: total devuelve toda; parcial solo la porción explícita autorizada | `XC-25`, `F3-05` |
+| 7 | ~~API de links de cobro~~ — **resuelto**: Payment Links persistente y single-use | `F3-08` |
+| 8 | ~~Pago ya liberado~~ — **resuelto para F3**: rechazar; Transfer Reversal queda en ticket separado | `F3-05`, `F3-09` |
+| 9 | ~~Cuenta sin suscripción al capturar~~ — **resuelto**: rechazar con `BUSINESS_NOT_ACTIVE` | `F3-03` |
 | 10 | Huso horario canónico de mes financiero (fuera de F7, que ya fija Chihuahua) | `F3-06`, `XC-27` |
 | 11 | Tratamiento fiscal de precios de suscripción (IVA/CFDI) antes de publicar Price | `F4-01` |
 | 12 | Cambio de Price para suscriptores vivos: conservar o migrar en renovación | `F4-01` |
@@ -65,8 +65,8 @@ La tabla de abajo es el detalle técnico de las mismas, más lo ya resuelto.
 | 17 | ~~Modelo de ingresos deck vs. diseño web~~ — **resuelto** por D1–D4 | `08` D1–D4 |
 | 18 | ~~Paleta de marca vs. zinc~~ — **resuelto** por D7 (marca en landing, zinc en dashboard/admin) | `08` D7 |
 
-Las filas 1–4 son las decisiones normativas de `PENDIENTES.md`. Las filas 6–14 son gates
-adicionales encontrados por las auditorías; no se consideran decididos por aparecer aquí.
+Las filas 1–3 y 6–9 están cerradas en `PENDIENTES.md`. Las filas 4–5 y 10–14 siguen siendo
+gates independientes; Transfer Reversal permanece fuera de F3 y requiere ticket propio.
 
 ## Orden global de ejecución
 
