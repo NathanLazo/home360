@@ -1,15 +1,33 @@
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { type Metadata } from "next";
 
-import { LocaleSwitcher } from "~/components/locale-switcher";
+import { LandingView } from "./_components/landing-view";
 import { routing } from "~/i18n/routing";
 
-type PublicPageProps = {
+type LandingPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-export default async function PublicPage({ params }: PublicPageProps) {
+export async function generateMetadata({
+  params,
+}: LandingPageProps): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const t = await getTranslations({ locale, namespace: "landing.metadata" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
+
+export default async function LandingPage({ params }: LandingPageProps) {
   const { locale } = await params;
 
   if (!hasLocale(routing.locales, locale)) {
@@ -17,22 +35,6 @@ export default async function PublicPage({ params }: PublicPageProps) {
   }
 
   setRequestLocale(locale);
-  const t = await getTranslations("landing");
 
-  return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-12 sm:px-6">
-      <section
-        aria-labelledby="placeholder-title"
-        className="flex w-full max-w-2xl flex-col items-center gap-8 text-center"
-      >
-        <h1
-          id="placeholder-title"
-          className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
-        >
-          {t("placeholderTitle")}
-        </h1>
-        <LocaleSwitcher />
-      </section>
-    </main>
-  );
+  return <LandingView />;
 }

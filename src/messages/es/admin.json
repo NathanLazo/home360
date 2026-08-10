@@ -10,10 +10,537 @@
     "placeholderName": "—",
     "placeholderInitials": "AD"
   },
-  "placeholder": {
-    "title": "Administración",
-    "subtitle": "Supervisa la actividad y configuración de la plataforma.",
-    "emptyTitle": "El resumen administrativo estará disponible pronto",
-    "emptyDescription": "Aquí encontrarás indicadores de la plataforma, actividad reciente y tareas que requieren atención."
+  "businessTypes": {
+    "SERVICES": "Servicios",
+    "PRODUCTS": "Productos",
+    "MIXED": "Mixto"
+  },
+  "guaranteeTypes": {
+    "DEPOSIT": "Depósito",
+    "VERIFICATION": "Verificación",
+    "INSURANCE_PER_SERVICE": "Seguro por servicio",
+    "REGISTERED_ASSET": "Bien registrado",
+    "COMBINED": "Combinada"
+  },
+  "disputeUrgency": {
+    "NORMAL": "Normal",
+    "URGENT": "Urgente"
+  },
+  "disputeStatus": {
+    "OPEN": "Abierta",
+    "IN_REVIEW": "En revisión",
+    "RESOLVED": "Resuelta"
+  },
+  "orderStatus": {
+    "PENDING": "Pendiente",
+    "PAID": "Pagada",
+    "IN_PROGRESS": "En proceso",
+    "SHIPPING": "En envío",
+    "COMPLETED": "Completada",
+    "CANCELLED": "Cancelada",
+    "DISPUTED": "En disputa"
+  },
+  "workerAvailability": {
+    "AVAILABLE": "Disponible",
+    "ON_SERVICE": "En servicio",
+    "OFF": "No disponible"
+  },
+  "documentTypes": {
+    "ID_DOCUMENT": "Identificación",
+    "ADDRESS_PROOF": "Comprobante de domicilio",
+    "INSURANCE_POLICY": "Póliza de seguro",
+    "DEPOSIT_RECEIPT": "Comprobante de depósito",
+    "ASSET_TITLE": "Título de propiedad",
+    "OTHER": "Otro"
+  },
+  "documentStatus": {
+    "PENDING": "Pendiente",
+    "APPROVED": "Aprobado",
+    "REJECTED": "Rechazado"
+  },
+  "users": {
+    "title": "Usuarios",
+    "subtitle": "Gestiona negocios, clientes y trabajadores de la plataforma.",
+    "loading": "Cargando usuarios…",
+    "loadMore": "Cargar más",
+    "errorTitle": "No pudimos cargar los usuarios",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "exportCsv": "Exportar CSV",
+    "csvTruncated": "La exportación se limitó a las primeras {cap} filas.",
+    "allStatuses": "Todos los estados",
+    "statusFilterLabel": "Filtrar por estado",
+    "unnamed": "Sin nombre",
+    "notAvailable": "—",
+    "tabs": {
+      "businesses": "Negocios",
+      "customers": "Clientes",
+      "workers": "Trabajadores",
+      "businessesWithCount": "Negocios ({count})",
+      "customersWithCount": "Clientes ({count})",
+      "workersWithCount": "Trabajadores ({count})"
+    },
+    "searchPlaceholder": {
+      "businesses": "Buscar por negocio, dueño o correo",
+      "customers": "Buscar por nombre o correo",
+      "workers": "Buscar por trabajador o negocio"
+    },
+    "derivedStatus": {
+      "active": "Activo",
+      "pending": "Pendiente",
+      "suspended": "Suspendido",
+      "rejected": "Rechazado",
+      "in_dispute": "En disputa"
+    },
+    "columns": {
+      "business": "Negocio",
+      "customer": "Cliente",
+      "worker": "Trabajador",
+      "branch": "Sucursal",
+      "specialty": "Especialidad",
+      "availability": "Disponibilidad",
+      "email": "Correo",
+      "guarantee": "Garantía",
+      "registeredAt": "Registro",
+      "orders": "Órdenes",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "open": "Abrir acciones",
+      "viewDetail": "Ver detalle",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "suspend": "Suspender",
+      "reactivate": "Reactivar"
+    },
+    "empty": {
+      "businesses": {
+        "title": "Sin negocios",
+        "description": "No hay negocios que coincidan con la búsqueda o el filtro aplicado."
+      },
+      "customers": {
+        "title": "Sin clientes",
+        "description": "No hay clientes que coincidan con la búsqueda aplicada."
+      },
+      "workers": {
+        "title": "Sin trabajadores",
+        "description": "No hay trabajadores que coincidan con la búsqueda aplicada."
+      }
+    },
+    "toasts": {
+      "approved": "Negocio aprobado.",
+      "rejected": "Negocio rechazado.",
+      "suspended": "Negocio suspendido.",
+      "reactivated": "Negocio reactivado."
+    },
+    "reasonDialog": {
+      "label": "Motivo",
+      "placeholder": "Explica brevemente la decisión (mínimo 5 caracteres).",
+      "invalid": "El motivo debe tener entre 5 y 500 caracteres.",
+      "cancel": "Cancelar"
+    },
+    "moderation": {
+      "cancel": "Cancelar",
+      "reject": {
+        "title": "Rechazar negocio",
+        "description": "El negocio no podrá operar y verá el motivo que registres.",
+        "confirm": "Rechazar"
+      },
+      "suspend": {
+        "title": "Suspender negocio",
+        "description": "Mientras esté suspendido, el negocio no podrá operar ni retirar fondos.",
+        "confirm": "Suspender"
+      },
+      "reactivate": {
+        "title": "Reactivar negocio",
+        "description": "El negocio volverá a operar con normalidad. No es posible reactivar si tiene disputas abiertas.",
+        "confirm": "Reactivar"
+      }
+    },
+    "approveDialog": {
+      "title": "Aprobar negocio",
+      "description": "Revisa la garantía y los documentos de {name} antes de activarlo.",
+      "detailErrorTitle": "No pudimos cargar el negocio",
+      "guarantee": "Garantía",
+      "documents": "Documentos",
+      "noDocuments": "Este negocio aún no ha subido documentos.",
+      "plan": "Plan inicial",
+      "planPlaceholder": "Selecciona un plan",
+      "planOption": "{code} · {price}/mes · {commission}% de comisión",
+      "planHint": "Los planes sin precio publicado en Stripe no pueden seleccionarse todavía.",
+      "plansErrorTitle": "No pudimos cargar los planes",
+      "cancel": "Cancelar",
+      "confirm": "Aprobar negocio"
+    },
+    "detail": {
+      "title": "Detalle del negocio",
+      "subtitle": "Perfil, garantía, documentos, suscripción e historial.",
+      "errorTitle": "No pudimos cargar el detalle",
+      "statusReason": "Motivo: {reason}",
+      "owner": "Titular",
+      "ownerName": "Nombre",
+      "ownerEmail": "Correo",
+      "registeredAt": "Registro",
+      "notAvailable": "—",
+      "guarantee": "Garantía",
+      "documents": "Documentos",
+      "noDocuments": "Este negocio aún no ha subido documentos.",
+      "openDocument": "Abrir documento",
+      "subscription": "Suscripción",
+      "noSubscription": "Sin suscripción activa.",
+      "renewsAt": "Renueva el {date}",
+      "recentOrders": "Órdenes recientes ({count} en total)",
+      "noOrders": "Este negocio aún no tiene órdenes.",
+      "disputes": "Disputas ({count} abiertas)",
+      "noDisputes": "Este negocio no tiene disputas."
+    }
+  },
+  "overview": {
+    "title": "Resumen de plataforma",
+    "subtitle": "Indicadores generales, negocios por aprobar y disputas que requieren atención.",
+    "errorTitle": "No pudimos cargar el resumen",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "kpis": {
+      "label": "Indicadores de plataforma",
+      "loading": "Cargando indicadores…",
+      "errorTitle": "No pudimos cargar los indicadores",
+      "totalUsers": "Usuarios totales",
+      "newUsersMonth": "{count, plural, =0 {Sin altas este mes} one {+# este mes} other {+# este mes}}",
+      "activeBusinesses": "Negocios activos",
+      "pendingBusinesses": "{count, plural, =0 {Sin pendientes} one {# pendiente} other {# pendientes}}",
+      "gmv": "GMV del mes",
+      "gmvDelta": "{value}% vs. mes anterior",
+      "gmvNoBaseline": "Sin base del mes anterior",
+      "escrow": "En escrow",
+      "escrowOrders": "{count, plural, =0 {Sin órdenes} one {# orden} other {# órdenes}}"
+    },
+    "pending": {
+      "title": "Negocios por aprobar",
+      "loading": "Cargando negocios pendientes…",
+      "errorTitle": "No pudimos cargar los negocios pendientes",
+      "emptyTitle": "No hay negocios por aprobar",
+      "emptyDescription": "Cuando un negocio complete su registro aparecerá aquí para revisión.",
+      "approve": "Aprobar",
+      "review": "Revisar",
+      "columns": {
+        "name": "Negocio",
+        "type": "Tipo",
+        "guarantee": "Garantía",
+        "actions": "Acciones"
+      }
+    },
+    "disputes": {
+      "title": "Disputas abiertas",
+      "loading": "Cargando disputas…",
+      "errorTitle": "No pudimos cargar las disputas",
+      "emptyTitle": "No hay disputas abiertas",
+      "emptyDescription": "Las disputas de clientes y negocios aparecerán aquí en cuanto se abran.",
+      "parties": "{business} · {customer}",
+      "unknownParty": "Cliente sin nombre"
+    },
+    "ai": {
+      "sectionTitle": "Inteligencia artificial",
+      "title": "Configuración de IA",
+      "errorTitle": "No pudimos cargar la configuración",
+      "threshold": "Umbral de confianza",
+      "model": "Modelo de precios",
+      "humanReview": "Revisión humana",
+      "humanReviewOn": "Activada bajo el umbral",
+      "humanReviewOff": "Desactivada",
+      "updatedAt": "Configuración actualizada {when}",
+      "openSettings": "Ir a configuración"
+    }
+  },
+  "paymentStatus": {
+    "PENDING": "Pendiente",
+    "IN_ESCROW": "En escrow",
+    "REFUNDING": "Reembolsando",
+    "RELEASING": "Liberando",
+    "RELEASED": "Liberado",
+    "REFUNDED": "Reembolsado",
+    "PARTIALLY_REFUNDED": "Reembolsado parcial"
+  },
+  "disputes": {
+    "title": "Disputas",
+    "subtitle": "Resuelve las disputas de escrow entre clientes y negocios.",
+    "subtitleWithStats": "{open} abiertas · {resolved} resueltas este mes",
+    "listLabel": "Lista de disputas",
+    "detailLabel": "Expediente de la disputa",
+    "loadMore": "Cargar más",
+    "errorTitle": "No pudimos cargar las disputas",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "parties": "{business} · {customer}",
+    "unknownParty": "Cliente sin nombre",
+    "tabs": {
+      "open": "Abiertas",
+      "resolved": "Resueltas",
+      "openWithCount": "Abiertas ({count})",
+      "resolvedWithCount": "Resueltas ({count})"
+    },
+    "tone": {
+      "urgent": "Urgente",
+      "review": "En revisión",
+      "resolved": "Resuelta"
+    },
+    "empty": {
+      "title": "Sin disputas",
+      "description": "No hay disputas con el filtro seleccionado."
+    },
+    "detail": {
+      "back": "Volver a la lista",
+      "subtitle": "Orden #{folio} · {business}",
+      "noSelectionTitle": "Selecciona una disputa",
+      "noSelectionDescription": "Elige una disputa de la lista para ver su expediente completo.",
+      "errorTitle": "No pudimos cargar el expediente",
+      "resolutionNotes": "Justificación registrada"
+    },
+    "recording": {
+      "title": "Grabación del servicio",
+      "missingTitle": "Sin grabación del servicio",
+      "incompleteTitle": "Grabación incompleta",
+      "ruleDescription": "La grabación es obligatoria e ininterrumpida. Si falta o quedó incompleta, la disputa se resuelve a favor del cliente; cualquier otra resolución requiere justificación escrita.",
+      "duration": "Duración: {minutes} min {seconds} s"
+    },
+    "evidence": {
+      "title": "Evidencia",
+      "itemAlt": "Evidencia {index}",
+      "more": "+{count}"
+    },
+    "arguments": {
+      "title": "Argumentos",
+      "customer": "Cliente",
+      "business": "Negocio",
+      "noBusinessAnswer": "El negocio aún no responde."
+    },
+    "aiSummary": {
+      "title": "Resumen de IA"
+    },
+    "payment": {
+      "escrow": "En escrow",
+      "commission": "Comisión",
+      "refunded": "Reembolsado",
+      "status": "Estado",
+      "noPayment": "Esta orden no tiene un pago asociado."
+    },
+    "resolutions": {
+      "title": "Resolución",
+      "FULL_REFUND": "Reembolso total",
+      "PARTIAL_REFUND": "Reembolso parcial",
+      "RELEASE_PAYMENT": "Liberar pago",
+      "MORE_EVIDENCE": "Pedir más evidencia",
+      "disabled": {
+        "alreadyResolved": "Esta disputa ya está resuelta.",
+        "notInEscrow": "El pago ya no está en escrow."
+      }
+    },
+    "resolveDialog": {
+      "title": "Resolver disputa",
+      "description": "Vas a resolver «{dispute}». Esta acción mueve dinero real.",
+      "providerRefund": "Reembolso al cliente (principal, MXN)",
+      "serviceFeeRefund": "Reembolso de tarifa de servicio (MXN)",
+      "providerAvailable": "Disponible para reembolsar: {amount}",
+      "serviceFeeAvailable": "Tarifa disponible para reembolsar: {amount}",
+      "justification": "Justificación",
+      "justificationPlaceholder": "Explica por qué esta resolución procede pese a la grabación faltante o incompleta.",
+      "justificationHint": "Mínimo {min} caracteres.",
+      "summary": {
+        "full": "Se reembolsarán {amount} al cliente, incluida la tarifa de servicio.",
+        "release": "Se liberarán {amount} al negocio menos {commission} de comisión.",
+        "partial": "Se reembolsarán {refund} al cliente y se liberará el resto ({remainder}) menos comisión."
+      },
+      "cancel": "Cancelar",
+      "confirm": "Confirmar resolución"
+    },
+    "toasts": {
+      "resolved": "Disputa resuelta."
+    }
+  },
+  "withdrawalStatus": {
+    "REQUESTED": "Pendiente",
+    "PROCESSING": "Procesando",
+    "APPROVED": "Aprobado",
+    "REJECTED": "Rechazado",
+    "FAILED": "Fallido",
+    "CANCELED": "Cancelado"
+  },
+  "finance": {
+    "title": "Finanzas",
+    "subtitle": "Ingresos de la plataforma, retiros de negocios y desglose del periodo.",
+    "errorTitle": "No pudimos cargar las finanzas",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "kpis": {
+      "label": "Indicadores financieros",
+      "errorTitle": "No pudimos cargar los indicadores",
+      "commission": "Comisiones del mes",
+      "commissionDelta": "{value}% vs. mes anterior",
+      "noBaseline": "Sin base del mes anterior",
+      "subscriptions": "Suscripciones del mes",
+      "activeBusinesses": "{count, plural, =0 {Sin negocios activos} one {# negocio activo} other {# negocios activos}}",
+      "escrow": "En escrow",
+      "escrowOrders": "{count, plural, =0 {Sin órdenes} one {# orden} other {# órdenes}}",
+      "pendingWithdrawals": "Retiros pendientes",
+      "pendingWithdrawalsCount": "{count, plural, =0 {Sin solicitudes} one {# solicitud} other {# solicitudes}}"
+    },
+    "chart": {
+      "title": "Ingresos por mes",
+      "commission": "Comisiones",
+      "subscriptions": "Suscripciones",
+      "emptyTitle": "Sin datos del periodo",
+      "emptyDescription": "Cuando haya comisiones o suscripciones cobradas verás la serie aquí."
+    },
+    "breakdown": {
+      "title": "Desglose del periodo",
+      "errorTitle": "No pudimos cargar el desglose",
+      "commission": "Comisiones",
+      "subscriptions": "Suscripciones",
+      "loyaltyBonuses": "Bonos de lealtad pagados",
+      "net": "Ingreso neto",
+      "pendingBonuses": "Bonos de lealtad pendientes de pago: {amount}"
+    },
+    "withdrawals": {
+      "title": "Retiros",
+      "allStatuses": "Todos los estados",
+      "statusFilterLabel": "Filtrar por estado",
+      "loadMore": "Cargar más",
+      "errorTitle": "No pudimos cargar los retiros",
+      "suspendedNote": "Cuenta suspendida",
+      "columns": {
+        "business": "Negocio",
+        "amount": "Monto",
+        "destination": "Cuenta destino",
+        "requestedAt": "Solicitado",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "empty": {
+        "title": "Sin retiros",
+        "description": "No hay solicitudes de retiro con el filtro seleccionado."
+      }
+    },
+    "actions": {
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "cancel": "Cancelar",
+      "approveTitle": "Aprobar retiro",
+      "approveDescription": "Se enviarán {amount} a {destination}. Esta acción mueve dinero real.",
+      "rejectTitle": "Rechazar retiro",
+      "rejectDescription": "Vas a rechazar el retiro de {amount} a {destination}. El monto vuelve al saldo disponible del negocio.",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Explica brevemente el rechazo (mínimo 5 caracteres)."
+    },
+    "toasts": {
+      "approved": "Retiro aprobado.",
+      "rejected": "Retiro rechazado."
+    },
+    "loyalty": {
+      "title": "Bonos de lealtad",
+      "description": "Cola de liquidación de bonos devengados. El pago ocurre fuera de la plataforma; aquí solo se registra.",
+      "errorTitle": "No pudimos cargar los bonos",
+      "cancelReason": "Cancelado por el administrador desde el panel de finanzas.",
+      "columns": {
+        "business": "Negocio",
+        "amount": "Monto",
+        "origin": "Pago origen",
+        "accruedAt": "Devengado",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "originValue": "{amount} · {pct}% del fee",
+      "empty": {
+        "title": "Sin bonos",
+        "description": "Los bonos se devengan al liberar cada pago."
+      },
+      "actions": {
+        "pay": "Registrar pago",
+        "cancel": "Cancelar"
+      },
+      "payDialog": {
+        "title": "Registrar pago de bono",
+        "description": "Vas a registrar el pago de {amount} a {business}.",
+        "method": "Método",
+        "notes": "Notas",
+        "notesPlaceholder": "Folio del vale, referencia de transferencia, etc.",
+        "outsideNote": "El bono no sale del saldo de escrow ni pasa por Stripe: el sistema solo registra la liquidación.",
+        "cancel": "Cancelar",
+        "confirm": "Registrar pago"
+      },
+      "toasts": {
+        "paid": "Bono registrado como pagado.",
+        "cancelled": "Bono cancelado."
+      }
+    }
+  },
+  "settings": {
+    "title": "Configuración de plataforma",
+    "subtitle": "Parámetros de IA, tarifas, escrow y notificaciones.",
+    "formLabel": "Formulario de configuración de plataforma",
+    "errorTitle": "No pudimos cargar la configuración",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "notSeededTitle": "La configuración aún no existe",
+    "planNames": {
+      "basic": "Básico",
+      "standard": "Estándar",
+      "enterprise": "Empresarial"
+    },
+    "ai": {
+      "title": "Inteligencia artificial",
+      "description": "Umbral de confianza, margen de precio y modelo con el que la IA cotiza servicios.",
+      "threshold": "Umbral de confianza",
+      "thresholdHint": "Entre {min}% y {max}%.",
+      "margin": "Margen de precio",
+      "marginHint": "Banda simétrica ±. Entre {min}% y {max}%.",
+      "model": "Modelo de precios",
+      "modelHint": "Catálogo provisional; pendiente de confirmación.",
+      "humanReview": "Revisión humana bajo el umbral",
+      "humanReviewHint": "Las cotizaciones por debajo del umbral pasan a revisión manual."
+    },
+    "fees": {
+      "title": "Tarifas y comisiones",
+      "description": "Comisión por plan, tarifa de servicio al cliente y bono de lealtad.",
+      "commissionFor": "Comisión {plan}",
+      "futureOnlyNote": "Los cambios aplican solo a pagos futuros: cada pago congela su comisión al cobrarse.",
+      "serviceFee": "Tarifa de servicio al cliente",
+      "serviceFeeHint": "Entre ${min} y ${max} MXN.",
+      "loyaltyBonus": "Bono de lealtad",
+      "loyaltyBonusHint": "Porcentaje de la tarifa de servicio que se devenga como bono."
+    },
+    "escrow": {
+      "title": "Escrow",
+      "description": "Tiempo que el dinero permanece retenido antes de liberarse automáticamente.",
+      "autoReleaseHours": "Liberación automática",
+      "autoReleaseHint": "Entre {min} y {max} horas.",
+      "hoursSuffix": "h",
+      "futureOnlyNote": "Aplica solo a pagos futuros: la fecha de liberación se fija al cobrar y no se recalcula."
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Radio de aviso de nuevas solicitudes y recordatorios de calificación.",
+      "radius": "Radio de nuevas solicitudes",
+      "radiusHint": "Entre {min} y {max} km.",
+      "ratingReminder": "Recordatorio de calificación",
+      "ratingReminderHint": "Entre {min} y {max} horas.",
+      "hoursSuffix": "h",
+      "paymentRelease": "Avisar liberación de pago",
+      "paymentReleaseHint": "Notifica al negocio cuando se libera un pago.",
+      "consumerNote": "Estos valores los consumirá la app móvil; el producto web no envía notificaciones."
+    },
+    "saveBar": {
+      "unsaved": "Tienes cambios sin guardar.",
+      "upToDate": "Todo está guardado.",
+      "save": "Guardar cambios",
+      "discard": "Descartar"
+    },
+    "toasts": {
+      "saved": "Configuración guardada."
+    }
+  },
+  "loyaltyBonusStatus": {
+    "PENDING": "Pendiente",
+    "PAID": "Pagado",
+    "CANCELLED": "Cancelado"
+  },
+  "loyaltyPayoutMethod": {
+    "VOUCHER": "Vales",
+    "TRANSFER": "Transferencia"
   }
 }

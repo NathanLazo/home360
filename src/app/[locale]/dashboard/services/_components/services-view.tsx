@@ -9,6 +9,7 @@ import { ServiceFormSheet } from "./service-form-sheet";
 import type { ServiceFiltersState, ServiceListItem } from "./service.types";
 import { ServicesTable } from "./services-table";
 import { useServiceMutations } from "./use-service-mutations";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -23,6 +24,8 @@ const INITIAL_FILTERS: ServiceFiltersState = {
 export function ServicesView() {
   const t = useTranslations("dashboard.services");
   const errors = useTranslations("errors");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const { isReadOnly } = useSubscriptionAccess();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<ServiceListItem | null>(null);
@@ -124,6 +127,8 @@ export function ServicesView() {
             type="button"
             onClick={openCreate}
             className="min-h-11 sm:min-h-10"
+            disabled={isReadOnly}
+            title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
           >
             <PlusIcon aria-hidden="true" />
             {t("newService")}

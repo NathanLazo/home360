@@ -11,6 +11,7 @@ import { z } from "zod";
 import { parsePesosToCents } from "./payment-amount";
 import type { CreatedPaymentLink } from "./payment.types";
 import { usePaymentMutations } from "./use-payment-mutations";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -48,6 +49,9 @@ export function CreatePaymentLinkDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("dashboard.payments.link");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const { createPaymentLink, creatingPaymentLink } = usePaymentMutations();
   const [created, setCreated] = useState<CreatedPaymentLink | null>(null);
   const [copied, setCopied] = useState(false);

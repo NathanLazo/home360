@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { parseProductsCsv } from "./product-csv.utils";
 import type { CsvRowError, ProductCsvRow } from "./product.schema";
 import type { ProductStockBranch } from "./product.types";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -72,6 +73,9 @@ export function ProductImportDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("dashboard.products.import");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const errorsT = useTranslations("errors");
   const locale = useLocale();
   const utils = api.useUtils();

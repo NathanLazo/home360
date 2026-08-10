@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import type { ProductListItem } from "./product.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -35,6 +36,11 @@ export function ProductRowActions({
   onDelete: (product: ProductListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.products");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  // The menu stays reachable so the reason is visible; only the mutating
+  // entries are blocked.
+  const { isReadOnly } = useSubscriptionAccess();
+  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const publishing = product.status === "DRAFT";
 
@@ -58,13 +64,18 @@ export function ProductRowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => onEdit(product)}>
+          <DropdownMenuItem
+            onSelect={() => onEdit(product)}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
+          >
             <PencilIcon aria-hidden="true" />
             {t("actions.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => void onStatusChange(product)}
-            disabled={busy}
+            disabled={busy || isReadOnly}
+            title={readOnlyTitle}
           >
             {publishing ? (
               <EyeIcon aria-hidden="true" />
@@ -77,6 +88,8 @@ export function ProductRowActions({
           <DropdownMenuItem
             variant="destructive"
             onSelect={() => setConfirmOpen(true)}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
           >
             <Trash2Icon aria-hidden="true" />
             {t("actions.delete")}

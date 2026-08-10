@@ -77,6 +77,9 @@ export function PaymentsView() {
   const errorsT = useTranslations("errors");
 
   const balancesQuery = api.payment.getBalances.useQuery();
+  // F3-12 debt: the commission card shows the percentage of the active plan.
+  // Read over tRPC, never by importing another module's `_components`.
+  const subscriptionQuery = api.subscription.getCurrent.useQuery();
   const transactionsQuery = api.payment.listTransactions.useInfiniteQuery(
     {},
     {
@@ -92,6 +95,12 @@ export function PaymentsView() {
     balancesResponse?.error === null ? balancesResponse.result : null;
   const balancesError =
     balancesResponse?.error ?? (balancesQuery.error ? "UNKNOWN_ERROR" : null);
+
+  const subscriptionResponse = subscriptionQuery.data;
+  const commissionPct =
+    subscriptionResponse?.error === null
+      ? (subscriptionResponse.result?.plan.commissionPct ?? null)
+      : null;
 
   const pages = transactionsQuery.data?.pages;
   const transactionsResponseError =
@@ -135,7 +144,7 @@ export function PaymentsView() {
       ) : null}
 
       {!balancesQuery.isPending && balancesError === null && balances ? (
-        <BalanceCards balances={balances} />
+        <BalanceCards balances={balances} commissionPct={commissionPct} />
       ) : null}
 
       <section className="flex flex-col gap-3" aria-label={t("transactions")}>

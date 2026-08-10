@@ -23,6 +23,29 @@ export const ERROR_CODES = [
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
+/**
+ * Domain codes raised by the money, dispute and settings services (F3/F5).
+ * They are kept out of `ERROR_CODES` so exhaustive maps over the base contract
+ * stay valid, but every value must exist in `errors.json` because the UI
+ * translates them through the same channel.
+ */
+export const DOMAIN_ERROR_CODES = [
+  "NO_CONNECT_ACCOUNT",
+  "PAYMENT_NOT_RELEASABLE",
+  "PAYMENT_NOT_REFUNDABLE",
+  "REFUND_EXCEEDS_LIMIT",
+  "DISPUTE_OPEN",
+  "RECORDING_JUSTIFICATION_REQUIRED",
+  "WITHDRAWAL_NOT_PENDING",
+  "BUSINESS_SUSPENDED",
+  "SETTINGS_STALE",
+] as const;
+
+export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];
+
+/** Every code the UI may need to translate. */
+export type TranslatableErrorCode = ErrorCode | DomainErrorCode;
+
 export type TrpcResponse<TResult, TError extends string = ErrorCode> = {
   result: TResult | null;
   error: TError | ErrorCode | null;

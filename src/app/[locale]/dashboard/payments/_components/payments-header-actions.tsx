@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import { CreatePaymentLinkDialog } from "./create-payment-link-dialog";
 import { WithdrawDialog } from "./withdraw-dialog";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -15,6 +16,8 @@ export function PaymentsHeaderActions({
   availableCents: number | null;
 }) {
   const t = useTranslations("dashboard.payments.actions");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const { isReadOnly } = useSubscriptionAccess();
   const formatter = useFormatter();
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
@@ -47,6 +50,8 @@ export function PaymentsHeaderActions({
         variant="outline"
         className="min-h-11 sm:min-h-10"
         onClick={() => setLinkDialogOpen(true)}
+        disabled={isReadOnly}
+        title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
       >
         <LinkIcon aria-hidden="true" />
         {t("createLink")}
@@ -55,8 +60,14 @@ export function PaymentsHeaderActions({
       <Button
         type="button"
         className="min-h-11 sm:min-h-10"
-        disabled={!canWithdraw}
-        title={payoutsReady ? undefined : t("withdrawNeedsConnect")}
+        disabled={!canWithdraw || isReadOnly}
+        title={
+          isReadOnly
+            ? readOnlyT("actionDisabled")
+            : payoutsReady
+              ? undefined
+              : t("withdrawNeedsConnect")
+        }
         onClick={() => setWithdrawDialogOpen(true)}
       >
         <BanknoteArrowDownIcon aria-hidden="true" />

@@ -22,6 +22,8 @@ export default async function PaymentsPage({ params }: PaymentsPageProps) {
   await Promise.all([
     api.payment.getBalances.prefetch(),
     api.payment.listTransactions.prefetchInfinite({}),
+    // Feeds the commission percentage of the balances card (F3-12 debt).
+    api.subscription.getCurrent.prefetch(),
   ]);
 
   return (

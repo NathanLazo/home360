@@ -10,10 +10,537 @@
     "placeholderName": "—",
     "placeholderInitials": "AD"
   },
-  "placeholder": {
-    "title": "Administration",
-    "subtitle": "Monitor platform activity and configuration.",
-    "emptyTitle": "The admin overview will be available soon",
-    "emptyDescription": "This is where you'll find platform metrics, recent activity, and tasks that need attention."
+  "businessTypes": {
+    "SERVICES": "Services",
+    "PRODUCTS": "Products",
+    "MIXED": "Mixed"
+  },
+  "guaranteeTypes": {
+    "DEPOSIT": "Deposit",
+    "VERIFICATION": "Verification",
+    "INSURANCE_PER_SERVICE": "Per-service insurance",
+    "REGISTERED_ASSET": "Registered asset",
+    "COMBINED": "Combined"
+  },
+  "disputeUrgency": {
+    "NORMAL": "Normal",
+    "URGENT": "Urgent"
+  },
+  "disputeStatus": {
+    "OPEN": "Open",
+    "IN_REVIEW": "In review",
+    "RESOLVED": "Resolved"
+  },
+  "orderStatus": {
+    "PENDING": "Pending",
+    "PAID": "Paid",
+    "IN_PROGRESS": "In progress",
+    "SHIPPING": "Shipping",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "DISPUTED": "Disputed"
+  },
+  "workerAvailability": {
+    "AVAILABLE": "Available",
+    "ON_SERVICE": "On service",
+    "OFF": "Unavailable"
+  },
+  "documentTypes": {
+    "ID_DOCUMENT": "ID document",
+    "ADDRESS_PROOF": "Proof of address",
+    "INSURANCE_POLICY": "Insurance policy",
+    "DEPOSIT_RECEIPT": "Deposit receipt",
+    "ASSET_TITLE": "Asset title",
+    "OTHER": "Other"
+  },
+  "documentStatus": {
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected"
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage the platform's businesses, customers and workers.",
+    "loading": "Loading users…",
+    "loadMore": "Load more",
+    "errorTitle": "We could not load the users",
+    "errorDescription": "Something went wrong preparing this screen. Please try again.",
+    "exportCsv": "Export CSV",
+    "csvTruncated": "The export was capped at the first {cap} rows.",
+    "allStatuses": "All statuses",
+    "statusFilterLabel": "Filter by status",
+    "unnamed": "Unnamed",
+    "notAvailable": "—",
+    "tabs": {
+      "businesses": "Businesses",
+      "customers": "Customers",
+      "workers": "Workers",
+      "businessesWithCount": "Businesses ({count})",
+      "customersWithCount": "Customers ({count})",
+      "workersWithCount": "Workers ({count})"
+    },
+    "searchPlaceholder": {
+      "businesses": "Search by business, owner or email",
+      "customers": "Search by name or email",
+      "workers": "Search by worker or business"
+    },
+    "derivedStatus": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended",
+      "rejected": "Rejected",
+      "in_dispute": "In dispute"
+    },
+    "columns": {
+      "business": "Business",
+      "customer": "Customer",
+      "worker": "Worker",
+      "branch": "Branch",
+      "specialty": "Specialty",
+      "availability": "Availability",
+      "email": "Email",
+      "guarantee": "Guarantee",
+      "registeredAt": "Registered",
+      "orders": "Orders",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "open": "Open actions",
+      "viewDetail": "View detail",
+      "approve": "Approve",
+      "reject": "Reject",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate"
+    },
+    "empty": {
+      "businesses": {
+        "title": "No businesses",
+        "description": "No businesses match the current search or filter."
+      },
+      "customers": {
+        "title": "No customers",
+        "description": "No customers match the current search."
+      },
+      "workers": {
+        "title": "No workers",
+        "description": "No workers match the current search."
+      }
+    },
+    "toasts": {
+      "approved": "Business approved.",
+      "rejected": "Business rejected.",
+      "suspended": "Business suspended.",
+      "reactivated": "Business reactivated."
+    },
+    "reasonDialog": {
+      "label": "Reason",
+      "placeholder": "Briefly explain the decision (at least 5 characters).",
+      "invalid": "The reason must be between 5 and 500 characters.",
+      "cancel": "Cancel"
+    },
+    "moderation": {
+      "cancel": "Cancel",
+      "reject": {
+        "title": "Reject business",
+        "description": "The business will not be able to operate and will see the reason you record.",
+        "confirm": "Reject"
+      },
+      "suspend": {
+        "title": "Suspend business",
+        "description": "While suspended, the business cannot operate or withdraw funds.",
+        "confirm": "Suspend"
+      },
+      "reactivate": {
+        "title": "Reactivate business",
+        "description": "The business will operate normally again. Reactivation is not possible while disputes are open.",
+        "confirm": "Reactivate"
+      }
+    },
+    "approveDialog": {
+      "title": "Approve business",
+      "description": "Review the guarantee and documents for {name} before activating it.",
+      "detailErrorTitle": "We could not load the business",
+      "guarantee": "Guarantee",
+      "documents": "Documents",
+      "noDocuments": "This business has not uploaded any documents yet.",
+      "plan": "Initial plan",
+      "planPlaceholder": "Select a plan",
+      "planOption": "{code} · {price}/month · {commission}% commission",
+      "planHint": "Plans without a published Stripe price cannot be selected yet.",
+      "plansErrorTitle": "We could not load the plans",
+      "cancel": "Cancel",
+      "confirm": "Approve business"
+    },
+    "detail": {
+      "title": "Business detail",
+      "subtitle": "Profile, guarantee, documents, subscription and history.",
+      "errorTitle": "We could not load the detail",
+      "statusReason": "Reason: {reason}",
+      "owner": "Owner",
+      "ownerName": "Name",
+      "ownerEmail": "Email",
+      "registeredAt": "Registered",
+      "notAvailable": "—",
+      "guarantee": "Guarantee",
+      "documents": "Documents",
+      "noDocuments": "This business has not uploaded any documents yet.",
+      "openDocument": "Open document",
+      "subscription": "Subscription",
+      "noSubscription": "No active subscription.",
+      "renewsAt": "Renews on {date}",
+      "recentOrders": "Recent orders ({count} total)",
+      "noOrders": "This business has no orders yet.",
+      "disputes": "Disputes ({count} open)",
+      "noDisputes": "This business has no disputes."
+    }
+  },
+  "overview": {
+    "title": "Platform overview",
+    "subtitle": "Headline metrics, businesses awaiting approval and disputes that need attention.",
+    "errorTitle": "We could not load the overview",
+    "errorDescription": "Something went wrong preparing this screen. Please try again.",
+    "kpis": {
+      "label": "Platform metrics",
+      "loading": "Loading metrics…",
+      "errorTitle": "We could not load the metrics",
+      "totalUsers": "Total users",
+      "newUsersMonth": "{count, plural, =0 {No sign-ups this month} one {+# this month} other {+# this month}}",
+      "activeBusinesses": "Active businesses",
+      "pendingBusinesses": "{count, plural, =0 {None pending} one {# pending} other {# pending}}",
+      "gmv": "GMV this month",
+      "gmvDelta": "{value}% vs. last month",
+      "gmvNoBaseline": "No baseline last month",
+      "escrow": "In escrow",
+      "escrowOrders": "{count, plural, =0 {No orders} one {# order} other {# orders}}"
+    },
+    "pending": {
+      "title": "Businesses awaiting approval",
+      "loading": "Loading pending businesses…",
+      "errorTitle": "We could not load pending businesses",
+      "emptyTitle": "No businesses awaiting approval",
+      "emptyDescription": "Once a business completes registration it will appear here for review.",
+      "approve": "Approve",
+      "review": "Review",
+      "columns": {
+        "name": "Business",
+        "type": "Type",
+        "guarantee": "Guarantee",
+        "actions": "Actions"
+      }
+    },
+    "disputes": {
+      "title": "Open disputes",
+      "loading": "Loading disputes…",
+      "errorTitle": "We could not load the disputes",
+      "emptyTitle": "No open disputes",
+      "emptyDescription": "Customer and business disputes will show up here as soon as they are opened.",
+      "parties": "{business} · {customer}",
+      "unknownParty": "Unnamed customer"
+    },
+    "ai": {
+      "sectionTitle": "Artificial intelligence",
+      "title": "AI configuration",
+      "errorTitle": "We could not load the configuration",
+      "threshold": "Confidence threshold",
+      "model": "Pricing model",
+      "humanReview": "Human review",
+      "humanReviewOn": "On below threshold",
+      "humanReviewOff": "Off",
+      "updatedAt": "Configuration updated {when}",
+      "openSettings": "Go to settings"
+    }
+  },
+  "paymentStatus": {
+    "PENDING": "Pending",
+    "IN_ESCROW": "In escrow",
+    "REFUNDING": "Refunding",
+    "RELEASING": "Releasing",
+    "RELEASED": "Released",
+    "REFUNDED": "Refunded",
+    "PARTIALLY_REFUNDED": "Partially refunded"
+  },
+  "disputes": {
+    "title": "Disputes",
+    "subtitle": "Resolve escrow disputes between customers and businesses.",
+    "subtitleWithStats": "{open} open · {resolved} resolved this month",
+    "listLabel": "Dispute list",
+    "detailLabel": "Dispute file",
+    "loadMore": "Load more",
+    "errorTitle": "We could not load the disputes",
+    "errorDescription": "Something went wrong preparing this screen. Please try again.",
+    "parties": "{business} · {customer}",
+    "unknownParty": "Unnamed customer",
+    "tabs": {
+      "open": "Open",
+      "resolved": "Resolved",
+      "openWithCount": "Open ({count})",
+      "resolvedWithCount": "Resolved ({count})"
+    },
+    "tone": {
+      "urgent": "Urgent",
+      "review": "In review",
+      "resolved": "Resolved"
+    },
+    "empty": {
+      "title": "No disputes",
+      "description": "No disputes match the selected filter."
+    },
+    "detail": {
+      "back": "Back to the list",
+      "subtitle": "Order #{folio} · {business}",
+      "noSelectionTitle": "Select a dispute",
+      "noSelectionDescription": "Pick a dispute from the list to open its full file.",
+      "errorTitle": "We could not load the file",
+      "resolutionNotes": "Recorded justification"
+    },
+    "recording": {
+      "title": "Service recording",
+      "missingTitle": "No service recording",
+      "incompleteTitle": "Incomplete recording",
+      "ruleDescription": "The recording is mandatory and uninterrupted. If it is missing or incomplete, the dispute resolves in the customer's favour; any other resolution requires a written justification.",
+      "duration": "Duration: {minutes} min {seconds} s"
+    },
+    "evidence": {
+      "title": "Evidence",
+      "itemAlt": "Evidence {index}",
+      "more": "+{count}"
+    },
+    "arguments": {
+      "title": "Arguments",
+      "customer": "Customer",
+      "business": "Business",
+      "noBusinessAnswer": "The business has not answered yet."
+    },
+    "aiSummary": {
+      "title": "AI summary"
+    },
+    "payment": {
+      "escrow": "In escrow",
+      "commission": "Commission",
+      "refunded": "Refunded",
+      "status": "Status",
+      "noPayment": "This order has no associated payment."
+    },
+    "resolutions": {
+      "title": "Resolution",
+      "FULL_REFUND": "Full refund",
+      "PARTIAL_REFUND": "Partial refund",
+      "RELEASE_PAYMENT": "Release payment",
+      "MORE_EVIDENCE": "Request more evidence",
+      "disabled": {
+        "alreadyResolved": "This dispute is already resolved.",
+        "notInEscrow": "The payment is no longer in escrow."
+      }
+    },
+    "resolveDialog": {
+      "title": "Resolve dispute",
+      "description": "You are about to resolve “{dispute}”. This action moves real money.",
+      "providerRefund": "Customer refund (principal, MXN)",
+      "serviceFeeRefund": "Service fee refund (MXN)",
+      "providerAvailable": "Available to refund: {amount}",
+      "serviceFeeAvailable": "Service fee available to refund: {amount}",
+      "justification": "Justification",
+      "justificationPlaceholder": "Explain why this resolution applies despite the missing or incomplete recording.",
+      "justificationHint": "At least {min} characters.",
+      "summary": {
+        "full": "{amount} will be refunded to the customer, including the service fee.",
+        "release": "{amount} will be released to the business minus {commission} in commission.",
+        "partial": "{refund} will be refunded to the customer and the remainder ({remainder}) released minus commission."
+      },
+      "cancel": "Cancel",
+      "confirm": "Confirm resolution"
+    },
+    "toasts": {
+      "resolved": "Dispute resolved."
+    }
+  },
+  "withdrawalStatus": {
+    "REQUESTED": "Pending",
+    "PROCESSING": "Processing",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "FAILED": "Failed",
+    "CANCELED": "Canceled"
+  },
+  "finance": {
+    "title": "Finance",
+    "subtitle": "Platform revenue, business withdrawals and the period breakdown.",
+    "errorTitle": "We could not load finance",
+    "errorDescription": "Something went wrong preparing this screen. Please try again.",
+    "kpis": {
+      "label": "Financial metrics",
+      "errorTitle": "We could not load the metrics",
+      "commission": "Commission this month",
+      "commissionDelta": "{value}% vs. last month",
+      "noBaseline": "No baseline last month",
+      "subscriptions": "Subscriptions this month",
+      "activeBusinesses": "{count, plural, =0 {No active businesses} one {# active business} other {# active businesses}}",
+      "escrow": "In escrow",
+      "escrowOrders": "{count, plural, =0 {No orders} one {# order} other {# orders}}",
+      "pendingWithdrawals": "Pending withdrawals",
+      "pendingWithdrawalsCount": "{count, plural, =0 {No requests} one {# request} other {# requests}}"
+    },
+    "chart": {
+      "title": "Revenue by month",
+      "commission": "Commission",
+      "subscriptions": "Subscriptions",
+      "emptyTitle": "No data for this period",
+      "emptyDescription": "Once commissions or subscriptions are charged the series will show up here."
+    },
+    "breakdown": {
+      "title": "Period breakdown",
+      "errorTitle": "We could not load the breakdown",
+      "commission": "Commission",
+      "subscriptions": "Subscriptions",
+      "loyaltyBonuses": "Loyalty bonuses paid",
+      "net": "Net revenue",
+      "pendingBonuses": "Loyalty bonuses pending payment: {amount}"
+    },
+    "withdrawals": {
+      "title": "Withdrawals",
+      "allStatuses": "All statuses",
+      "statusFilterLabel": "Filter by status",
+      "loadMore": "Load more",
+      "errorTitle": "We could not load the withdrawals",
+      "suspendedNote": "Account suspended",
+      "columns": {
+        "business": "Business",
+        "amount": "Amount",
+        "destination": "Destination account",
+        "requestedAt": "Requested",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No withdrawals",
+        "description": "No withdrawal requests match the selected filter."
+      }
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "cancel": "Cancel",
+      "approveTitle": "Approve withdrawal",
+      "approveDescription": "{amount} will be sent to {destination}. This action moves real money.",
+      "rejectTitle": "Reject withdrawal",
+      "rejectDescription": "You are about to reject the {amount} withdrawal to {destination}. The amount returns to the business's available balance.",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Briefly explain the rejection (at least 5 characters)."
+    },
+    "toasts": {
+      "approved": "Withdrawal approved.",
+      "rejected": "Withdrawal rejected."
+    },
+    "loyalty": {
+      "title": "Loyalty bonuses",
+      "description": "Settlement queue for accrued bonuses. Payment happens outside the platform; this only records it.",
+      "errorTitle": "We could not load the bonuses",
+      "cancelReason": "Cancelled by the administrator from the finance panel.",
+      "columns": {
+        "business": "Business",
+        "amount": "Amount",
+        "origin": "Source payment",
+        "accruedAt": "Accrued",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "originValue": "{amount} · {pct}% of the fee",
+      "empty": {
+        "title": "No bonuses",
+        "description": "Bonuses accrue when each payment is released."
+      },
+      "actions": {
+        "pay": "Record payment",
+        "cancel": "Cancel"
+      },
+      "payDialog": {
+        "title": "Record bonus payment",
+        "description": "You are recording a {amount} payment to {business}.",
+        "method": "Method",
+        "notes": "Notes",
+        "notesPlaceholder": "Voucher number, transfer reference, etc.",
+        "outsideNote": "The bonus never leaves the escrow balance nor goes through Stripe: the system only records the settlement.",
+        "cancel": "Cancel",
+        "confirm": "Record payment"
+      },
+      "toasts": {
+        "paid": "Bonus recorded as paid.",
+        "cancelled": "Bonus cancelled."
+      }
+    }
+  },
+  "settings": {
+    "title": "Platform settings",
+    "subtitle": "AI, fees, escrow and notification parameters.",
+    "formLabel": "Platform settings form",
+    "errorTitle": "We could not load the settings",
+    "errorDescription": "Something went wrong preparing this screen. Please try again.",
+    "notSeededTitle": "The settings do not exist yet",
+    "planNames": {
+      "basic": "Basic",
+      "standard": "Standard",
+      "enterprise": "Enterprise"
+    },
+    "ai": {
+      "title": "Artificial intelligence",
+      "description": "Confidence threshold, price margin and the model the AI quotes services with.",
+      "threshold": "Confidence threshold",
+      "thresholdHint": "Between {min}% and {max}%.",
+      "margin": "Price margin",
+      "marginHint": "Symmetric ± band. Between {min}% and {max}%.",
+      "model": "Pricing model",
+      "modelHint": "Provisional catalogue, pending confirmation.",
+      "humanReview": "Human review below threshold",
+      "humanReviewHint": "Quotes below the threshold go to manual review."
+    },
+    "fees": {
+      "title": "Fees and commissions",
+      "description": "Commission per plan, customer service fee and loyalty bonus.",
+      "commissionFor": "{plan} commission",
+      "futureOnlyNote": "Changes apply to future payments only: each payment freezes its commission at capture time.",
+      "serviceFee": "Customer service fee",
+      "serviceFeeHint": "Between ${min} and ${max} MXN.",
+      "loyaltyBonus": "Loyalty bonus",
+      "loyaltyBonusHint": "Percentage of the service fee accrued as a bonus."
+    },
+    "escrow": {
+      "title": "Escrow",
+      "description": "How long money is held before it is released automatically.",
+      "autoReleaseHours": "Automatic release",
+      "autoReleaseHint": "Between {min} and {max} hours.",
+      "hoursSuffix": "h",
+      "futureOnlyNote": "Applies to future payments only: the release date is set at capture time and never recalculated."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "New-request notification radius and rating reminders.",
+      "radius": "New request radius",
+      "radiusHint": "Between {min} and {max} km.",
+      "ratingReminder": "Rating reminder",
+      "ratingReminderHint": "Between {min} and {max} hours.",
+      "hoursSuffix": "h",
+      "paymentRelease": "Notify payment release",
+      "paymentReleaseHint": "Notifies the business when a payment is released.",
+      "consumerNote": "These values will be consumed by the mobile app; the web product does not send notifications."
+    },
+    "saveBar": {
+      "unsaved": "You have unsaved changes.",
+      "upToDate": "Everything is saved.",
+      "save": "Save changes",
+      "discard": "Discard"
+    },
+    "toasts": {
+      "saved": "Settings saved."
+    }
+  },
+  "loyaltyBonusStatus": {
+    "PENDING": "Pending",
+    "PAID": "Paid",
+    "CANCELLED": "Cancelled"
+  },
+  "loyaltyPayoutMethod": {
+    "VOUCHER": "Vouchers",
+    "TRANSFER": "Transfer"
   }
 }

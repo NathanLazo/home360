@@ -10,6 +10,7 @@ import { z } from "zod";
 import { parsePesosToCents } from "./payment-amount";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { ConfirmDialog } from "~/components/confirm-dialog";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -50,6 +51,9 @@ export function WithdrawDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("dashboard.payments.withdraw");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const formatter = useFormatter();
   const { requestWithdrawal, requestingWithdrawal } = usePaymentMutations();
   const [confirming, setConfirming] = useState(false);

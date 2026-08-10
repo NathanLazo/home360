@@ -14,6 +14,11 @@
   "INVALID_TARGET": "The payment details are not valid.",
   "REFUND_EXCEEDS_LIMIT": "The refund exceeds the available amount.",
   "CORPORATE_PRICING_NOT_AVAILABLE": "Corporate pricing is not available yet.",
+  "NO_SUBSCRIPTION": "This business does not have a subscription yet.",
+  "PLAN_NOT_FOUND": "We could not find the selected plan.",
+  "PLAN_NOT_SYNCED": "This plan is not available for purchase yet.",
+  "SAME_PLAN": "You are already on this plan.",
+  "SUBSCRIPTION_NOT_ACTIVE": "Your subscription is canceled.",
   "STRIPE_ERROR": "Unable to process the payment. Try again.",
   "INTERNAL_ERROR": "Unable to complete the request. Try again.",
   "UNKNOWN_ERROR": "An unexpected error occurred. Try again.",
@@ -31,5 +36,12 @@
   "CSV_INVALID_LOW_STOCK_THRESHOLD": "The threshold must be a whole number greater than or equal to zero.",
   "DUPLICATE_SKU_IN_FILE": "The SKU is duplicated in the file; the first row was kept.",
   "INVALID_TOKEN": "The reset link is invalid or has expired.",
-  "TOO_MANY_REQUESTS": "Too many attempts. Wait a moment and try again."
+  "TOO_MANY_REQUESTS": "Too many attempts. Wait a moment and try again.",
+  "EMAIL_SEND_FAILED": "We could not send the email. Try again.",
+  "CURRENT_PASSWORD_INVALID": "The current password is not valid.",
+  "PAYMENT_NOT_REFUNDABLE": "This payment cannot be refunded in its current state.",
+  "RECORDING_JUSTIFICATION_REQUIRED": "Without a complete recording, this resolution needs a written justification.",
+  "WITHDRAWAL_NOT_PENDING": "This withdrawal is no longer pending.",
+  "BUSINESS_SUSPENDED": "The business account is suspended.",
+  "SETTINGS_STALE": "Someone else changed the settings. Reload the screen."
 }

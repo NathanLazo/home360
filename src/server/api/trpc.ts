@@ -11,21 +11,23 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type { BusinessStatus } from "../../../generated/prisma";
+import type {
+  BusinessStatus,
+  SubscriptionStatus,
+} from "../../../generated/prisma";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
+import type { PlanLimits } from "~/server/services/subscription/plan-limits";
 
+/**
+ * Flattened business context (F0-05): the plan travels as a plain object, never
+ * nested under `subscription`, so services take it without casting.
+ */
 type BusinessContext = {
   id: string;
   status: BusinessStatus;
-  subscription: {
-    plan: {
-      commissionPct: number;
-      maxBranches: number | null;
-      maxWorkers: number | null;
-      maxProducts: number | null;
-    };
-  } | null;
+  plan: (PlanLimits & { commissionPct: number }) | null;
+  subscriptionStatus: SubscriptionStatus | null;
 };
 
 type CustomerContext = {
@@ -182,6 +184,7 @@ export const businessProcedure = protectedProcedure.use(
         status: true,
         subscription: {
           select: {
+            status: true,
             plan: {
               select: {
                 commissionPct: true,
@@ -202,7 +205,8 @@ export const businessProcedure = protectedProcedure.use(
     const business: BusinessContext = {
       id: businessRecord.id,
       status: businessRecord.status,
-      subscription: businessRecord.subscription,
+      plan: businessRecord.subscription?.plan ?? null,
+      subscriptionStatus: businessRecord.subscription?.status ?? null,
     };
 
     return next({
@@ -214,9 +218,26 @@ export const businessProcedure = protectedProcedure.use(
   },
 );
 
+/**
+ * F4 extends this guard with the subscription state (spec/04 §2).
+ *
+ * `CANCELED` degrades the business to read-only, and a missing subscription
+ * breaks the F5-05 invariant that an ACTIVE business always has one, so neither
+ * may move money or mutate the catalogue. `PAST_DUE` passes: arrears show a
+ * banner but never block operations. The check lives here and only here; the UI
+ * tells the two reasons apart through `subscription.getCurrent`, which
+ * `businessProcedure` still allows.
+ */
 export const activeBusinessProcedure = businessProcedure.use(
   ({ ctx, next }) => {
     if (ctx.business.status !== "ACTIVE") {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    if (
+      ctx.business.subscriptionStatus === null ||
+      ctx.business.subscriptionStatus === "CANCELED"
+    ) {
       throw new TRPCError({ code: "FORBIDDEN" });
     }
 

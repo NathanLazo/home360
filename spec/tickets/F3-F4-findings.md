@@ -32,10 +32,10 @@ Los hallazgos ya documentados en `XC-findings.md` **no se re-analizan**: se cita
 | 10 | Comisión cuando el negocio no tiene suscripción al capturar | mayor | 03, 04 | resuelto (fallback provisional) | F3-03 |
 | 11 | `Business` sin `chargesEnabled`/`payoutsEnabled` | mayor | 00, 03 | resuelto | F3-01 |
 | 12 | Forma de `ctx.business.plan` divergente entre F0-05 y F2-02 | mayor | 00, 02, 04 | resuelto | F4-02 |
-| 13 | **No existe recolección de método de pago para Billing** | bloqueante | 04 | resuelto (paliativo) | F4-03, F4-11 |
+| 13 | **No existe recolección de método de pago para Billing** | bloqueante | 04 | **cerrado**: Customer Portal (`PENDIENTES.md` §8) | F4-03, F4-06 |
 | 14 | `PLAN_LIMIT_REACHED` "con detalle" contradice el contrato | mayor | 04, 00 | resuelto | F4-04, F4-06, F4-09 |
 | 15 | Suscripción cancelada → 403 indistinguible | menor | 00, 04 | resuelto | F4-07 |
-| 16 | Nadie puede cancelar ni reactivar una suscripción | mayor | 04, 05 | abierto | — |
+| 16 | Nadie puede cancelar ni reactivar una suscripción | mayor | 04, 05 | **cerrado**: opción (a), vía Portal | F4-03, F4-06 |
 | 17 | Payload de `Invoice` dependiente de `apiVersion` de Stripe | menor | 04, 00 | resuelto | F4-05 |
 | 18 | "Solo-lectura" no está definido en la UI | menor | 04 | abierto | F4-07 |
 | 19 | Facturación fiscal mexicana (IVA/CFDI) no modelada | mayor | 04 | abierto | — |

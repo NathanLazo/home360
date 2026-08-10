@@ -30,7 +30,6 @@ export const adminNav: SidebarNavDefinition[] = [
     labelKey: "nav.disputes",
     href: "/admin/disputes",
     icon: ScaleIcon,
-    badgeCount: 2,
   },
   {
     key: "finance",

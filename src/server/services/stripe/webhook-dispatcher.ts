@@ -9,6 +9,7 @@ import {
   type ServiceResult,
 } from "~/server/services/service-result";
 import { handleAccountUpdated } from "./handlers/account-updated";
+import { billingHandlers } from "./handlers/billing-handlers";
 import { handleChargeRefunded } from "./handlers/charge-refunded";
 import { handleCheckoutSessionCompleted } from "./handlers/checkout-session-completed";
 import { handlePaymentIntentSucceeded } from "./handlers/payment-intent-succeeded";
@@ -51,6 +52,8 @@ registerStripeHandlers({
   "payout.canceled": handlePayoutCanceled,
   "payout.failed": handlePayoutFailed,
 });
+
+registerStripeHandlers(billingHandlers);
 
 /**
  * Routes a verified Stripe event to its handler.

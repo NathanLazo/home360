@@ -5,7 +5,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { DashboardHeader } from "./_components/dashboard-header";
+import { SubscriptionStatusBanner } from "./_components/subscription-status-banner";
 import { DashboardMobileNav } from "~/components/dashboard-mobile-nav";
+import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
@@ -55,6 +57,8 @@ export default async function DashboardLayout({
     payments: t("nav.payments"),
     subscription: t("nav.subscription"),
     branches: t("nav.branches"),
+    team: t("nav.team"),
+    settings: t("nav.settings"),
   };
 
   return (
@@ -97,8 +101,19 @@ export default async function DashboardLayout({
               />
             }
           />
-          <main id="dashboard-content" className="p-4 sm:p-6 lg:p-8">
-            {children}
+          <main
+            id="dashboard-content"
+            className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8"
+          >
+            <SubscriptionAccessProvider
+              initialStatus={shell.subscription?.status ?? null}
+            >
+              <SubscriptionStatusBanner
+                status={shell.subscription?.status ?? null}
+                renewsAt={shell.subscription?.renewsAt ?? null}
+              />
+              {children}
+            </SubscriptionAccessProvider>
           </main>
         </div>
       </div>

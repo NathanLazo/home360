@@ -49,7 +49,7 @@ La tabla de abajo es el detalle técnico de las mismas, más lo ya resuelto.
 | 1 | ~~Fórmula de Disponible~~ — **resuelto**: neta XC-03 e incluye `PARTIALLY_REFUNDED` | `XC-03`, `F3-F4-findings` #2 |
 | 2 | ~~Comisión en reembolso parcial~~ — **resuelto**: proporcional al principal retenido | `XC-03`, `F3-05`, `F5-07` |
 | 3 | ~~Retiros~~ — **resuelto**: solicitud manual y aprobación mediante `Payout` | `XC-08`, `F3-02`, `F3-07`, `F5-11` |
-| 4 | Cobro de la suscripción: no existe recolección de método de pago (sin Portal/Elements nunca cobra) | `F3-F4-findings` #13 |
+| 4 | ~~Cobro de la suscripción~~ — **resuelto**: Billing Customer Portal; alta `charge_automatically` + `default_incomplete` | `PENDIENTES.md` §8, `F4-03`, `F4-06` |
 | 5 | Onboarding Connect: quitar la "cuenta placeholder" de `approveBusiness` o cambiar la condición del banner | `F5-findings` F5-1 |
 | 6 | ~~Refund de tarifa plana~~ — **resuelto**: total devuelve toda; parcial solo la porción explícita autorizada | `XC-25`, `F3-05` |
 | 7 | ~~API de links de cobro~~ — **resuelto**: Payment Links persistente y single-use | `F3-08` |
@@ -65,8 +65,10 @@ La tabla de abajo es el detalle técnico de las mismas, más lo ya resuelto.
 | 17 | ~~Modelo de ingresos deck vs. diseño web~~ — **resuelto** por D1–D4 | `08` D1–D4 |
 | 18 | ~~Paleta de marca vs. zinc~~ — **resuelto** por D7 (marca en landing, zinc en dashboard/admin) | `08` D7 |
 
-Las filas 1–3 y 6–9 están cerradas en `PENDIENTES.md`. Las filas 4–5 y 10–14 siguen siendo
+Las filas 1–4 y 6–9 están cerradas en `PENDIENTES.md`. Las filas 5 y 10–14 siguen siendo
 gates independientes; Transfer Reversal permanece fuera de F3 y requiere ticket propio.
+La fila 4 arrastra el hallazgo #16 (cancelar/reactivar): ocurre en el Portal, sin código ni
+campos nuevos, así que no queda como gate abierto.
 
 ## Orden global de ejecución
 

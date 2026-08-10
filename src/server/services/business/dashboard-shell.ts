@@ -1,6 +1,9 @@
 import "server-only";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type {
+  PrismaClient,
+  SubscriptionStatus,
+} from "../../../../generated/prisma";
 import { countActiveOrders } from "~/server/services/business/order-activity";
 
 export type DashboardShellData = {
@@ -9,6 +12,11 @@ export type DashboardShellData = {
     name: string;
     status: string;
   };
+  /** Drives the global subscription banner (F4-07). `null` = no plan yet. */
+  subscription: {
+    status: SubscriptionStatus;
+    renewsAt: Date;
+  } | null;
   branches: Array<{ id: string; name: string }>;
   activeOrdersCount: number;
 };
@@ -17,14 +25,22 @@ export async function getDashboardShellData(
   db: PrismaClient,
   ownerId: string,
 ): Promise<DashboardShellData | null> {
-  const business = await db.business.findUnique({
+  const record = await db.business.findUnique({
     where: { ownerId },
-    select: { id: true, name: true, status: true },
+    select: {
+      id: true,
+      name: true,
+      status: true,
+      // Same query as the shell: the banner costs no extra round trip.
+      subscription: { select: { status: true, renewsAt: true } },
+    },
   });
 
-  if (!business) {
+  if (!record) {
     return null;
   }
+
+  const { subscription, ...business } = record;
 
   const [branches, activeOrdersCount] = await Promise.all([
     db.branch.findMany({
@@ -35,5 +51,5 @@ export async function getDashboardShellData(
     countActiveOrders(db, business.id),
   ]);
 
-  return { business, branches, activeOrdersCount };
+  return { business, subscription, branches, activeOrdersCount };
 }

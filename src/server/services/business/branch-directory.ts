@@ -64,7 +64,7 @@ export async function listBranches(
   business: BusinessWithPlan,
   now = new Date(),
 ): Promise<TrpcResponse<BranchListResult>> {
-  if (!business.subscription) {
+  if (!business.plan) {
     return fail("BUSINESS_NOT_ACTIVE", 403, "Business has no active plan");
   }
 
@@ -99,7 +99,7 @@ export async function listBranches(
       })),
       limits: {
         used: branches.length,
-        max: business.subscription.plan.maxBranches,
+        max: business.plan.maxBranches,
       },
     },
     "Branches loaded",

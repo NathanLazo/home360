@@ -23,6 +23,7 @@ import type {
   ProductMutationResult,
   ProductStockBranch,
 } from "./product.types";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -91,6 +92,9 @@ export function ProductFormSheet({
   ) => Promise<ProductMutationResult>;
 }) {
   const t = useTranslations("dashboard.products.form");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const errorsT = useTranslations("errors");
   const [values, setValues] = useState<ProductFormValues>(() =>
     emptyValues(branches),

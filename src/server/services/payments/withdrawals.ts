@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  AdminAuditAction,
   BusinessStatus,
   Prisma,
   type PrismaClient,
@@ -8,6 +9,7 @@ import {
 } from "../../../../generated/prisma";
 import Stripe from "stripe";
 
+import { writeAdminAudit } from "../admin/admin-audit";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { getBusinessBalances } from "./balances";
 
@@ -142,7 +144,7 @@ export async function requestWithdrawal(
 
 export async function approveWithdrawal(
   { db, stripe }: ApproveWithdrawalDeps,
-  input: { withdrawalId: string },
+  input: { withdrawalId: string; adminId?: string },
 ): Promise<
   ServiceResult<
     { withdrawalId: string; stripePayoutId: string },
@@ -318,17 +320,36 @@ export async function approveWithdrawal(
   }
 
   const resolvedAt = new Date();
-  const approved = await db.withdrawal.updateMany({
-    where: {
-      id: withdrawal.id,
-      status: WithdrawalStatus.PROCESSING,
-      stripePayoutId: null,
-    },
-    data: {
-      status: WithdrawalStatus.APPROVED,
-      stripePayoutId: payout.id,
-      resolvedAt,
-    },
+  // The confirming write and its audit entry share one transaction so a
+  // recorded approval always matches an applied one.
+  const approved = await db.$transaction(async (tx) => {
+    const updated = await tx.withdrawal.updateMany({
+      where: {
+        id: withdrawal.id,
+        status: WithdrawalStatus.PROCESSING,
+        stripePayoutId: null,
+      },
+      data: {
+        status: WithdrawalStatus.APPROVED,
+        stripePayoutId: payout.id,
+        resolvedAt,
+      },
+    });
+
+    if (updated.count > 0 && input.adminId) {
+      await writeAdminAudit(tx, input.adminId, {
+        action: AdminAuditAction.WITHDRAWAL_APPROVED,
+        withdrawalId: withdrawal.id,
+        before: { status: WithdrawalStatus.PROCESSING },
+        after: { status: WithdrawalStatus.APPROVED },
+        metadata: {
+          amountCents: withdrawal.amountCents,
+          reasonPresent: false,
+        },
+      });
+    }
+
+    return updated;
   });
 
   if (approved.count === 0) {
@@ -358,7 +379,7 @@ export async function approveWithdrawal(
 
 export async function rejectWithdrawal(
   { db }: WithdrawalDeps,
-  input: { withdrawalId: string; reason: string },
+  input: { withdrawalId: string; reason: string; adminId?: string },
 ): Promise<ServiceResult<{ withdrawalId: string }, "WITHDRAWAL_NOT_PENDING">> {
   const withdrawalId = input.withdrawalId.trim();
   const reason = input.reason.trim();
@@ -371,16 +392,38 @@ export async function rejectWithdrawal(
     return svcFail("CONFLICT", "Invalid withdrawal rejection reason");
   }
 
-  const rejected = await db.withdrawal.updateMany({
-    where: {
-      id: withdrawalId,
-      status: WithdrawalStatus.REQUESTED,
-    },
-    data: {
-      status: WithdrawalStatus.REJECTED,
-      rejectionReason: reason,
-      resolvedAt: new Date(),
-    },
+  const rejected = await db.$transaction(async (tx) => {
+    const updated = await tx.withdrawal.updateMany({
+      where: {
+        id: withdrawalId,
+        status: WithdrawalStatus.REQUESTED,
+      },
+      data: {
+        status: WithdrawalStatus.REJECTED,
+        rejectionReason: reason,
+        resolvedAt: new Date(),
+      },
+    });
+
+    if (updated.count > 0 && input.adminId) {
+      const amount = await tx.withdrawal.findUnique({
+        where: { id: withdrawalId },
+        select: { amountCents: true },
+      });
+
+      await writeAdminAudit(tx, input.adminId, {
+        action: AdminAuditAction.WITHDRAWAL_REJECTED,
+        withdrawalId,
+        before: { status: WithdrawalStatus.REQUESTED },
+        after: { status: WithdrawalStatus.REJECTED },
+        metadata: {
+          amountCents: amount?.amountCents ?? 0,
+          reasonPresent: true,
+        },
+      });
+    }
+
+    return updated;
   });
 
   if (rejected.count === 0) {

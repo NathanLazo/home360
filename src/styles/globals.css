@@ -11,6 +11,9 @@
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Display face: landing `h1`/`h2` only (see DESIGN-DIRECTIVE §2). */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman",
+    serif;
 }
 
 @theme inline {
@@ -53,6 +56,33 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Magic UI (landing only): shimmer button keyframes. */
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
+    alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+
+  @keyframes shimmer-slide {
+    to {
+      transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+
+  @keyframes spin-around {
+    0% {
+      transform: translateZ(0) rotate(0);
+    }
+    15%,
+    35% {
+      transform: translateZ(0) rotate(90deg);
+    }
+    65%,
+    85% {
+      transform: translateZ(0) rotate(270deg);
+    }
+    100% {
+      transform: translateZ(0) rotate(360deg);
+    }
+  }
 }
 
 :root {
@@ -141,5 +171,32 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Landing-only smooth scroll for the header anchor navigation. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-landing="true"]) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Reduced motion: the landing must render completely static. */
+@media (prefers-reduced-motion: reduce) {
+  html:has([data-landing="true"]) {
+    scroll-behavior: auto;
+  }
+
+  [data-landing="true"] .animate-shimmer-slide,
+  [data-landing="true"] .animate-spin-around {
+    animation: none !important;
+  }
+
+  [data-landing="true"] *,
+  [data-landing="true"] *::before,
+  [data-landing="true"] *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

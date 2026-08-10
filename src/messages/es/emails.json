@@ -1,0 +1,9 @@
+{
+  "workerInvitation": {
+    "subject": "{businessName} te agregó a su equipo en Home360",
+    "greeting": "Hola {workerName}:",
+    "intro": "{businessName} te agregó como parte de su equipo en Home360.",
+    "instructions": "Descarga la app móvil de Home360 e inicia sesión con este correo para ver los servicios que tienes asignados.",
+    "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
+  }
+}

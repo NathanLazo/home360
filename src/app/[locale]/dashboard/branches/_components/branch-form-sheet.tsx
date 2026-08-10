@@ -16,6 +16,7 @@ import type {
   BranchFormValues,
   BranchListItem,
 } from "./branch.types";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -50,6 +51,9 @@ export function BranchFormSheet({
   onUpdate: (input: BranchUpdateInput) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.branches");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const [values, setValues] = useState<BranchFormValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<BranchFormErrors>({});
 

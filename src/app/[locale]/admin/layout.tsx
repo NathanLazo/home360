@@ -9,6 +9,27 @@ import { AdminHeader } from "./_components/admin-header";
 import { AppSidebar, type SidebarItem } from "~/components/app-sidebar";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
+import { api } from "~/trpc/server";
+
+/**
+ * The sidebar must stay navigable even when the counter query fails, so the
+ * badge degrades to "no badge" instead of breaking the whole admin shell.
+ */
+async function getOpenDisputeCount(): Promise<number> {
+  try {
+    const response = await api.admin.overview.getSidebarStats();
+
+    if (response.error !== null || response.result === null) {
+      console.error(`[admin] getSidebarStats failed: ${response.error}`);
+      return 0;
+    }
+
+    return response.result.openDisputes;
+  } catch {
+    console.error("[admin] getSidebarStats threw");
+    return 0;
+  }
+}
 
 type AdminLayoutProps = Readonly<{
   children: ReactNode;
@@ -32,11 +53,14 @@ export default async function AdminLayout({
     locale,
     namespace: "common.userMenu",
   });
+  const openDisputes = await getOpenDisputeCount();
   const userName = user.name ?? t("sidebar.placeholderName");
   const userEmail = user.email ?? common("emailUnavailable");
   const items: SidebarItem[] = adminNav.map(({ labelKey, ...item }) => ({
     ...item,
     label: t(labelKey),
+    badgeCount:
+      item.key === "disputes" && openDisputes > 0 ? openDisputes : undefined,
   }));
 
   return (

@@ -6,7 +6,96 @@
     "orders": "Orders",
     "payments": "Payments",
     "subscription": "Subscription",
-    "branches": "Branches"
+    "branches": "Branches",
+    "team": "Team",
+    "settings": "Settings"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "subtitle": "Review your plan, change it, and download your invoices.",
+    "currentPlan": "Current plan: {plan}",
+    "renewsOn": "renews on {date}",
+    "currentPlanTag": "Your plan",
+    "perMonth": "/month",
+    "unlimited": "unlimited",
+    "plansLabel": "Available plans",
+    "retry": "Try again",
+    "unexpectedError": "An unexpected error occurred. Try again.",
+    "errorTitle": "We could not load your subscription",
+    "errorDescription": "Try again in a moment.",
+    "currentErrorTitle": "We could not load your plan",
+    "plansErrorTitle": "We could not load the plans",
+    "noSubscriptionTitle": "Your plan starts when your account is approved",
+    "noSubscriptionDescription": "Once the HOME360 team approves your business, your plan and invoices will show up here.",
+    "features": {
+      "commission": "{percent}% commission per sale",
+      "branches": "Branches: {value}",
+      "workers": "Workers: {value}",
+      "products": "Published products: {value}"
+    },
+    "usage": {
+      "branches": "Branches",
+      "workers": "Workers",
+      "products": "Products",
+      "value": "{used} of {max}",
+      "valueUnlimited": "{used} · no limit"
+    },
+    "actions": {
+      "manage": "Manage plan",
+      "manageBilling": "Manage billing",
+      "upgrade": "Upgrade plan",
+      "switchTo": "Switch to {plan}",
+      "unavailableHint": "This plan is not available for purchase yet."
+    },
+    "readOnly": {
+      "actionDisabled": "Your account is read-only because your subscription is canceled.",
+      "badge": "Read-only"
+    },
+    "changeDialog": {
+      "title": "Switch to {plan}",
+      "titleFallback": "Change plan",
+      "description": "Review the adjustment before confirming.",
+      "loading": "Calculating the adjustment",
+      "chargeLabel": "Charge for the change",
+      "creditLabel": "Credit in your favour",
+      "chargeExplanation": "You are not charged now: this amount is added to your next invoice on {date}.",
+      "creditExplanation": "You are not refunded now: this amount is deducted from your next invoice on {date}.",
+      "doesNotFitTitle": "Your current usage does not fit this plan",
+      "doesNotFitDescription": "Reduce these resources before changing plan:",
+      "cancel": "Cancel",
+      "confirm": "Confirm change",
+      "success": "Your plan was updated."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "latestLabel": "Latest invoice:",
+      "download": "Download",
+      "downloadUnavailable": "Stripe has not generated the PDF for this invoice yet.",
+      "loading": "Loading invoices",
+      "loadMore": "Load more",
+      "retry": "Try again",
+      "errorTitle": "We could not load your invoices",
+      "emptyTitle": "You have no invoices yet",
+      "emptyDescription": "Your first invoice will appear here as soon as Stripe issues it.",
+      "status": {
+        "PAID": "Paid",
+        "OPEN": "Unpaid",
+        "VOID": "Voided"
+      }
+    }
+  },
+  "subscriptionBanner": {
+    "pastDue": {
+      "title": "Your subscription has a pending payment",
+      "description": "Update your payment method to keep your account current. You can keep operating as usual meanwhile.",
+      "descriptionWithDate": "Your period ends on {date}. Update your payment method to keep your account current; you can keep operating as usual meanwhile.",
+      "cta": "View billing"
+    },
+    "canceled": {
+      "title": "Account is read-only",
+      "description": "Your subscription is canceled. You can review your information, but you cannot create or edit records.",
+      "cta": "View billing"
+    }
   },
   "branchSelector": {
     "label": "Select branch",
@@ -207,7 +296,8 @@
       "escrow": "Held in escrow",
       "escrowOrders": "{count, plural, =0 {No active orders} one {# active order} other {# active orders}}",
       "commission": "Monthly commission",
-      "commissionHint": "Accrued in the current month"
+      "commissionHint": "Accrued in the current month",
+      "commissionHintWithRate": "Accrued in the current month · {percent}% on your plan"
     },
     "columns": {
       "customer": "Customer",
@@ -597,5 +687,155 @@
     "subtitle": "Manage your business operations from one place.",
     "emptyTitle": "Your overview will be available soon",
     "emptyDescription": "This is where you'll find metrics, recent activity, and shortcuts for managing your business."
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Manage your business workers and their invitations.",
+    "newWorker": "New worker",
+    "usage": "{used} of {max} workers in your plan",
+    "unlimited": "{used} workers · No limit in your plan",
+    "noPlan": "Subscribe to a plan to add workers.",
+    "noPlanHint": "Subscribe to a plan to add workers.",
+    "limitReachedHint": "You reached your plan's worker limit. Upgrade your plan to add more.",
+    "unassigned": "Unassigned",
+    "noSpecialty": "No specialty",
+    "noEmail": "No invitation email",
+    "retry": "Try again",
+    "errorTitle": "We couldn't load your team",
+    "errorDescription": "Something went wrong while opening this screen. Try again to reload it.",
+    "queryErrorTitle": "We couldn't load your team",
+    "queryErrorDescription": "Check your connection and try again to get the list back.",
+    "columns": {
+      "worker": "Worker",
+      "services": "Assigned services",
+      "branch": "Branch",
+      "invitation": "Invitation",
+      "actions": "Actions"
+    },
+    "invitationStatus": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted"
+    },
+    "empty": {
+      "title": "No workers yet",
+      "description": "Add your first worker to assign services and a branch to them."
+    },
+    "actions": {
+      "open": "Open actions for {name}",
+      "edit": "Edit",
+      "resendInvitation": "Resend invitation",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Delete worker",
+      "description": "Delete {name}? This action can't be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "createTitle": "New worker",
+      "editTitle": "Edit worker",
+      "createDescription": "Register the worker and send them an email invitation.",
+      "editDescription": "Update this worker's details.",
+      "close": "Close form",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "create": "Create worker",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Ana Ramírez",
+      "specialtyLabel": "Specialty",
+      "specialtyPlaceholder": "Plumbing",
+      "specialtyHint": "Optional. It helps identify what this person works on.",
+      "invitedEmailLabel": "Invitation email",
+      "invitedEmailPlaceholder": "ana@example.com",
+      "invitedEmailHint": "Optional. If you enter it, we send the invitation when the worker is created.",
+      "branchLabel": "Branch",
+      "branchNone": "No branch",
+      "invalidField": "Check this field.",
+      "invalidEmail": "Enter a valid email, for example ana@example.com."
+    },
+    "feedback": {
+      "created": "Worker created.",
+      "invitationSent": "Invitation sent.",
+      "invitationResent": "Invitation resent.",
+      "updated": "Worker updated.",
+      "deleted": "Worker deleted.",
+      "transportError": "We couldn't complete the action. Check your connection and try again."
+    },
+    "errors": {
+      "PLAN_LIMIT_REACHED": "You reached your plan's worker limit. Upgrade your plan to add more.",
+      "BUSINESS_NOT_ACTIVE": "Your business isn't active yet, so you can't add workers.",
+      "EMAIL_SEND_FAILED": "We couldn't send the invitation. Resend it from the worker's menu.",
+      "CONFLICT": "This is the only worker assigned to an active service; reassign the service first.",
+      "RESEND_CONFLICT": "This worker has no pending invitation."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Update your business details and your account.",
+    "retry": "Try again",
+    "errorTitle": "We couldn't load your settings",
+    "errorDescription": "Something went wrong while opening this screen. Try again to reload it.",
+    "queryErrorTitle": "We couldn't load your settings",
+    "queryErrorDescription": "Check your connection and try again to get your data back.",
+    "profile": {
+      "title": "Business profile",
+      "description": "These details appear on your public profile.",
+      "nameLabel": "Business name",
+      "nameError": "Enter a name between 2 and 100 characters.",
+      "typeLabel": "Business type",
+      "typePlaceholder": "Select a type",
+      "typeError": "Select a business type.",
+      "businessTypes": {
+        "SERVICES": "Services",
+        "PRODUCTS": "Products",
+        "MIXED": "Services and products"
+      },
+      "guaranteeLabel": "Guarantee type",
+      "guaranteeNote": "Changing it requires approval from the HOME360 team.",
+      "guaranteeTypes": {
+        "DEPOSIT": "Deposit",
+        "VERIFICATION": "Verification",
+        "INSURANCE_PER_SERVICE": "Insurance per service",
+        "REGISTERED_ASSET": "Registered asset",
+        "COMBINED": "Combined guarantee"
+      },
+      "notesLabel": "Guarantee notes",
+      "notesPlaceholder": "Describe how you apply your guarantee.",
+      "notesHint": "Optional. Up to 500 characters.",
+      "notesError": "Notes can't be longer than 500 characters.",
+      "save": "Save changes",
+      "notActiveNotice": "Your business isn't active, so the business profile can't be edited right now."
+    },
+    "account": {
+      "title": "Owner account",
+      "description": "Your sign-in details. They stay available even if the business isn't active.",
+      "nameLabel": "Owner name",
+      "nameError": "Enter a name between 2 and 100 characters.",
+      "emailNote": "Your sign-in email is {email}.",
+      "emailUnavailable": "unavailable",
+      "save": "Save name"
+    },
+    "password": {
+      "title": "Password",
+      "description": "Changing it signs you out, so you'll need to sign in again.",
+      "currentLabel": "Current password",
+      "currentError": "Enter your current password.",
+      "currentInvalid": "That current password isn't valid. Type it again.",
+      "newLabel": "New password",
+      "newHint": "Use at least 8 characters.",
+      "newError": "Use at least 8 characters.",
+      "sameAsCurrentError": "The new password must be different from the current one.",
+      "confirmLabel": "Confirm new password",
+      "confirmError": "The passwords don't match.",
+      "save": "Change password",
+      "redirecting": "Signing out"
+    },
+    "feedback": {
+      "profileUpdated": "Business profile updated.",
+      "ownerUpdated": "Owner name updated.",
+      "passwordUpdated": "Password updated.",
+      "transportError": "We couldn't complete the action. Check your connection and try again."
+    }
   }
 }

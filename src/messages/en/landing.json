@@ -1,3 +1,174 @@
 {
-  "placeholderTitle": "Your home, all in one place"
+  "metadata": {
+    "title": "HOME360 — Home services. With a real guarantee.",
+    "description": "Home services. With a real guarantee. AI diagnosis, protected payments and five guarantee options back every visit to your home."
+  },
+  "header": {
+    "brand": "HOME360",
+    "logoMark": "H",
+    "navLabel": "Main navigation",
+    "menuLabel": "Open the navigation menu",
+    "menuTitle": "Menu",
+    "menuDescription": "Page sections, sign in and registration.",
+    "skipToContent": "Skip to content",
+    "nav": {
+      "howItWorks": "How it works",
+      "forBusiness": "For businesses",
+      "guarantees": "Guarantees",
+      "pricing": "Pricing"
+    },
+    "login": "Sign in",
+    "cta": "Register your business"
+  },
+  "hero": {
+    "badge": "AI diagnosis + protected payments",
+    "title": "The only place where you can hand over your house key with complete peace of mind.",
+    "subtitle": "We connect homes with verified businesses: AI diagnoses the problem, the payment stays protected until the job is done, and every service is backed by a real guarantee.",
+    "ctaPrimary": "Register your business",
+    "ctaSecondary": "See how it works"
+  },
+  "heroVisual": {
+    "photoLabel": "Photo of the problem",
+    "diagnosisLabel": "AI diagnosis",
+    "escrowLabel": "Protected payment",
+    "alt": "A HOME360 service journey: the photo of the problem moves to the AI diagnosis and from there to the protected payment."
+  },
+  "features": {
+    "title": "Home service that can actually be audited",
+    "subtitle": "Three pieces that change the conversation between customer and business: what will be done, what it costs and who answers if something goes wrong.",
+    "aiDiagnosis": {
+      "title": "AI diagnosis",
+      "description": "The customer uploads a photo and the AI describes the likely fault, the materials and the price range before anyone sets foot in the house."
+    },
+    "protectedPayments": {
+      "title": "Protected payments",
+      "description": "The money is held until the service is completed. The business collects with certainty and the customer pays without fear."
+    },
+    "realGuarantees": {
+      "title": "Real guarantees",
+      "description": "Escrow deposit, per-service insurance or identity verification: every business chooses how it backs its work, and it is published."
+    }
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "subtitle": "Three steps, with no blind phone calls and no quotes improvised at the door.",
+    "steps": {
+      "1": {
+        "title": "Describe the problem",
+        "description": "A photo and a couple of details are enough. The AI proposes the diagnosis, the likely materials and a price range."
+      },
+      "2": {
+        "title": "Choose a verified business",
+        "description": "Every business shows its validated identity, its guarantee option and its track record. The customer compares and books."
+      },
+      "3": {
+        "title": "Pay once the work is done",
+        "description": "The payment is released when the order closes. The service recording stands as evidence if there is a dispute."
+      }
+    }
+  },
+  "metrics": {
+    "title": "The market we are organizing",
+    "subtitle": "Figures from the Mexican home maintenance market, not from our own operation.",
+    "households": "households in Mexico need maintenance every year",
+    "marketSize": "annual market in home services",
+    "informality": "of the market operates informally, with no guarantee or receipt",
+    "providers": "providers ready for launch in Chihuahua",
+    "source": "Source: 2025 partner deck · CONAPO 2025",
+    "units": {
+      "million": "M",
+      "percent": "%",
+      "plus": "+"
+    }
+  },
+  "guaranteeTypes": {
+    "title": "Five guarantee options",
+    "subtitle": "No competitor has a single one. Every business picks its own at sign-up and it stays visible to the customer.",
+    "recording": {
+      "title": "Mandatory service recording",
+      "description": "Every service is recorded from start to finish. If the recording is missing or interrupted, the dispute is resolved in the customer's favor."
+    },
+    "types": {
+      "deposit": {
+        "title": "Cash deposit",
+        "description": "Between $3,000 and $10,000 held in escrow while the business operates on the platform."
+      },
+      "insurance": {
+        "title": "Per-service insurance",
+        "description": "A policy covering property damage during the visit, taken out service by service."
+      },
+      "combined": {
+        "title": "Combined A+B",
+        "description": "Escrow deposit and per-service insurance at the same time. This is the recommended option."
+      },
+      "verification": {
+        "title": "Verification only",
+        "description": "Government ID, biometrics and background checks validated, with no additional financial backing."
+      },
+      "asset": {
+        "title": "Registered asset",
+        "description": "A registered property or asset stands as formal backing for the business commitment."
+      }
+    }
+  },
+  "pricing": {
+    "title": "Plans for businesses",
+    "subtitle": "A monthly subscription plus a per-service commission that drops as your operation grows.",
+    "perMonth": "/month",
+    "commission": "{pct} % commission per service",
+    "unlimited": "Unlimited",
+    "recommended": "Recommended",
+    "cta": "Register your business",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "features": [
+          "1 branch",
+          "Up to 3 workers",
+          "Up to 50 products in the catalog",
+          "AI diagnosis and protected payments"
+        ]
+      },
+      "standard": {
+        "name": "Standard",
+        "features": [
+          "Up to 5 branches",
+          "Up to 15 workers",
+          "Unlimited product catalog",
+          "Revenue reports by branch"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "features": [
+          "Unlimited branches",
+          "Unlimited workers",
+          "Unlimited product catalog",
+          "Priority handling for disputes"
+        ]
+      }
+    }
+  },
+  "cta": {
+    "title": "Your home, in good hands.",
+    "subtitle": "Register your business today and start taking jobs with guaranteed payment from day one.",
+    "register": "Register your business",
+    "downloadApp": "Download the app",
+    "downloadAppSoon": "Coming soon"
+  },
+  "footer": {
+    "tagline": "Your home, in good hands.",
+    "rights": "© {year} HOME360. All rights reserved.",
+    "navLabel": "Footer links",
+    "sections": "Sections",
+    "account": "Your account",
+    "links": {
+      "howItWorks": "How it works",
+      "forBusiness": "For businesses",
+      "guarantees": "Guarantees",
+      "pricing": "Pricing",
+      "login": "Sign in",
+      "register": "Register your business"
+    }
+  }
 }

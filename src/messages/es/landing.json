@@ -1,3 +1,174 @@
 {
-  "placeholderTitle": "Tu hogar, en un solo lugar"
+  "metadata": {
+    "title": "HOME360 — Servicios para el hogar. Con garantía real.",
+    "description": "Servicios para el hogar. Con garantía real. Diagnóstico con IA, pagos protegidos y cinco modalidades de garantía respaldan cada visita a tu casa."
+  },
+  "header": {
+    "brand": "HOME360",
+    "logoMark": "H",
+    "navLabel": "Navegación principal",
+    "menuLabel": "Abrir el menú de navegación",
+    "menuTitle": "Menú",
+    "menuDescription": "Secciones de la página, inicio de sesión y registro.",
+    "skipToContent": "Saltar al contenido",
+    "nav": {
+      "howItWorks": "Cómo funciona",
+      "forBusiness": "Para negocios",
+      "guarantees": "Garantías",
+      "pricing": "Precios"
+    },
+    "login": "Iniciar sesión",
+    "cta": "Registra tu negocio"
+  },
+  "hero": {
+    "badge": "Diagnóstico con IA + pagos protegidos",
+    "title": "El único lugar donde puedes dejar la llave de tu casa con total tranquilidad.",
+    "subtitle": "Conectamos hogares con negocios verificados: la IA diagnostica el problema, el pago queda protegido hasta que el trabajo termina y cada servicio se respalda con una garantía real.",
+    "ctaPrimary": "Registra tu negocio",
+    "ctaSecondary": "Ver cómo funciona"
+  },
+  "heroVisual": {
+    "photoLabel": "Foto del problema",
+    "diagnosisLabel": "Diagnóstico con IA",
+    "escrowLabel": "Pago protegido",
+    "alt": "Recorrido de un servicio en HOME360: la foto del problema pasa al diagnóstico con IA y de ahí al pago protegido."
+  },
+  "features": {
+    "title": "Un servicio a domicilio que sí se puede auditar",
+    "subtitle": "Tres piezas que cambian la conversación entre el cliente y el negocio: qué se va a hacer, cuánto cuesta y quién responde si algo sale mal.",
+    "aiDiagnosis": {
+      "title": "Diagnóstico con IA",
+      "description": "El cliente sube una foto y la IA describe la falla probable, los materiales y el rango de precio antes de que alguien pise su casa."
+    },
+    "protectedPayments": {
+      "title": "Pagos protegidos",
+      "description": "El dinero queda retenido hasta que el servicio se completa. El negocio cobra con certeza y el cliente paga sin miedo."
+    },
+    "realGuarantees": {
+      "title": "Garantías reales",
+      "description": "Depósito en fideicomiso, seguro por servicio o verificación de identidad: cada negocio elige cómo respalda su trabajo, y se publica."
+    }
+  },
+  "howItWorks": {
+    "title": "Cómo funciona",
+    "subtitle": "Tres pasos, sin llamadas a ciegas ni presupuestos improvisados en la puerta.",
+    "steps": {
+      "1": {
+        "title": "Describe el problema",
+        "description": "Una foto y un par de datos bastan. La IA propone el diagnóstico, los materiales probables y un rango de precio."
+      },
+      "2": {
+        "title": "Elige un negocio verificado",
+        "description": "Cada negocio muestra su identidad validada, su modalidad de garantía y su historial. El cliente compara y agenda."
+      },
+      "3": {
+        "title": "Paga cuando el trabajo esté hecho",
+        "description": "El pago se libera al cerrar la orden. La grabación del servicio queda como evidencia si hay una disputa."
+      }
+    }
+  },
+  "metrics": {
+    "title": "El mercado que estamos ordenando",
+    "subtitle": "Cifras del mercado mexicano de mantenimiento del hogar, no de nuestra propia operación.",
+    "households": "hogares en México que necesitan mantenimiento cada año",
+    "marketSize": "de mercado anual en servicios para el hogar",
+    "informality": "del mercado opera en la informalidad, sin garantía ni comprobante",
+    "providers": "proveedores listos para el arranque en Chihuahua",
+    "source": "Fuente: deck de socios 2025 · CONAPO 2025",
+    "units": {
+      "million": " M",
+      "percent": " %",
+      "plus": "+"
+    }
+  },
+  "guaranteeTypes": {
+    "title": "Cinco modalidades de garantía",
+    "subtitle": "Ningún competidor tiene una. Cada negocio elige la suya al registrarse y queda visible para el cliente.",
+    "recording": {
+      "title": "Grabación obligatoria del servicio",
+      "description": "Todo servicio se graba de principio a fin. Si la grabación falta o se interrumpe, la disputa se resuelve a favor del cliente."
+    },
+    "types": {
+      "deposit": {
+        "title": "Depósito en efectivo",
+        "description": "Entre $3,000 y $10,000 retenidos en fideicomiso mientras el negocio opera en la plataforma."
+      },
+      "insurance": {
+        "title": "Seguro por servicio",
+        "description": "Póliza que cubre daños a la propiedad durante la visita, contratada servicio por servicio."
+      },
+      "combined": {
+        "title": "Combinada A+B",
+        "description": "Depósito en fideicomiso y seguro por servicio al mismo tiempo. Es la modalidad recomendada."
+      },
+      "verification": {
+        "title": "Solo verificación",
+        "description": "Identificación oficial, biometría y antecedentes validados, sin respaldo económico adicional."
+      },
+      "asset": {
+        "title": "Bien inmueble o mueble",
+        "description": "Un bien registrado queda como respaldo formal del cumplimiento del negocio."
+      }
+    }
+  },
+  "pricing": {
+    "title": "Planes para negocios",
+    "subtitle": "Suscripción mensual más una comisión por servicio que baja conforme crece tu operación.",
+    "perMonth": "/mes",
+    "commission": "{pct} % de comisión por servicio",
+    "unlimited": "Ilimitado",
+    "recommended": "Recomendado",
+    "cta": "Registra tu negocio",
+    "plans": {
+      "basic": {
+        "name": "Básico",
+        "features": [
+          "1 sucursal",
+          "Hasta 3 trabajadores",
+          "Hasta 50 productos en catálogo",
+          "Diagnóstico con IA y pagos protegidos"
+        ]
+      },
+      "standard": {
+        "name": "Estándar",
+        "features": [
+          "Hasta 5 sucursales",
+          "Hasta 15 trabajadores",
+          "Catálogo de productos ilimitado",
+          "Reportes de ingresos por sucursal"
+        ]
+      },
+      "enterprise": {
+        "name": "Empresarial",
+        "features": [
+          "Sucursales ilimitadas",
+          "Trabajadores ilimitados",
+          "Catálogo de productos ilimitado",
+          "Atención prioritaria en disputas"
+        ]
+      }
+    }
+  },
+  "cta": {
+    "title": "Tu hogar, en buenas manos.",
+    "subtitle": "Registra tu negocio hoy y empieza a recibir servicios con el pago garantizado desde el primer día.",
+    "register": "Registra tu negocio",
+    "downloadApp": "Descargar la app",
+    "downloadAppSoon": "Muy pronto"
+  },
+  "footer": {
+    "tagline": "Tu hogar, en buenas manos.",
+    "rights": "© {year} HOME360. Todos los derechos reservados.",
+    "navLabel": "Enlaces del pie de página",
+    "sections": "Secciones",
+    "account": "Tu cuenta",
+    "links": {
+      "howItWorks": "Cómo funciona",
+      "forBusiness": "Para negocios",
+      "guarantees": "Garantías",
+      "pricing": "Precios",
+      "login": "Iniciar sesión",
+      "register": "Registra tu negocio"
+    }
+  }
 }

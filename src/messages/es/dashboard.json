@@ -6,7 +6,96 @@
     "orders": "Órdenes",
     "payments": "Pagos",
     "subscription": "Suscripción",
-    "branches": "Sucursales"
+    "branches": "Sucursales",
+    "team": "Equipo",
+    "settings": "Configuración"
+  },
+  "subscription": {
+    "title": "Suscripción",
+    "subtitle": "Consulta tu plan, cámbialo y descarga tus facturas.",
+    "currentPlan": "Plan actual: {plan}",
+    "renewsOn": "renueva el {date}",
+    "currentPlanTag": "Tu plan",
+    "perMonth": "/mes",
+    "unlimited": "ilimitado",
+    "plansLabel": "Planes disponibles",
+    "retry": "Reintentar",
+    "unexpectedError": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "errorTitle": "No pudimos cargar tu suscripción",
+    "errorDescription": "Vuelve a intentarlo en un momento.",
+    "currentErrorTitle": "No pudimos cargar tu plan",
+    "plansErrorTitle": "No pudimos cargar los planes",
+    "noSubscriptionTitle": "Tu plan se activa al aprobar tu cuenta",
+    "noSubscriptionDescription": "Cuando el equipo de HOME360 apruebe tu negocio verás aquí tu plan y tus facturas.",
+    "features": {
+      "commission": "Comisión de {percent}% por venta",
+      "branches": "Sucursales: {value}",
+      "workers": "Trabajadores: {value}",
+      "products": "Productos publicados: {value}"
+    },
+    "usage": {
+      "branches": "Sucursales",
+      "workers": "Trabajadores",
+      "products": "Productos",
+      "value": "{used} de {max}",
+      "valueUnlimited": "{used} · sin límite"
+    },
+    "actions": {
+      "manage": "Administrar plan",
+      "manageBilling": "Administrar facturación",
+      "upgrade": "Mejorar plan",
+      "switchTo": "Cambiar a {plan}",
+      "unavailableHint": "Este plan aún no está disponible para contratarse."
+    },
+    "readOnly": {
+      "actionDisabled": "Tu cuenta está en solo lectura porque tu suscripción está cancelada.",
+      "badge": "Solo lectura"
+    },
+    "changeDialog": {
+      "title": "Cambiar a {plan}",
+      "titleFallback": "Cambiar de plan",
+      "description": "Revisa el ajuste antes de confirmar.",
+      "loading": "Calculando el ajuste",
+      "chargeLabel": "Cargo por el cambio",
+      "creditLabel": "Crédito a tu favor",
+      "chargeExplanation": "No se te cobra ahora: este monto se agregará a tu próxima factura del {date}.",
+      "creditExplanation": "No se te devuelve ahora: este monto se descontará de tu próxima factura del {date}.",
+      "doesNotFitTitle": "Tu uso actual no cabe en este plan",
+      "doesNotFitDescription": "Reduce estos recursos antes de cambiar de plan:",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar cambio",
+      "success": "Tu plan se actualizó."
+    },
+    "invoices": {
+      "title": "Facturas",
+      "latestLabel": "Última factura:",
+      "download": "Descargar",
+      "downloadUnavailable": "Stripe todavía no genera el PDF de esta factura.",
+      "loading": "Cargando facturas",
+      "loadMore": "Cargar más",
+      "retry": "Reintentar",
+      "errorTitle": "No pudimos cargar tus facturas",
+      "emptyTitle": "Todavía no tienes facturas",
+      "emptyDescription": "Tu primera factura aparecerá aquí en cuanto Stripe la emita.",
+      "status": {
+        "PAID": "Pagada",
+        "OPEN": "Pendiente",
+        "VOID": "Anulada"
+      }
+    }
+  },
+  "subscriptionBanner": {
+    "pastDue": {
+      "title": "Tu suscripción tiene un pago pendiente",
+      "description": "Actualiza tu método de pago para mantener tu cuenta al corriente. Mientras tanto puedes seguir operando con normalidad.",
+      "descriptionWithDate": "Tu periodo vence el {date}. Actualiza tu método de pago para mantener tu cuenta al corriente; mientras tanto puedes seguir operando con normalidad.",
+      "cta": "Ver facturación"
+    },
+    "canceled": {
+      "title": "Cuenta en solo lectura",
+      "description": "Tu suscripción está cancelada. Puedes consultar tu información, pero no crear ni modificar registros.",
+      "cta": "Ver facturación"
+    }
   },
   "branchSelector": {
     "label": "Seleccionar sucursal",
@@ -207,7 +296,8 @@
       "escrow": "Retenido en garantía",
       "escrowOrders": "{count, plural, =0 {Sin órdenes activas} one {# orden activa} other {# órdenes activas}}",
       "commission": "Comisión del mes",
-      "commissionHint": "Acumulado del mes en curso"
+      "commissionHint": "Acumulado del mes en curso",
+      "commissionHintWithRate": "Acumulado del mes en curso · {percent}% de tu plan"
     },
     "columns": {
       "customer": "Cliente",
@@ -597,5 +687,155 @@
     "subtitle": "Administra la operación de tu negocio desde un solo lugar.",
     "emptyTitle": "Tu resumen estará disponible pronto",
     "emptyDescription": "Aquí encontrarás indicadores, actividad reciente y accesos rápidos para gestionar tu negocio."
+  },
+  "team": {
+    "title": "Equipo",
+    "subtitle": "Administra a los trabajadores de tu negocio y sus invitaciones.",
+    "newWorker": "Nuevo trabajador",
+    "usage": "{used} de {max} trabajadores en tu plan",
+    "unlimited": "{used} trabajadores · Sin límite en tu plan",
+    "noPlan": "Contrata un plan para agregar trabajadores.",
+    "noPlanHint": "Contrata un plan para agregar trabajadores.",
+    "limitReachedHint": "Alcanzaste el límite de trabajadores de tu plan. Mejora tu plan para agregar más.",
+    "unassigned": "Sin asignar",
+    "noSpecialty": "Sin especialidad",
+    "noEmail": "Sin correo de invitación",
+    "retry": "Reintentar",
+    "errorTitle": "No pudimos cargar el equipo",
+    "errorDescription": "Ocurrió un problema al abrir esta pantalla. Reintenta para volver a cargarla.",
+    "queryErrorTitle": "No pudimos cargar el equipo",
+    "queryErrorDescription": "Revisa tu conexión y reintenta para recuperar la lista.",
+    "columns": {
+      "worker": "Trabajador",
+      "services": "Servicios asignados",
+      "branch": "Sucursal",
+      "invitation": "Invitación",
+      "actions": "Acciones"
+    },
+    "invitationStatus": {
+      "PENDING": "Pendiente",
+      "ACCEPTED": "Aceptada"
+    },
+    "empty": {
+      "title": "Aún no hay trabajadores",
+      "description": "Agrega a tu primer trabajador para asignarle servicios y sucursal."
+    },
+    "actions": {
+      "open": "Abrir acciones de {name}",
+      "edit": "Editar",
+      "resendInvitation": "Reenviar invitación",
+      "delete": "Eliminar"
+    },
+    "delete": {
+      "title": "Eliminar trabajador",
+      "description": "¿Eliminar a {name}? Esta acción no se puede deshacer.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "form": {
+      "createTitle": "Nuevo trabajador",
+      "editTitle": "Editar trabajador",
+      "createDescription": "Registra al trabajador y envíale una invitación por correo.",
+      "editDescription": "Actualiza los datos del trabajador.",
+      "close": "Cerrar formulario",
+      "cancel": "Cancelar",
+      "save": "Guardar cambios",
+      "create": "Crear trabajador",
+      "fullNameLabel": "Nombre completo",
+      "fullNamePlaceholder": "Ana Ramírez",
+      "specialtyLabel": "Especialidad",
+      "specialtyPlaceholder": "Plomería",
+      "specialtyHint": "Opcional. Ayuda a identificar en qué trabaja esta persona.",
+      "invitedEmailLabel": "Correo de invitación",
+      "invitedEmailPlaceholder": "ana@ejemplo.com",
+      "invitedEmailHint": "Opcional. Si lo capturas, enviaremos la invitación al crear el trabajador.",
+      "branchLabel": "Sucursal",
+      "branchNone": "Sin sucursal",
+      "invalidField": "Revisa este campo.",
+      "invalidEmail": "Escribe un correo válido, por ejemplo ana@ejemplo.com."
+    },
+    "feedback": {
+      "created": "Trabajador creado.",
+      "invitationSent": "Invitación enviada.",
+      "invitationResent": "Invitación reenviada.",
+      "updated": "Trabajador actualizado.",
+      "deleted": "Trabajador eliminado.",
+      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+    },
+    "errors": {
+      "PLAN_LIMIT_REACHED": "Alcanzaste el límite de trabajadores de tu plan. Mejora tu plan para agregar más.",
+      "BUSINESS_NOT_ACTIVE": "Tu negocio aún no está activo, así que no puedes agregar trabajadores.",
+      "EMAIL_SEND_FAILED": "No pudimos enviar la invitación. Reenvíala desde el menú del trabajador.",
+      "CONFLICT": "Es el único trabajador asignado a un servicio activo; reasigna el servicio primero.",
+      "RESEND_CONFLICT": "Este trabajador no tiene una invitación pendiente."
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Actualiza los datos de tu negocio y de tu cuenta.",
+    "retry": "Reintentar",
+    "errorTitle": "No pudimos cargar la configuración",
+    "errorDescription": "Ocurrió un problema al abrir esta pantalla. Reintenta para volver a cargarla.",
+    "queryErrorTitle": "No pudimos cargar la configuración",
+    "queryErrorDescription": "Revisa tu conexión y reintenta para recuperar los datos.",
+    "profile": {
+      "title": "Perfil del negocio",
+      "description": "Estos datos aparecen en tu perfil público.",
+      "nameLabel": "Nombre del negocio",
+      "nameError": "Escribe un nombre de 2 a 100 caracteres.",
+      "typeLabel": "Tipo de negocio",
+      "typePlaceholder": "Selecciona un tipo",
+      "typeError": "Selecciona un tipo de negocio.",
+      "businessTypes": {
+        "SERVICES": "Servicios",
+        "PRODUCTS": "Productos",
+        "MIXED": "Servicios y productos"
+      },
+      "guaranteeLabel": "Tipo de garantía",
+      "guaranteeNote": "Cambiarla requiere aprobación del equipo HOME360.",
+      "guaranteeTypes": {
+        "DEPOSIT": "Depósito",
+        "VERIFICATION": "Verificación",
+        "INSURANCE_PER_SERVICE": "Seguro por servicio",
+        "REGISTERED_ASSET": "Bien registrado",
+        "COMBINED": "Garantía combinada"
+      },
+      "notesLabel": "Notas de la garantía",
+      "notesPlaceholder": "Describe cómo aplicas tu garantía.",
+      "notesHint": "Opcional. Hasta 500 caracteres.",
+      "notesError": "Las notas no pueden superar 500 caracteres.",
+      "save": "Guardar cambios",
+      "notActiveNotice": "Tu negocio no está activo, así que el perfil comercial no se puede editar por ahora."
+    },
+    "account": {
+      "title": "Cuenta del dueño",
+      "description": "Tus datos de acceso. Siguen disponibles aunque el negocio no esté activo.",
+      "nameLabel": "Nombre del dueño",
+      "nameError": "Escribe un nombre de 2 a 100 caracteres.",
+      "emailNote": "Tu correo de acceso es {email}.",
+      "emailUnavailable": "no disponible",
+      "save": "Guardar nombre"
+    },
+    "password": {
+      "title": "Contraseña",
+      "description": "Al cambiarla cerraremos tu sesión y tendrás que iniciar de nuevo.",
+      "currentLabel": "Contraseña actual",
+      "currentError": "Escribe tu contraseña actual.",
+      "currentInvalid": "La contraseña actual no es válida. Vuelve a escribirla.",
+      "newLabel": "Contraseña nueva",
+      "newHint": "Usa al menos 8 caracteres.",
+      "newError": "Usa al menos 8 caracteres.",
+      "sameAsCurrentError": "La contraseña nueva debe ser distinta de la actual.",
+      "confirmLabel": "Confirma la contraseña nueva",
+      "confirmError": "Las contraseñas no coinciden.",
+      "save": "Cambiar contraseña",
+      "redirecting": "Cerrando sesión"
+    },
+    "feedback": {
+      "profileUpdated": "Perfil del negocio actualizado.",
+      "ownerUpdated": "Nombre del dueño actualizado.",
+      "passwordUpdated": "Contraseña actualizada.",
+      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+    }
   }
 }

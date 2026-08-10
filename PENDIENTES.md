@@ -99,6 +99,28 @@ saldo Connect y no modifica el ledger local de un pago liberado. El soporte de r
 posteriores a la liberación requiere un ticket independiente que implemente y reconcilie
 Stripe Transfer Reversal antes de habilitar ese flujo.
 
+## 8. Cobro de la suscripción: Stripe Billing Customer Portal
+
+Aprobado por Roger el 2026-08-10. Cierra el gate #4 de `spec/tickets/README.md` y el
+hallazgo #13 de `F3-F4-findings.md`; de paso resuelve el #16 (cancelación/reactivación).
+
+- **Captura del método de pago**: pantalla hosted de Stripe (Billing Customer Portal).
+  HOME360 nunca renderiza Elements ni toca datos de tarjeta.
+- **Alta**: `stripe.subscriptions.create` con `collection_method: "charge_automatically"`,
+  `payment_behavior: "default_incomplete"` y
+  `payment_settings.save_default_payment_method: "on_subscription"`. La suscripción nace
+  `incomplete` → mapea a `PAST_DUE` local, con banner y CTA al Portal.
+- **Momento de creación**: al aprobar el negocio (F5-05), best-effort y post-commit, sin
+  esperar a que exista método de pago. `ensureBillingSubscription` es reparador.
+- **Fallo del primer cobro**: no bloquea la operación. `PAST_DUE` deja el dashboard
+  plenamente operativo (contrato de `spec/04` §2); solo `CANCELED` degrada a solo lectura.
+- **Cancelar y reactivar**: exclusivamente desde el Portal. No se agregan
+  `cancelAtPeriodEnd` ni `canceledAt` al schema y la app no expone ninguna acción de
+  cancelación; `customer.subscription.*` sincroniza el estado local.
+- **Acceso**: `subscription.createPortalSession` es `businessProcedure`, no
+  `activeBusinessProcedure`: un negocio con la suscripción `CANCELED` debe poder entrar al
+  Portal a regularizar, y `activeBusinessProcedure` lo rechaza por diseño (F4-07).
+
 ## Pendiente independiente para F5
 
 El placeholder de onboarding de Stripe Connect sigue siendo un bug separado: F5-05 debe
@@ -129,3 +151,5 @@ Crear o reabrir una disputa debe ocurrir en una transacción serializable que es
 | Captura sin suscripción activa | Rechazar con `BUSINESS_NOT_ACTIVE` |
 | Tarifa plana en refund | Total: completa; parcial: solo porción explícita autorizada |
 | Refund de pago `RELEASED` | Rechazar; Transfer Reversal queda en ticket separado |
+| Cobro de suscripción | Billing Customer Portal; alta `default_incomplete` |
+| Cancelar/reactivar suscripción | Solo desde el Portal; sin campos ni acciones nuevas |

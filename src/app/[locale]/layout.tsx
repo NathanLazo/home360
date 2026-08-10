@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -18,6 +18,18 @@ const geist = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+});
+
+/**
+ * Display face for the public landing only (`spec/DESIGN-DIRECTIVE.md` §2).
+ * Exposed as `--font-display` and applied exclusively to `h1`/`h2` inside
+ * `(public)/`; dashboard and admin keep Geist.
+ */
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  axes: ["SOFT", "opsz"],
 });
 
 type LocaleLayoutProps = Readonly<{
@@ -59,7 +71,10 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${geist.variable} ${geistMono.variable}`}>
+    <html
+      lang={locale}
+      className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`}
+    >
       <body className="antialiased">
         <NextIntlClientProvider>
           <TRPCReactProvider>

@@ -15,6 +15,7 @@ import { ProductImportDialog } from "./product-import-dialog";
 import type { ProductFiltersState, ProductListItem } from "./product.types";
 import { ProductsTable } from "./products-table";
 import { useProductMutations } from "./use-product-mutations";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -30,6 +31,8 @@ const INITIAL_FILTERS: ProductFiltersState = {
 export function ProductsView({ branchId }: { branchId?: string }) {
   const t = useTranslations("dashboard.products");
   const errors = useTranslations("errors");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const { isReadOnly } = useSubscriptionAccess();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -131,6 +134,8 @@ export function ProductsView({ branchId }: { branchId?: string }) {
               variant="outline"
               onClick={() => setImportOpen(true)}
               className="min-h-11 sm:min-h-10"
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
             >
               <FileUpIcon aria-hidden="true" />
               {t("import.action")}
@@ -142,6 +147,8 @@ export function ProductsView({ branchId }: { branchId?: string }) {
                 setSheetOpen(true);
               }}
               className="min-h-11 sm:min-h-10"
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
             >
               <PlusIcon aria-hidden="true" />
               {t("newProduct")}

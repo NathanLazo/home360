@@ -5,14 +5,16 @@ import { notFound } from "next/navigation";
 import { routing } from "./routing";
 
 async function loadSpanishMessages() {
-  const [common, landing, auth, dashboard, admin, errors] = await Promise.all([
-    import("~/messages/es/common.json"),
-    import("~/messages/es/landing.json"),
-    import("~/messages/es/auth.json"),
-    import("~/messages/es/dashboard.json"),
-    import("~/messages/es/admin.json"),
-    import("~/messages/es/errors.json"),
-  ]);
+  const [common, landing, auth, dashboard, admin, errors, emails] =
+    await Promise.all([
+      import("~/messages/es/common.json"),
+      import("~/messages/es/landing.json"),
+      import("~/messages/es/auth.json"),
+      import("~/messages/es/dashboard.json"),
+      import("~/messages/es/admin.json"),
+      import("~/messages/es/errors.json"),
+      import("~/messages/es/emails.json"),
+    ]);
 
   return {
     common: common.default,
@@ -21,18 +23,21 @@ async function loadSpanishMessages() {
     dashboard: dashboard.default,
     admin: admin.default,
     errors: errors.default,
+    emails: emails.default,
   };
 }
 
 async function loadEnglishMessages() {
-  const [common, landing, auth, dashboard, admin, errors] = await Promise.all([
-    import("~/messages/en/common.json"),
-    import("~/messages/en/landing.json"),
-    import("~/messages/en/auth.json"),
-    import("~/messages/en/dashboard.json"),
-    import("~/messages/en/admin.json"),
-    import("~/messages/en/errors.json"),
-  ]);
+  const [common, landing, auth, dashboard, admin, errors, emails] =
+    await Promise.all([
+      import("~/messages/en/common.json"),
+      import("~/messages/en/landing.json"),
+      import("~/messages/en/auth.json"),
+      import("~/messages/en/dashboard.json"),
+      import("~/messages/en/admin.json"),
+      import("~/messages/en/errors.json"),
+      import("~/messages/en/emails.json"),
+    ]);
 
   return {
     common: common.default,
@@ -41,6 +46,7 @@ async function loadEnglishMessages() {
     dashboard: dashboard.default,
     admin: admin.default,
     errors: errors.default,
+    emails: emails.default,
   };
 }
 

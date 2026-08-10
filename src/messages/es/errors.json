@@ -14,6 +14,11 @@
   "INVALID_TARGET": "Los datos del cobro no son válidos.",
   "REFUND_EXCEEDS_LIMIT": "El reembolso supera el monto disponible.",
   "CORPORATE_PRICING_NOT_AVAILABLE": "Los precios corporativos aún no están disponibles.",
+  "NO_SUBSCRIPTION": "Este negocio todavía no tiene una suscripción.",
+  "PLAN_NOT_FOUND": "No encontramos el plan seleccionado.",
+  "PLAN_NOT_SYNCED": "Este plan aún no está disponible para contratarse.",
+  "SAME_PLAN": "Ya estás en este plan.",
+  "SUBSCRIPTION_NOT_ACTIVE": "Tu suscripción está cancelada.",
   "STRIPE_ERROR": "No se pudo procesar el pago. Inténtalo de nuevo.",
   "INTERNAL_ERROR": "No se pudo completar la solicitud. Inténtalo de nuevo.",
   "UNKNOWN_ERROR": "Ocurrió un error inesperado. Inténtalo de nuevo.",
@@ -31,5 +36,12 @@
   "CSV_INVALID_LOW_STOCK_THRESHOLD": "El umbral debe ser un número entero igual o mayor que cero.",
   "DUPLICATE_SKU_IN_FILE": "El SKU está repetido en el archivo; se conservó la primera fila.",
   "INVALID_TOKEN": "El enlace de restablecimiento no es válido o ya venció.",
-  "TOO_MANY_REQUESTS": "Demasiados intentos. Espera un momento e inténtalo de nuevo."
+  "TOO_MANY_REQUESTS": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+  "EMAIL_SEND_FAILED": "No pudimos enviar el correo. Inténtalo de nuevo.",
+  "CURRENT_PASSWORD_INVALID": "La contraseña actual no es válida.",
+  "PAYMENT_NOT_REFUNDABLE": "Este pago no se puede reembolsar en su estado actual.",
+  "RECORDING_JUSTIFICATION_REQUIRED": "Sin grabación completa, esta resolución necesita una justificación escrita.",
+  "WITHDRAWAL_NOT_PENDING": "Este retiro ya no está pendiente.",
+  "BUSINESS_SUSPENDED": "La cuenta del negocio está suspendida.",
+  "SETTINGS_STALE": "Alguien más cambió la configuración. Vuelve a cargar la pantalla."
 }

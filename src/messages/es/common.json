@@ -1,5 +1,6 @@
 {
   "appName": "Home 360",
+  "retry": "Reintentar",
   "localeSwitcher": {
     "label": "Idioma",
     "spanish": "Español",

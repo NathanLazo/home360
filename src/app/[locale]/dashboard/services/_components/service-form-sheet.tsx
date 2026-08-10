@@ -17,6 +17,7 @@ import type {
   ServiceListItem,
   ServiceWorker,
 } from "./service.types";
+import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -57,6 +58,9 @@ export function ServiceFormSheet({
   onUpdate: (input: ServiceUpdateInput) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.services");
+  // A cancellation arriving mid-edit closes the form instead of letting the
+  // user finish something the server will reject.
+  useCloseWhenReadOnly(open, onOpenChange);
   const [values, setValues] = useState<ServiceFormValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<ServiceFormErrors>({});
 

@@ -13,6 +13,7 @@ import { BranchCard } from "./branch-card";
 import { BranchFormSheet } from "./branch-form-sheet";
 import type { BranchListItem } from "./branch.types";
 import { useBranchMutations } from "./use-branch-mutations";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -21,6 +22,8 @@ import { api } from "~/trpc/react";
 export function BranchesView() {
   const t = useTranslations("dashboard.branches");
   const errors = useTranslations("errors");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const { isReadOnly } = useSubscriptionAccess();
   const query = api.branch.list.useQuery();
   const mutations = useBranchMutations();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -90,13 +93,22 @@ export function BranchesView() {
               ? t("usageUnlimited", { used: data.limits.used })
               : t("usage", { used: data.limits.used, max: data.limits.max })}
           </p>
-          <span title={atLimit ? t("limitTooltip") : undefined}>
+          <span
+            title={
+              isReadOnly
+                ? readOnlyT("actionDisabled")
+                : atLimit
+                  ? t("limitTooltip")
+                  : undefined
+            }
+          >
             <Button
               type="button"
               className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               aria-disabled={atLimit}
               aria-describedby={atLimit ? "branch-limit-help" : undefined}
               onClick={create}
+              disabled={isReadOnly}
             >
               <PlusIcon aria-hidden="true" />
               {t("new")}
@@ -116,7 +128,13 @@ export function BranchesView() {
           title={t("emptyTitle")}
           description={t("emptyDescription")}
           action={
-            <Button type="button" className="min-h-11" onClick={create}>
+            <Button
+              type="button"
+              className="min-h-11"
+              onClick={create}
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            >
               <PlusIcon aria-hidden="true" />
               {t("emptyAction")}
             </Button>

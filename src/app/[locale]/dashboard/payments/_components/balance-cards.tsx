@@ -6,7 +6,13 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { BusinessBalances } from "./payment.types";
 import { KpiCard } from "~/components/kpi-card";
 
-export function BalanceCards({ balances }: { balances: BusinessBalances }) {
+type BalanceCardsProps = {
+  balances: BusinessBalances;
+  /** Commission of the active plan; `null` while unknown (F3-12 debt). */
+  commissionPct: number | null;
+};
+
+export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
   const t = useTranslations("dashboard.payments");
   const formatter = useFormatter();
   // The only arithmetic allowed on the client: cents -> major units for
@@ -46,7 +52,15 @@ export function BalanceCards({ balances }: { balances: BusinessBalances }) {
         label={t("balances.commission")}
         value={currency(balances.monthCommissionCents)}
         icon={PercentIcon}
-        delta={{ text: t("balances.commissionHint"), trend: "neutral" }}
+        delta={{
+          text:
+            commissionPct === null
+              ? t("balances.commissionHint")
+              : t("balances.commissionHintWithRate", {
+                  percent: commissionPct,
+                }),
+          trend: "neutral",
+        }}
       />
     </section>
   );

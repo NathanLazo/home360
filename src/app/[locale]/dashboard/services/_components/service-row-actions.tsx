@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import type { ServiceListItem } from "./service.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -35,6 +36,11 @@ export function ServiceRowActions({
   onDelete: (service: ServiceListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.services");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  // The menu stays reachable so the reason is visible; only the mutating
+  // entries are blocked.
+  const { isReadOnly } = useSubscriptionAccess();
+  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const nextStatus = service.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
 
@@ -58,13 +64,18 @@ export function ServiceRowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => onEdit(service)}>
+          <DropdownMenuItem
+            onSelect={() => onEdit(service)}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
+          >
             <PencilIcon aria-hidden="true" />
             {t("actions.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => void onStatusChange(service)}
-            disabled={busy}
+            disabled={busy || isReadOnly}
+            title={readOnlyTitle}
           >
             {nextStatus === "ACTIVE" ? (
               <PlayIcon aria-hidden="true" />
@@ -77,6 +88,8 @@ export function ServiceRowActions({
           <DropdownMenuItem
             variant="destructive"
             onSelect={() => setConfirmOpen(true)}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
           >
             <Trash2Icon aria-hidden="true" />
             {t("actions.delete")}

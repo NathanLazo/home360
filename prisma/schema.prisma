@@ -186,6 +186,28 @@ enum DocumentStatus {
   REJECTED
 }
 
+enum AdminAuditAction {
+  BUSINESS_APPROVED
+  BUSINESS_REJECTED
+  BUSINESS_SUSPENDED
+  BUSINESS_REACTIVATED
+  DISPUTE_MORE_EVIDENCE
+  DISPUTE_RESOLVED
+  WITHDRAWAL_APPROVED
+  WITHDRAWAL_REJECTED
+  SETTINGS_UPDATED
+  LOYALTY_BONUS_PAID
+  LOYALTY_BONUS_CANCELLED
+}
+
+enum AdminAuditTarget {
+  BUSINESS
+  DISPUTE
+  WITHDRAWAL
+  PLATFORM_SETTINGS
+  LOYALTY_BONUS
+}
+
 // Necessary for Next auth
 model Account {
   id                       String  @id @default(cuid())
@@ -232,6 +254,7 @@ model User {
   serviceRequests     ServiceRequest[]
   reviewedDocuments   BusinessDocument[]
   passwordResetTokens PasswordResetToken[]
+  adminAuditLogs      AdminAuditLog[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
@@ -255,6 +278,9 @@ model Business {
   ownerId         String             @unique
   owner           User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   stripeAccountId String?            @unique
+  // Stripe Billing customer (F4). Connect account and Billing customer are
+  // different Stripe objects and must never be confused.
+  stripeCustomerId String?           @unique
   chargesEnabled  Boolean            @default(false)
   payoutsEnabled  Boolean            @default(false)
   branches        Branch[]
@@ -646,6 +672,11 @@ model Dispute {
   aiSummary             String?
   resolution            DisputeResolution?
   resolutionAmountCents Int?
+  // D6 traceability: an incomplete recording resolves in favour of the
+  // customer, so any other resolution must record its justification and the
+  // recording state observed at resolution time.
+  resolutionNotes               String?
+  recordingCompleteAtResolution Boolean?
   resolvedAt            DateTime?
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
@@ -698,6 +729,28 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+// Append-only trail of every administrative action that changes an account
+// state, moves or records money, or edits a risk variable. It stores ids,
+// states and amounts only: never free text, contact data, external URLs or
+// provider identifiers.
+model AdminAuditLog {
+  id         String           @id @default(cuid())
+  adminId    String
+  admin      User             @relation(fields: [adminId], references: [id])
+  action     AdminAuditAction
+  targetType AdminAuditTarget
+  targetId   String
+  before     Json?
+  after      Json?
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId, createdAt])
+  @@index([action, createdAt])
 }
 
 model AuthAttempt {
