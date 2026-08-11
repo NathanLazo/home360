@@ -106,11 +106,13 @@
     "closeNavigation": "Close navigation",
     "navigationTitle": "Navigation",
     "navigationDescription": "Business dashboard sections",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "toggleSidebar": "Show or hide navigation"
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "PG"
+    "placeholderInitials": "PG",
+    "brandLabel": "HOME360, go to dashboard home"
   },
   "home": {
     "title": "Home",
@@ -137,6 +139,8 @@
     "branchCountLabel": "{branch}: {count, plural, one {# order} other {# orders}}",
     "branchEmptyTitle": "No branch orders",
     "branchEmptyDescription": "The breakdown will appear when orders are placed during this period.",
+    "branchChartCenterLabel": "Orders",
+    "otherBranches": "Other branches",
     "recentOrdersTitle": "Recent orders",
     "viewAll": "View all",
     "folioColumn": "Order no.",

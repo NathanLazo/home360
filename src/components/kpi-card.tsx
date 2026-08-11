@@ -30,12 +30,12 @@ const deltaClasses: Record<
 
 export function KpiCard({ label, value, delta, icon: Icon }: KpiCardProps) {
   return (
-    <Card>
+    <Card className="transition-[border-color,box-shadow] duration-150 ease-out hover:shadow-sm">
       <CardHeader>
         <CardTitle className="text-muted-foreground text-sm">{label}</CardTitle>
         {Icon ? (
           <CardAction>
-            <Icon aria-hidden="true" className="text-muted-foreground" />
+            <Icon aria-hidden="true" className="text-muted-foreground size-4" />
           </CardAction>
         ) : null}
       </CardHeader>

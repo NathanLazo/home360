@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { RevenueBreakdown } from "./finance.types";
+import { DonutDistributionChart } from "~/components/donut-distribution-chart";
 import {
   Card,
   CardContent,
@@ -40,6 +41,25 @@ export function RevenueBreakdownList({
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
+        {totals.commissionCents + totals.subscriptionCents > 0 ? (
+          <DonutDistributionChart
+            data={[
+              {
+                label: t("commission"),
+                value: totals.commissionCents / 100,
+                color: "var(--chart-5)",
+              },
+              {
+                label: t("subscriptions"),
+                value: totals.subscriptionCents / 100,
+                color: "var(--chart-3)",
+              },
+            ]}
+            centerLabel={t("chartCenterLabel")}
+            prefix="$"
+            className="mx-auto max-w-52"
+          />
+        ) : null}
         <dl className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
             <dt className="text-muted-foreground text-sm">{t("commission")}</dt>

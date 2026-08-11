@@ -5,17 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { AppSidebar, type SidebarItem } from "~/components/app-sidebar";
 import { usePathname } from "~/i18n/navigation";
 import { DASHBOARD_NAV, type DashboardNavKey } from "~/lib/dashboard-nav";
-import { cn } from "~/lib/utils";
 
 export type DashboardSidebarProps = {
   labels: Record<DashboardNavKey, string>;
   activeOrdersCount: number;
+  brandLabel: string;
+  mobileTitle: string;
+  mobileDescription: string;
   user: {
     name: string;
     subtitle: string;
     initials: string;
   };
-  className?: string;
 };
 
 function isCurrentSection(pathname: string, href: string): boolean {
@@ -29,8 +30,10 @@ function isCurrentSection(pathname: string, href: string): boolean {
 export function DashboardSidebar({
   labels,
   activeOrdersCount,
+  brandLabel,
+  mobileTitle,
+  mobileDescription,
   user,
-  className,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -59,8 +62,11 @@ export function DashboardSidebar({
     <AppSidebar
       variant="light"
       items={items}
+      homeHref="/dashboard"
+      brandLabel={brandLabel}
+      mobileTitle={mobileTitle}
+      mobileDescription={mobileDescription}
       user={user}
-      className={cn(className)}
     />
   );
 }

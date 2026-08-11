@@ -8,7 +8,8 @@
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "AD"
+    "placeholderInitials": "AD",
+    "brandLabel": "HOME360, ir al resumen de administración"
   },
   "businessTypes": {
     "SERVICES": "Servicios",
@@ -395,6 +396,7 @@
       "subscriptions": "Suscripciones",
       "loyaltyBonuses": "Bonos de lealtad pagados",
       "net": "Ingreso neto",
+      "chartCenterLabel": "Ingreso bruto",
       "pendingBonuses": "Bonos de lealtad pendientes de pago: {amount}"
     },
     "withdrawals": {
@@ -542,5 +544,10 @@
   "loyaltyPayoutMethod": {
     "VOUCHER": "Vales",
     "TRANSFER": "Transferencia"
+  },
+  "header": {
+    "toggleSidebar": "Mostrar u ocultar la navegación",
+    "navigationTitle": "Navegación de administración",
+    "navigationDescription": "Secciones del panel de administración"
   }
 }

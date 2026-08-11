@@ -8,7 +8,8 @@
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "AD"
+    "placeholderInitials": "AD",
+    "brandLabel": "HOME360, go to admin overview"
   },
   "businessTypes": {
     "SERVICES": "Services",
@@ -395,6 +396,7 @@
       "subscriptions": "Subscriptions",
       "loyaltyBonuses": "Loyalty bonuses paid",
       "net": "Net revenue",
+      "chartCenterLabel": "Gross revenue",
       "pendingBonuses": "Loyalty bonuses pending payment: {amount}"
     },
     "withdrawals": {
@@ -542,5 +544,10 @@
   "loyaltyPayoutMethod": {
     "VOUCHER": "Vouchers",
     "TRANSFER": "Transfer"
+  },
+  "header": {
+    "toggleSidebar": "Show or hide navigation",
+    "navigationTitle": "Admin navigation",
+    "navigationDescription": "Admin panel sections"
   }
 }

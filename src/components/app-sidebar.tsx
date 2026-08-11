@@ -1,18 +1,40 @@
+"use client";
+
 import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 
 import {
-  SidebarNavItem,
-  type SidebarItem,
-} from "~/components/sidebar-nav-item";
-import { SidebarUserCard } from "~/components/sidebar-user-card";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "~/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
-export type { SidebarItem } from "~/components/sidebar-nav-item";
+export type SidebarItem = {
+  key: string;
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  badgeCount?: number;
+};
 
 export type AppSidebarProps = {
   variant: "light" | "dark";
   items: SidebarItem[];
-  className?: string;
+  homeHref: string;
+  brandLabel: string;
+  mobileTitle: string;
+  mobileDescription: string;
   user: {
     name: string;
     subtitle?: string;
@@ -21,40 +43,134 @@ export type AppSidebarProps = {
   footerSlot?: ReactNode;
 };
 
+function matchesPath(pathname: string, href: string) {
+  const hrefPath = href.split(/[?#]/, 1)[0] ?? href;
+  const normalizedHref =
+    hrefPath.length > 1 ? hrefPath.replace(/\/$/, "") : hrefPath;
+
+  const isTopLevelRoute = normalizedHref.split("/").filter(Boolean).length <= 1;
+
+  if (isTopLevelRoute) {
+    return pathname === normalizedHref;
+  }
+
+  return (
+    pathname === normalizedHref || pathname.startsWith(`${normalizedHref}/`)
+  );
+}
+
 export function AppSidebar({
   variant,
   items,
-  className,
+  homeHref,
+  brandLabel,
+  mobileTitle,
+  mobileDescription,
   user,
   footerSlot,
 }: AppSidebarProps) {
+  const pathname = usePathname();
+
   return (
-    <aside
-      className={cn(
-        "flex h-full w-64 shrink-0 flex-col border-r p-4",
-        variant === "light"
-          ? "border-zinc-200 bg-white text-zinc-950"
-          : "border-zinc-800 bg-[#18181b] text-zinc-100",
-        className,
-      )}
+    <Sidebar
+      collapsible="icon"
+      mobileTitle={mobileTitle}
+      mobileDescription={mobileDescription}
+      className={cn(variant === "dark" && "dark")}
     >
-      <nav className="min-h-0 flex-1 py-2">
-        <ul className="flex flex-col gap-1">
-          {items.map(({ icon: Icon, ...item }) => (
-            <li key={item.key}>
-              <SidebarNavItem
-                item={item}
-                icon={<Icon aria-hidden="true" />}
-                variant={variant}
-              />
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="flex flex-col gap-3 pt-4">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              className="duration-150 active:scale-[0.98] motion-reduce:active:scale-100"
+            >
+              <Link href={homeHref} aria-label={brandLabel}>
+                <span
+                  aria-hidden="true"
+                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                >
+                  H
+                </span>
+                <span className="truncate text-sm font-bold tracking-tight">
+                  HOME360
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map(({ icon: Icon, ...item }) => {
+                const isActive = matchesPath(pathname, item.href);
+                const tooltip =
+                  item.badgeCount !== undefined
+                    ? `${item.label} (${item.badgeCount})`
+                    : item.label;
+
+                return (
+                  <SidebarMenuItem key={item.key}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={tooltip}
+                      className="duration-150 active:scale-[0.98] motion-reduce:active:scale-100"
+                    >
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <Icon aria-hidden="true" />
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    {item.badgeCount !== undefined ? (
+                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar rounded-full">
+                        {item.badgeCount}
+                      </SidebarMenuBadge>
+                    ) : null}
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
         {footerSlot}
-        <SidebarUserCard variant={variant} {...user} />
-      </div>
-    </aside>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              className="cursor-default hover:bg-transparent active:bg-transparent"
+            >
+              <div>
+                <Avatar className="size-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg text-xs font-semibold">
+                    {user.initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid min-w-0 flex-1 leading-tight">
+                  <span className="truncate text-sm font-medium">
+                    {user.name}
+                  </span>
+                  {user.subtitle ? (
+                    <span className="text-sidebar-foreground/70 truncate text-xs">
+                      {user.subtitle}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
   );
 }

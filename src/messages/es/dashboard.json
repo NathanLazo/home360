@@ -106,11 +106,13 @@
     "closeNavigation": "Cerrar navegación",
     "navigationTitle": "Navegación",
     "navigationDescription": "Secciones del panel del negocio",
-    "skipToContent": "Saltar al contenido"
+    "skipToContent": "Saltar al contenido",
+    "toggleSidebar": "Mostrar u ocultar la navegación"
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "PG"
+    "placeholderInitials": "PG",
+    "brandLabel": "HOME360, ir al inicio del panel"
   },
   "home": {
     "title": "Inicio",
@@ -137,6 +139,8 @@
     "branchCountLabel": "{branch}: {count, plural, one {# orden} other {# órdenes}}",
     "branchEmptyTitle": "No hay órdenes por sucursal",
     "branchEmptyDescription": "El desglose aparecerá cuando haya órdenes en este periodo.",
+    "branchChartCenterLabel": "Órdenes",
+    "otherBranches": "Otras sucursales",
     "recentOrdersTitle": "Órdenes recientes",
     "viewAll": "Ver todas",
     "folioColumn": "Folio",

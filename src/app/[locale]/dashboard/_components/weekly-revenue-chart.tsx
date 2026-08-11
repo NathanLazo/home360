@@ -1,6 +1,5 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { BarChart3Icon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
@@ -9,11 +8,9 @@ import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "~/components/ui/chart";
+  StackedCurrencyBarChart,
+  type CurrencyBarSeries,
+} from "~/components/stacked-currency-bar-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { api } from "~/trpc/react";
 
@@ -114,23 +111,18 @@ export function WeeklyRevenueChart({
       timeZone: "UTC",
     }),
   }));
-  const chartConfig = {
-    servicesCents: {
+  const series: CurrencyBarSeries[] = [
+    {
+      dataKey: "servicesCents",
       label: t("servicesTab"),
-      color: "var(--foreground)",
+      color: "var(--chart-5)",
     },
-    productsCents: {
+    {
+      dataKey: "productsCents",
       label: t("productsTab"),
-      color: "var(--muted-foreground)",
+      color: "var(--chart-3)",
     },
-  } satisfies ChartConfig;
-  const compactCurrency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      notation: "compact",
-      maximumFractionDigits: 1,
-    });
+  ];
   const fullCurrency = (cents: number) =>
     formatter.number(cents / 100, {
       style: "currency",
@@ -170,8 +162,7 @@ export function WeeklyRevenueChart({
           </TabsList>
           <RevenueChartPanels
             data={chartData}
-            config={chartConfig}
-            compactCurrency={compactCurrency}
+            series={series}
             fullCurrency={fullCurrency}
           />
         </Tabs>
@@ -188,15 +179,13 @@ export function WeeklyRevenueChart({
 
 type RevenueChartPanelsProps = {
   data: ChartPoint[];
-  config: ChartConfig;
-  compactCurrency: (cents: number) => string;
+  series: CurrencyBarSeries[];
   fullCurrency: (cents: number) => string;
 };
 
 function RevenueChartPanels({
   data,
-  config,
-  compactCurrency,
+  series,
   fullCurrency,
 }: RevenueChartPanelsProps) {
   return (
@@ -206,8 +195,7 @@ function RevenueChartPanels({
           key={mode}
           mode={mode}
           data={data}
-          config={config}
-          compactCurrency={compactCurrency}
+          series={series}
           fullCurrency={fullCurrency}
         />
       ))}
@@ -219,65 +207,26 @@ type RevenueChartProps = RevenueChartPanelsProps & {
   mode: ChartMode;
 };
 
-function RevenueChart({
-  mode,
-  data,
-  config,
-  compactCurrency,
-  fullCurrency,
-}: RevenueChartProps) {
+function RevenueChart({ mode, data, series, fullCurrency }: RevenueChartProps) {
+  const visibleSeries =
+    mode === "all"
+      ? series
+      : series.filter((entry) =>
+          mode === "services"
+            ? entry.dataKey === "servicesCents"
+            : entry.dataKey === "productsCents",
+        );
+
   return (
     <TabsContent value={mode} className="h-full">
-      <ChartContainer config={config} className="aspect-auto h-full w-full">
-        <BarChart data={data} accessibilityLayer margin={{ left: 0, right: 8 }}>
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="weekLabel"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={10}
-          />
-          <YAxis
-            tickLine={false}
-            axisLine={false}
-            width={58}
-            tickFormatter={(value: number) => compactCurrency(value)}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={
-              <ChartTooltipContent
-                formatter={(value, name) => (
-                  <div className="flex min-w-40 items-center justify-between gap-4">
-                    <span className="text-muted-foreground">
-                      {config[String(name)]?.label}
-                    </span>
-                    <span className="font-mono font-medium tabular-nums">
-                      {fullCurrency(Number(value))}
-                    </span>
-                  </div>
-                )}
-              />
-            }
-          />
-          {mode !== "products" ? (
-            <Bar
-              dataKey="servicesCents"
-              stackId={mode === "all" ? "revenue" : undefined}
-              fill="var(--color-servicesCents)"
-              radius={mode === "all" ? [0, 0, 3, 3] : [4, 4, 0, 0]}
-            />
-          ) : null}
-          {mode !== "services" ? (
-            <Bar
-              dataKey="productsCents"
-              stackId={mode === "all" ? "revenue" : undefined}
-              fill="var(--color-productsCents)"
-              radius={[4, 4, 0, 0]}
-            />
-          ) : null}
-        </BarChart>
-      </ChartContainer>
+      <StackedCurrencyBarChart
+        data={data}
+        xDataKey="weekLabel"
+        series={visibleSeries}
+        stacked={mode === "all"}
+        formatValue={fullCurrency}
+        className="h-full"
+      />
     </TabsContent>
   );
 }

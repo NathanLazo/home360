@@ -3,10 +3,18 @@
 import { Building2Icon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import {
+  DonutDistributionChart,
+  donutPalette,
+  type DonutDatum,
+} from "~/components/donut-distribution-chart";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/trpc/react";
+
+/** Slices beyond this count collapse into a single "others" slice. */
+const MAX_DONUT_SLICES = 5;
 
 export type OrdersByBranchListProps = {
   branchId?: string;
@@ -26,13 +34,16 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
         <CardHeader>
           <div className="bg-accent h-5 w-44 animate-pulse rounded motion-reduce:animate-none" />
         </CardHeader>
-        <CardContent className="flex flex-col gap-5">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="flex flex-col gap-2">
-              <div className="bg-accent h-4 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-accent h-2 animate-pulse rounded-full motion-reduce:animate-none" />
-            </div>
-          ))}
+        <CardContent className="flex flex-col items-center gap-5">
+          <div className="bg-accent size-44 animate-pulse rounded-full motion-reduce:animate-none" />
+          <div className="flex w-full flex-col gap-3">
+            {Array.from({ length: 3 }, (_, index) => (
+              <div
+                key={index}
+                className="bg-accent h-4 animate-pulse rounded motion-reduce:animate-none"
+              />
+            ))}
+          </div>
         </CardContent>
       </Card>
     );
@@ -89,7 +100,24 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
     );
   }
 
-  const highestCount = Math.max(...data.map((row) => row.ordersCount), 1);
+  const rows = data.map((row, index) => ({
+    key: row.branchId ?? "unassigned",
+    label: row.branchName ?? t("noBranch"),
+    count: row.ordersCount,
+    color: donutPalette[index % donutPalette.length],
+  }));
+  const topRows = rows.slice(0, MAX_DONUT_SLICES);
+  const restCount = rows
+    .slice(MAX_DONUT_SLICES)
+    .reduce((total, row) => total + row.count, 0);
+  const donutData: DonutDatum[] = topRows.map((row) => ({
+    label: row.label,
+    value: row.count,
+    color: row.color,
+  }));
+  if (restCount > 0) {
+    donutData.push({ label: t("otherBranches"), value: restCount });
+  }
 
   return (
     <Card>
@@ -98,39 +126,35 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
           <h2>{t("branchOrdersTitle")}</h2>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ul className="flex flex-col gap-5">
-          {data.map((row) => {
-            const branchName = row.branchName ?? t("noBranch");
-            const width = `${Math.max((row.ordersCount / highestCount) * 100, 4)}%`;
-
-            return (
-              <li
-                key={row.branchId ?? "unassigned"}
-                className="flex flex-col gap-2"
-              >
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="min-w-0 truncate">{branchName}</span>
-                  <span className="font-mono font-semibold tabular-nums">
-                    {formatter.number(row.ordersCount)}
-                  </span>
-                </div>
-                <div
-                  className="bg-muted h-2 overflow-hidden rounded-full"
-                  role="img"
-                  aria-label={t("branchCountLabel", {
-                    branch: branchName,
-                    count: row.ordersCount,
-                  })}
-                >
-                  <div
-                    className="bg-foreground h-full rounded-full"
-                    style={{ width }}
-                  />
-                </div>
-              </li>
-            );
-          })}
+      <CardContent className="flex flex-col gap-5">
+        <DonutDistributionChart
+          data={donutData}
+          centerLabel={t("branchChartCenterLabel")}
+          className="mx-auto max-w-56"
+        />
+        <ul className="flex flex-col gap-3">
+          {rows.map((row) => (
+            <li
+              key={row.key}
+              className="flex items-center justify-between gap-4 text-sm"
+              aria-label={t("branchCountLabel", {
+                branch: row.label,
+                count: row.count,
+              })}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: row.color }}
+                />
+                <span className="min-w-0 truncate">{row.label}</span>
+              </span>
+              <span className="font-mono font-semibold tabular-nums">
+                {formatter.number(row.count)}
+              </span>
+            </li>
+          ))}
         </ul>
       </CardContent>
     </Card>
