@@ -5,16 +5,8 @@ import Google from "next-auth/providers/google";
 
 import { edgeAuthConfig } from "./edge-config";
 import { env } from "~/env";
-import { loginSchema } from "~/schemas/auth/login.schema";
 import { db } from "~/server/db";
-import { verifyPasswordOrDummy } from "~/server/services/auth/password";
-import {
-  clientIpFromHeaders,
-  emailRateLimitIdentifier,
-  ipRateLimitIdentifier,
-  releaseRateLimitAttempts,
-  reserveRateLimitAttempts,
-} from "~/server/services/auth/rate-limit";
+import { verifyCredentials } from "~/server/services/auth/verify-credentials";
 
 function hasVerifiedGoogleEmail(profile: unknown): boolean {
   return (
@@ -31,65 +23,8 @@ export const authConfig = {
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
-      authorize: async (credentials, request) => {
-        const parsed = loginSchema.safeParse(credentials);
-
-        if (!parsed.success) {
-          return null;
-        }
-
-        const reservation = await reserveRateLimitAttempts(db, [
-          {
-            action: "login",
-            identifier: emailRateLimitIdentifier(parsed.data.email),
-            max: 10,
-            windowMinutes: 15,
-          },
-          {
-            action: "login",
-            identifier: ipRateLimitIdentifier(
-              clientIpFromHeaders(request.headers),
-            ),
-            max: 30,
-            windowMinutes: 15,
-          },
-        ]);
-
-        if (!reservation.allowed) {
-          return null;
-        }
-
-        const user = await db.user.findUnique({
-          where: { email: parsed.data.email },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            image: true,
-            role: true,
-            passwordHash: true,
-          },
-        });
-
-        const isValid = await verifyPasswordOrDummy(
-          parsed.data.password,
-          user?.passwordHash,
-        );
-
-        if (!user || !isValid) {
-          return null;
-        }
-
-        await releaseRateLimitAttempts(db, reservation.attemptIds);
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
-      },
+      authorize: async (credentials, request) =>
+        verifyCredentials(db, credentials, request.headers),
     }),
     Google({
       clientId: env.AUTH_GOOGLE_ID,
