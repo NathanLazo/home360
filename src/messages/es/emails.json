@@ -5,5 +5,12 @@
     "intro": "{businessName} te agregó como parte de su equipo en Home360.",
     "instructions": "Descarga la app móvil de Home360 e inicia sesión con este correo para ver los servicios que tienes asignados.",
     "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
+  },
+  "corporateInvitation": {
+    "subject": "Tu cuenta corporativa de {companyName} en Home360",
+    "intro": "Se creó una cuenta corporativa para {companyName} en Home360 y tú eres la persona responsable.",
+    "cta": "Crea tu contraseña para entrar",
+    "expires": "El enlace es válido por 1 hora y solo puede usarse una vez. Si vence, pide al equipo de Home360 que reenvíe la invitación.",
+    "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
   }
 }

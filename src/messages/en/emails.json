@@ -5,5 +5,12 @@
     "intro": "{businessName} added you as a team member on Home360.",
     "instructions": "Download the Home360 mobile app and sign in with this email address to see the services assigned to you.",
     "closing": "If you were not expecting this invitation, you can ignore this message."
+  },
+  "corporateInvitation": {
+    "subject": "Your {companyName} corporate account on Home360",
+    "intro": "A corporate account for {companyName} was created on Home360 and you are its owner.",
+    "cta": "Create your password to sign in",
+    "expires": "The link is valid for 1 hour and can only be used once. If it expires, ask the Home360 team to resend the invitation.",
+    "closing": "If you were not expecting this invitation, you can ignore this message."
   }
 }

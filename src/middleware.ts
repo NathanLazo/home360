@@ -20,7 +20,8 @@ export default auth((request) => {
   const session = request.auth;
   const wantsDashboard = isRouteOrDescendant(pathname, "/dashboard");
   const wantsAdmin = isRouteOrDescendant(pathname, "/admin");
-  const wantsProtectedRoute = wantsDashboard || wantsAdmin;
+  const wantsCorporate = isRouteOrDescendant(pathname, "/corporate");
+  const wantsProtectedRoute = wantsDashboard || wantsAdmin || wantsCorporate;
 
   if (wantsProtectedRoute && !session) {
     const loginUrl = new URL(
@@ -39,7 +40,8 @@ export default auth((request) => {
     const home = homeForRole(session.user.role);
     const isAllowed =
       (wantsDashboard && home === "/dashboard") ||
-      (wantsAdmin && home === "/admin");
+      (wantsAdmin && home === "/admin") ||
+      (wantsCorporate && home === "/corporate");
 
     if (!isAllowed) {
       return NextResponse.redirect(

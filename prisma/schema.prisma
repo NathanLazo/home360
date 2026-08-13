@@ -20,6 +20,7 @@ enum UserRole {
   BUSINESS
   CUSTOMER
   WORKER
+  CORPORATE
 }
 
 enum BusinessType {
@@ -237,26 +238,29 @@ model Session {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  name                String?
-  email               String?              @unique
-  emailVerified       DateTime?
-  image               String?
-  role                UserRole             @default(CUSTOMER)
-  passwordHash        String?
-  sessionsValidFrom   DateTime             @default(now())
-  accounts            Account[]
-  sessions            Session[]
-  business            Business?
-  workerProfile       Worker?
-  orders              Order[]
-  reviews             Review[]
-  serviceRequests     ServiceRequest[]
-  reviewedDocuments   BusinessDocument[]
-  passwordResetTokens PasswordResetToken[]
-  adminAuditLogs      AdminAuditLog[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id                           String                       @id @default(cuid())
+  name                         String?
+  email                        String?                      @unique
+  emailVerified                DateTime?
+  image                        String?
+  role                         UserRole                     @default(CUSTOMER)
+  passwordHash                 String?
+  sessionsValidFrom            DateTime                     @default(now())
+  accounts                     Account[]
+  sessions                     Session[]
+  business                     Business?
+  workerProfile                Worker?
+  orders                       Order[]
+  reviews                      Review[]
+  serviceRequests              ServiceRequest[]
+  reviewedDocuments            BusinessDocument[]
+  passwordResetTokens          PasswordResetToken[]
+  adminAuditLogs               AdminAuditLog[]
+  corporateAccount             CorporateAccount?            @relation("CorporateOwner")
+  managedCorporateAccounts     CorporateAccount[]           @relation("CorporateAccountManager")
+  reviewedCorporateTierChanges CorporateTierChangeRequest[] @relation("CorporateTierReviewer")
+  createdAt                    DateTime                     @default(now())
+  updatedAt                    DateTime                     @updatedAt
 }
 
 model VerificationToken {
@@ -268,36 +272,36 @@ model VerificationToken {
 }
 
 model Business {
-  id              String             @id @default(cuid())
-  name            String
-  type            BusinessType
-  status          BusinessStatus     @default(PENDING)
-  guaranteeType   GuaranteeType
-  guaranteeNotes  String?
-  statusReason    String?
-  ownerId         String             @unique
-  owner           User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  stripeAccountId String?            @unique
+  id               String             @id @default(cuid())
+  name             String
+  type             BusinessType
+  status           BusinessStatus     @default(PENDING)
+  guaranteeType    GuaranteeType
+  guaranteeNotes   String?
+  statusReason     String?
+  ownerId          String             @unique
+  owner            User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  stripeAccountId  String?            @unique
   // Stripe Billing customer (F4). Connect account and Billing customer are
   // different Stripe objects and must never be confused.
-  stripeCustomerId String?           @unique
-  chargesEnabled  Boolean            @default(false)
-  payoutsEnabled  Boolean            @default(false)
-  branches        Branch[]
-  workers         Worker[]
-  services        Service[]
-  products        Product[]
-  orders          Order[]
-  payments        Payment[]
-  paymentLinks    PaymentLink[]
-  withdrawals     Withdrawal[]
-  subscription    Subscription?
-  disputes        Dispute[]
-  quotes          Quote[]
-  documents       BusinessDocument[]
-  loyaltyBonuses  LoyaltyBonus[]
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  stripeCustomerId String?            @unique
+  chargesEnabled   Boolean            @default(false)
+  payoutsEnabled   Boolean            @default(false)
+  branches         Branch[]
+  workers          Worker[]
+  services         Service[]
+  products         Product[]
+  orders           Order[]
+  payments         Payment[]
+  paymentLinks     PaymentLink[]
+  withdrawals      Withdrawal[]
+  subscription     Subscription?
+  disputes         Dispute[]
+  quotes           Quote[]
+  documents        BusinessDocument[]
+  loyaltyBonuses   LoyaltyBonus[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   @@index([status])
 }
@@ -452,30 +456,35 @@ model Quote {
 }
 
 model Order {
-  id                   String            @id @default(cuid())
-  folio                Int               @unique @default(autoincrement())
+  id                   String             @id @default(cuid())
+  folio                Int                @unique @default(autoincrement())
   type                 OrderType
   title                String
-  status               OrderStatus       @default(PENDING)
+  status               OrderStatus        @default(PENDING)
   amountCents          Int
   customerId           String
-  customer             User              @relation(fields: [customerId], references: [id])
+  customer             User               @relation(fields: [customerId], references: [id])
   businessId           String
-  business             Business          @relation(fields: [businessId], references: [id])
+  business             Business           @relation(fields: [businessId], references: [id])
   branchId             String?
-  branch               Branch?           @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  branch               Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
   serviceId            String?
-  service              Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  service              Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   productId            String?
-  product              Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
-  quoteId              String?           @unique
-  quote                Quote?            @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  product              Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  quoteId              String?            @unique
+  quote                Quote?             @relation(fields: [quoteId], references: [id], onDelete: SetNull)
   corporateAccountId   String?
-  corporateAccount     CorporateAccount? @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
-  quantity             Int               @default(1)
+  corporateAccount     CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  // Attention location within the corporate account. The order service must
+  // validate that this location belongs to corporateAccountId: the database
+  // cannot express equality between two optional FKs.
+  corporateLocationId  String?
+  corporateLocation    CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
+  quantity             Int                @default(1)
   recordingUrl         String?
   recordingDurationSec Int?
-  recordingComplete    Boolean           @default(false)
+  recordingComplete    Boolean            @default(false)
   beforeUrls           String[]
   afterUrls            String[]
   workNotes            String?
@@ -483,8 +492,8 @@ model Order {
   payment              Payment?
   dispute              Dispute?
   review               Review?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   @@index([businessId, status])
   @@index([businessId, branchId])
@@ -493,6 +502,7 @@ model Order {
   @@index([serviceId])
   @@index([productId])
   @@index([corporateAccountId])
+  @@index([corporateLocationId])
 }
 
 // Materials are rows instead of JSON so callers get typed selects and an optional Product FK.
@@ -512,42 +522,190 @@ model OrderMaterial {
   @@index([productId])
 }
 
-// This minimal relational anchor makes Order.corporateAccountId a real FK in the initial
-// migration. F7 extends this same model with the complete B2B corporate domain.
+// B2B corporate domain (F7). Corporate accounts consume services (unlike
+// Business, which provides them), pay a monthly membership and get a
+// preferential commission on the orders they generate.
+
+enum CorporateTier {
+  BASIC
+  STANDARD
+  ENTERPRISE
+  CUSTOM
+}
+
+enum CorporateStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum CorporateTierChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Effective terms (commissionPct, monthlyFeeCents, maxLocations) live on the
+// account, not only in CorporateTierConfig: CUSTOM tiers are negotiated per
+// account and may deviate from the catalog.
 model CorporateAccount {
-  id        String   @id @default(cuid())
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String                       @id @default(cuid())
+  name               String
+  taxId              String? // RFC for consolidated invoicing
+  ownerId            String                       @unique
+  owner              User                         @relation("CorporateOwner", fields: [ownerId], references: [id])
+  tier               CorporateTier                @default(BASIC)
+  status             CorporateStatus              @default(PENDING)
+  commissionPct      Int // 10 / 8 / 5 / negotiated (< 5 in CUSTOM)
+  monthlyFeeCents    Int // 150000 / 350000 / 750000 / negotiated
+  maxLocations       Int? // 3 / 15 / 50 / null = unlimited
+  accountManagerId   String? // account executive (tier >= STANDARD)
+  accountManager     User?                        @relation("CorporateAccountManager", fields: [accountManagerId], references: [id], onDelete: SetNull)
+  stripeCustomerId   String?                      @unique
+  statusReason       String?
+  locations          CorporateLocation[]
+  membership         CorporateMembership?
+  tierChangeRequests CorporateTierChangeRequest[]
+  invoices           CorporateInvoice[]
+  orders             Order[]
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+
+  @@index([status, tier])
+  @@index([accountManagerId])
+}
+
+model CorporateLocation {
+  id                 String           @id @default(cuid())
+  corporateAccountId String
+  corporateAccount   CorporateAccount @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  name               String
+  addressLine        String
+  city               String
+  contactName        String?
+  contactPhone       String?
+  isActive           Boolean          @default(true)
+  orders             Order[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([corporateAccountId, isActive])
+}
+
+model CorporateMembership {
+  id                   String             @id @default(cuid())
+  corporateAccountId   String             @unique
+  corporateAccount     CorporateAccount   @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus
+  renewsAt             DateTime?
+  // Epoch of the last Stripe event applied, so F7-07 can discard out-of-order
+  // webhook deliveries.
+  stripeUpdatedAt      DateTime?
+  invoices             CorporateInvoice[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+// Tier catalog (seeded, same pattern as Plan): values live in the database so
+// the admin can negotiate CUSTOM without a deploy. The CUSTOM row keeps fee,
+// limit, commission and Stripe price null: terms are negotiated per account.
+model CorporateTierConfig {
+  id              String        @id @default(cuid())
+  tier            CorporateTier @unique
+  monthlyFeeCents Int?
+  maxLocations    Int?
+  commissionPct   Int?
+  stripePriceId   String?       @unique
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([isActive])
+}
+
+// pendingKey holds corporateAccountId while status is PENDING and is set to
+// null on approval/rejection, so the unique constraint guarantees a single
+// pending request per account even under concurrent requests.
+model CorporateTierChangeRequest {
+  id                 String                    @id @default(cuid())
+  corporateAccountId String
+  corporateAccount   CorporateAccount          @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  requestedTier      CorporateTier
+  notes              String?
+  status             CorporateTierChangeStatus @default(PENDING)
+  pendingKey         String?                   @unique
+  reviewedById       String?
+  reviewedBy         User?                     @relation("CorporateTierReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt         DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@index([corporateAccountId, status, createdAt])
+  @@index([reviewedById])
+}
+
+// Membership invoices synced from Stripe (consolidated corporate billing).
+model CorporateInvoice {
+  id                    String              @id @default(cuid())
+  corporateAccountId    String
+  corporateAccount      CorporateAccount    @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  corporateMembershipId String
+  corporateMembership   CorporateMembership @relation(fields: [corporateMembershipId], references: [id], onDelete: Cascade)
+  stripeInvoiceId       String              @unique
+  amountCents           Int
+  status                InvoiceStatus
+  pdfUrl                String?
+  issuedAt              DateTime
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([corporateAccountId, issuedAt])
+  @@index([corporateMembershipId])
+}
+
+// Origin of the effective commission frozen on a Payment (XC-26). The
+// provider-plan reference is always frozen alongside it so historical savings
+// stay auditable even after plan or corporate-term renegotiations.
+enum CommissionSource {
+  PROVIDER_PLAN
+  CORPORATE_ACCOUNT
 }
 
 model Payment {
-  id                       String        @id @default(cuid())
-  orderId                  String?       @unique
-  order                    Order?        @relation(fields: [orderId], references: [id])
-  paymentLinkId            String?       @unique
-  paymentLink              PaymentLink?  @relation(fields: [paymentLinkId], references: [id])
-  businessId               String
-  business                 Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  method                   PaymentMethod
-  status                   PaymentStatus @default(PENDING)
-  amountCents              Int
-  providerAmountCents      Int
-  serviceFeeCentsApplied   Int
-  commissionPctApplied     Int
-  commissionCents          Int
-  providerRefundedCents    Int           @default(0)
-  serviceFeeRefundedCents  Int           @default(0)
-  refundedCents            Int           @default(0)
-  stripePaymentIntentId    String?       @unique
-  stripeChargeId           String?       @unique
-  stripeTransferId         String?       @unique
-  escrowReleaseAt          DateTime?
-  escrowReleaseAttemptedAt DateTime?
-  releasedAt               DateTime?
-  loyaltyBonus             LoyaltyBonus?
-  createdAt                DateTime      @default(now())
-  updatedAt                DateTime      @updatedAt
+  id                               String           @id @default(cuid())
+  orderId                          String?          @unique
+  order                            Order?           @relation(fields: [orderId], references: [id])
+  paymentLinkId                    String?          @unique
+  paymentLink                      PaymentLink?     @relation(fields: [paymentLinkId], references: [id])
+  businessId                       String
+  business                         Business         @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  method                           PaymentMethod
+  status                           PaymentStatus    @default(PENDING)
+  amountCents                      Int
+  providerAmountCents              Int
+  serviceFeeCentsApplied           Int
+  commissionPctApplied             Int
+  commissionCents                  Int
+  // Reference snapshot frozen at capture (XC-26): the commission the provider
+  // plan alone would have charged over the same principal, plus the source of
+  // the effective commission. Plan/tier renegotiations never rewrite these.
+  providerPlanCommissionPctApplied Int
+  providerPlanCommissionCents      Int
+  commissionSource                 CommissionSource
+  providerRefundedCents            Int              @default(0)
+  serviceFeeRefundedCents          Int              @default(0)
+  refundedCents                    Int              @default(0)
+  stripePaymentIntentId            String?          @unique
+  stripeChargeId                   String?          @unique
+  stripeTransferId                 String?          @unique
+  escrowReleaseAt                  DateTime?
+  escrowReleaseAttemptedAt         DateTime?
+  releasedAt                       DateTime?
+  loyaltyBonus                     LoyaltyBonus?
+  createdAt                        DateTime         @default(now())
+  updatedAt                        DateTime         @updatedAt
 
   @@index([status, escrowReleaseAt])
   @@index([status, escrowReleaseAttemptedAt, escrowReleaseAt])
@@ -658,28 +816,28 @@ model Invoice {
 }
 
 model Dispute {
-  id                    String             @id @default(cuid())
-  orderId               String             @unique
-  order                 Order              @relation(fields: [orderId], references: [id])
-  businessId            String
-  business              Business           @relation(fields: [businessId], references: [id])
-  title                 String
-  urgency               DisputeUrgency     @default(NORMAL)
-  status                DisputeStatus      @default(OPEN)
-  customerArgument      String
-  businessArgument      String?
-  evidenceUrls          String[]
-  aiSummary             String?
-  resolution            DisputeResolution?
-  resolutionAmountCents Int?
+  id                            String             @id @default(cuid())
+  orderId                       String             @unique
+  order                         Order              @relation(fields: [orderId], references: [id])
+  businessId                    String
+  business                      Business           @relation(fields: [businessId], references: [id])
+  title                         String
+  urgency                       DisputeUrgency     @default(NORMAL)
+  status                        DisputeStatus      @default(OPEN)
+  customerArgument              String
+  businessArgument              String?
+  evidenceUrls                  String[]
+  aiSummary                     String?
+  resolution                    DisputeResolution?
+  resolutionAmountCents         Int?
   // D6 traceability: an incomplete recording resolves in favour of the
   // customer, so any other resolution must record its justification and the
   // recording state observed at resolution time.
   resolutionNotes               String?
   recordingCompleteAtResolution Boolean?
-  resolvedAt            DateTime?
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  resolvedAt                    DateTime?
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
 
   @@index([status, urgency])
   @@index([businessId])

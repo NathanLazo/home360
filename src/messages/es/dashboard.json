@@ -376,10 +376,10 @@
     "onboarding": {
       "title": "Conecta tu cuenta para recibir tu dinero",
       "missing": "Puedes cobrar, pero necesitas conectar una cuenta bancaria antes de liberar o retirar fondos.",
-      "pending": "Tu cuenta está conectada pero aún no puede recibir depósitos. Completa la información que Stripe te pide.",
+      "pending": "Tu cuenta está conectada pero el registro aún no está completo. Completa la información que Stripe te pide.",
       "start": "Conectar cuenta",
       "resume": "Completar información",
-      "completed": "Tu cuenta ya puede recibir depósitos."
+      "completed": "Tu cuenta ya puede cobrar y recibir depósitos."
     }
   },
   "services": {

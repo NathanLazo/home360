@@ -4,6 +4,7 @@
     "users": "Users",
     "disputes": "Disputes",
     "finance": "Finance",
+    "corporate": "Corporate",
     "settings": "Settings"
   },
   "sidebar": {
@@ -372,8 +373,8 @@
     "kpis": {
       "label": "Financial metrics",
       "errorTitle": "We could not load the metrics",
-      "commission": "Commission this month",
-      "commissionDelta": "{value}% vs. last month",
+      "platformGrossRevenue": "Gross revenue this month",
+      "platformGrossRevenueDelta": "{value}% vs. last month",
       "noBaseline": "No baseline last month",
       "subscriptions": "Subscriptions this month",
       "activeBusinesses": "{count, plural, =0 {No active businesses} one {# active business} other {# active businesses}}",
@@ -384,15 +385,15 @@
     },
     "chart": {
       "title": "Revenue by month",
-      "commission": "Commission",
+      "platformGrossRevenue": "Commissions and service fees",
       "subscriptions": "Subscriptions",
       "emptyTitle": "No data for this period",
-      "emptyDescription": "Once commissions or subscriptions are charged the series will show up here."
+      "emptyDescription": "Once commissions, fees or subscriptions are charged the series will show up here."
     },
     "breakdown": {
       "title": "Period breakdown",
       "errorTitle": "We could not load the breakdown",
-      "commission": "Commission",
+      "platformGrossRevenue": "Commissions and service fees",
       "subscriptions": "Subscriptions",
       "loyaltyBonuses": "Loyalty bonuses paid",
       "net": "Net revenue",
@@ -470,6 +471,230 @@
         "paid": "Bonus recorded as paid.",
         "cancelled": "Bonus cancelled."
       }
+    }
+  },
+  "corporate": {
+    "title": "Corporate accounts",
+    "subtitle": "Manage B2B accounts, their negotiated terms and their billing.",
+    "loading": "Loading corporate accounts…",
+    "loadMore": "Load more",
+    "errorTitle": "We could not load the corporate accounts",
+    "errorDescription": "Something went wrong while preparing this screen. Try again.",
+    "searchPlaceholder": "Search by company, owner or email",
+    "allTiers": "All tiers",
+    "tierFilterLabel": "Filter by tier",
+    "notAvailable": "—",
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended",
+      "cancelled": "Cancelled",
+      "allWithCount": "All ({count})",
+      "activeWithCount": "Active ({count})",
+      "pendingWithCount": "Pending ({count})",
+      "suspendedWithCount": "Suspended ({count})",
+      "cancelledWithCount": "Cancelled ({count})"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "CANCELLED": "Cancelled"
+    },
+    "tier": {
+      "BASIC": "Basic",
+      "STANDARD": "Standard",
+      "ENTERPRISE": "Enterprise",
+      "CUSTOM": "Custom"
+    },
+    "membershipStatus": {
+      "ACTIVE": "Active",
+      "PAST_DUE": "Past due",
+      "CANCELED": "Cancelled"
+    },
+    "columns": {
+      "account": "Account",
+      "tier": "Tier",
+      "locations": "Locations",
+      "monthSpend": "Month spend",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "locationsCell": "{active} of {max}",
+    "locationsCellUnlimited": "{active} · no limit",
+    "empty": {
+      "title": "No corporate accounts",
+      "description": "No accounts match the current search or filters."
+    },
+    "actions": {
+      "open": "Open actions",
+      "viewDetail": "View file",
+      "activate": "Activate",
+      "editTerms": "Edit terms",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "reconcileBilling": "Reconcile billing"
+    },
+    "toasts": {
+      "created": "Account created. The invitation is on its way to the owner’s email.",
+      "activated": "Account activated. The Stripe subscription was created.",
+      "termsUpdated": "Terms updated. They only apply to future orders.",
+      "suspended": "Account suspended. Access and billing are paused.",
+      "reactivated": "Account reactivated. Access and billing resumed.",
+      "billingReconciled": "Billing reconciled. The account is aligned with Stripe.",
+      "requestRejected": "Tier change request rejected."
+    },
+    "reasonDialog": {
+      "label": "Reason",
+      "placeholder": "Briefly explain the decision (at least 5 characters).",
+      "invalid": "The reason must be between 5 and 500 characters.",
+      "cancel": "Cancel"
+    },
+    "suspendDialog": {
+      "title": "Suspend corporate account",
+      "description": "You are about to suspend {name}. While suspended, the account cannot operate and the monthly Stripe charge is paused.",
+      "confirm": "Suspend"
+    },
+    "reactivateDialog": {
+      "title": "Reactivate corporate account",
+      "description": "You are about to reactivate {name}. The account regains access and the monthly Stripe charge resumes.",
+      "confirm": "Reactivate",
+      "cancel": "Cancel"
+    },
+    "reconcileDialog": {
+      "title": "Reconcile billing",
+      "description": "You are about to reconcile the billing of {name}. This repairs the customer, subscription and membership against Stripe. It is safe to repeat: it never duplicates billing objects.",
+      "confirm": "Reconcile",
+      "cancel": "Cancel"
+    },
+    "activateDialog": {
+      "title": "Activate corporate account",
+      "description": "You are about to activate {name} on the {tier} tier: {fee} monthly fee and a preferential commission of {commission}%. This creates the Stripe subscription.",
+      "confirm": "Activate account",
+      "cancel": "Cancel"
+    },
+    "create": {
+      "button": "New account",
+      "title": "Create corporate account",
+      "description": "Capture the company data and the initial terms. The owner will receive an email invitation.",
+      "errorTitle": "We could not prepare the form",
+      "invitationNote": "An email invitation will be sent so the owner creates their own password through a secure link. No password is captured here.",
+      "cancel": "Cancel",
+      "confirm": "Create and send invitation",
+      "fields": {
+        "name": "Company",
+        "nameInvalid": "The name must be at least 2 characters long.",
+        "taxId": "Tax ID (optional)",
+        "taxIdPlaceholder": "Company tax ID",
+        "ownerEmail": "Owner email",
+        "ownerEmailInvalid": "Enter a valid email.",
+        "locale": "Language",
+        "localeOptions": {
+          "es": "Spanish",
+          "en": "English"
+        },
+        "tier": "Tier",
+        "tierPlaceholder": "Select a tier",
+        "tierOption": "{tier} · {fee}/mo · {commission}% commission",
+        "tierRequired": "Select a tier to continue.",
+        "tierHint": "Terms are prefilled from the tier catalog; adjust them if there is a negotiation.",
+        "commission": "Commission (%)",
+        "commissionHint": "Percentage the platform charges on the account’s orders.",
+        "commissionHintCustom": "The custom tier requires it; 4% at most.",
+        "commissionRequired": "Enter the negotiated commission.",
+        "monthlyFee": "Monthly fee (MXN)",
+        "monthlyFeeHint": "Billed through a Stripe subscription.",
+        "monthlyFeeRequired": "Enter the monthly fee.",
+        "maxLocations": "Location limit",
+        "maxLocationsUnlimited": "No limit",
+        "maxLocationsHint": "Must stay within the tier range; empty only on the custom tier.",
+        "manager": "Account manager",
+        "managerPlaceholder": "Select a manager",
+        "managerNone": "No manager",
+        "managerRequired": "This tier requires an account manager.",
+        "managerHint": "Required from the Standard tier upwards."
+      }
+    },
+    "terms": {
+      "title": "Negotiated terms",
+      "description": "Adjust the account’s tier, commission, fee and location limit.",
+      "errorTitle": "We could not load the terms",
+      "approvingRequest": "You are approving a change request to the {tier} tier. The tier is fixed by the request; negotiate the remaining terms.",
+      "scopeNote": "Terms only apply to future orders: every payment freezes its commission at capture and is never rewritten.",
+      "cancel": "Cancel",
+      "confirm": "Save terms",
+      "fields": {
+        "tier": "Tier",
+        "commission": "Commission (%)",
+        "commissionHint": "Percentage the platform charges on the account’s orders.",
+        "commissionHintCustom": "The custom tier requires it; 4% at most.",
+        "commissionInvalid": "Enter a whole number between 0 and 100.",
+        "monthlyFee": "Monthly fee (MXN)",
+        "monthlyFeeHint": "If it changes, the Stripe subscription rotates to the new price with proration.",
+        "monthlyFeeInvalid": "Enter an amount greater than zero.",
+        "maxLocations": "Location limit",
+        "maxLocationsUnlimited": "No limit",
+        "maxLocationsHint": "Cannot fall below the account’s {active} active locations.",
+        "maxLocationsInvalid": "Enter a whole number of at least 1, or leave it empty for no limit.",
+        "manager": "Account manager",
+        "managerPlaceholder": "Select a manager",
+        "managerNone": "No manager",
+        "managerRequired": "This tier requires an account manager.",
+        "managerHint": "Required from the Standard tier upwards."
+      },
+      "example": {
+        "title": "Effect on a {ticket} ticket",
+        "commission": "Commission",
+        "fee": "Fee",
+        "bonus": "Provider bonus",
+        "net": "Platform net",
+        "currentRow": "Current ({commission}%)",
+        "newRow": "New ({commission}%)",
+        "awaitingCommission": "Enter a valid commission to see the effect.",
+        "bonusNote": "The provider loyalty bonus is {pct}% of the commission (D3): lowering the commission drops both the fee and the bonus.",
+        "rowSummary": "At a {commission}% commission: {fee} fee, {bonus} provider bonus, {net} platform net."
+      }
+    },
+    "requests": {
+      "empty": "There are no pending tier change requests.",
+      "requestedTier": "Requested tier:",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectTitle": "Reject tier request",
+      "rejectDescription": "The request will be rejected and the account keeps its current terms.",
+      "rejectConfirm": "Reject request"
+    },
+    "detail": {
+      "title": "Corporate file",
+      "subtitle": "Terms, membership, spending, locations and orders of the account.",
+      "errorTitle": "We could not load the file",
+      "statusReason": "Reason: {reason}",
+      "terms": "Negotiated terms",
+      "commission": "Commission",
+      "monthlyFee": "Monthly fee",
+      "maxLocations": "Location limit",
+      "unlimited": "No limit",
+      "manager": "Account manager",
+      "taxId": "Tax ID",
+      "createdAt": "Created",
+      "notAvailable": "—",
+      "owner": "Owner",
+      "ownerName": "Name",
+      "ownerEmail": "Email",
+      "membership": "Membership",
+      "noMembership": "The membership is created when the account is activated.",
+      "renewsAt": "Renews on {date}",
+      "noStripeSubscription": "No Stripe subscription",
+      "spending": "Spending",
+      "monthSpend": "Month spend",
+      "ordersCount": "Total orders",
+      "requests": "Tier requests ({count})",
+      "locations": "Locations ({count} active)",
+      "noLocations": "This account has no locations yet.",
+      "inactiveLocation": "Inactive",
+      "recentOrders": "Recent orders ({count} total)",
+      "noOrders": "This account has no orders yet."
     }
   },
   "settings": {

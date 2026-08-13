@@ -245,6 +245,63 @@ export const activeBusinessProcedure = businessProcedure.use(
   },
 );
 
+/**
+ * Corporate tenant guard (F7-02, spec/09 §4).
+ *
+ * The account is resolved from the session owner, never from input, in a
+ * single query per request. A wrong role and a missing account both answer
+ * with the same generic FORBIDDEN so the response never reveals whether the
+ * resource exists. The `ctx.corporateAccount` type is inferred from the
+ * Prisma `select`, so there is no parallel interface to drift out of sync.
+ */
+export const corporateProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    if (ctx.session.user.role !== "CORPORATE") {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    const corporateAccount = await ctx.db.corporateAccount.findUnique({
+      where: {
+        ownerId: ctx.session.user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        tier: true,
+        status: true,
+        commissionPct: true,
+        maxLocations: true,
+      },
+    });
+
+    if (!corporateAccount) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        corporateAccount,
+      },
+    });
+  },
+);
+
+/**
+ * Only ACTIVE corporate accounts pass. PENDING, SUSPENDED and CANCELLED get
+ * the same generic 403; reads under `corporateProcedure` stay available so
+ * the account can still see its own status, membership and history.
+ */
+export const activeCorporateProcedure = corporateProcedure.use(
+  ({ ctx, next }) => {
+    if (ctx.corporateAccount.status !== "ACTIVE") {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return next();
+  },
+);
+
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.session.user.role !== "ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN" });

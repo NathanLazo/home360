@@ -38,6 +38,7 @@
   "INVALID_TOKEN": "The reset link is invalid or has expired.",
   "TOO_MANY_REQUESTS": "Too many attempts. Wait a moment and try again.",
   "EMAIL_SEND_FAILED": "We could not send the email. Try again.",
+  "EMAIL_DELIVERY_FAILED": "We could not send the invitation. The account stays pending; retry the creation with the same email to resend it.",
   "CURRENT_PASSWORD_INVALID": "The current password is not valid.",
   "PAYMENT_NOT_REFUNDABLE": "This payment cannot be refunded in its current state.",
   "RECORDING_JUSTIFICATION_REQUIRED": "Without a complete recording, this resolution needs a written justification.",

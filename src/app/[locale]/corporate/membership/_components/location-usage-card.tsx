@@ -1,0 +1,54 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import type { CorporateMembershipSummary } from "../../_components/corporate.types";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+
+/**
+ * Active locations against the tier limit. Both numbers come from the
+ * server; nothing is counted here. Without a limit the bar disappears and
+ * only the count remains.
+ */
+export function LocationUsageCard({
+  usage,
+}: {
+  usage: CorporateMembershipSummary["usage"];
+}) {
+  const t = useTranslations("corporate.membership.usage");
+  const percent =
+    usage.max === null || usage.max === 0
+      ? null
+      : Math.min(100, Math.round((usage.used / usage.max) * 100));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t("title")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <p className="text-muted-foreground text-sm">{t("description")}</p>
+        <p className="font-mono text-2xl font-semibold tracking-tight tabular-nums">
+          {usage.max === null
+            ? t("valueUnlimited", { used: usage.used })
+            : t("value", { used: usage.used, max: usage.max })}
+        </p>
+        {percent !== null && usage.max !== null ? (
+          <div
+            role="progressbar"
+            aria-label={t("label")}
+            aria-valuemin={0}
+            aria-valuemax={usage.max}
+            aria-valuenow={usage.used}
+            className="bg-muted h-2 w-full overflow-hidden rounded-full"
+          >
+            <div
+              className="bg-primary h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}

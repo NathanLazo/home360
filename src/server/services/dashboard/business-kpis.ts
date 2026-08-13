@@ -6,12 +6,18 @@ import type {
   PrismaClient,
 } from "../../../../generated/prisma";
 
-const REVENUE_STATUSES = ["IN_ESCROW", "RELEASED"] as const;
+import {
+  ESCROW_PAYMENT_STATUSES,
+  PROVIDER_REVENUE_PAYMENT_STATUSES,
+  providerRevenueCents,
+} from "~/server/services/payments/financial-projections";
+
 const DAY_MS = 24 * 60 * 60 * 1_000;
 const WEEK_MS = 7 * DAY_MS;
 
 const weeklyPaymentSelect = {
   providerAmountCents: true,
+  providerRefundedCents: true,
   createdAt: true,
   order: { select: { type: true } },
 } satisfies Prisma.PaymentSelect;
@@ -92,9 +98,15 @@ function startOfUtcWeek(date: Date): Date {
 }
 
 function revenueFromAggregate(aggregate: {
-  _sum: { providerAmountCents: number | null };
+  _sum: {
+    providerAmountCents: number | null;
+    providerRefundedCents: number | null;
+  };
 }): number {
-  return aggregate._sum.providerAmountCents ?? 0;
+  return providerRevenueCents({
+    providerAmountCents: aggregate._sum.providerAmountCents ?? 0,
+    providerRefundedCents: aggregate._sum.providerRefundedCents ?? 0,
+  });
 }
 
 export async function getBusinessKpis(
@@ -108,23 +120,24 @@ export async function getBusinessKpis(
   const scopedOrder = orderScope(businessId, input.branchId);
   const scopedPayment = paymentScope(businessId, input.branchId);
 
+  // Revenue series bucket by `Payment.createdAt` (charge time, XC-27).
   const [currentRevenue, previousRevenue, ordersByType, escrow, reviews] =
     await Promise.all([
       db.payment.aggregate({
         where: {
           ...scopedPayment,
-          status: { in: [...REVENUE_STATUSES] },
+          status: { in: [...PROVIDER_REVENUE_PAYMENT_STATUSES] },
           createdAt: { gte: currentStart, lte: now },
         },
-        _sum: { providerAmountCents: true },
+        _sum: { providerAmountCents: true, providerRefundedCents: true },
       }),
       db.payment.aggregate({
         where: {
           ...scopedPayment,
-          status: { in: [...REVENUE_STATUSES] },
+          status: { in: [...PROVIDER_REVENUE_PAYMENT_STATUSES] },
           createdAt: { gte: previousStart, lt: currentStart },
         },
-        _sum: { providerAmountCents: true },
+        _sum: { providerAmountCents: true, providerRefundedCents: true },
       }),
       db.order.groupBy({
         by: ["type"],
@@ -135,7 +148,10 @@ export async function getBusinessKpis(
         _count: true,
       }),
       db.payment.aggregate({
-        where: { ...scopedPayment, status: "IN_ESCROW" },
+        where: {
+          ...scopedPayment,
+          status: { in: [...ESCROW_PAYMENT_STATUSES] },
+        },
         _sum: { amountCents: true },
         _count: true,
       }),
@@ -208,10 +224,12 @@ function addPaymentToWeek(
     return;
   }
 
+  const revenueCents = providerRevenueCents(payment);
+
   if (payment.order.type === "SERVICE") {
-    point.servicesCents += payment.providerAmountCents;
+    point.servicesCents += revenueCents;
   } else if (payment.order.type === "PRODUCT") {
-    point.productsCents += payment.providerAmountCents;
+    point.productsCents += revenueCents;
   }
 }
 
@@ -228,7 +246,7 @@ export async function getWeeklyRevenue(
   const payments = await db.payment.findMany({
     where: {
       ...paymentScope(businessId, input.branchId),
-      status: { in: [...REVENUE_STATUSES] },
+      status: { in: [...PROVIDER_REVENUE_PAYMENT_STATUSES] },
       createdAt: { gte: firstWeek, lte: now },
     },
     select: weeklyPaymentSelect,

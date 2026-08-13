@@ -1,0 +1,248 @@
+{
+  "nav": {
+    "home": "Overview",
+    "orders": "Orders",
+    "locations": "Locations",
+    "membership": "Membership"
+  },
+  "sidebar": {
+    "brandLabel": "HOME360, go to corporate overview",
+    "placeholderName": "Corporate account",
+    "placeholderInitials": "CA"
+  },
+  "header": {
+    "skipToContent": "Skip to content",
+    "toggleSidebar": "Open or close the sidebar",
+    "navigationTitle": "Corporate navigation",
+    "navigationDescription": "Corporate panel sections"
+  },
+  "statusBanner": {
+    "PENDING": "Your account is under review. You will be able to operate once the team activates it.",
+    "SUSPENDED": "Your account is suspended. You can review your information, but not make changes.",
+    "CANCELLED": "Your account is cancelled. You can review your history, but not make changes.",
+    "reasonLabel": "Reason"
+  },
+  "tier": {
+    "BASIC": "Basic",
+    "STANDARD": "Standard",
+    "ENTERPRISE": "Enterprise",
+    "CUSTOM": "Custom"
+  },
+  "orderStatus": {
+    "PENDING": "Pending",
+    "PAID": "Paid",
+    "IN_PROGRESS": "In progress",
+    "SHIPPING": "Shipping",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled",
+    "DISPUTED": "Disputed"
+  },
+  "orderType": {
+    "SERVICE": "Service",
+    "PRODUCT": "Product"
+  },
+  "home": {
+    "title": "Overview",
+    "subtitle": "Consolidated spending and activity across all your locations.",
+    "kpisLabel": "Key indicators",
+    "spent": "Spent this month",
+    "spentHint": "{count, plural, one {# order this month} other {# orders this month}}",
+    "ordersActive": "Active orders",
+    "ordersActiveHint": "Across all your locations",
+    "locations": "Active locations",
+    "locationsHint": "Tier limit of {max}",
+    "locationsHintUnlimited": "No tier limit",
+    "savings": "Saved this month",
+    "savingsHint": "From the preferential commission of your {tier} tier",
+    "recentTitle": "Recent orders",
+    "viewAll": "View all",
+    "recentEmptyTitle": "No orders yet",
+    "recentEmptyDescription": "Once your locations generate orders, they will appear here consolidated.",
+    "recentEmptyAction": "Manage locations",
+    "loading": "Loading overview…",
+    "queryErrorTitle": "We could not load the overview",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not show the corporate overview. Please try again."
+  },
+  "orders": {
+    "title": "Orders",
+    "subtitle": "Consolidated orders across all your locations.",
+    "filters": {
+      "locationLabel": "Filter by location",
+      "allLocations": "All locations",
+      "statusLabel": "Filter by status",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "label": "Corporate orders",
+      "folio": "Folio",
+      "order": "Order",
+      "business": "Provider",
+      "location": "Location",
+      "amount": "Amount",
+      "status": "Status",
+      "date": "Date",
+      "noLocation": "No location"
+    },
+    "loadMore": "Load more",
+    "loading": "Loading orders…",
+    "emptyTitle": "No orders yet",
+    "emptyDescription": "Once your locations generate orders, you will see them here.",
+    "filteredEmptyTitle": "No results",
+    "filteredEmptyDescription": "No order matches the filters. Adjust the location or the status.",
+    "queryErrorTitle": "We could not load the orders",
+    "detail": {
+      "title": "Order detail",
+      "description": "Information about the selected order.",
+      "folio": "Folio",
+      "business": "Provider",
+      "location": "Location",
+      "type": "Type",
+      "status": "Status",
+      "amount": "Amount",
+      "created": "Created",
+      "noLocation": "No location",
+      "close": "Close"
+    },
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not show your orders. Please try again."
+  },
+  "locations": {
+    "title": "Locations",
+    "subtitle": "Branches and sites we serve under your account.",
+    "usage": "{used, plural, one {# active location} other {# active locations}} of {max}",
+    "usageUnlimited": "{used, plural, one {# active location} other {# active locations}}",
+    "new": "New location",
+    "limitTooltip": "You reached your tier limit of {max, plural, one {# location} other {# locations}}.",
+    "limitCta": "Review membership",
+    "notActiveTooltip": "Your account is not active; you cannot modify locations.",
+    "listLabel": "Account locations",
+    "table": {
+      "name": "Name",
+      "address": "Address",
+      "contact": "Contact",
+      "orders": "Orders",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "noContact": "No contact",
+    "emptyTitle": "No locations yet",
+    "emptyDescription": "Register your branches or sites to request services and consolidate their spending.",
+    "emptyAction": "Register location",
+    "form": {
+      "createTitle": "New location",
+      "createDescription": "Register a branch or site to be served under your account.",
+      "editTitle": "Edit location",
+      "editDescription": "Update the details of this location.",
+      "name": "Name",
+      "addressLine": "Address",
+      "city": "City",
+      "contactName": "Contact name",
+      "contactPhone": "Contact phone",
+      "optional": "Optional",
+      "create": "Register",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "close": "Close form",
+      "validation": {
+        "name": "Enter a name between 2 and 120 characters.",
+        "addressLine": "Enter an address between 5 and 200 characters.",
+        "city": "Enter a city between 2 and 80 characters.",
+        "contactName": "The contact must have 2 to 80 characters.",
+        "contactPhone": "Enter a phone between 7 and 20 characters."
+      }
+    },
+    "deactivateDialog": {
+      "title": "Deactivate this location?",
+      "description": "It will stop appearing for new orders. Its history is kept, and you can ask the team to reactivate it later.",
+      "confirm": "Deactivate",
+      "cancel": "Cancel"
+    },
+    "feedback": {
+      "created": "Location registered.",
+      "updated": "Location updated.",
+      "deactivated": "Location deactivated.",
+      "createError": "We could not register the location. Please try again.",
+      "updateError": "We could not update the location. Please try again.",
+      "deactivateError": "We could not deactivate the location. Please try again.",
+      "planLimit": "You reached your tier's location limit. Review your membership to expand it.",
+      "deactivateConflict": "This location has active orders; close them before deactivating it."
+    },
+    "loading": "Loading locations…",
+    "queryErrorTitle": "We could not load your locations",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not show your locations. Please try again."
+  },
+  "membership": {
+    "title": "Membership",
+    "subtitle": "Your tier, its usage and the account's consolidated billing.",
+    "summary": {
+      "title": "Current tier",
+      "tier": "Tier",
+      "monthlyFee": "Monthly fee",
+      "commission": "Commission per order",
+      "commissionValue": "{pct}%",
+      "renewsAt": "Next renewal",
+      "renewsAtUnknown": "To be defined",
+      "status": "Account status",
+      "membershipStatus": "Membership status"
+    },
+    "accountStatus": {
+      "PENDING": "Under review",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "CANCELLED": "Cancelled"
+    },
+    "subscriptionStatus": {
+      "ACTIVE": "Up to date",
+      "PAST_DUE": "Payment due",
+      "CANCELED": "Cancelled",
+      "none": "No active membership"
+    },
+    "usage": {
+      "title": "Location usage",
+      "description": "Active locations against your tier limit.",
+      "value": "{used} of {max}",
+      "valueUnlimited": "{used} — no limit",
+      "label": "Active locations used"
+    },
+    "change": {
+      "button": "Request tier change",
+      "title": "Request tier change",
+      "description": "This is a request: our team reviews it and negotiates the terms with you. Your tier does not change immediately.",
+      "tierLabel": "Desired tier",
+      "notesLabel": "Notes for the team",
+      "notesPlaceholder": "Tell us what you need (locations, volume, terms)…",
+      "submit": "Send request",
+      "cancel": "Cancel",
+      "pendingNotice": "You have a pending request for the {tier} tier. The team is reviewing it.",
+      "requested": "Request sent. The team will contact you.",
+      "requestError": "We could not send the request. Please try again.",
+      "alreadyPending": "A different request is already pending; wait for its resolution."
+    },
+    "invoices": {
+      "title": "Membership invoices",
+      "description": "A single membership invoice covers your account and all its locations.",
+      "loading": "Loading invoices…",
+      "emptyTitle": "No invoices yet",
+      "emptyDescription": "When your first membership invoice is issued, it will appear here.",
+      "errorTitle": "We could not load the invoices",
+      "download": "Download PDF",
+      "downloadUnavailable": "The PDF is not available for this invoice yet.",
+      "loadMore": "Load more",
+      "status": {
+        "PAID": "Paid",
+        "OPEN": "Open",
+        "VOID": "Void"
+      }
+    },
+    "loading": "Loading membership…",
+    "queryErrorTitle": "We could not load your membership",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not show your membership. Please try again."
+  }
+}

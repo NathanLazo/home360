@@ -1,4 +1,5 @@
 import {
+  CommissionSource,
   LoyaltyBonusStatus,
   LoyaltyPayoutMethod,
   OrderStatus,
@@ -133,6 +134,11 @@ export async function seedPayments(
       serviceFeeCentsApplied,
       commissionPctApplied,
       commissionCents,
+      // XC-26 reference snapshot: seeded payments are not corporate, so the
+      // provider-plan reference matches the effective commission.
+      providerPlanCommissionPctApplied: commissionPctApplied,
+      providerPlanCommissionCents: commissionCents,
+      commissionSource: CommissionSource.PROVIDER_PLAN,
       stripePaymentIntentId: null,
       stripeChargeId: null,
       stripeTransferId: null,

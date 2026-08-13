@@ -27,13 +27,9 @@ export function RevenueBreakdownList({
       maximumFractionDigits: 2,
     });
 
+  // Every figure below — including the net total — arrives already derived by
+  // the server (XC-27 projection contract); this component only formats.
   const { totals } = breakdown;
-  // Display arithmetic only: every component arrives already aggregated by the
-  // server from real LoyaltyBonus, Payment and Invoice rows.
-  const netCents =
-    totals.commissionCents +
-    totals.subscriptionCents -
-    totals.loyaltyBonusCents;
 
   return (
     <Card>
@@ -41,12 +37,12 @@ export function RevenueBreakdownList({
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {totals.commissionCents + totals.subscriptionCents > 0 ? (
+        {totals.platformGrossRevenueCents + totals.subscriptionCents > 0 ? (
           <DonutDistributionChart
             data={[
               {
-                label: t("commission"),
-                value: totals.commissionCents / 100,
+                label: t("platformGrossRevenue"),
+                value: totals.platformGrossRevenueCents / 100,
                 color: "var(--chart-5)",
               },
               {
@@ -62,9 +58,11 @@ export function RevenueBreakdownList({
         ) : null}
         <dl className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">{t("commission")}</dt>
+            <dt className="text-muted-foreground text-sm">
+              {t("platformGrossRevenue")}
+            </dt>
             <dd className="font-mono font-semibold tabular-nums">
-              {currency(totals.commissionCents)}
+              {currency(totals.platformGrossRevenueCents)}
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
@@ -80,7 +78,7 @@ export function RevenueBreakdownList({
               {t("loyaltyBonuses")}
             </dt>
             <dd className="text-destructive font-mono font-semibold tabular-nums">
-              −{currency(totals.loyaltyBonusCents)}
+              −{currency(totals.loyaltyBonusPaidCents)}
             </dd>
           </div>
         </dl>
@@ -90,7 +88,7 @@ export function RevenueBreakdownList({
         <div className="flex items-baseline justify-between gap-4">
           <span className="font-medium">{t("net")}</span>
           <span className="font-mono text-lg font-semibold tabular-nums">
-            {currency(netCents)}
+            {currency(totals.netRevenueCents)}
           </span>
         </div>
 

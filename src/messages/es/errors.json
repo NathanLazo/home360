@@ -38,6 +38,7 @@
   "INVALID_TOKEN": "El enlace de restablecimiento no es válido o ya venció.",
   "TOO_MANY_REQUESTS": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
   "EMAIL_SEND_FAILED": "No pudimos enviar el correo. Inténtalo de nuevo.",
+  "EMAIL_DELIVERY_FAILED": "No pudimos enviar la invitación. La cuenta quedó pendiente; vuelve a intentar el alta con el mismo correo para reenviarla.",
   "CURRENT_PASSWORD_INVALID": "La contraseña actual no es válida.",
   "PAYMENT_NOT_REFUNDABLE": "Este pago no se puede reembolsar en su estado actual.",
   "RECORDING_JUSTIFICATION_REQUIRED": "Sin grabación completa, esta resolución necesita una justificación escrita.",

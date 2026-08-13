@@ -64,7 +64,7 @@ export function KpiRow({ kpis }: { kpis: PlatformKpis }) {
         value={currency(kpis.escrowCents)}
         icon={LockKeyholeIcon}
         delta={{
-          text: t("kpis.escrowOrders", { count: kpis.escrowOrders }),
+          text: t("kpis.escrowOrders", { count: kpis.escrowOrdersCount }),
           trend: "neutral",
         }}
       />

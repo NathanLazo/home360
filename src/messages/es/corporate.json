@@ -1,0 +1,248 @@
+{
+  "nav": {
+    "home": "Resumen",
+    "orders": "Órdenes",
+    "locations": "Ubicaciones",
+    "membership": "Membresía"
+  },
+  "sidebar": {
+    "brandLabel": "HOME360, ir al resumen corporativo",
+    "placeholderName": "Cuenta corporativa",
+    "placeholderInitials": "CC"
+  },
+  "header": {
+    "skipToContent": "Saltar al contenido",
+    "toggleSidebar": "Abrir o cerrar el menú lateral",
+    "navigationTitle": "Navegación corporativa",
+    "navigationDescription": "Secciones del panel corporativo"
+  },
+  "statusBanner": {
+    "PENDING": "Tu cuenta está en revisión. Podrás operar cuando el equipo la active.",
+    "SUSPENDED": "Tu cuenta está suspendida. Puedes consultar tu información, pero no hacer cambios.",
+    "CANCELLED": "Tu cuenta está cancelada. Puedes consultar tu historial, pero no hacer cambios.",
+    "reasonLabel": "Motivo"
+  },
+  "tier": {
+    "BASIC": "Básico",
+    "STANDARD": "Estándar",
+    "ENTERPRISE": "Enterprise",
+    "CUSTOM": "A la medida"
+  },
+  "orderStatus": {
+    "PENDING": "Pendiente",
+    "PAID": "Pagada",
+    "IN_PROGRESS": "En curso",
+    "SHIPPING": "En envío",
+    "COMPLETED": "Completada",
+    "CANCELLED": "Cancelada",
+    "DISPUTED": "En disputa"
+  },
+  "orderType": {
+    "SERVICE": "Servicio",
+    "PRODUCT": "Producto"
+  },
+  "home": {
+    "title": "Resumen",
+    "subtitle": "Gasto consolidado y actividad de todas tus ubicaciones.",
+    "kpisLabel": "Indicadores principales",
+    "spent": "Gasto del mes",
+    "spentHint": "{count, plural, one {# orden este mes} other {# órdenes este mes}}",
+    "ordersActive": "Órdenes activas",
+    "ordersActiveHint": "En todas tus ubicaciones",
+    "locations": "Ubicaciones activas",
+    "locationsHint": "Con límite de {max}",
+    "locationsHintUnlimited": "Sin límite por tier",
+    "savings": "Ahorro del mes",
+    "savingsHint": "Por la comisión preferente de tu tier {tier}",
+    "recentTitle": "Órdenes recientes",
+    "viewAll": "Ver todas",
+    "recentEmptyTitle": "Aún no hay órdenes",
+    "recentEmptyDescription": "Cuando tus ubicaciones generen órdenes, aparecerán aquí consolidadas.",
+    "recentEmptyAction": "Administrar ubicaciones",
+    "loading": "Cargando resumen…",
+    "queryErrorTitle": "No pudimos cargar el resumen",
+    "errorTitle": "Algo salió mal",
+    "errorDescription": "No pudimos mostrar el resumen corporativo. Inténtalo de nuevo."
+  },
+  "orders": {
+    "title": "Órdenes",
+    "subtitle": "Órdenes consolidadas de todas tus ubicaciones.",
+    "filters": {
+      "locationLabel": "Filtrar por ubicación",
+      "allLocations": "Todas las ubicaciones",
+      "statusLabel": "Filtrar por estado",
+      "allStatuses": "Todos los estados"
+    },
+    "table": {
+      "label": "Órdenes corporativas",
+      "folio": "Folio",
+      "order": "Orden",
+      "business": "Proveedor",
+      "location": "Ubicación",
+      "amount": "Monto",
+      "status": "Estado",
+      "date": "Fecha",
+      "noLocation": "Sin ubicación"
+    },
+    "loadMore": "Cargar más",
+    "loading": "Cargando órdenes…",
+    "emptyTitle": "Aún no hay órdenes",
+    "emptyDescription": "Cuando tus ubicaciones generen órdenes, las verás aquí.",
+    "filteredEmptyTitle": "Sin resultados",
+    "filteredEmptyDescription": "Ninguna orden coincide con los filtros. Ajusta la ubicación o el estado.",
+    "queryErrorTitle": "No pudimos cargar las órdenes",
+    "detail": {
+      "title": "Detalle de la orden",
+      "description": "Información de la orden seleccionada.",
+      "folio": "Folio",
+      "business": "Proveedor",
+      "location": "Ubicación",
+      "type": "Tipo",
+      "status": "Estado",
+      "amount": "Monto",
+      "created": "Creada",
+      "noLocation": "Sin ubicación",
+      "close": "Cerrar"
+    },
+    "errorTitle": "Algo salió mal",
+    "errorDescription": "No pudimos mostrar tus órdenes. Inténtalo de nuevo."
+  },
+  "locations": {
+    "title": "Ubicaciones",
+    "subtitle": "Sucursales y sitios que atendemos bajo tu cuenta.",
+    "usage": "{used, plural, one {# ubicación activa} other {# ubicaciones activas}} de {max}",
+    "usageUnlimited": "{used, plural, one {# ubicación activa} other {# ubicaciones activas}}",
+    "new": "Nueva ubicación",
+    "limitTooltip": "Alcanzaste el límite de {max, plural, one {# ubicación} other {# ubicaciones}} de tu tier.",
+    "limitCta": "Revisar membresía",
+    "notActiveTooltip": "Tu cuenta no está activa; no puedes modificar ubicaciones.",
+    "listLabel": "Ubicaciones de la cuenta",
+    "table": {
+      "name": "Nombre",
+      "address": "Dirección",
+      "contact": "Contacto",
+      "orders": "Órdenes",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "edit": "Editar",
+    "deactivate": "Desactivar",
+    "noContact": "Sin contacto",
+    "emptyTitle": "Aún no tienes ubicaciones",
+    "emptyDescription": "Registra tus sucursales o sitios para pedir servicios y consolidar su gasto.",
+    "emptyAction": "Registrar ubicación",
+    "form": {
+      "createTitle": "Nueva ubicación",
+      "createDescription": "Registra una sucursal o sitio a atender bajo tu cuenta.",
+      "editTitle": "Editar ubicación",
+      "editDescription": "Actualiza los datos de esta ubicación.",
+      "name": "Nombre",
+      "addressLine": "Dirección",
+      "city": "Ciudad",
+      "contactName": "Nombre de contacto",
+      "contactPhone": "Teléfono de contacto",
+      "optional": "Opcional",
+      "create": "Registrar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "close": "Cerrar formulario",
+      "validation": {
+        "name": "Escribe un nombre de 2 a 120 caracteres.",
+        "addressLine": "Escribe una dirección de 5 a 200 caracteres.",
+        "city": "Escribe una ciudad de 2 a 80 caracteres.",
+        "contactName": "El contacto debe tener de 2 a 80 caracteres.",
+        "contactPhone": "Escribe un teléfono de 7 a 20 caracteres."
+      }
+    },
+    "deactivateDialog": {
+      "title": "¿Desactivar esta ubicación?",
+      "description": "Dejará de aparecer para nuevas órdenes. Su historial se conserva y puedes pedirle al equipo reactivarla después.",
+      "confirm": "Desactivar",
+      "cancel": "Cancelar"
+    },
+    "feedback": {
+      "created": "Ubicación registrada.",
+      "updated": "Ubicación actualizada.",
+      "deactivated": "Ubicación desactivada.",
+      "createError": "No pudimos registrar la ubicación. Inténtalo de nuevo.",
+      "updateError": "No pudimos actualizar la ubicación. Inténtalo de nuevo.",
+      "deactivateError": "No pudimos desactivar la ubicación. Inténtalo de nuevo.",
+      "planLimit": "Alcanzaste el límite de ubicaciones de tu tier. Revisa tu membresía para ampliarlo.",
+      "deactivateConflict": "Esta ubicación tiene órdenes activas; ciérralas antes de desactivarla."
+    },
+    "loading": "Cargando ubicaciones…",
+    "queryErrorTitle": "No pudimos cargar tus ubicaciones",
+    "errorTitle": "Algo salió mal",
+    "errorDescription": "No pudimos mostrar tus ubicaciones. Inténtalo de nuevo."
+  },
+  "membership": {
+    "title": "Membresía",
+    "subtitle": "Tu tier, su uso y la facturación consolidada de la cuenta.",
+    "summary": {
+      "title": "Tier actual",
+      "tier": "Tier",
+      "monthlyFee": "Cuota mensual",
+      "commission": "Comisión por orden",
+      "commissionValue": "{pct} %",
+      "renewsAt": "Próxima renovación",
+      "renewsAtUnknown": "Por definir",
+      "status": "Estado de la cuenta",
+      "membershipStatus": "Estado de la membresía"
+    },
+    "accountStatus": {
+      "PENDING": "En revisión",
+      "ACTIVE": "Activa",
+      "SUSPENDED": "Suspendida",
+      "CANCELLED": "Cancelada"
+    },
+    "subscriptionStatus": {
+      "ACTIVE": "Al corriente",
+      "PAST_DUE": "Pago pendiente",
+      "CANCELED": "Cancelada",
+      "none": "Sin membresía activa"
+    },
+    "usage": {
+      "title": "Uso de ubicaciones",
+      "description": "Ubicaciones activas frente al límite de tu tier.",
+      "value": "{used} de {max}",
+      "valueUnlimited": "{used} — sin límite",
+      "label": "Ubicaciones activas usadas"
+    },
+    "change": {
+      "button": "Solicitar cambio de tier",
+      "title": "Solicitar cambio de tier",
+      "description": "Es una solicitud: nuestro equipo la revisa y negocia contigo los términos. Tu tier no cambia de inmediato.",
+      "tierLabel": "Tier deseado",
+      "notesLabel": "Notas para el equipo",
+      "notesPlaceholder": "Cuéntanos qué necesitas (ubicaciones, volumen, condiciones)…",
+      "submit": "Enviar solicitud",
+      "cancel": "Cancelar",
+      "pendingNotice": "Tienes una solicitud pendiente para el tier {tier}. El equipo la está revisando.",
+      "requested": "Solicitud enviada. El equipo te contactará.",
+      "requestError": "No pudimos enviar la solicitud. Inténtalo de nuevo.",
+      "alreadyPending": "Ya hay una solicitud pendiente distinta; espera su resolución."
+    },
+    "invoices": {
+      "title": "Facturas de membresía",
+      "description": "Una sola factura de membresía cubre tu cuenta y todas sus ubicaciones.",
+      "loading": "Cargando facturas…",
+      "emptyTitle": "Aún no hay facturas",
+      "emptyDescription": "Cuando se genere tu primera factura de membresía, aparecerá aquí.",
+      "errorTitle": "No pudimos cargar las facturas",
+      "download": "Descargar PDF",
+      "downloadUnavailable": "El PDF aún no está disponible para esta factura.",
+      "loadMore": "Cargar más",
+      "status": {
+        "PAID": "Pagada",
+        "OPEN": "Pendiente",
+        "VOID": "Anulada"
+      }
+    },
+    "loading": "Cargando membresía…",
+    "queryErrorTitle": "No pudimos cargar tu membresía",
+    "errorTitle": "Algo salió mal",
+    "errorDescription": "No pudimos mostrar tu membresía. Inténtalo de nuevo."
+  }
+}

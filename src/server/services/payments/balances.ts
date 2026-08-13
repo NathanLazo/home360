@@ -1,12 +1,16 @@
 import {
   LoyaltyBonusStatus,
-  PaymentStatus,
   type PrismaClient,
-  WithdrawalStatus,
 } from "../../../../generated/prisma";
 
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
-import { providerTransferCents } from "./payment-ledger";
+import {
+  AVAILABLE_BALANCE_PAYMENT_STATUSES,
+  ESCROW_PAYMENT_STATUSES,
+  PLATFORM_EARNING_PAYMENT_STATUSES,
+  RESERVED_WITHDRAWAL_STATUSES,
+  availableBalanceCents,
+} from "./financial-projections";
 
 export const FINANCIAL_TIME_ZONE = "America/Chihuahua";
 
@@ -129,9 +133,7 @@ export async function getBusinessBalances(
     deps.db.payment.aggregate({
       where: {
         businessId: input.businessId,
-        status: {
-          in: [PaymentStatus.RELEASED, PaymentStatus.PARTIALLY_REFUNDED],
-        },
+        status: { in: [...AVAILABLE_BALANCE_PAYMENT_STATUSES] },
       },
       _sum: {
         providerAmountCents: true,
@@ -142,42 +144,25 @@ export async function getBusinessBalances(
     deps.db.withdrawal.aggregate({
       where: {
         businessId: input.businessId,
-        status: {
-          in: [
-            WithdrawalStatus.REQUESTED,
-            WithdrawalStatus.PROCESSING,
-            WithdrawalStatus.APPROVED,
-          ],
-        },
+        status: { in: [...RESERVED_WITHDRAWAL_STATUSES] },
       },
       _sum: { amountCents: true },
     }),
+    // Escrow shows the total charged amount; the provider net share is not a
+    // business balance (the retained flat fee is platform revenue).
     deps.db.payment.aggregate({
       where: {
         businessId: input.businessId,
-        status: {
-          in: [
-            PaymentStatus.IN_ESCROW,
-            PaymentStatus.REFUNDING,
-            PaymentStatus.RELEASING,
-          ],
-        },
+        status: { in: [...ESCROW_PAYMENT_STATUSES] },
       },
       _sum: { amountCents: true },
       _count: { _all: true },
     }),
+    // Month commission buckets by `Payment.createdAt` (charge time, XC-27).
     deps.db.payment.aggregate({
       where: {
         businessId: input.businessId,
-        status: {
-          in: [
-            PaymentStatus.IN_ESCROW,
-            PaymentStatus.REFUNDING,
-            PaymentStatus.RELEASING,
-            PaymentStatus.RELEASED,
-            PaymentStatus.PARTIALLY_REFUNDED,
-          ],
-        },
+        status: { in: [...PLATFORM_EARNING_PAYMENT_STATUSES] },
         createdAt: { gte: month.start, lt: month.end },
       },
       _sum: { commissionCents: true },
@@ -191,19 +176,17 @@ export async function getBusinessBalances(
     }),
   ]);
 
-  const providerAmountCents = releasedPayments._sum.providerAmountCents ?? 0;
-  const providerRefundedCents =
-    releasedPayments._sum.providerRefundedCents ?? 0;
-  const commissionCents = releasedPayments._sum.commissionCents ?? 0;
-  const reservedWithdrawalCents = reservedWithdrawals._sum.amountCents ?? 0;
-  const availableProviderCents = providerTransferCents({
-    providerAmountCents,
-    providerRefundedCents,
-    commissionCents,
+  const availableCents = availableBalanceCents({
+    releasedLedger: {
+      providerAmountCents: releasedPayments._sum.providerAmountCents ?? 0,
+      providerRefundedCents: releasedPayments._sum.providerRefundedCents ?? 0,
+      commissionCents: releasedPayments._sum.commissionCents ?? 0,
+    },
+    reservedWithdrawalCents: reservedWithdrawals._sum.amountCents ?? 0,
   });
 
   return svcOk({
-    availableCents: availableProviderCents - reservedWithdrawalCents,
+    availableCents,
     escrowCents: escrowPayments._sum.amountCents ?? 0,
     escrowOrdersCount: escrowPayments._count._all,
     monthCommissionCents: monthCommission._sum.commissionCents ?? 0,

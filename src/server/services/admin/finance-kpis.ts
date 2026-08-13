@@ -2,7 +2,6 @@ import {
   BusinessStatus,
   InvoiceStatus,
   LoyaltyBonusStatus,
-  PaymentStatus,
   type Prisma,
   type PrismaClient,
   WithdrawalStatus,
@@ -12,6 +11,12 @@ import {
   WITHDRAWALS_PAGE_SIZE,
 } from "~/app/[locale]/admin/finance/_components/finance.schema";
 import { getFinancialMonthBounds } from "../payments/balances";
+import {
+  ESCROW_PAYMENT_STATUSES,
+  PLATFORM_EARNING_PAYMENT_STATUSES,
+  netPlatformRevenueCents,
+  platformGrossRevenueCents,
+} from "../payments/financial-projections";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 type FinanceDb = Pick<
@@ -19,29 +24,10 @@ type FinanceDb = Pick<
   "business" | "invoice" | "loyaltyBonus" | "payment" | "withdrawal"
 >;
 
-/**
- * Commission actually earned by the platform. A fully refunded payment earned
- * nothing; a partial refund already carries its effective (proportional)
- * commission persisted by F3-05, so reads never recompute the policy.
- */
-const EARNING_PAYMENT_STATUSES = [
-  PaymentStatus.IN_ESCROW,
-  PaymentStatus.REFUNDING,
-  PaymentStatus.RELEASING,
-  PaymentStatus.RELEASED,
-  PaymentStatus.PARTIALLY_REFUNDED,
-] as const;
-
-const ESCROW_PAYMENT_STATUSES = [
-  PaymentStatus.IN_ESCROW,
-  PaymentStatus.REFUNDING,
-  PaymentStatus.RELEASING,
-] as const;
-
 export interface FinanceKpis {
   month: string;
-  commissionCents: number;
-  commissionDeltaPct: number | null;
+  platformGrossRevenueCents: number;
+  platformGrossRevenueDeltaPct: number | null;
   subscriptionCents: number;
   activeBusinesses: number;
   escrowCents: number;
@@ -53,14 +39,16 @@ export interface FinanceKpis {
 export interface RevenueBreakdown {
   series: Array<{
     month: string;
-    commissionCents: number;
+    platformGrossRevenueCents: number;
     subscriptionCents: number;
   }>;
   totals: {
-    commissionCents: number;
+    platformGrossRevenueCents: number;
     subscriptionCents: number;
-    loyaltyBonusCents: number;
+    loyaltyBonusPaidCents: number;
+    /** Operating liability: PENDING bonuses never reduce paid income. */
     loyaltyBonusPendingCents: number;
+    netRevenueCents: number;
   };
 }
 
@@ -100,16 +88,18 @@ function deltaPct(current: number, previous: number): number | null {
     : Math.round(((current - previous) / previous) * 100);
 }
 
-function commissionWhere(range: {
+/** Payment earnings bucket by `Payment.createdAt` (charge time, XC-27). */
+function platformEarningWhere(range: {
   start: Date;
   end: Date;
 }): Prisma.PaymentWhereInput {
   return {
-    status: { in: [...EARNING_PAYMENT_STATUSES] },
+    status: { in: [...PLATFORM_EARNING_PAYMENT_STATUSES] },
     createdAt: { gte: range.start, lt: range.end },
   };
 }
 
+/** PAID subscription invoices bucket by `Invoice.issuedAt` (XC-27). */
 function paidInvoiceWhere(range: {
   start: Date;
   end: Date;
@@ -118,6 +108,27 @@ function paidInvoiceWhere(range: {
     status: InvoiceStatus.PAID,
     issuedAt: { gte: range.start, lt: range.end },
   };
+}
+
+const platformEarningSum = {
+  commissionCents: true,
+  serviceFeeCentsApplied: true,
+  serviceFeeRefundedCents: true,
+} as const;
+
+/** W12 gross platform revenue over aggregated ledger `_sum` columns. */
+function grossFromAggregate(aggregate: {
+  _sum: {
+    commissionCents: number | null;
+    serviceFeeCentsApplied: number | null;
+    serviceFeeRefundedCents: number | null;
+  };
+}): number {
+  return platformGrossRevenueCents({
+    commissionCents: aggregate._sum.commissionCents ?? 0,
+    serviceFeeCentsApplied: aggregate._sum.serviceFeeCentsApplied ?? 0,
+    serviceFeeRefundedCents: aggregate._sum.serviceFeeRefundedCents ?? 0,
+  });
 }
 
 export async function getFinanceKpis(
@@ -134,20 +145,20 @@ export async function getFinanceKpis(
   const previous = previousMonthBounds(month.start);
 
   const [
-    commission,
-    previousCommission,
+    earnings,
+    previousEarnings,
     subscriptions,
     activeBusinesses,
     escrow,
     pendingWithdrawals,
   ] = await Promise.all([
     deps.db.payment.aggregate({
-      where: commissionWhere(month),
-      _sum: { commissionCents: true },
+      where: platformEarningWhere(month),
+      _sum: platformEarningSum,
     }),
     deps.db.payment.aggregate({
-      where: commissionWhere(previous),
-      _sum: { commissionCents: true },
+      where: platformEarningWhere(previous),
+      _sum: platformEarningSum,
     }),
     deps.db.invoice.aggregate({
       where: paidInvoiceWhere(month),
@@ -166,14 +177,14 @@ export async function getFinanceKpis(
     }),
   ]);
 
-  const commissionCents = commission._sum.commissionCents ?? 0;
+  const grossCents = grossFromAggregate(earnings);
 
   return svcOk({
     month: monthKey(month),
-    commissionCents,
-    commissionDeltaPct: deltaPct(
-      commissionCents,
-      previousCommission._sum.commissionCents ?? 0,
+    platformGrossRevenueCents: grossCents,
+    platformGrossRevenueDeltaPct: deltaPct(
+      grossCents,
+      grossFromAggregate(previousEarnings),
     ),
     subscriptionCents: subscriptions._sum.amountCents ?? 0,
     activeBusinesses,
@@ -252,10 +263,10 @@ export async function getRevenueBreakdown(
   const [series, loyaltyPaid, loyaltyPending] = await Promise.all([
     Promise.all(
       buckets.map(async (bucket) => {
-        const [commission, subscriptions] = await Promise.all([
+        const [earnings, subscriptions] = await Promise.all([
           deps.db.payment.aggregate({
-            where: commissionWhere(bucket),
-            _sum: { commissionCents: true },
+            where: platformEarningWhere(bucket),
+            _sum: platformEarningSum,
           }),
           deps.db.invoice.aggregate({
             where: paidInvoiceWhere(bucket),
@@ -265,7 +276,7 @@ export async function getRevenueBreakdown(
 
         return {
           month: monthKey(bucket),
-          commissionCents: commission._sum.commissionCents ?? 0,
+          platformGrossRevenueCents: grossFromAggregate(earnings),
           subscriptionCents: subscriptions._sum.amountCents ?? 0,
         };
       }),
@@ -285,19 +296,28 @@ export async function getRevenueBreakdown(
     }),
   ]);
 
+  const totalGrossCents = series.reduce(
+    (total, bucket) => total + bucket.platformGrossRevenueCents,
+    0,
+  );
+  const totalSubscriptionCents = series.reduce(
+    (total, bucket) => total + bucket.subscriptionCents,
+    0,
+  );
+  const loyaltyBonusPaidCents = loyaltyPaid._sum.amountCents ?? 0;
+
   return svcOk({
     series,
     totals: {
-      commissionCents: series.reduce(
-        (total, bucket) => total + bucket.commissionCents,
-        0,
-      ),
-      subscriptionCents: series.reduce(
-        (total, bucket) => total + bucket.subscriptionCents,
-        0,
-      ),
-      loyaltyBonusCents: loyaltyPaid._sum.amountCents ?? 0,
+      platformGrossRevenueCents: totalGrossCents,
+      subscriptionCents: totalSubscriptionCents,
+      loyaltyBonusPaidCents,
       loyaltyBonusPendingCents: loyaltyPending._sum.amountCents ?? 0,
+      netRevenueCents: netPlatformRevenueCents({
+        platformGrossRevenueCents: totalGrossCents,
+        paidSubscriptionCents: totalSubscriptionCents,
+        paidLoyaltyBonusCents: loyaltyBonusPaidCents,
+      }),
     },
   });
 }

@@ -14,6 +14,7 @@
     "roles": {
       "ADMIN": "Administrator",
       "BUSINESS": "Business",
+      "CORPORATE": "Corporate",
       "CUSTOMER": "Customer",
       "WORKER": "Worker"
     }

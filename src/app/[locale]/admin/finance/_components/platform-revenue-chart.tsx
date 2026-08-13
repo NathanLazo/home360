@@ -53,8 +53,8 @@ export function PlatformRevenueChart({ series }: { series: RevenuePoint[] }) {
 
   const chartSeries: CurrencyBarSeries[] = [
     {
-      dataKey: "commissionCents",
-      label: t("commission"),
+      dataKey: "platformGrossRevenueCents",
+      label: t("platformGrossRevenue"),
       color: "var(--chart-5)",
     },
     {

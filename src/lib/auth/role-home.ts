@@ -1,15 +1,22 @@
 import type { UserRole } from "../../../generated/prisma";
 
-export const homeForRole = (role: UserRole): "/admin" | "/dashboard" | "/" => {
-  if (role === "ADMIN") {
-    return "/admin";
+export const homeForRole = (
+  role: UserRole,
+): "/admin" | "/dashboard" | "/corporate" | "/" => {
+  // Exhaustive on purpose (no `default`): adding a UserRole without mapping
+  // it here must fail typecheck instead of silently landing on `/`.
+  switch (role) {
+    case "ADMIN":
+      return "/admin";
+    case "BUSINESS":
+      return "/dashboard";
+    case "CORPORATE":
+      return "/corporate";
+    case "CUSTOMER":
+      return "/";
+    case "WORKER":
+      return "/";
   }
-
-  if (role === "BUSINESS") {
-    return "/dashboard";
-  }
-
-  return "/";
 };
 
 export const isRouteOrDescendant = (pathname: string, root: string): boolean =>
@@ -96,6 +103,10 @@ export function safeCallbackForRole(
   }
 
   if (role === "BUSINESS" && isRouteOrDescendant(pathname, "/dashboard")) {
+    return canonicalPath;
+  }
+
+  if (role === "CORPORATE" && isRouteOrDescendant(pathname, "/corporate")) {
     return canonicalPath;
   }
 

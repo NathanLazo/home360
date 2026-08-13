@@ -376,10 +376,10 @@
     "onboarding": {
       "title": "Connect your account to receive your money",
       "missing": "You can charge customers, but you need to connect a bank account before releasing or withdrawing funds.",
-      "pending": "Your account is connected but cannot receive deposits yet. Complete the information Stripe is asking for.",
+      "pending": "Your account is connected but its setup is not complete yet. Complete the information Stripe is asking for.",
       "start": "Connect account",
       "resume": "Complete information",
-      "completed": "Your account can now receive deposits."
+      "completed": "Your account can now charge and receive deposits."
     }
   },
   "services": {

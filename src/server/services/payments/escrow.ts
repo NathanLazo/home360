@@ -8,6 +8,10 @@ import {
 } from "../../../../generated/prisma";
 import Stripe from "stripe";
 
+import {
+  commissionCentsOnPrincipal,
+  resolveCommissionPct,
+} from "~/server/services/payments/commission-resolution";
 import { providerTransferCents } from "~/server/services/payments/payment-ledger";
 import {
   svcFail,
@@ -23,7 +27,6 @@ const CAPTURE_MAX_SERIALIZABLE_ATTEMPTS = 3;
 
 export const capturePaymentErrorCodes = [
   "INVALID_TARGET",
-  "CORPORATE_PRICING_NOT_AVAILABLE",
   "BUSINESS_NOT_ACTIVE",
 ] as const;
 
@@ -60,47 +63,6 @@ type CapturePaymentDeps = {
   db: PrismaClient;
   stripe: Stripe;
 };
-
-type CommissionDb = Pick<PrismaClient, "business">;
-
-export type CommissionResolutionErrorCode =
-  "CORPORATE_PRICING_NOT_AVAILABLE" | "BUSINESS_NOT_ACTIVE";
-
-export async function resolveCommissionPct(
-  db: CommissionDb,
-  input: { businessId: string; corporateAccountId: string | null },
-): Promise<ServiceResult<number, CommissionResolutionErrorCode>> {
-  if (input.corporateAccountId !== null) {
-    return svcFail("CORPORATE_PRICING_NOT_AVAILABLE");
-  }
-
-  const business = await db.business.findUnique({
-    where: { id: input.businessId },
-    select: {
-      subscription: {
-        select: {
-          status: true,
-          plan: { select: { commissionPct: true } },
-        },
-      },
-    },
-  });
-  const subscription = business?.subscription;
-
-  if (subscription?.status !== "ACTIVE") {
-    return svcFail("BUSINESS_NOT_ACTIVE");
-  }
-
-  if (
-    !Number.isInteger(subscription.plan.commissionPct) ||
-    subscription.plan.commissionPct < 0 ||
-    subscription.plan.commissionPct > 100
-  ) {
-    return svcFail("CONFLICT", "Invalid plan commission configuration");
-  }
-
-  return svcOk(subscription.plan.commissionPct);
-}
 
 function hasExactlyOneOrigin(input: CapturePaymentInput): boolean {
   return (input.orderId !== undefined) !== (input.paymentLinkId !== undefined);
@@ -301,9 +263,19 @@ export async function capturePayment(
             return svcFail(commission.code, commission.detail);
           }
 
-          const commissionPctApplied = commission.data;
-          const commissionCents = Math.round(
-            (input.providerAmountCents * commissionPctApplied) / 100,
+          // XC-26: freeze both sides of the audit comparison at capture. The
+          // effective values govern transfers, D3 bonuses and real income; the
+          // provider-plan reference makes historical savings auditable even
+          // after plan or corporate-term renegotiations.
+          const { effectivePct, providerPlanPct, source } = commission.data;
+          const commissionPctApplied = effectivePct;
+          const commissionCents = commissionCentsOnPrincipal(
+            input.providerAmountCents,
+            effectivePct,
+          );
+          const providerPlanCommissionCents = commissionCentsOnPrincipal(
+            input.providerAmountCents,
+            providerPlanPct,
           );
           const escrowReleaseAt = new Date(
             Date.now() + escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
@@ -324,6 +296,9 @@ export async function capturePayment(
               serviceFeeCentsApplied,
               commissionPctApplied,
               commissionCents,
+              providerPlanCommissionPctApplied: providerPlanPct,
+              providerPlanCommissionCents,
+              commissionSource: source,
               stripePaymentIntentId: input.stripePaymentIntentId,
               stripeChargeId: input.stripeChargeId,
               escrowReleaseAt,

@@ -22,7 +22,7 @@ export function FinanceKpiRow({ kpis }: { kpis: FinanceKpis }) {
       maximumFractionDigits: 2,
     });
 
-  const delta = kpis.commissionDeltaPct;
+  const delta = kpis.platformGrossRevenueDeltaPct;
 
   return (
     <section
@@ -30,14 +30,14 @@ export function FinanceKpiRow({ kpis }: { kpis: FinanceKpis }) {
       aria-label={t("label")}
     >
       <KpiCard
-        label={t("commission")}
-        value={currency(kpis.commissionCents)}
+        label={t("platformGrossRevenue")}
+        value={currency(kpis.platformGrossRevenueCents)}
         icon={PercentIcon}
         delta={{
           text:
             delta === null
               ? t("noBaseline")
-              : t("commissionDelta", { value: delta }),
+              : t("platformGrossRevenueDelta", { value: delta }),
           trend:
             delta === null || delta === 0 ? "neutral" : delta > 0 ? "up" : "down",
         }}

@@ -4,6 +4,7 @@
     "users": "Usuarios",
     "disputes": "Disputas",
     "finance": "Finanzas",
+    "corporate": "Corporativo",
     "settings": "Configuración"
   },
   "sidebar": {
@@ -372,8 +373,8 @@
     "kpis": {
       "label": "Indicadores financieros",
       "errorTitle": "No pudimos cargar los indicadores",
-      "commission": "Comisiones del mes",
-      "commissionDelta": "{value}% vs. mes anterior",
+      "platformGrossRevenue": "Ingreso bruto del mes",
+      "platformGrossRevenueDelta": "{value}% vs. mes anterior",
       "noBaseline": "Sin base del mes anterior",
       "subscriptions": "Suscripciones del mes",
       "activeBusinesses": "{count, plural, =0 {Sin negocios activos} one {# negocio activo} other {# negocios activos}}",
@@ -384,15 +385,15 @@
     },
     "chart": {
       "title": "Ingresos por mes",
-      "commission": "Comisiones",
+      "platformGrossRevenue": "Comisiones y tarifas de servicio",
       "subscriptions": "Suscripciones",
       "emptyTitle": "Sin datos del periodo",
-      "emptyDescription": "Cuando haya comisiones o suscripciones cobradas verás la serie aquí."
+      "emptyDescription": "Cuando haya comisiones, tarifas o suscripciones cobradas verás la serie aquí."
     },
     "breakdown": {
       "title": "Desglose del periodo",
       "errorTitle": "No pudimos cargar el desglose",
-      "commission": "Comisiones",
+      "platformGrossRevenue": "Comisiones y tarifas de servicio",
       "subscriptions": "Suscripciones",
       "loyaltyBonuses": "Bonos de lealtad pagados",
       "net": "Ingreso neto",
@@ -470,6 +471,230 @@
         "paid": "Bono registrado como pagado.",
         "cancelled": "Bono cancelado."
       }
+    }
+  },
+  "corporate": {
+    "title": "Cuentas corporativas",
+    "subtitle": "Administra las cuentas B2B, sus términos negociados y su facturación.",
+    "loading": "Cargando cuentas corporativas…",
+    "loadMore": "Cargar más",
+    "errorTitle": "No pudimos cargar las cuentas corporativas",
+    "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
+    "searchPlaceholder": "Buscar por empresa, responsable o correo",
+    "allTiers": "Todos los tiers",
+    "tierFilterLabel": "Filtrar por tier",
+    "notAvailable": "—",
+    "tabs": {
+      "all": "Todas",
+      "active": "Activas",
+      "pending": "Pendientes",
+      "suspended": "Suspendidas",
+      "cancelled": "Canceladas",
+      "allWithCount": "Todas ({count})",
+      "activeWithCount": "Activas ({count})",
+      "pendingWithCount": "Pendientes ({count})",
+      "suspendedWithCount": "Suspendidas ({count})",
+      "cancelledWithCount": "Canceladas ({count})"
+    },
+    "status": {
+      "PENDING": "Pendiente",
+      "ACTIVE": "Activa",
+      "SUSPENDED": "Suspendida",
+      "CANCELLED": "Cancelada"
+    },
+    "tier": {
+      "BASIC": "Básico",
+      "STANDARD": "Estándar",
+      "ENTERPRISE": "Enterprise",
+      "CUSTOM": "A la medida"
+    },
+    "membershipStatus": {
+      "ACTIVE": "Activa",
+      "PAST_DUE": "Pago vencido",
+      "CANCELED": "Cancelada"
+    },
+    "columns": {
+      "account": "Cuenta",
+      "tier": "Tier",
+      "locations": "Ubicaciones",
+      "monthSpend": "Gasto del mes",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "locationsCell": "{active} de {max}",
+    "locationsCellUnlimited": "{active} · sin límite",
+    "empty": {
+      "title": "Sin cuentas corporativas",
+      "description": "No hay cuentas que coincidan con la búsqueda o los filtros aplicados."
+    },
+    "actions": {
+      "open": "Abrir acciones",
+      "viewDetail": "Ver expediente",
+      "activate": "Activar",
+      "editTerms": "Editar términos",
+      "suspend": "Suspender",
+      "reactivate": "Reactivar",
+      "reconcileBilling": "Reconciliar facturación"
+    },
+    "toasts": {
+      "created": "Cuenta creada. La invitación va en camino al correo del responsable.",
+      "activated": "Cuenta activada. La suscripción quedó creada en Stripe.",
+      "termsUpdated": "Términos actualizados. Aplican solo a órdenes futuras.",
+      "suspended": "Cuenta suspendida. El acceso y el cobro quedaron en pausa.",
+      "reactivated": "Cuenta reactivada. El acceso y el cobro se reanudaron.",
+      "billingReconciled": "Facturación reconciliada. La cuenta quedó alineada con Stripe.",
+      "requestRejected": "Solicitud de cambio de tier rechazada."
+    },
+    "reasonDialog": {
+      "label": "Motivo",
+      "placeholder": "Explica brevemente la decisión (mínimo 5 caracteres).",
+      "invalid": "El motivo debe tener entre 5 y 500 caracteres.",
+      "cancel": "Cancelar"
+    },
+    "suspendDialog": {
+      "title": "Suspender cuenta corporativa",
+      "description": "Vas a suspender {name}. Mientras esté suspendida, la cuenta no podrá operar y el cobro mensual en Stripe queda en pausa.",
+      "confirm": "Suspender"
+    },
+    "reactivateDialog": {
+      "title": "Reactivar cuenta corporativa",
+      "description": "Vas a reactivar {name}. La cuenta recupera el acceso y el cobro mensual en Stripe se reanuda.",
+      "confirm": "Reactivar",
+      "cancel": "Cancelar"
+    },
+    "reconcileDialog": {
+      "title": "Reconciliar facturación",
+      "description": "Vas a reconciliar la facturación de {name}. Se repara el cliente, la suscripción y la membresía contra Stripe. Es seguro repetirlo: no duplica ningún objeto de cobro.",
+      "confirm": "Reconciliar",
+      "cancel": "Cancelar"
+    },
+    "activateDialog": {
+      "title": "Activar cuenta corporativa",
+      "description": "Vas a activar {name} con el tier {tier}: cuota mensual de {fee} y comisión preferente de {commission}%. Esta acción crea la suscripción en Stripe.",
+      "confirm": "Activar cuenta",
+      "cancel": "Cancelar"
+    },
+    "create": {
+      "button": "Nueva cuenta",
+      "title": "Alta de cuenta corporativa",
+      "description": "Captura los datos de la empresa y los términos iniciales. El responsable recibirá una invitación por correo.",
+      "errorTitle": "No pudimos preparar el formulario",
+      "invitationNote": "Se enviará una invitación por correo para que la persona responsable cree su contraseña con un enlace seguro. Aquí no se captura ninguna contraseña.",
+      "cancel": "Cancelar",
+      "confirm": "Crear y enviar invitación",
+      "fields": {
+        "name": "Empresa",
+        "nameInvalid": "El nombre debe tener al menos 2 caracteres.",
+        "taxId": "RFC (opcional)",
+        "taxIdPlaceholder": "RFC de la empresa",
+        "ownerEmail": "Correo del responsable",
+        "ownerEmailInvalid": "Escribe un correo válido.",
+        "locale": "Idioma",
+        "localeOptions": {
+          "es": "Español",
+          "en": "Inglés"
+        },
+        "tier": "Tier",
+        "tierPlaceholder": "Selecciona un tier",
+        "tierOption": "{tier} · {fee}/mes · {commission}% de comisión",
+        "tierRequired": "Selecciona un tier para continuar.",
+        "tierHint": "Los términos se prellenan con el catálogo del tier; puedes ajustarlos si hay negociación.",
+        "commission": "Comisión (%)",
+        "commissionHint": "Porcentaje que cobra la plataforma en las órdenes de la cuenta.",
+        "commissionHintCustom": "El tier a la medida exige capturarla; máximo 4%.",
+        "commissionRequired": "Captura la comisión negociada.",
+        "monthlyFee": "Cuota mensual (MXN)",
+        "monthlyFeeHint": "Se cobra por suscripción en Stripe.",
+        "monthlyFeeRequired": "Captura la cuota mensual.",
+        "maxLocations": "Límite de ubicaciones",
+        "maxLocationsUnlimited": "Sin límite",
+        "maxLocationsHint": "Debe respetar el rango del tier; vacío solo en el tier a la medida.",
+        "manager": "Ejecutivo de cuenta",
+        "managerPlaceholder": "Selecciona un ejecutivo",
+        "managerNone": "Sin ejecutivo",
+        "managerRequired": "Este tier requiere un ejecutivo de cuenta.",
+        "managerHint": "Obligatorio a partir del tier Estándar."
+      }
+    },
+    "terms": {
+      "title": "Términos negociados",
+      "description": "Ajusta tier, comisión, cuota y límite de ubicaciones de la cuenta.",
+      "errorTitle": "No pudimos cargar los términos",
+      "approvingRequest": "Estás aprobando una solicitud de cambio al tier {tier}. El tier queda fijado por la solicitud; negocia el resto de los términos.",
+      "scopeNote": "Los términos aplican solo a órdenes futuras: cada pago congela su comisión al cobrarse y nunca se reescribe.",
+      "cancel": "Cancelar",
+      "confirm": "Guardar términos",
+      "fields": {
+        "tier": "Tier",
+        "commission": "Comisión (%)",
+        "commissionHint": "Porcentaje que cobra la plataforma en las órdenes de la cuenta.",
+        "commissionHintCustom": "El tier a la medida exige capturarla; máximo 4%.",
+        "commissionInvalid": "Escribe un número entero entre 0 y 100.",
+        "monthlyFee": "Cuota mensual (MXN)",
+        "monthlyFeeHint": "Si cambia, la suscripción de Stripe rota de precio con prorrateo.",
+        "monthlyFeeInvalid": "Escribe un monto mayor a cero.",
+        "maxLocations": "Límite de ubicaciones",
+        "maxLocationsUnlimited": "Sin límite",
+        "maxLocationsHint": "No puede quedar por debajo de las {active} ubicaciones activas.",
+        "maxLocationsInvalid": "Escribe un número entero de al menos 1, o deja el campo vacío para no fijar límite.",
+        "manager": "Ejecutivo de cuenta",
+        "managerPlaceholder": "Selecciona un ejecutivo",
+        "managerNone": "Sin ejecutivo",
+        "managerRequired": "Este tier requiere un ejecutivo de cuenta.",
+        "managerHint": "Obligatorio a partir del tier Estándar."
+      },
+      "example": {
+        "title": "Efecto sobre un ticket de {ticket}",
+        "commission": "Comisión",
+        "fee": "Fee",
+        "bonus": "Bono al proveedor",
+        "net": "Neto plataforma",
+        "currentRow": "Actual ({commission}%)",
+        "newRow": "Nueva ({commission}%)",
+        "awaitingCommission": "Captura una comisión válida para ver el efecto.",
+        "bonusNote": "El bono de lealtad del proveedor es el {pct}% de la comisión (D3): al bajar la comisión, el fee y el bono bajan juntos.",
+        "rowSummary": "Con comisión de {commission}%: fee {fee}, bono al proveedor {bonus}, neto para la plataforma {net}."
+      }
+    },
+    "requests": {
+      "empty": "No hay solicitudes de cambio de tier pendientes.",
+      "requestedTier": "Tier solicitado:",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "rejectTitle": "Rechazar solicitud de tier",
+      "rejectDescription": "La solicitud quedará rechazada y la cuenta conservará sus términos actuales.",
+      "rejectConfirm": "Rechazar solicitud"
+    },
+    "detail": {
+      "title": "Expediente corporativo",
+      "subtitle": "Términos, membresía, gasto, ubicaciones y órdenes de la cuenta.",
+      "errorTitle": "No pudimos cargar el expediente",
+      "statusReason": "Motivo: {reason}",
+      "terms": "Términos negociados",
+      "commission": "Comisión",
+      "monthlyFee": "Cuota mensual",
+      "maxLocations": "Límite de ubicaciones",
+      "unlimited": "Sin límite",
+      "manager": "Ejecutivo de cuenta",
+      "taxId": "RFC",
+      "createdAt": "Alta",
+      "notAvailable": "—",
+      "owner": "Responsable",
+      "ownerName": "Nombre",
+      "ownerEmail": "Correo",
+      "membership": "Membresía",
+      "noMembership": "La membresía se crea al activar la cuenta.",
+      "renewsAt": "Renueva el {date}",
+      "noStripeSubscription": "Sin suscripción en Stripe",
+      "spending": "Gasto",
+      "monthSpend": "Gasto del mes",
+      "ordersCount": "Órdenes totales",
+      "requests": "Solicitudes de tier ({count})",
+      "locations": "Ubicaciones ({count} activas)",
+      "noLocations": "Esta cuenta aún no tiene ubicaciones.",
+      "inactiveLocation": "Inactiva",
+      "recentOrders": "Órdenes recientes ({count} en total)",
+      "noOrders": "Esta cuenta aún no tiene órdenes."
     }
   },
   "settings": {

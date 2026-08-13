@@ -43,8 +43,9 @@ export function ConnectOnboardingBanner() {
     void (async () => {
       const status = await refreshConnectStatus();
 
-      // Success is the real capability, not the mere return from Stripe.
-      if (status?.payoutsEnabled === true) {
+      // Success is the real capability, not the mere return from Stripe:
+      // onboarding is complete only when the account can charge AND pay out.
+      if (status?.chargesEnabled === true && status.payoutsEnabled) {
         toast.success(t("completed"));
       }
 
@@ -60,7 +61,10 @@ export function ConnectOnboardingBanner() {
     return null;
   }
 
-  const isReady = status.hasAccount && status.payoutsEnabled;
+  // Onboarding completion is defined by the Stripe capabilities synced from
+  // `account.updated` (F3), never by the mere presence of `stripeAccountId`:
+  // a half-onboarded account must keep showing the banner (F5-1).
+  const isReady = status.chargesEnabled && status.payoutsEnabled;
 
   if (isReady) {
     return null;

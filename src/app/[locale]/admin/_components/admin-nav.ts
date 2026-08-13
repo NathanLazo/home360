@@ -1,5 +1,6 @@
 import {
   BanknoteIcon,
+  Building2Icon,
   LayoutDashboardIcon,
   ScaleIcon,
   SettingsIcon,
@@ -36,6 +37,12 @@ export const adminNav: SidebarNavDefinition[] = [
     labelKey: "nav.finance",
     href: "/admin/finance",
     icon: BanknoteIcon,
+  },
+  {
+    key: "corporate",
+    labelKey: "nav.corporate",
+    href: "/admin/corporate",
+    icon: Building2Icon,
   },
   {
     key: "settings",

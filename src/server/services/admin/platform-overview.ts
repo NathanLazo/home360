@@ -4,37 +4,21 @@ import {
   type DisputeStatus,
   type DisputeUrgency,
   type GuaranteeType,
-  PaymentStatus,
   type PrismaClient,
   UserRole,
 } from "../../../../generated/prisma";
 
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { getFinancialMonthBounds } from "../payments/balances";
+import {
+  CHARGED_PAYMENT_STATUSES,
+  ESCROW_PAYMENT_STATUSES,
+} from "../payments/financial-projections";
 
 type OverviewDb = Pick<
   PrismaClient,
   "business" | "dispute" | "payment" | "platformSettings" | "user"
 >;
-
-/**
- * "Charged" GMV is every payment that left `PENDING`: the money reached the
- * platform even if it later moved to escrow, release or refund.
- */
-const CHARGED_PAYMENT_STATUSES = [
-  PaymentStatus.IN_ESCROW,
-  PaymentStatus.REFUNDING,
-  PaymentStatus.RELEASING,
-  PaymentStatus.RELEASED,
-  PaymentStatus.REFUNDED,
-  PaymentStatus.PARTIALLY_REFUNDED,
-] as const;
-
-const ESCROW_PAYMENT_STATUSES = [
-  PaymentStatus.IN_ESCROW,
-  PaymentStatus.REFUNDING,
-  PaymentStatus.RELEASING,
-] as const;
 
 /** Platform users exclude the internal admin team (F5-18). */
 const PLATFORM_USER_ROLES = [
@@ -51,7 +35,7 @@ export interface PlatformKpis {
   gmvCents: number;
   gmvDeltaPct: number | null;
   escrowCents: number;
-  escrowOrders: number;
+  escrowOrdersCount: number;
 }
 
 export interface PendingBusinessSummary {
@@ -129,6 +113,9 @@ export async function getPlatformKpis(
     }),
     deps.db.business.count({ where: { status: BusinessStatus.ACTIVE } }),
     deps.db.business.count({ where: { status: BusinessStatus.PENDING } }),
+    // GMV: total effectively charged in the month, gross of refunds, bucketed
+    // by `Payment.createdAt` (charge time, XC-27). The UI shows the gross
+    // figure; a net view must expose `refundedCents` separately.
     deps.db.payment.aggregate({
       where: {
         status: { in: [...CHARGED_PAYMENT_STATUSES] },
@@ -161,7 +148,7 @@ export async function getPlatformKpis(
     gmvCents,
     gmvDeltaPct: deltaPct(gmvCents, previousGmvCents),
     escrowCents: escrow._sum.amountCents ?? 0,
-    escrowOrders: escrow._count._all,
+    escrowOrdersCount: escrow._count._all,
   });
 }
 

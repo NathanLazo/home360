@@ -1,6 +1,7 @@
 import { PrismaClient } from "../generated/prisma";
 import { seedBusinesses } from "./seed/businesses";
 import { seedCatalog } from "./seed/catalog";
+import { seedCorporate } from "./seed/corporate";
 import { seedMarketplace } from "./seed/marketplace";
 import { seedOrders } from "./seed/orders";
 import { seedPayments } from "./seed/payments";
@@ -33,6 +34,7 @@ async function main(): Promise<void> {
     });
 
     await seedPayments(prisma, { businesses, orders, plans });
+    await seedCorporate(prisma);
   } finally {
     await prisma.$disconnect();
   }
