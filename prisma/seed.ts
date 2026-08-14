@@ -43,7 +43,6 @@ async function main(): Promise<void> {
 }
 
 void main().catch((error: unknown) => {
-  void error;
-  console.error("Seed failed");
+  console.error("Seed failed", error);
   process.exitCode = 1;
 });

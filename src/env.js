@@ -20,8 +20,9 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
+    BLOB_READ_WRITE_TOKEN: z.string().optional(),
     CRON_SECRET: z.string(),
-    DATABASE_URL: z.string().url(),
+    POSTGRES_PRISMA_URL: z.string().url(),
     EMAIL_FROM: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -51,8 +52,9 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
     CRON_SECRET: process.env.CRON_SECRET,
-    DATABASE_URL: process.env.DATABASE_URL,
+    POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,
     EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
