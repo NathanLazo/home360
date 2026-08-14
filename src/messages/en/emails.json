@@ -12,5 +12,10 @@
     "cta": "Create your password to sign in",
     "expires": "The link is valid for 1 hour and can only be used once. If it expires, ask the Home360 team to resend the invitation.",
     "closing": "If you were not expecting this invitation, you can ignore this message."
+  },
+  "newRequestNearby": {
+    "subject": "New {category} request near your branch",
+    "intro": "{businessName}: there is a new {category} request inside your coverage area on Home360.",
+    "cta": "Open the Home360 app to review the details and send your quote."
   }
 }

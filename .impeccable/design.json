@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T00:00:00Z",
+  "title": "Design System: HOME360",
+  "extensions": {
+    "colorMeta": {
+      "brand-navy": { "role": "primary", "displayName": "Navy bóveda", "canonical": "#0d1b2a", "tonalRamp": ["oklch(0.15 0.03 250)", "oklch(0.22 0.04 250)", "oklch(0.32 0.05 250)", "oklch(0.45 0.05 250)", "oklch(0.58 0.05 250)", "oklch(0.72 0.04 250)", "oklch(0.85 0.03 250)", "oklch(0.95 0.01 250)"] },
+      "brand-gold": { "role": "secondary", "displayName": "Gold sello", "canonical": "#c8a96e", "tonalRamp": ["oklch(0.25 0.06 85)", "oklch(0.38 0.08 85)", "oklch(0.5 0.09 85)", "oklch(0.62 0.1 85)", "oklch(0.74 0.1 85)", "oklch(0.82 0.08 85)", "oklch(0.9 0.05 85)", "oklch(0.96 0.02 85)"] },
+      "brand-cream": { "role": "neutral", "displayName": "Cream", "canonical": "#f5f0e8", "tonalRamp": ["oklch(0.2 0.01 85)", "oklch(0.35 0.015 85)", "oklch(0.5 0.02 85)", "oklch(0.65 0.02 85)", "oklch(0.78 0.02 85)", "oklch(0.88 0.02 85)", "oklch(0.94 0.015 85)", "oklch(0.97 0.01 85)"] },
+      "brand-gray": { "role": "neutral", "displayName": "Brand gray", "canonical": "#8a9bb0", "tonalRamp": ["oklch(0.2 0.02 250)", "oklch(0.32 0.025 250)", "oklch(0.45 0.03 250)", "oklch(0.58 0.03 250)", "oklch(0.68 0.03 250)", "oklch(0.78 0.025 250)", "oklch(0.88 0.015 250)", "oklch(0.95 0.008 250)"] },
+      "zinc-primary": { "role": "primary", "displayName": "Zinc ink", "canonical": "oklch(0.21 0.006 285.885)", "tonalRamp": ["oklch(0.141 0.005 286)", "oklch(0.21 0.006 286)", "oklch(0.274 0.006 286)", "oklch(0.37 0.013 286)", "oklch(0.442 0.017 286)", "oklch(0.552 0.016 286)", "oklch(0.705 0.015 286)", "oklch(0.92 0.004 286)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display (Fraunces)", "purpose": "h1/h2 de landing únicamente; nunca en dashboard." },
+      "label": { "displayName": "Label mono", "purpose": "Eyebrows y etiquetas de dato; mono = dato verificable." },
+      "metric": { "displayName": "Cifra métrica", "purpose": "Dinero y métricas, siempre tabular-nums." }
+    },
+    "shadows": [
+      { "name": "hover-card", "value": "0 4px 8px rgba(13, 27, 42, 0.08)", "purpose": "Respuesta a hover en cards; nunca en reposo." },
+      { "name": "floating", "value": "0 8px 24px rgba(13, 27, 42, 0.16)", "purpose": "Dialog, Sheet, Popover — superficies flotantes." }
+    ],
+    "motion": [
+      { "name": "ease-premium", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Landing: entradas decelerando, overshoot 0." },
+      { "name": "ease-corporate", "value": "cubic-bezier(0.2, 0, 0, 1)", "purpose": "Dashboard/admin: feedback only, sin entradas por scroll." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Hover, foco, press." },
+      { "name": "duration-standard", "value": "300ms", "purpose": "Entrada de card, cambio de estado, Sheet/Dialog." },
+      { "name": "duration-slow", "value": "500ms", "purpose": "Revelado de sección de landing, hero." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "375px" },
+      { "name": "tablet", "value": "768px" },
+      { "name": "desktop", "value": "1024px" },
+      { "name": "wide", "value": "1440px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "CTA Gold (landing)",
+      "kind": "button",
+      "refersTo": "cta-gold",
+      "description": "CTA primario de la landing: gold con texto navy, hover con elevación breve.",
+      "html": "<button class=\"ds-cta-gold\">Registra tu negocio</button>",
+      "css": ".ds-cta-gold { background: var(--brand-gold, #c8a96e); color: var(--brand-navy, #0d1b2a); font: 600 1rem/1 'Geist Sans', system-ui, sans-serif; padding: 14px 28px; border: none; border-radius: 0.5rem; cursor: pointer; transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1); } .ds-cta-gold:hover { box-shadow: 0 4px 8px rgba(13,27,42,0.16); transform: scale(1.01); } .ds-cta-gold:focus-visible { outline: 2px solid #0d1b2a; outline-offset: 2px; } .ds-cta-gold:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Botón primario (dashboard)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "shadcn Button en zinc ink; feedback ≤150 ms.",
+      "html": "<button class=\"ds-btn-primary\">Guardar cambios</button>",
+      "css": ".ds-btn-primary { background: oklch(0.21 0.006 285.885); color: oklch(0.985 0 0); font: 500 0.875rem/1 'Geist Sans', system-ui, sans-serif; padding: 10px 16px; border: none; border-radius: 0.4rem; cursor: pointer; transition: background 150ms cubic-bezier(0.2,0,0,1), transform 150ms cubic-bezier(0.2,0,0,1); } .ds-btn-primary:hover { background: oklch(0.274 0.006 286.033); } .ds-btn-primary:focus-visible { outline: 2px solid oklch(0.705 0.015 286.067); outline-offset: 2px; } .ds-btn-primary:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Card (dashboard)",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card blanca sobre fondo zinc, plana en reposo, sombra solo en hover.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Órdenes activas</h3><p class=\"ds-card-value\">128</p><p class=\"ds-card-hint\">+12 esta semana</p></div>",
+      "css": ".ds-card { background: oklch(1 0 0); color: oklch(0.141 0.005 285.823); border: 1px solid oklch(0.92 0.004 286.32); border-radius: 0.5rem; padding: 20px; max-width: 260px; transition: box-shadow 150ms cubic-bezier(0.2,0,0,1), border-color 150ms cubic-bezier(0.2,0,0,1); } .ds-card:hover { box-shadow: 0 4px 8px rgba(13,27,42,0.08); border-color: oklch(0.85 0.01 286); } .ds-card-title { font: 600 0.875rem/1.3 'Geist Sans', system-ui, sans-serif; margin: 0 0 8px; } .ds-card-value { font: 600 2rem/1 'Geist Mono', monospace; font-variant-numeric: tabular-nums; margin: 0 0 4px; } .ds-card-hint { font: 400 0.75rem/1.4 'Geist Sans', system-ui, sans-serif; color: oklch(0.552 0.016 285.938); margin: 0; }"
+    },
+    {
+      "name": "Input (dashboard)",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Input shadcn con label visible siempre; error con aria-describedby.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-email\">Correo electrónico</label><input class=\"ds-input\" id=\"ds-email\" type=\"email\" placeholder=\"nombre@negocio.mx\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; max-width: 280px; } .ds-label { font: 500 0.8125rem/1 'Geist Sans', system-ui, sans-serif; color: oklch(0.141 0.005 285.823); } .ds-input { background: oklch(1 0 0); color: oklch(0.141 0.005 285.823); font: 400 0.875rem/1.4 'Geist Sans', system-ui, sans-serif; padding: 9px 12px; border: 1px solid oklch(0.92 0.004 286.32); border-radius: 0.4rem; transition: border-color 150ms cubic-bezier(0.2,0,0,1), box-shadow 150ms cubic-bezier(0.2,0,0,1); } .ds-input::placeholder { color: oklch(0.552 0.016 285.938); } .ds-input:focus-visible { outline: none; border-color: oklch(0.705 0.015 286.067); box-shadow: 0 0 0 3px oklch(0.705 0.015 286.067 / 0.3); }"
+    },
+    {
+      "name": "Eyebrow mono (landing)",
+      "kind": "chip",
+      "refersTo": "label",
+      "description": "Etiqueta de dato en mono uppercase; el eyebrow de la landing.",
+      "html": "<span class=\"ds-eyebrow\">Pago protegido</span>",
+      "css": ".ds-eyebrow { font: 500 0.75rem/1 'Geist Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-gray, #8a9bb0); }"
+    },
+    {
+      "name": "Cifra métrica",
+      "kind": "custom",
+      "refersTo": "metric",
+      "description": "Cifra de mercado en mono con pie de fuente; la Regla del Comprobante aplicada.",
+      "html": "<div class=\"ds-metric\"><span class=\"ds-metric-value\">35 M</span><span class=\"ds-metric-label\">hogares en México</span><span class=\"ds-metric-source\">CONAPO 2025</span></div>",
+      "css": ".ds-metric { display: flex; flex-direction: column; gap: 4px; } .ds-metric-value { font: 600 clamp(2rem, 4vw, 3rem)/1 'Geist Mono', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--brand-cream, #f5f0e8); } .ds-metric-label { font: 400 1rem/1.4 'Geist Sans', system-ui, sans-serif; color: var(--brand-cream, #f5f0e8); } .ds-metric-source { font: 400 0.75rem/1 'Geist Mono', monospace; color: var(--brand-gray, #8a9bb0); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La bóveda del oficio",
+    "overview": "HOME360 custodia el dinero de una persona mientras otra entrega trabajo manual verificable. El navy es la bóveda, el gold es el sello, el mono es el comprobante. El sistema vive partido en dos personalidades bajo la frontera D7: landing Premium (brand + Fraunces) y dashboard Corporate (zinc shadcn, la herramienta está, no se revela). Rechaza el default reconocible de diseño IA, el SaaS de productividad y el motion elástico.",
+    "keyCharacteristics": [
+      "Dos registros, una disciplina: Premium (brand) en landing, Corporate (zinc) en herramienta.",
+      "Mono = dato verificable: precios, métricas, pasos y etiquetas de dato en Geist Mono.",
+      "Gold escaso y significativo: ≤4 apariciones por pantalla; siempre acción o custodia.",
+      "Motion decelerado, overshoot 0, reduced-motion como requisito de entrega.",
+      "Espaciado en múltiplos de 4 px; agrupamiento por espacio, no por líneas."
+    ],
+    "rules": [
+      { "name": "La Regla D7", "body": "Los tokens --brand-* solo existen dentro de src/app/[locale]/(public)/**. Cualquier tarea que necesite cruzarlos a dashboard/admin está mal planteada: se reporta y se detiene.", "section": "colors" },
+      { "name": "La Regla del Gold Escaso", "body": "Gold sobre cream ≈ 1.9:1 — nunca texto ni iconografía portadora de significado; solo bordes/filetes ≥2 px acompañados de otro indicador. El texto del CTA gold es navy.", "section": "colors" },
+      { "name": "La Regla del Comprobante", "body": "Todo número que represente dinero, métrica o paso verificable se compone en Geist Mono. Sans para prosa, serif para titulares de landing, mono para datos.", "section": "typography" },
+      { "name": "La Regla del Display Contenido", "body": "--font-display solo en h1/h2 dentro de (public)/, aplicada con clase local del módulo. Nunca en dashboard, body, botones ni h3.", "section": "typography" },
+      { "name": "La Regla del Reposo Plano", "body": "Si un elemento tiene sombra sin que el usuario haya hecho nada, la sombra sobra. Sombras aparecen por hover, foco o flotación — no por decoración.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do componer toda cifra de dinero/métrica en Geist Mono con tabular-nums.",
+      "Do alternar cream → navy → cream en la landing; hero y CTA final en navy.",
+      "Do entregar los cuatro estados (loading/empty/error/éxito) en cada pantalla de dashboard.",
+      "Do verificar contraste AA con números, no a ojo (cream/navy ≈ 15.2:1 ✓, gold/navy ≈ 7.6:1 ✓).",
+      "Do usar cifras de mercado con fuente visible (35 M hogares, CONAPO 2025) — nunca tracción propia inventada.",
+      "Do respetar prefers-reduced-motion sin pérdida de contenido ni de layout."
+    ],
+    "donts": [
+      "Don't cruzar la frontera D7: --brand-* fuera de (public)/ está prohibido, igual que reescribir zinc para la landing.",
+      "Don't reproducir el default reconocible de diseño IA: titular Geist sobre cream con acento gold, hero-metric template, card grids idénticos.",
+      "Don't usar gold como texto sobre cream (≈1.9:1), como fondo amplio ni como icono decorativo.",
+      "Don't usar gradientes de color ajenos al sistema ni background-clip: text.",
+      "Don't animar con rebote o overshoot: un producto que custodia dinero ajeno no rebota.",
+      "Don't usar transition: all, ni animar width/height/top/left.",
+      "Don't hardcodear strings: es/en al 100 %, el inglés como traducción real, no calco.",
+      "Don't usar color como único portador de información (estados, plan recomendado, errores)."
+    ]
+  }
+}

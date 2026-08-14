@@ -319,6 +319,11 @@ model Branch {
   name             String
   address          String
   managerName      String?
+  // Geo added by M2-W3: notifyNearbyBusinesses / M5-W1 radar need branch
+  // coordinates for the Haversine radius match. Nullable so existing rows
+  // keep working until each branch is geocoded.
+  latitude         Float?
+  longitude        Float?
   coverageRadiusKm Int            @default(10)
   status           BranchStatus   @default(ACTIVE)
   businessId       String

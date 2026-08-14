@@ -138,7 +138,7 @@ export async function createDownloadUrl(input: {
   userId: string;
   pathname: string;
 }): Promise<ServiceResult<DownloadUrlGrant, MediaServiceError>> {
-  if (!isOwnedPathname(input.pathname, input.userId)) {
+  if (!isOwnedMediaPathname(input.pathname, input.userId)) {
     return svcFail("NOT_FOUND", "Blob not found");
   }
 
@@ -168,11 +168,17 @@ export async function createDownloadUrl(input: {
 }
 
 /**
- * True when the pathname is exactly `mobile/{kind}/{userId}/{file}` for a
- * known kind and the session user. The single trailing segment rules out
- * traversal tricks (`..`, nested slashes, empty segments).
+ * True when the pathname is exactly `mobile/{kind}/{userId}/{file}` for one of
+ * the accepted kinds and the session user. The single trailing segment rules
+ * out traversal tricks (`..`, nested slashes, empty segments). Exported so
+ * other services (e.g. request creation, M2-W2) can authorize media
+ * references with the exact same rule.
  */
-function isOwnedPathname(pathname: string, userId: string): boolean {
+export function isOwnedMediaPathname(
+  pathname: string,
+  userId: string,
+  kinds: readonly MediaKind[] = MEDIA_KINDS,
+): boolean {
   const segments = pathname.split("/");
 
   if (segments.length !== 4) {
@@ -183,7 +189,7 @@ function isOwnedPathname(pathname: string, userId: string): boolean {
 
   return (
     prefix === PATHNAME_PREFIX &&
-    (MEDIA_KINDS as readonly string[]).includes(kind ?? "") &&
+    (kinds as readonly string[]).includes(kind ?? "") &&
     owner === userId &&
     file !== undefined &&
     file.length > 0 &&

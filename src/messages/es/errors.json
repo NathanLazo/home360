@@ -44,5 +44,7 @@
   "RECORDING_JUSTIFICATION_REQUIRED": "Sin grabación completa, esta resolución necesita una justificación escrita.",
   "WITHDRAWAL_NOT_PENDING": "Este retiro ya no está pendiente.",
   "BUSINESS_SUSPENDED": "La cuenta del negocio está suspendida.",
-  "SETTINGS_STALE": "Alguien más cambió la configuración. Vuelve a cargar la pantalla."
+  "SETTINGS_STALE": "Alguien más cambió la configuración. Vuelve a cargar la pantalla.",
+  "AI_UNAVAILABLE": "El diagnóstico inteligente no está disponible por ahora. Inténtalo de nuevo en unos minutos.",
+  "ADDRESS_LIMIT_REACHED": "Llegaste al límite de 10 direcciones guardadas. Elimina una para agregar otra."
 }

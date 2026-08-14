@@ -39,6 +39,8 @@ export const DOMAIN_ERROR_CODES = [
   "WITHDRAWAL_NOT_PENDING",
   "BUSINESS_SUSPENDED",
   "SETTINGS_STALE",
+  "AI_UNAVAILABLE",
+  "ADDRESS_LIMIT_REACHED",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

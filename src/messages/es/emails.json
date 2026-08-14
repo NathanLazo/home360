@@ -12,5 +12,10 @@
     "cta": "Crea tu contraseña para entrar",
     "expires": "El enlace es válido por 1 hora y solo puede usarse una vez. Si vence, pide al equipo de Home360 que reenvíe la invitación.",
     "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
+  },
+  "newRequestNearby": {
+    "subject": "Nueva solicitud de {category} cerca de tu sucursal",
+    "intro": "{businessName}: hay una nueva solicitud de {category} dentro de tu zona de cobertura en Home360.",
+    "cta": "Entra a la app de Home360 para ver el detalle y enviar tu cotización."
   }
 }

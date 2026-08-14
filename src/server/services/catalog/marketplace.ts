@@ -29,12 +29,12 @@ const activeBusinessFilter = {
   status: "ACTIVE",
 } satisfies Prisma.BusinessWhereInput;
 
-const serviceCatalogFilter = {
+export const serviceCatalogFilter = {
   status: "ACTIVE",
   business: activeBusinessFilter,
 } satisfies Prisma.ServiceWhereInput;
 
-const productCatalogFilter = {
+export const productCatalogFilter = {
   status: "PUBLISHED",
   business: activeBusinessFilter,
 } satisfies Prisma.ProductWhereInput;
@@ -161,7 +161,7 @@ function decodeCursor(
   return { kind, id };
 }
 
-type BusinessRating = {
+export type BusinessRating = {
   ratingAvg: number | null;
   ratingCount: number;
 };
@@ -169,8 +169,9 @@ type BusinessRating = {
 /**
  * Business rating lives on `Review` (per order), so it is aggregated through
  * `order.businessId`. Bounded by the featured candidate pool upstream.
+ * Exported for reuse by the suggestion service (M2-W2).
  */
-async function getBusinessRatings(
+export async function getBusinessRatings(
   db: PrismaClient,
   businessIds: readonly string[],
 ): Promise<Map<string, BusinessRating>> {

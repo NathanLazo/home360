@@ -20,6 +20,10 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
+    // Vercel AI Gateway key. The AI SDK reads it from process.env on its own;
+    // it is declared here for validation and for the availability check in
+    // the AI diagnosis service.
+    AI_GATEWAY_API_KEY: z.string().optional(),
     BLOB_READ_WRITE_TOKEN: z.string().optional(),
     CRON_SECRET: z.string(),
     POSTGRES_PRISMA_URL: z.string().url(),
@@ -48,6 +52,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
     APP_URL: process.env.APP_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
