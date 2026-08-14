@@ -5,10 +5,12 @@ import { branchRouter } from "~/server/api/routers/branch";
 import { businessSettingsRouter } from "~/server/api/routers/business-settings";
 import { corporateRouter } from "~/server/api/routers/corporate";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
+import { marketplaceRouter } from "~/server/api/routers/marketplace";
 import { mediaRouter } from "~/server/api/routers/media";
 import { orderRouter } from "~/server/api/routers/order";
 import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
+import { pushRouter } from "~/server/api/routers/push";
 import { serviceRouter } from "~/server/api/routers/service";
 import { subscriptionRouter } from "~/server/api/routers/subscription";
 import { teamRouter } from "~/server/api/routers/team";
@@ -31,10 +33,12 @@ export const appRouter = createTRPCRouter({
   corporate: corporateRouter,
   dashboard: dashboardRouter,
   health: publicProcedure.query(() => ok({ ready: true }, "API is ready")),
+  marketplace: marketplaceRouter,
   media: mediaRouter,
   order: orderRouter,
   payment: paymentRouter,
   product: productRouter,
+  push: pushRouter,
   service: serviceRouter,
   subscription: subscriptionRouter,
   team: teamRouter,

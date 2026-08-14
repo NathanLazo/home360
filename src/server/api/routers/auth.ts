@@ -5,12 +5,19 @@ import {
 } from "~/schemas/auth/password-reset.schema";
 import { registerBusinessSchema } from "~/schemas/auth/register-business.schema";
 import { fail, ok } from "~/server/api/contract";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { customerRegisterSchema } from "~/server/api/schemas/customer-register.schema";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
+import { getCurrentUser } from "~/server/services/auth/current-user";
 import {
   requestPasswordReset,
   resetPassword,
 } from "~/server/services/auth/password-reset";
 import { registerBusiness } from "~/server/services/auth/register-business";
+import { registerCustomer } from "~/server/services/auth/register-customer";
 import {
   clientIpFromHeaders,
   emailRateLimitIdentifier,
@@ -25,6 +32,9 @@ const passwordResetEmailClient =
     : null;
 
 export const authRouter = createTRPCRouter({
+  me: protectedProcedure.query(({ ctx }) =>
+    getCurrentUser(ctx.db, ctx.session.user.id),
+  ),
   requestPasswordReset: publicProcedure
     .input(requestPasswordResetSchema)
     .mutation(async ({ ctx, input }) => {
@@ -78,5 +88,23 @@ export const authRouter = createTRPCRouter({
       }
 
       return registerBusiness(ctx.db, input);
+    }),
+  registerCustomer: publicProcedure
+    .input(customerRegisterSchema)
+    .mutation(async ({ ctx, input }) => {
+      const reservation = await reserveRateLimitAttempts(ctx.db, [
+        {
+          action: "register",
+          identifier: ipRateLimitIdentifier(clientIpFromHeaders(ctx.headers)),
+          max: 5,
+          windowMinutes: 60,
+        },
+      ]);
+
+      if (!reservation.allowed) {
+        return fail("TOO_MANY_REQUESTS", 429, "Too many registration attempts");
+      }
+
+      return registerCustomer(ctx.db, input);
     }),
 });
