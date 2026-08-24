@@ -3,6 +3,7 @@ import {
   UserRole,
   type PrismaClient,
 } from "../../../../generated/prisma";
+import type { AuthErrorCode } from "~/schemas/auth/auth-errors";
 import type { CustomerRegisterInput } from "~/server/api/schemas/customer-register.schema";
 import {
   fail,
@@ -16,13 +17,14 @@ import { hashPassword } from "~/server/services/auth/password";
  * Registers a CUSTOMER user with an empty `CustomerProfile` (M1-W1). Customers
  * are born in the mobile app; the app logs in afterwards through the mobile
  * auth endpoint, so only `{ id }` is returned here. Same shape as
- * `registerBusiness`: the email unique constraint answers `CONFLICT` and the
+ * `registerBusiness`: the email unique constraint answers `EMAIL_TAKEN`
+ * (M3-W0 unified both registrations on the domain's de facto code) and the
  * password reuses the shared bcrypt service.
  */
 export const registerCustomer = async (
   db: PrismaClient,
   input: CustomerRegisterInput,
-): Promise<TrpcResponse<{ id: string }>> => {
+): Promise<TrpcResponse<{ id: string }, AuthErrorCode>> => {
   try {
     const passwordHash = await hashPassword(input.password);
     const user = await db.user.create({
@@ -30,6 +32,7 @@ export const registerCustomer = async (
         name: input.name,
         email: input.email,
         role: UserRole.CUSTOMER,
+        locale: input.locale,
         passwordHash,
         customerProfile: {
           create: {},
@@ -44,7 +47,7 @@ export const registerCustomer = async (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      return fail("CONFLICT", 409, "Email already registered");
+      return fail("EMAIL_TAKEN", 409, "Email already registered");
     }
 
     const { code, status } = normalizeError(error);

@@ -18,6 +18,8 @@ import {
 const addressFieldsSchema = z.object({
   label: z.string().trim().min(1).max(80),
   addressLine: z.string().trim().min(1).max(200),
+  // Structured colonia (MA-13); optional until the mobile form ships it.
+  neighborhood: z.string().trim().min(1).max(120).optional(),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
 });
@@ -33,6 +35,7 @@ const updateAddressSchema = addressFieldsSchema
     (input) =>
       input.label !== undefined ||
       input.addressLine !== undefined ||
+      input.neighborhood !== undefined ||
       input.latitude !== undefined ||
       input.longitude !== undefined,
     { message: "At least one field is required" },

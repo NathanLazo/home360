@@ -140,6 +140,9 @@ enum QuoteStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+  // quote.withdraw (M5-W1). With @@unique([requestId, businessId]) a withdrawn
+  // quote blocks re-quoting the same request — deliberate (MA-16).
+  WITHDRAWN
 }
 
 enum RequestStatus {
@@ -214,6 +217,31 @@ enum PushPlatform {
   ANDROID
 }
 
+enum MessageType {
+  TEXT
+  IMAGE
+  LOCATION
+}
+
+enum OrderEventType {
+  ACCEPTED
+  ESCROW_HELD
+  EN_ROUTE
+  ARRIVED
+  RECORDING_STARTED
+  RECORDING_STOPPED
+  WORK_DONE
+  CONFIRMATION_REQUESTED
+  CONFIRMED
+  AUTO_RELEASED
+}
+
+enum AiUrgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 // Necessary for Next auth
 model Account {
   id                       String  @id @default(cuid())
@@ -249,6 +277,9 @@ model User {
   emailVerified                DateTime?
   image                        String?
   role                         UserRole                     @default(CUSTOMER)
+  // Preferred UI language (es | en). Zod validates it at registration;
+  // consumed by mobile emails and localized push (M7-W1).
+  locale                       String                       @default("es")
   passwordHash                 String?
   sessionsValidFrom            DateTime                     @default(now())
   accounts                     Account[]
@@ -267,6 +298,8 @@ model User {
   pushTokens                   PushToken[]
   customerProfile              CustomerProfile?
   addresses                    Address[]
+  messages                     Message[]
+  orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -295,6 +328,10 @@ model Business {
   stripeCustomerId String?            @unique
   chargesEnabled   Boolean            @default(false)
   payoutsEnabled   Boolean            @default(false)
+  // Rating denormalized from Review (via Review.order.businessId). Written
+  // ONLY by recalculateBusinessRating() or the seed; null = no reviews yet.
+  ratingAvg        Float?
+  ratingCount      Int                @default(0)
   branches         Branch[]
   workers          Worker[]
   services         Service[]
@@ -308,10 +345,12 @@ model Business {
   quotes           Quote[]
   documents        BusinessDocument[]
   loyaltyBonuses   LoyaltyBonus[]
+  conversations    Conversation[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
   @@index([status])
+  @@index([status, ratingAvg])
 }
 
 model Branch {
@@ -352,8 +391,15 @@ model Worker {
   ratingAvg        Float?
   invitedEmail     String?
   invitationStatus InvitationStatus   @default(ACCEPTED)
+  // Last known position for C6 tracking (written by tracking.updateLocation,
+  // M4-W2, throttled to 15 s).
+  lastLatitude      Float?
+  lastLongitude     Float?
+  locationUpdatedAt DateTime?
   services         Service[]
   quotes           Quote[]
+  // Orders assigned to the technician (MA-01).
+  assignedOrders   Order[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
@@ -387,6 +433,9 @@ model Product {
   sku            String
   category       String
   priceCents     Int
+  // Public catalog image URL (C1/C3 design). Public catalog: does not use the
+  // signed media pathname flow (M0-W3).
+  imageUrl       String?
   status         ProductStatus   @default(DRAFT)
   businessId     String
   business       Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -432,9 +481,16 @@ model ServiceRequest {
   addressLine     String?
   latitude        Float?
   longitude       Float?
+  // AI diagnosis urgency (M2-W2 computed it and discarded it).
+  aiUrgency       AiUrgency?
+  // Colonia copied from Address.neighborhood at request creation (MA-13).
+  // It is the ONLY textual piece of the address a business sees before its
+  // quote is accepted (radar privacy gating, M5-W1).
+  neighborhood    String?
   status          RequestStatus @default(OPEN)
   expiresAt       DateTime?
   quotes          Quote[]
+  conversations   Conversation[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -494,6 +550,18 @@ model Order {
   // cannot express equality between two optional FKs.
   corporateLocationId  String?
   corporateLocation    CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
+  // Assigned technician (MA-01). Written by quote.accept (M3-W1) copying it
+  // from Quote.workerId in the same transaction. PRODUCT orders: null (no
+  // worker mode). Nullable: historical and PRODUCT orders have no worker.
+  workerId             String?
+  worker               Worker?            @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  // Delivery snapshot (MA-06). For PRODUCT it is copied by createProductIntent
+  // (M3-W2) from the input Address (snapshot, not FK: the Address is editable
+  // and deletable). For SERVICE it stays null: geo/address derive from
+  // quote.request (ServiceRequest.addressLine/latitude/longitude).
+  deliveryAddressLine  String?
+  deliveryLatitude     Float?
+  deliveryLongitude    Float?
   quantity             Int                @default(1)
   recordingUrl         String?
   recordingDurationSec Int?
@@ -505,9 +573,12 @@ model Order {
   payment              Payment?
   dispute              Dispute?
   review               Review?
+  conversation         Conversation?
+  events               OrderEvent[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
+  @@index([workerId, status])
   @@index([businessId, status])
   @@index([businessId, branchId])
   @@index([customerId])
@@ -953,12 +1024,71 @@ model Address {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   label       String
   addressLine String
+  // Structured colonia (MA-13). Captured by the mobile address form (new
+  // field on the M2 screen; lands with M5-M1, its first consumer). Null →
+  // the radar shows only distance/zone.
+  neighborhood String?
   latitude    Float
   longitude   Float
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
 
   @@index([userId])
+}
+
+// Messaging (M4-W1) and order timeline (C6). A conversation is attached to an
+// Order (post-acceptance chat) or to a ServiceRequest×Business pair
+// (pre-order chat of N2).
+model Conversation {
+  id         String          @id @default(cuid())
+  orderId    String?         @unique
+  order      Order?          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  requestId  String?
+  request    ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  // Business owning the per-request conversation (pre-order chat of N2,
+  // audit MA-08). Created by quote.submit (M5-W1); quote.accept (M3-W1)
+  // re-links it to the Order by setting orderId. Null on conversations
+  // created directly per order (getOrCreateConversation).
+  businessId String?
+  business   Business?       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  messages   Message[]
+  createdAt  DateTime        @default(now())
+
+  // One conversation per request×business pair (MA-08).
+  @@unique([requestId, businessId])
+  @@index([requestId])
+  @@index([businessId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  type           MessageType
+  body           String?
+  attachmentUrl  String?
+  latitude       Float?
+  longitude      Float?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+model OrderEvent {
+  id          String         @id @default(cuid())
+  orderId     String
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type        OrderEventType
+  actorUserId String?
+  actor       User?          @relation("OrderEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([actorUserId])
 }
 
 model AuthAttempt {

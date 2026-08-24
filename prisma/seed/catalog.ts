@@ -25,6 +25,9 @@ type ProductDefinition = {
   sku: string;
   category: string;
   priceCents: number;
+  // Public catalog image (M3-W0); most seed products stay without one so the
+  // app placeholder keeps being exercised.
+  imageUrl?: string;
   status: Prisma.ProductUncheckedCreateInput["status"];
 };
 
@@ -46,6 +49,7 @@ const productData = [
     sku: "PG-001",
     category: "Sanitarios",
     priceCents: 189_900,
+    imageUrl: "https://picsum.photos/seed/home360-pg-001/800/600",
     status: ProductStatus.PUBLISHED,
   },
   {
@@ -54,6 +58,7 @@ const productData = [
     sku: "PG-002",
     category: "Grifería",
     priceCents: 124_900,
+    imageUrl: "https://picsum.photos/seed/home360-pg-002/800/600",
     status: ProductStatus.PUBLISHED,
   },
   {
@@ -86,6 +91,7 @@ const productData = [
     sku: "PG-006",
     category: "Refacciones",
     priceCents: 34_900,
+    imageUrl: "https://picsum.photos/seed/home360-pg-006/800/600",
     status: ProductStatus.PUBLISHED,
   },
   {

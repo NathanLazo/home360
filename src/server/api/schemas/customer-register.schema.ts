@@ -13,10 +13,7 @@ export const customerRegisterSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().toLowerCase().email(),
   password: passwordSchema,
-  /**
-   * UI locale the app registered with. Validated for forward compatibility;
-   * `User` has no locale column yet, so it is not persisted (see M1 findings).
-   */
+  /** UI locale the app registered with; persisted on `User.locale` (M3-W0). */
   locale: z.enum(["es", "en"]),
 });
 

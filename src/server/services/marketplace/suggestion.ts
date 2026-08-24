@@ -2,14 +2,12 @@ import "server-only";
 
 import type { Prisma, PrismaClient } from "../../../../generated/prisma";
 import {
-  getBusinessRatings,
   productCatalogFilter,
   serviceCatalogFilter,
-  type BusinessRating,
 } from "~/server/services/catalog/marketplace";
 
-// Rating is aggregated in memory (it is not a column), so candidates are
-// bounded the same way the featured ranking of M2-W1 bounds its pool.
+// Rating is denormalized on Business (M3-W0), so the database orders by it
+// directly; the take is only a safety bound over pathological catalogs.
 const SUGGESTION_CANDIDATE_POOL = 100;
 
 export type SuggestedService = {
@@ -29,12 +27,16 @@ export type RequestSuggestions = {
   product: SuggestedProduct | null;
 };
 
+const suggestionBusinessSelect = {
+  select: { name: true, ratingAvg: true, ratingCount: true },
+} as const;
+
 const suggestionServiceSelect = {
   id: true,
   name: true,
   category: true,
   basePriceCents: true,
-  business: { select: { id: true, name: true } },
+  business: suggestionBusinessSelect,
 } satisfies Prisma.ServiceSelect;
 
 type ServiceCandidate = Prisma.ServiceGetPayload<{
@@ -46,23 +48,24 @@ const suggestionProductSelect = {
   name: true,
   category: true,
   priceCents: true,
-  business: { select: { id: true, name: true } },
+  business: suggestionBusinessSelect,
 } satisfies Prisma.ProductSelect;
 
 type ProductCandidate = Prisma.ProductGetPayload<{
   select: typeof suggestionProductSelect;
 }>;
 
-type Candidate = {
-  id: string;
-  name: string;
-  category: string;
-  priceCents: number;
-  businessId: string;
-  businessName: string;
-};
+type Candidate = SuggestedService;
 
 type PriceRange = { minPriceCents: number; maxPriceCents: number };
+
+const suggestionOrderBy = [
+  { business: { ratingAvg: { sort: "desc", nulls: "last" } } },
+  { createdAt: "desc" },
+  { id: "desc" },
+] satisfies
+  | Prisma.ServiceOrderByWithRelationInput[]
+  | Prisma.ProductOrderByWithRelationInput[];
 
 function inRange(priceCents: number, range: PriceRange): boolean {
   return (
@@ -78,10 +81,7 @@ function inRange(priceCents: number, range: PriceRange): boolean {
 function pickBest(
   candidates: Candidate[],
   range: PriceRange,
-  ratings: Map<string, BusinessRating>,
 ): SuggestedService | null {
-  const scoreOf = (candidate: Candidate): BusinessRating =>
-    ratings.get(candidate.businessId) ?? { ratingAvg: null, ratingCount: 0 };
   const best = [...candidates].sort((a, b) => {
     const aInRange = inRange(a.priceCents, range) ? 1 : 0;
     const bInRange = inRange(b.priceCents, range) ? 1 : 0;
@@ -90,30 +90,13 @@ function pickBest(
       return bInRange - aInRange;
     }
 
-    const aRating = scoreOf(a);
-    const bRating = scoreOf(b);
-
     return (
-      (bRating.ratingAvg ?? -1) - (aRating.ratingAvg ?? -1) ||
-      bRating.ratingCount - aRating.ratingCount
+      (b.ratingAvg ?? -1) - (a.ratingAvg ?? -1) ||
+      b.ratingCount - a.ratingCount
     );
   })[0];
 
-  if (!best) {
-    return null;
-  }
-
-  const rating = scoreOf(best);
-
-  return {
-    id: best.id,
-    name: best.name,
-    category: best.category,
-    priceCents: best.priceCents,
-    businessName: best.businessName,
-    ratingAvg: rating.ratingAvg,
-    ratingCount: rating.ratingCount,
-  };
+  return best ?? null;
 }
 
 function serviceCandidate(row: ServiceCandidate): Candidate {
@@ -122,8 +105,9 @@ function serviceCandidate(row: ServiceCandidate): Candidate {
     name: row.name,
     category: row.category,
     priceCents: row.basePriceCents,
-    businessId: row.business.id,
     businessName: row.business.name,
+    ratingAvg: row.business.ratingAvg,
+    ratingCount: row.business.ratingCount,
   };
 }
 
@@ -133,8 +117,9 @@ function productCandidate(row: ProductCandidate): Candidate {
     name: row.name,
     category: row.category,
     priceCents: row.priceCents,
-    businessId: row.business.id,
     businessName: row.business.name,
+    ratingAvg: row.business.ratingAvg,
+    ratingCount: row.business.ratingCount,
   };
 }
 
@@ -157,13 +142,13 @@ export async function suggestForRequest(
     db.service.findMany({
       where: { ...serviceCatalogFilter, ...categoryFilter },
       select: suggestionServiceSelect,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      orderBy: suggestionOrderBy,
       take: SUGGESTION_CANDIDATE_POOL,
     }),
     db.product.findMany({
       where: { ...productCatalogFilter, ...categoryFilter },
       select: suggestionProductSelect,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      orderBy: suggestionOrderBy,
       take: SUGGESTION_CANDIDATE_POOL,
     }),
   ]);
@@ -173,19 +158,12 @@ export async function suggestForRequest(
       : await db.product.findMany({
           where: productCatalogFilter,
           select: suggestionProductSelect,
-          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          orderBy: suggestionOrderBy,
           take: SUGGESTION_CANDIDATE_POOL,
         });
-  const services = serviceRows.map(serviceCandidate);
-  const products = productRows.map(productCandidate);
-  const ratings = await getBusinessRatings(db, [
-    ...new Set(
-      [...services, ...products].map((candidate) => candidate.businessId),
-    ),
-  ]);
 
   return {
-    service: pickBest(services, input, ratings),
-    product: pickBest(products, input, ratings),
+    service: pickBest(serviceRows.map(serviceCandidate), input),
+    product: pickBest(productRows.map(productCandidate), input),
   };
 }

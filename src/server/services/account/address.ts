@@ -9,6 +9,7 @@ export const MAX_ADDRESSES_PER_USER = 10;
 export type CreateAddressInput = {
   label: string;
   addressLine: string;
+  neighborhood?: string;
   latitude: number;
   longitude: number;
   isDefault?: boolean;
@@ -18,6 +19,7 @@ export type UpdateAddressInput = {
   id: string;
   label?: string;
   addressLine?: string;
+  neighborhood?: string;
   latitude?: number;
   longitude?: number;
 };
@@ -68,6 +70,7 @@ export async function createAddress(
         userId,
         label: input.label,
         addressLine: input.addressLine,
+        neighborhood: input.neighborhood ?? null,
         latitude: input.latitude,
         longitude: input.longitude,
         isDefault,
@@ -102,6 +105,9 @@ export async function updateAddress(
       ...(input.label !== undefined ? { label: input.label } : {}),
       ...(input.addressLine !== undefined
         ? { addressLine: input.addressLine }
+        : {}),
+      ...(input.neighborhood !== undefined
+        ? { neighborhood: input.neighborhood }
         : {}),
       ...(input.latitude !== undefined ? { latitude: input.latitude } : {}),
       ...(input.longitude !== undefined ? { longitude: input.longitude } : {}),

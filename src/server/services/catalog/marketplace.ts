@@ -5,10 +5,6 @@ import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 
 const SEARCH_PAGE_SIZE = 20;
 const FEATURED_PRODUCTS_TAKE = 10;
-// Featured ranking sorts by business rating, which is not a column, so the
-// candidate pool is bounded to keep the query cheap. Newest products win the
-// spot when the pool overflows.
-const FEATURED_CANDIDATE_POOL = 200;
 
 export const MARKETPLACE_KINDS = ["service", "product"] as const;
 
@@ -48,19 +44,14 @@ const featuredProductSelect = {
   id: true,
   name: true,
   priceCents: true,
-  business: { select: { id: true, name: true } },
+  imageUrl: true,
+  business: { select: { name: true } },
 } satisfies Prisma.ProductSelect;
-
-type FeaturedProductRow = Prisma.ProductGetPayload<{
-  select: typeof featuredProductSelect;
-}>;
 
 export type MarketplaceFeaturedProduct = {
   id: string;
   name: string;
   priceCents: number;
-  // Products have no image column yet; the app renders its placeholder until
-  // media lands for the catalog.
   imageUrl: string | null;
   businessName: string;
 };
@@ -108,8 +99,9 @@ const productDetailSelect = {
   name: true,
   category: true,
   priceCents: true,
+  imageUrl: true,
   stocks: { select: { stock: true } },
-  business: { select: { id: true, name: true } },
+  business: { select: { name: true, ratingAvg: true, ratingCount: true } },
 } satisfies Prisma.ProductSelect;
 
 type ProductDetailRow = Prisma.ProductGetPayload<{
@@ -161,50 +153,6 @@ function decodeCursor(
   return { kind, id };
 }
 
-export type BusinessRating = {
-  ratingAvg: number | null;
-  ratingCount: number;
-};
-
-/**
- * Business rating lives on `Review` (per order), so it is aggregated through
- * `order.businessId`. Bounded by the featured candidate pool upstream.
- * Exported for reuse by the suggestion service (M2-W2).
- */
-export async function getBusinessRatings(
-  db: PrismaClient,
-  businessIds: readonly string[],
-): Promise<Map<string, BusinessRating>> {
-  const ratings = new Map<string, BusinessRating>(
-    businessIds.map((id) => [id, { ratingAvg: null, ratingCount: 0 }]),
-  );
-
-  if (businessIds.length === 0) {
-    return ratings;
-  }
-
-  const reviews = await db.review.findMany({
-    where: { order: { businessId: { in: [...businessIds] } } },
-    select: { rating: true, order: { select: { businessId: true } } },
-  });
-  const totals = new Map<string, { sum: number; count: number }>();
-
-  for (const review of reviews) {
-    const businessId = review.order.businessId;
-    const entry = totals.get(businessId) ?? { sum: 0, count: 0 };
-
-    entry.sum += review.rating;
-    entry.count += 1;
-    totals.set(businessId, entry);
-  }
-
-  for (const [businessId, { sum, count }] of totals) {
-    ratings.set(businessId, { ratingAvg: sum / count, ratingCount: count });
-  }
-
-  return ratings;
-}
-
 export async function listMarketplaceCategories(
   db: PrismaClient,
 ): Promise<TrpcResponse<MarketplaceCategory[]>> {
@@ -241,29 +189,25 @@ export async function listMarketplaceCategories(
 export async function listFeaturedProducts(
   db: PrismaClient,
 ): Promise<TrpcResponse<MarketplaceFeaturedProduct[]>> {
-  const candidates = await db.product.findMany({
+  // Best-rated businesses first (denormalized Business.ratingAvg, M3-W0);
+  // unrated businesses rank last, newest products break ties.
+  const featured = await db.product.findMany({
     where: productCatalogFilter,
     select: featuredProductSelect,
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take: FEATURED_CANDIDATE_POOL,
+    orderBy: [
+      { business: { ratingAvg: { sort: "desc", nulls: "last" } } },
+      { createdAt: "desc" },
+      { id: "desc" },
+    ],
+    take: FEATURED_PRODUCTS_TAKE,
   });
-  const ratings = await getBusinessRatings(db, [
-    ...new Set(candidates.map((candidate) => candidate.business.id)),
-  ]);
-  const ratingOf = (row: FeaturedProductRow): number =>
-    ratings.get(row.business.id)?.ratingAvg ?? -1;
-  // Stable sort keeps the newest-first order within equal ratings; unrated
-  // businesses rank last.
-  const featured = [...candidates]
-    .sort((a, b) => ratingOf(b) - ratingOf(a))
-    .slice(0, FEATURED_PRODUCTS_TAKE);
 
   return ok(
     featured.map((product) => ({
       id: product.id,
       name: product.name,
       priceCents: product.priceCents,
-      imageUrl: null,
+      imageUrl: product.imageUrl,
       businessName: product.business.name,
     })),
     "Featured products loaded",
@@ -411,24 +355,18 @@ export async function getMarketplaceProduct(
     return fail("NOT_FOUND", 404, "Product not found");
   }
 
-  const reviewAggregate = await db.review.aggregate({
-    where: { order: { businessId: product.business.id } },
-    _avg: { rating: true },
-    _count: { rating: true },
-  });
-
   return ok(
     {
       id: product.id,
       name: product.name,
       category: product.category,
       priceCents: product.priceCents,
-      imageUrl: null,
+      imageUrl: product.imageUrl,
       stock: product.stocks.reduce((total, { stock }) => total + stock, 0),
       business: {
         name: product.business.name,
-        ratingAvg: reviewAggregate._avg.rating,
-        ratingCount: reviewAggregate._count.rating,
+        ratingAvg: product.business.ratingAvg,
+        ratingCount: product.business.ratingCount,
       },
     },
     "Marketplace product loaded",

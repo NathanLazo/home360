@@ -40,7 +40,8 @@ export type CreateRequestInput = {
 
 export type CreateRequestResult = {
   request: ServiceRequest;
-  /** Not persisted (no column yet); returned so C3 can render it. */
+  /** Also persisted as `ServiceRequest.aiUrgency` (M3-W0); kept at the top
+   * level so existing C3 consumers keep working. */
   urgency: UrgencyLevel;
   suggestions: RequestSuggestions;
 };
@@ -106,7 +107,12 @@ export async function createServiceRequest(
 
   const address = await db.address.findFirst({
     where: { id: input.addressId, userId: input.customerId },
-    select: { addressLine: true, latitude: true, longitude: true },
+    select: {
+      addressLine: true,
+      neighborhood: true,
+      latitude: true,
+      longitude: true,
+    },
   });
 
   if (!address) {
@@ -150,7 +156,11 @@ export async function createServiceRequest(
       aiDiagnosis: diagnosis.data.diagnosis,
       aiMinPriceCents: diagnosis.data.minPriceCents,
       aiMaxPriceCents: diagnosis.data.maxPriceCents,
+      aiUrgency: diagnosis.data.urgency,
       addressLine: address.addressLine,
+      // Colonia snapshot (MA-13): the only textual address piece the radar
+      // exposes to businesses before their quote is accepted.
+      neighborhood: address.neighborhood,
       latitude: address.latitude,
       longitude: address.longitude,
       status: RequestStatus.OPEN,

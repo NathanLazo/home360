@@ -12,6 +12,7 @@ import type {
   PrismaClient,
   Review,
 } from "../../generated/prisma";
+import { recalculateBusinessRating } from "../../src/server/services/reviews/business-rating";
 import type { SeededBusinesses } from "./businesses";
 import type { SeededCatalog } from "./catalog";
 import type { SeededMarketplace } from "./marketplace";
@@ -556,6 +557,10 @@ export async function seedOrders(
       }),
     ),
   );
+
+  // Full recalculation (never increments) keeps the seed idempotent: all seed
+  // reviews belong to García orders, so García is the only business to sync.
+  await recalculateBusinessRating(prisma, businesses.garcia.id);
 
   return {
     orders,

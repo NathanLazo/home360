@@ -1,4 +1,4 @@
-import { QuoteStatus, RequestStatus } from "../../generated/prisma";
+import { AiUrgency, QuoteStatus, RequestStatus } from "../../generated/prisma";
 import type {
   Prisma,
   PrismaClient,
@@ -43,6 +43,7 @@ export async function seedMarketplace(
       aiDiagnosis: "Conexión flexible o empaque deteriorado.",
       aiMinPriceCents: 65_000,
       aiMaxPriceCents: 110_000,
+      aiUrgency: AiUrgency.MEDIUM,
       addressLine: "Av. Universidad 2500, Chihuahua, Chih.",
       latitude: 28.6516,
       longitude: -106.0889,
@@ -62,6 +63,7 @@ export async function seedMarketplace(
       aiDiagnosis: "Instalación estándar con adecuación de conexiones.",
       aiMinPriceCents: 190_000,
       aiMaxPriceCents: 260_000,
+      aiUrgency: AiUrgency.LOW,
       addressLine: "Paseo Bolívar 601, Chihuahua, Chih.",
       latitude: 28.6387,
       longitude: -106.0768,
