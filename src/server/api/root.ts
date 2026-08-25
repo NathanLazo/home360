@@ -15,6 +15,7 @@ import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
 import { pushRouter } from "~/server/api/routers/push";
 import { quoteRouter } from "~/server/api/routers/quote";
+import { radarRouter } from "~/server/api/routers/radar";
 import { requestRouter } from "~/server/api/routers/request";
 import { serviceRouter } from "~/server/api/routers/service";
 import { subscriptionRouter } from "~/server/api/routers/subscription";
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
   product: productRouter,
   push: pushRouter,
   quote: quoteRouter,
+  radar: radarRouter,
   request: requestRouter,
   service: serviceRouter,
   subscription: subscriptionRouter,

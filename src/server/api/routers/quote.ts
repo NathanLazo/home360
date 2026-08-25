@@ -6,7 +6,15 @@ import {
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
-import { createTRPCRouter, userProcedure } from "~/server/api/trpc";
+import {
+  activeBusinessProcedure,
+  createTRPCRouter,
+  userProcedure,
+} from "~/server/api/trpc";
+import {
+  submitQuote,
+  withdrawQuote,
+} from "~/server/services/orders/quote-business";
 import {
   acceptQuote,
   getMyQuote,
@@ -21,10 +29,19 @@ const listByRequestSchema = z.object({
 
 const quoteIdSchema = z.object({ id: z.string().cuid() });
 
+const submitSchema = z.object({
+  requestId: z.string().cuid(),
+  priceCents: z.number().int().positive(),
+  scheduledAt: z.coerce.date(),
+  workerId: z.string().cuid(),
+  branchId: z.string().cuid().optional(),
+});
+
 /** HTTP status per service code surfaced by the quote services. */
 const serviceErrorStatuses = {
   NOT_FOUND: 404,
   CONFLICT: 409,
+  VALIDATION_ERROR: 422,
   STRIPE_ERROR: 502,
 } as const satisfies Record<string, number>;
 
@@ -46,10 +63,9 @@ function unexpectedFailure(
 }
 
 /**
- * Customer-side quotes (M3-W1): the C4 comparator lists the PENDING offers of
- * an own request, C5 opens one in detail and `accept` closes the deal creating
- * the SERVICE Order. Tenant always comes from the session; a foreign request
- * or quote answers a generic NOT_FOUND.
+ * Quotes router: customer side (M3-W1 — list/get/accept) plus business side
+ * (M5-W1 — submit/withdraw). Tenant always from the session; foreign resources
+ * answer a generic NOT_FOUND.
  */
 export const quoteRouter = createTRPCRouter({
   listByRequest: userProcedure
@@ -105,6 +121,49 @@ export const quoteRouter = createTRPCRouter({
         return ok(accepted.data, "Quote accepted", 201);
       } catch (error) {
         return unexpectedFailure(error, "Quote accept failed");
+      }
+    }),
+
+  submit: activeBusinessProcedure
+    .input(submitSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const submitted = await submitQuote(ctx.db, {
+          businessId: ctx.business.id,
+          userId: ctx.session.user.id,
+          requestId: input.requestId,
+          priceCents: input.priceCents,
+          scheduledAt: input.scheduledAt,
+          workerId: input.workerId,
+          branchId: input.branchId,
+        });
+
+        if (!submitted.ok) {
+          return serviceFailure(submitted.code, "Quote submit failed");
+        }
+
+        return ok(submitted.data, "Quote submitted", 201);
+      } catch (error) {
+        return unexpectedFailure(error, "Quote submit failed");
+      }
+    }),
+
+  withdraw: activeBusinessProcedure
+    .input(quoteIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const withdrawn = await withdrawQuote(ctx.db, {
+          businessId: ctx.business.id,
+          quoteId: input.id,
+        });
+
+        if (!withdrawn.ok) {
+          return serviceFailure(withdrawn.code, "Quote withdraw failed");
+        }
+
+        return ok(withdrawn.data, "Quote withdrawn");
+      } catch (error) {
+        return unexpectedFailure(error, "Quote withdraw failed");
       }
     }),
 });
