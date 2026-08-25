@@ -77,7 +77,7 @@ export async function resolveRadarBranch(
         orderBy: [{ name: "asc" }, { id: "asc" }],
       });
 
-  if (!branch || branch.latitude === null || branch.longitude === null) {
+  if (branch?.latitude == null || branch.longitude == null) {
     return svcFail("NOT_FOUND", "Branch not found");
   }
 
@@ -126,7 +126,7 @@ export async function isRequestVisibleOnRadar(
     },
   });
 
-  if (!request || request.latitude === null || request.longitude === null) {
+  if (request?.latitude == null || request.longitude == null) {
     return false;
   }
 
