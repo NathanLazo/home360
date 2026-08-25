@@ -570,6 +570,7 @@ model Order {
   afterUrls            String[]
   workNotes            String?
   materials            OrderMaterial[]
+  recordingSegments    RecordingSegment[]
   payment              Payment?
   dispute              Dispute?
   review               Review?
@@ -604,6 +605,23 @@ model OrderMaterial {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model RecordingSegment {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  startedAt   DateTime
+  endedAt     DateTime?
+  startLat    Float
+  startLng    Float
+  endLat      Float?
+  endLng      Float?
+  pathname    String?
+  uploadedAt  DateTime?
+  interrupted Boolean   @default(false)
+
+  @@index([orderId])
 }
 
 // B2B corporate domain (F7). Corporate accounts consume services (unlike

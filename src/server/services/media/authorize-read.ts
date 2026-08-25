@@ -13,7 +13,8 @@ import { isRequestVisibleOnRadar } from "~/server/services/orders/radar-visibili
  * - request evidence (M5-W1): pathname on ServiceRequest.photoUrls → business
  *   that sees the request on the radar (OPEN + radius + category) or that
  *   already has a quote on it.
- * - order evidence (M6-W1) adds its branch over this same helper later.
+ * - order evidence (M6-W1): request/before/after/recording media for the
+ *   customer, business owner, assigned worker or an administrator.
  */
 export async function authorizeMediaRead(
   db: PrismaClient,
@@ -34,7 +35,57 @@ export async function authorizeMediaRead(
     return participantIds?.includes(userId) ?? false;
   }
 
+  if (await authorizeOrderEvidenceRead(db, userId, pathname)) {
+    return true;
+  }
+
   return authorizeRequestEvidenceRead(db, userId, pathname);
+}
+
+async function authorizeOrderEvidenceRead(
+  db: PrismaClient,
+  userId: string,
+  pathname: string,
+): Promise<boolean> {
+  const order = await db.order.findFirst({
+    where: {
+      OR: [
+        {
+          quote: {
+            is: { request: { is: { photoUrls: { has: pathname } } } },
+          },
+        },
+        { beforeUrls: { has: pathname } },
+        { afterUrls: { has: pathname } },
+        { recordingUrl: pathname },
+        { recordingSegments: { some: { pathname } } },
+      ],
+    },
+    select: {
+      customerId: true,
+      business: { select: { ownerId: true } },
+      worker: { select: { userId: true } },
+    },
+  });
+
+  if (!order) {
+    return false;
+  }
+
+  if (
+    order.customerId === userId ||
+    order.business.ownerId === userId ||
+    order.worker?.userId === userId
+  ) {
+    return true;
+  }
+
+  const admin = await db.user.findFirst({
+    where: { id: userId, role: "ADMIN" },
+    select: { id: true },
+  });
+
+  return admin !== null;
 }
 
 /**

@@ -150,6 +150,17 @@ export async function isRequestVisibleOnRadar(
     },
   });
 
+  if (branches.length === 0) {
+    return false;
+  }
+
+  const settings = await db.platformSettings.findUnique({
+    where: { id: PLATFORM_SETTINGS_ID },
+    select: { notifyNewRequestRadiusKm: true },
+  });
+  const notifyRadiusKm =
+    settings?.notifyNewRequestRadiusKm ?? DEFAULT_NOTIFY_RADIUS_KM;
+
   const requestPoint: GeoPoint = {
     latitude: request.latitude,
     longitude: request.longitude,
@@ -160,9 +171,9 @@ export async function isRequestVisibleOnRadar(
       continue;
     }
 
-    const effectiveRadiusKm = await getEffectiveRadiusKm(
-      db,
+    const effectiveRadiusKm = Math.min(
       branch.coverageRadiusKm,
+      notifyRadiusKm,
     );
     const distanceKm = haversineKm(
       { latitude: branch.latitude, longitude: branch.longitude },

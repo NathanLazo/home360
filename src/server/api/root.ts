@@ -21,6 +21,7 @@ import { serviceRouter } from "~/server/api/routers/service";
 import { subscriptionRouter } from "~/server/api/routers/subscription";
 import { teamRouter } from "~/server/api/routers/team";
 import { trackingRouter } from "~/server/api/routers/tracking";
+import { workerOrdersRouter } from "~/server/api/routers/worker-orders";
 import {
   createCallerFactory,
   createTRPCRouter,
@@ -56,6 +57,7 @@ export const appRouter = createTRPCRouter({
   subscription: subscriptionRouter,
   team: teamRouter,
   tracking: trackingRouter,
+  workerOrders: workerOrdersRouter,
 });
 
 // export type definition of API
