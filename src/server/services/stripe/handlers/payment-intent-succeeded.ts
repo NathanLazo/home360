@@ -4,6 +4,7 @@ import { PaymentMethod } from "../../../../../generated/prisma";
 import type Stripe from "stripe";
 
 import { capturePayment } from "~/server/services/payments/escrow";
+import { finalizePendingCheckoutPayment } from "~/server/services/payments/customer-checkout";
 import { svcOk, type ServiceResult } from "~/server/services/service-result";
 import type {
   StripeEventHandler,
@@ -82,6 +83,20 @@ export async function capturePaymentIntent(
       "INVALID_PAYMENT_METADATA",
       `PaymentIntent ${paymentIntent.id} carries unreadable metadata`,
     );
+  }
+
+  const pendingCheckout = await finalizePendingCheckoutPayment(deps, {
+    stripePaymentIntentId: paymentIntent.id,
+    stripeChargeId,
+    amountCents,
+  });
+
+  if (!pendingCheckout.ok) {
+    return handlerFail(pendingCheckout.code, pendingCheckout.detail);
+  }
+
+  if (pendingCheckout.data.handled) {
+    return svcOk(null);
   }
 
   const origin = await resolveCaptureOrigin(deps, metadata.data, options);

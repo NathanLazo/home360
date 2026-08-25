@@ -1,6 +1,6 @@
 import {
+  OrderEventType,
   OrderStatus,
-  PaymentStatus,
   type Prisma,
 } from "../../../../generated/prisma";
 import { env } from "~/env";
@@ -441,19 +441,15 @@ export const paymentRouter = createTRPCRouter({
           });
         };
 
-        // Retry after a crash between the Stripe transfer and the order update.
-        if (order.payment.status === PaymentStatus.RELEASED) {
-          await completeOrder();
-
-          return ok(
-            { orderId: order.id, paymentId: order.payment.id },
-            "Delivery already confirmed",
-          );
-        }
-
         const released = await releasePayment(
           { db: ctx.db, stripe: getStripe() },
-          { paymentId: order.payment.id },
+          {
+            paymentId: order.payment.id,
+            event: {
+              type: OrderEventType.CONFIRMED,
+              actorUserId: ctx.customer.id,
+            },
+          },
         );
 
         if (!released.ok) {

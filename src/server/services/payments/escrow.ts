@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  OrderEventType,
   PaymentMethod,
   PaymentStatus,
   Prisma,
@@ -371,6 +372,35 @@ export type RefundPaymentInput = {
   serviceFeeRefundCents?: number;
 };
 
+export type ReleaseOrderEvent = {
+  type: typeof OrderEventType.CONFIRMED | typeof OrderEventType.AUTO_RELEASED;
+  actorUserId?: string;
+};
+
+async function ensureReleaseOrderEvent(
+  db: Pick<PrismaClient, "orderEvent">,
+  input: { orderId: string; event: ReleaseOrderEvent },
+): Promise<void> {
+  const existing = await db.orderEvent.findFirst({
+    where: { orderId: input.orderId, type: input.event.type },
+    select: { id: true },
+  });
+
+  if (existing) {
+    return;
+  }
+
+  await db.orderEvent.create({
+    data: {
+      orderId: input.orderId,
+      type: input.event.type,
+      ...(input.event.actorUserId !== undefined
+        ? { actorUserId: input.event.actorUserId }
+        : {}),
+    },
+  });
+}
+
 type RefundAllocation = {
   providerRefundedCents: number;
   serviceFeeRefundedCents: number;
@@ -708,7 +738,7 @@ export async function refundPayment(
 
 export async function releasePayment(
   { db, stripe }: CapturePaymentDeps,
-  input: { paymentId: string },
+  input: { paymentId: string; event?: ReleaseOrderEvent },
 ): Promise<
   ServiceResult<
     { paymentId: string; stripeTransferId: string },
@@ -732,7 +762,7 @@ export async function releasePayment(
         select: { stripeAccountId: true, payoutsEnabled: true },
       },
       order: {
-        select: { dispute: { select: { status: true } } },
+        select: { id: true, dispute: { select: { status: true } } },
       },
     },
   });
@@ -745,6 +775,13 @@ export async function releasePayment(
     payment.status === PaymentStatus.RELEASED &&
     payment.stripeTransferId !== null
   ) {
+    if (input.event && payment.order) {
+      await ensureReleaseOrderEvent(db, {
+        orderId: payment.order.id,
+        event: input.event,
+      });
+    }
+
     return svcOk({
       paymentId: payment.id,
       stripeTransferId: payment.stripeTransferId,
@@ -930,6 +967,13 @@ export async function releasePayment(
         current?.status === PaymentStatus.RELEASED &&
         current.stripeTransferId === transfer.id
       ) {
+        if (input.event && payment.order) {
+          await ensureReleaseOrderEvent(tx, {
+            orderId: payment.order.id,
+            event: input.event,
+          });
+        }
+
         return svcOk({
           paymentId: payment.id,
           stripeTransferId: transfer.id,
@@ -953,6 +997,13 @@ export async function releasePayment(
       ],
       skipDuplicates: true,
     });
+
+    if (input.event && payment.order) {
+      await ensureReleaseOrderEvent(tx, {
+        orderId: payment.order.id,
+        event: input.event,
+      });
+    }
 
     return svcOk({
       paymentId: payment.id,
@@ -1022,7 +1073,10 @@ export async function releaseDuePayments(
 
   for (const payment of duePayments) {
     try {
-      const result = await releasePayment(deps, { paymentId: payment.id });
+      const result = await releasePayment(deps, {
+        paymentId: payment.id,
+        event: { type: OrderEventType.AUTO_RELEASED },
+      });
 
       if (result.ok) {
         released += 1;
