@@ -122,7 +122,7 @@ export async function createServiceRequest(
   const imageUrls: string[] = [];
 
   for (const pathname of photoPathnames) {
-    const grant = await createDownloadUrl({
+    const grant = await createDownloadUrl(db, {
       userId: input.customerId,
       pathname,
     });

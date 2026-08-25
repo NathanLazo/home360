@@ -8,7 +8,6 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import type { Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -17,7 +16,7 @@ import type {
   SubscriptionStatus,
 } from "../../../generated/prisma";
 import { auth } from "~/server/auth";
-import { verifyMobileToken } from "~/server/auth/mobile-token";
+import { resolveBearerSession } from "~/server/auth/resolve-session";
 import { db } from "~/server/db";
 import type { PlanLimits } from "~/server/services/subscription/plan-limits";
 
@@ -48,55 +47,8 @@ type CustomerContext = {
  *
  * @see https://trpc.io/docs/server/context
  */
-const BEARER_PREFIX = "Bearer ";
-
-/**
- * Mobile fallback (M0-W2): resolves a session from an `Authorization: Bearer`
- * header when the cookie path yielded nothing. The returned object has the
- * exact shape the `session` callback in `edge-config.ts` produces
- * (`user: { id, role, authInvalidated }`), so every guard downstream works
- * unchanged. `authInvalidated` re-reads `User.sessionsValidFrom` against the
- * token's `authIssuedAtMs`, mirroring the `jwt` callback in `config.ts`. An
- * invalid or expired token resolves to `null`; the guards answer with a
- * generic UNAUTHORIZED without leaking the reason.
- */
-async function resolveBearerSession(headers: Headers): Promise<Session | null> {
-  const authorization = headers.get("authorization");
-
-  if (!authorization?.startsWith(BEARER_PREFIX)) {
-    return null;
-  }
-
-  const payload = await verifyMobileToken(
-    authorization.slice(BEARER_PREFIX.length),
-  );
-
-  if (!payload?.sub || payload.authIssuedAtMs === undefined) {
-    return null;
-  }
-
-  const storedUser = await db.user.findUnique({
-    where: { id: payload.sub },
-    select: { sessionsValidFrom: true },
-  });
-
-  const authInvalidated =
-    !storedUser ||
-    storedUser.sessionsValidFrom.getTime() > payload.authIssuedAtMs;
-
-  return {
-    user: {
-      id: payload.id,
-      role: payload.role,
-      authInvalidated,
-    },
-    expires:
-      typeof payload.exp === "number"
-        ? new Date(payload.exp * 1000).toISOString()
-        : new Date().toISOString(),
-  };
-}
-
+// The Bearer fallback (M0-W2) lives in `~/server/auth/resolve-session` since
+// M4-W1 so the Pusher channel auth endpoint reuses the exact same resolution.
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // The Bearer fallback only runs when the cookie path resolved nothing, so
   // web requests pay zero extra latency.

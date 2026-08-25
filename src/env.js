@@ -28,6 +28,12 @@ export const env = createEnv({
     CRON_SECRET: z.string(),
     POSTGRES_PRISMA_URL: z.string().url(),
     EMAIL_FROM: z.string().optional(),
+    // Pusher Channels (M4-W1). Optional, Stripe pattern: without them the
+    // realtime layer degrades to a logged no-op (polling-only mode).
+    PUSHER_APP_ID: z.string().optional(),
+    PUSHER_KEY: z.string().optional(),
+    PUSHER_SECRET: z.string().optional(),
+    PUSHER_CLUSTER: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -45,6 +51,8 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+    NEXT_PUBLIC_PUSHER_KEY: z.string().optional(),
+    NEXT_PUBLIC_PUSHER_CLUSTER: z.string().optional(),
   },
 
   /**
@@ -63,7 +71,13 @@ export const env = createEnv({
     EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_PUSHER_KEY: process.env.NEXT_PUBLIC_PUSHER_KEY,
+    NEXT_PUBLIC_PUSHER_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
     NODE_ENV: process.env.NODE_ENV,
+    PUSHER_APP_ID: process.env.PUSHER_APP_ID,
+    PUSHER_KEY: process.env.PUSHER_KEY,
+    PUSHER_SECRET: process.env.PUSHER_SECRET,
+    PUSHER_CLUSTER: process.env.PUSHER_CLUSTER,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     SENDDM_API_KEY: process.env.SENDDM_API_KEY,
     SMS_FROM: process.env.SMS_FROM,
