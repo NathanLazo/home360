@@ -4,8 +4,10 @@ import { createId } from "@paralleldrive/cuid2";
 import { issueSignedToken, presignUrl } from "@vercel/blob";
 import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
 
+import type { PrismaClient } from "../../../../generated/prisma";
 import { env } from "~/env";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
+import { authorizeMediaRead } from "./authorize-read";
 
 /**
  * Media namespaces uploaded by the mobile app (M0-W3). Each kind carries its
@@ -128,17 +130,23 @@ export async function createUploadToken(input: {
 }
 
 /**
- * Returns a short-lived signed read URL for a private blob the caller owns.
- * M0 authorizes by owner prefix only (`mobile/{kind}/{userId}/…`); later
- * tickets widen this per order/conversation once media references persist.
- * A pathname outside the caller namespace answers a generic NOT_FOUND so the
- * response never reveals whether the blob exists.
+ * Returns a short-lived signed read URL for a private blob the caller may
+ * read: either it owns the pathname by prefix (`mobile/{kind}/{userId}/…`,
+ * M0-W3) or a persisted reference authorizes it (`authorizeMediaRead`,
+ * MA-02 — e.g. the receiver of a chat attachment). Anything else answers a
+ * generic NOT_FOUND so the response never reveals whether the blob exists.
  */
-export async function createDownloadUrl(input: {
-  userId: string;
-  pathname: string;
-}): Promise<ServiceResult<DownloadUrlGrant, MediaServiceError>> {
-  if (!isOwnedMediaPathname(input.pathname, input.userId)) {
+export async function createDownloadUrl(
+  db: PrismaClient,
+  input: {
+    userId: string;
+    pathname: string;
+  },
+): Promise<ServiceResult<DownloadUrlGrant, MediaServiceError>> {
+  if (
+    !isOwnedMediaPathname(input.pathname, input.userId) &&
+    !(await authorizeMediaRead(db, input.userId, input.pathname))
+  ) {
     return svcFail("NOT_FOUND", "Blob not found");
   }
 

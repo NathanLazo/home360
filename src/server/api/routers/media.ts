@@ -91,7 +91,7 @@ export const mediaRouter = createTRPCRouter({
     .input(getDownloadUrlSchema)
     .query(async ({ ctx, input }) => {
       try {
-        const grant = await createDownloadUrl({
+        const grant = await createDownloadUrl(ctx.db, {
           userId: ctx.session.user.id,
           pathname: input.pathname,
         });

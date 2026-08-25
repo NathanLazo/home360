@@ -8,6 +8,7 @@ import { corporateRouter } from "~/server/api/routers/corporate";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
 import { marketplaceRouter } from "~/server/api/routers/marketplace";
 import { mediaRouter } from "~/server/api/routers/media";
+import { messagingRouter } from "~/server/api/routers/messaging";
 import { orderRouter } from "~/server/api/routers/order";
 import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
@@ -40,6 +41,7 @@ export const appRouter = createTRPCRouter({
   health: publicProcedure.query(() => ok({ ready: true }, "API is ready")),
   marketplace: marketplaceRouter,
   media: mediaRouter,
+  messaging: messagingRouter,
   order: orderRouter,
   payment: paymentRouter,
   product: productRouter,
