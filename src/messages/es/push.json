@@ -1,0 +1,42 @@
+{
+  "requestNearby": {
+    "title": "Nueva solicitud cerca",
+    "body": "Hay una nueva oportunidad disponible en tu zona."
+  },
+  "quoteReceived": {
+    "title": "Recibiste una cotización",
+    "body": "Ya puedes revisar una nueva propuesta para tu solicitud."
+  },
+  "escrowHeld": {
+    "title": "Pago protegido confirmado",
+    "body": "El pago de una orden está protegido y el trabajo puede comenzar."
+  },
+  "orderEnRoute": {
+    "title": "Tu profesional va en camino",
+    "body": "Consulta el seguimiento de tu orden para ver las novedades."
+  },
+  "orderArrived": {
+    "title": "Tu profesional llegó",
+    "body": "La persona asignada ya se encuentra en el lugar del servicio."
+  },
+  "newMessage": {
+    "title": "Nuevo mensaje",
+    "body": "Tienes un mensaje nuevo en una conversación."
+  },
+  "confirmationRequested": {
+    "title": "Confirma la entrega",
+    "body": "El trabajo fue marcado como terminado y espera tu confirmación."
+  },
+  "deliveryConfirmed": {
+    "title": "Entrega confirmada",
+    "body": "El cliente confirmó la entrega y el pago fue liberado."
+  },
+  "escrowAutoReleased": {
+    "title": "Pago liberado",
+    "body": "El pago protegido de una orden fue liberado automáticamente."
+  },
+  "workerInvitation": {
+    "title": "Invitación a un equipo",
+    "body": "Un negocio te invitó a formar parte de su equipo en HOME360."
+  }
+}

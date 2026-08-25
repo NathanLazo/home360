@@ -9,6 +9,7 @@ import {
   type EmailClient,
 } from "~/server/services/email/email-client";
 import { haversineKmSql } from "~/server/services/geo/haversine";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 const PLATFORM_SETTINGS_ID = 1;
@@ -29,15 +30,24 @@ const emailClient: EmailClient | null =
     ? createResendEmailClientFromApiKey(env.RESEND_API_KEY, env.EMAIL_FROM)
     : null;
 
-/**
- * Placeholder until M7-W1 wires Expo push. Kept synchronous on purpose: the
- * real implementation will fan out to the `PushToken` registry.
- */
-function sendPush(requestId: string, businessIds: string[]): Promise<void> {
-  console.info(
-    `[notify-request] push pending (M7-W1): request ${requestId} → ${businessIds.length} business(es)`,
+async function sendPush(
+  db: PrismaClient,
+  requestId: string,
+  businessIds: string[],
+): Promise<void> {
+  const businesses = await db.business.findMany({
+    where: { id: { in: businessIds } },
+    select: { ownerId: true },
+  });
+
+  await Promise.all(
+    businesses.map(({ ownerId }) =>
+      sendLocalizedPushToUser(db, ownerId, {
+        message: "requestNearby",
+        url: `home360app://request/${requestId}`,
+      }),
+    ),
   );
-  return Promise.resolve();
 }
 
 /**
@@ -143,7 +153,7 @@ export async function notifyNearbyBusinesses(
     const businessIds = rows.map((row) => row.businessId);
 
     await sendEmails(db, { businessIds, category: request.category });
-    await sendPush(requestId, businessIds);
+    await sendPush(db, requestId, businessIds);
 
     return svcOk({ businessIds });
   } catch {

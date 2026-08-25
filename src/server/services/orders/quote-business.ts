@@ -8,6 +8,7 @@ import {
   type Quote,
 } from "../../../../generated/prisma";
 import { getOrCreateForRequest } from "~/server/services/messaging/conversations";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {
   isRequestVisibleOnRadar,
@@ -65,7 +66,7 @@ export async function submitQuote(
 
   const request = await db.serviceRequest.findFirst({
     where: { id: input.requestId, status: RequestStatus.OPEN },
-    select: { id: true },
+    select: { id: true, customerId: true },
   });
 
   if (!request) {
@@ -123,6 +124,11 @@ export async function submitQuote(
   if (!conversation.ok) {
     return svcFail("NOT_FOUND", "Conversation could not be opened");
   }
+
+  await sendLocalizedPushToUser(db, request.customerId, {
+    message: "quoteReceived",
+    url: `home360app://request/${request.id}/quotes`,
+  });
 
   return svcOk({
     quoteId: quote.id,

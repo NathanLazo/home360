@@ -14,6 +14,7 @@ import {
   resolveCommissionPct,
 } from "~/server/services/payments/commission-resolution";
 import { providerTransferCents } from "~/server/services/payments/payment-ledger";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import {
   svcFail,
   svcOk,
@@ -1066,7 +1067,15 @@ export async function releaseDuePayments(
       { id: "asc" },
     ],
     take: RELEASE_BATCH_SIZE,
-    select: { id: true },
+    select: {
+      id: true,
+      order: {
+        select: {
+          id: true,
+          business: { select: { ownerId: true } },
+        },
+      },
+    },
   });
   let released = 0;
   let failed = 0;
@@ -1080,6 +1089,16 @@ export async function releaseDuePayments(
 
       if (result.ok) {
         released += 1;
+        if (payment.order) {
+          await sendLocalizedPushToUser(
+            deps.db,
+            payment.order.business.ownerId,
+            {
+              message: "escrowAutoReleased",
+              url: `home360app://orders/${payment.order.id}`,
+            },
+          );
+        }
       } else {
         failed += 1;
         console.error("[release-due-payments] PAYMENT_RELEASE_FAILED", {

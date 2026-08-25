@@ -1,0 +1,42 @@
+{
+  "requestNearby": {
+    "title": "New request nearby",
+    "body": "A new opportunity is available in your area."
+  },
+  "quoteReceived": {
+    "title": "You received a quote",
+    "body": "You can now review a new proposal for your request."
+  },
+  "escrowHeld": {
+    "title": "Protected payment confirmed",
+    "body": "An order payment is protected and work can begin."
+  },
+  "orderEnRoute": {
+    "title": "Your professional is on the way",
+    "body": "Open your order tracking to see the latest update."
+  },
+  "orderArrived": {
+    "title": "Your professional has arrived",
+    "body": "The assigned professional is now at the service location."
+  },
+  "newMessage": {
+    "title": "New message",
+    "body": "You have a new message in a conversation."
+  },
+  "confirmationRequested": {
+    "title": "Confirm delivery",
+    "body": "The work was marked as finished and is waiting for your confirmation."
+  },
+  "deliveryConfirmed": {
+    "title": "Delivery confirmed",
+    "body": "The customer confirmed delivery and the payment was released."
+  },
+  "escrowAutoReleased": {
+    "title": "Payment released",
+    "body": "The protected payment for an order was released automatically."
+  },
+  "workerInvitation": {
+    "title": "Team invitation",
+    "body": "A business invited you to join its team on HOME360."
+  }
+}

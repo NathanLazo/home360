@@ -24,6 +24,7 @@ import {
   svcOk,
   type ServiceResult,
 } from "~/server/services/service-result";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 
 const MAX_PRISMA_INT = 2_147_483_647;
 const MILLISECONDS_PER_HOUR = 60 * 60 * 1_000;
@@ -539,6 +540,7 @@ export async function finalizePendingCheckoutPayment(
           quantity: true,
           productId: true,
           branchId: true,
+          business: { select: { ownerId: true } },
           quote: { select: { id: true, requestId: true } },
         },
       },
@@ -585,7 +587,8 @@ export async function finalizePendingCheckoutPayment(
     return svcFail("CONFLICT", "Invalid escrow release configuration");
   }
 
-  return deps.db.$transaction(async (tx) => {
+  let shouldNotifyBusiness = false;
+  const result = await deps.db.$transaction(async (tx) => {
     const captured = await tx.payment.updateMany({
       where: {
         id: payment.id,
@@ -613,6 +616,8 @@ export async function finalizePendingCheckoutPayment(
         ? svcOk({ handled: true })
         : svcFail("CONFLICT", "Checkout capture claim was lost");
     }
+
+    shouldNotifyBusiness = true;
 
     await tx.order.update({
       where: { id: order.id },
@@ -673,4 +678,13 @@ export async function finalizePendingCheckoutPayment(
 
     return svcOk({ handled: true });
   });
+
+  if (result.ok && shouldNotifyBusiness) {
+    await sendLocalizedPushToUser(deps.db, order.business.ownerId, {
+      message: "escrowHeld",
+      url: `home360app://orders/${order.id}`,
+    });
+  }
+
+  return result;
 }

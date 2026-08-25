@@ -1,10 +1,18 @@
 import "server-only";
 
-import type { Message, MessageType, PrismaClient } from "../../../../generated/prisma";
+import type {
+  Message,
+  MessageType,
+  PrismaClient,
+} from "../../../../generated/prisma";
 import { isOwnedMediaPathname } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { conversationChannel } from "./channels";
-import { isConversationParticipant } from "./participants";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
+import {
+  getConversationParticipantIds,
+  isConversationParticipant,
+} from "./participants";
 import { triggerPusherEvent } from "./pusher-server";
 
 /**
@@ -84,6 +92,28 @@ export async function sendMessage(
       type: message.type,
     },
   );
+
+  try {
+    const participantIds = await getConversationParticipantIds(
+      db,
+      input.conversationId,
+    );
+
+    await Promise.all(
+      (participantIds ?? [])
+        .filter((userId) => userId !== input.senderId)
+        .map((userId) =>
+          sendLocalizedPushToUser(db, userId, {
+            message: "newMessage",
+            url: `home360app://conversation/${input.conversationId}`,
+          }),
+        ),
+    );
+  } catch {
+    console.error("[messaging] PUSH_DELIVERY_FAILED", {
+      conversationId: input.conversationId,
+    });
+  }
 
   return svcOk(message);
 }

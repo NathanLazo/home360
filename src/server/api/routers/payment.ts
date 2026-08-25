@@ -33,6 +33,7 @@ import {
 } from "~/server/services/payments/payment-links";
 import { requestWithdrawal } from "~/server/services/payments/withdrawals";
 import { getStripe } from "~/server/services/stripe/client";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import {
   createConnectAccount,
   createOnboardingLink,
@@ -416,6 +417,7 @@ export const paymentRouter = createTRPCRouter({
           select: {
             id: true,
             payment: { select: { id: true, status: true } },
+            business: { select: { ownerId: true } },
           },
         });
 
@@ -457,6 +459,10 @@ export const paymentRouter = createTRPCRouter({
         }
 
         await completeOrder();
+        await sendLocalizedPushToUser(ctx.db, order.business.ownerId, {
+          message: "deliveryConfirmed",
+          url: `home360app://orders/${order.id}`,
+        });
 
         return ok(
           { orderId: order.id, paymentId: released.data.paymentId },

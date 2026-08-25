@@ -18,6 +18,7 @@ import {
   type BusinessWithPlan,
 } from "~/server/services/subscription/plan-limits";
 import { sendWorkerInvitation } from "~/server/services/team/send-worker-invitation";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 
 /**
  * Business context as `businessProcedure` builds it (F0-05): the plan is already
@@ -272,6 +273,22 @@ async function deliverInvitation(
       businessName: business.name,
       locale: input.locale,
     });
+
+    try {
+      const existingUser = await db.user.findUnique({
+        where: { email: input.to },
+        select: { id: true },
+      });
+
+      if (existingUser) {
+        await sendLocalizedPushToUser(db, existingUser.id, {
+          message: "workerInvitation",
+          url: "home360app://team",
+        });
+      }
+    } catch {
+      console.error("[team] WORKER_INVITATION_PUSH_FAILED");
+    }
 
     return true;
   } catch {
