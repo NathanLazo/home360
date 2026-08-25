@@ -139,20 +139,16 @@ export async function listQuotesByRequest(
   });
 
   const scored: ScoredQuote[] = rows.map((row) => {
-    const hasGeo =
-      request.latitude !== null &&
-      request.longitude !== null &&
-      row.branch?.latitude != null &&
-      row.branch?.longitude != null;
-    const distanceKm = hasGeo
-      ? haversineKm(
-          { latitude: request.latitude ?? 0, longitude: request.longitude ?? 0 },
-          {
-            latitude: row.branch?.latitude ?? 0,
-            longitude: row.branch?.longitude ?? 0,
-          },
-        )
-      : null;
+    const origin =
+      request.latitude !== null && request.longitude !== null
+        ? { latitude: request.latitude, longitude: request.longitude }
+        : null;
+    const branch =
+      row.branch?.latitude != null && row.branch.longitude != null
+        ? { latitude: row.branch.latitude, longitude: row.branch.longitude }
+        : null;
+    const distanceKm =
+      origin !== null && branch !== null ? haversineKm(origin, branch) : null;
 
     return {
       id: row.id,
@@ -161,16 +157,9 @@ export async function listQuotesByRequest(
       message: row.message,
       distanceKm,
       recommended: false,
+      business: row.business,
       score: recommendationScore(row.business.ratingAvg, distanceKm),
-    } satisfies Omit<ScoredQuote, "business"> & object as ScoredQuote;
-  });
-
-  rows.forEach((row, index) => {
-    const quote = scored[index];
-
-    if (quote) {
-      quote.business = row.business;
-    }
+    };
   });
 
   const best = sortQuotes(scored, "recommended")[0];
