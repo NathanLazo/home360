@@ -256,6 +256,22 @@ async function deliverInvitation(
     locale: WorkerCreateInput["locale"];
   },
 ): Promise<boolean> {
+  try {
+    const existingUser = await db.user.findUnique({
+      where: { email: input.to },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      await sendLocalizedPushToUser(db, existingUser.id, {
+        message: "workerInvitation",
+        url: "home360app://team",
+      });
+    }
+  } catch {
+    console.error("[team] WORKER_INVITATION_PUSH_FAILED");
+  }
+
   if (!emailClient) {
     console.error("[team] EMAIL_CLIENT_UNAVAILABLE");
     return false;
@@ -273,22 +289,6 @@ async function deliverInvitation(
       businessName: business.name,
       locale: input.locale,
     });
-
-    try {
-      const existingUser = await db.user.findUnique({
-        where: { email: input.to },
-        select: { id: true },
-      });
-
-      if (existingUser) {
-        await sendLocalizedPushToUser(db, existingUser.id, {
-          message: "workerInvitation",
-          url: "home360app://team",
-        });
-      }
-    } catch {
-      console.error("[team] WORKER_INVITATION_PUSH_FAILED");
-    }
 
     return true;
   } catch {

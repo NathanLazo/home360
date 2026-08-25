@@ -152,8 +152,10 @@ export async function notifyNearbyBusinesses(
     `);
     const businessIds = rows.map((row) => row.businessId);
 
-    await sendEmails(db, { businessIds, category: request.category });
-    await sendPush(db, requestId, businessIds);
+    await Promise.allSettled([
+      sendEmails(db, { businessIds, category: request.category }),
+      sendPush(db, requestId, businessIds),
+    ]);
 
     return svcOk({ businessIds });
   } catch {
