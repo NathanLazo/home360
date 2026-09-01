@@ -16,7 +16,11 @@ import {
 import { usePathname, useRouter } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
 
-export function LocaleSwitcher() {
+type LocaleSwitcherProps = {
+  tone?: "light" | "dark";
+};
+
+export function LocaleSwitcher({ tone = "light" }: LocaleSwitcherProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -33,11 +37,16 @@ export function LocaleSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon-lg"
           aria-label={t("label")}
+          className={
+            tone === "dark"
+              ? "border-0 bg-transparent text-white shadow-none hover:bg-transparent hover:text-white hover:opacity-80 focus-visible:border-transparent focus-visible:ring-white/60"
+              : "border-0 bg-transparent shadow-none hover:bg-transparent hover:opacity-80 focus-visible:border-transparent"
+          }
         >
-          <LanguagesIcon aria-hidden="true" />
+          <LanguagesIcon className="size-5" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

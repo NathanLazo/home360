@@ -91,7 +91,7 @@ export async function LandingFooter() {
           <p className="text-sm text-[var(--brand-gray)]">
             {t("footer.rights", { year })}
           </p>
-          <LocaleSwitcher />
+          <LocaleSwitcher tone="dark" />
         </div>
       </div>
     </footer>

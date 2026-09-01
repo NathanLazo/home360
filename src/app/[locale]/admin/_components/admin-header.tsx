@@ -26,7 +26,7 @@ export function AdminHeader({ user, toggleSidebarLabel }: AdminHeaderProps) {
         className="mr-1 bg-zinc-800 data-[orientation=vertical]:h-4"
       />
       <div className="ml-auto flex items-center gap-2">
-        <LocaleSwitcher />
+        <LocaleSwitcher tone="dark" />
         <UserMenu {...user} variant="dark" />
       </div>
     </header>
