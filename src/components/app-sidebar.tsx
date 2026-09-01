@@ -129,7 +129,7 @@ export function AppSidebar({
                       </Link>
                     </SidebarMenuButton>
                     {item.badgeCount !== undefined ? (
-                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar rounded-full">
+                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full">
                         {item.badgeCount}
                       </SidebarMenuBadge>
                     ) : null}
