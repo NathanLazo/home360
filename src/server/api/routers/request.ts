@@ -17,7 +17,7 @@ import {
 const MAX_MEDIA_PER_REQUEST = 5;
 
 const createRequestSchema = z.object({
-  // Blob pathnames issued by media.createUploadToken (M0-W3); ownership and
+  // Blob pathnames issued by media.createUploadUrl (M0-W3); ownership and
   // kind are enforced by the service against the session user.
   mediaPathnames: z
     .array(z.string().trim().min(1).max(500))

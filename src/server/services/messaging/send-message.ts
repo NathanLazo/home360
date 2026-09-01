@@ -20,7 +20,7 @@ import { triggerPusherEvent } from "./pusher-server";
  * Persistence rules: the message is written first and the Pusher event only
  * carries ids, so a Pusher outage or missing envs degrade to polling without
  * losing anything. Attachments must be `chatAttachment` blob pathnames owned
- * by the sender (issued by `media.createUploadToken`).
+ * by the sender (issued by `media.createUploadUrl`).
  */
 export async function sendMessage(
   db: PrismaClient,

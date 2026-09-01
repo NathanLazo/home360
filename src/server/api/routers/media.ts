@@ -9,7 +9,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   createDownloadUrl,
-  createUploadToken,
+  createUploadUrl,
   MEDIA_KINDS,
 } from "~/server/services/media/blob";
 
@@ -20,7 +20,7 @@ import {
  */
 const MAX_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024 * 1024;
 
-const createUploadTokenSchema = z.object({
+const createUploadUrlSchema = z.object({
   kind: z.enum(MEDIA_KINDS),
   contentType: z.string().trim().min(1).max(100),
   sizeBytes: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
@@ -62,15 +62,15 @@ function unexpectedFailure(
 
 /**
  * Media uploads for the mobile app (M0-W3): the app uploads bytes directly to
- * Vercel Blob with tokens signed here; the backend never receives the file.
+ * a narrowly scoped Vercel Blob PUT URL; the backend never receives the file.
  * Signed URLs are returned to the caller only and must never be logged.
  */
 export const mediaRouter = createTRPCRouter({
-  createUploadToken: protectedProcedure
-    .input(createUploadTokenSchema)
+  createUploadUrl: protectedProcedure
+    .input(createUploadUrlSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        const grant = await createUploadToken({
+        const grant = await createUploadUrl({
           userId: ctx.session.user.id,
           kind: input.kind,
           contentType: input.contentType,
@@ -78,12 +78,12 @@ export const mediaRouter = createTRPCRouter({
         });
 
         if (!grant.ok) {
-          return serviceFailure(grant.code, "Upload token creation failed");
+          return serviceFailure(grant.code, "Upload URL creation failed");
         }
 
-        return ok(grant.data, "Upload token created");
+        return ok(grant.data, "Upload URL created");
       } catch (error) {
-        return unexpectedFailure(error, "Upload token creation failed");
+        return unexpectedFailure(error, "Upload URL creation failed");
       }
     }),
 

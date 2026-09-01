@@ -2,7 +2,6 @@ import "server-only";
 
 import { createId } from "@paralleldrive/cuid2";
 import { issueSignedToken, presignUrl } from "@vercel/blob";
-import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
 
 import type { PrismaClient } from "../../../../generated/prisma";
 import { env } from "~/env";
@@ -55,16 +54,16 @@ const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {
   "video/quicktime": "mov",
 };
 
-/** Upload client tokens stay valid long enough for a 2 GB recording upload. */
-const UPLOAD_TOKEN_TTL_MS = 60 * 60 * 1000;
+/** Upload URLs stay valid long enough for a 2 GB recording upload. */
+const UPLOAD_URL_TTL_MS = 60 * 60 * 1000;
 
 /** Signed read URLs are short-lived: the app requests a fresh one per view. */
 const DOWNLOAD_URL_TTL_MS = 5 * 60 * 1000;
 
 const PATHNAME_PREFIX = "mobile";
 
-export interface UploadTokenGrant {
-  token: string;
+export interface UploadUrlGrant {
+  uploadUrl: string;
   pathname: string;
   expiresAt: Date;
 }
@@ -82,17 +81,17 @@ function getReadWriteToken(): string | null {
 }
 
 /**
- * Issues a client upload token scoped to a single freshly generated pathname
+ * Issues a presigned PUT URL scoped to a single freshly generated pathname
  * `mobile/{kind}/{userId}/{cuid}.{ext}`. The owner segment always comes from
  * the session user, never from input, so a caller can only ever write inside
- * its own namespace. The blob must be uploaded with `access: "private"`.
+ * its own namespace. The read-write token never leaves the server.
  */
-export async function createUploadToken(input: {
+export async function createUploadUrl(input: {
   userId: string;
   kind: MediaKind;
   contentType: string;
   sizeBytes: number;
-}): Promise<ServiceResult<UploadTokenGrant, MediaServiceError>> {
+}): Promise<ServiceResult<UploadUrlGrant, MediaServiceError>> {
   const policy = MEDIA_POLICIES[input.kind];
 
   if (!policy.allowedContentTypes.includes(input.contentType)) {
@@ -116,17 +115,26 @@ export async function createUploadToken(input: {
   }
 
   const pathname = `${PATHNAME_PREFIX}/${input.kind}/${input.userId}/${createId()}.${extension}`;
-  const expiresAt = new Date(Date.now() + UPLOAD_TOKEN_TTL_MS);
+  const expiresAt = new Date(Date.now() + UPLOAD_URL_TTL_MS);
 
-  const token = await generateClientTokenFromReadWriteToken({
+  const signedToken = await issueSignedToken({
     token: readWriteToken,
     pathname,
+    operations: ["put"],
     allowedContentTypes: [input.contentType],
-    maximumSizeInBytes: policy.maxSizeBytes,
+    maximumSizeInBytes: input.sizeBytes,
+    validUntil: expiresAt.getTime(),
+  });
+  const { presignedUrl } = await presignUrl(signedToken, {
+    operation: "put",
+    pathname,
+    access: "private",
+    allowedContentTypes: [input.contentType],
+    maximumSizeInBytes: input.sizeBytes,
     validUntil: expiresAt.getTime(),
   });
 
-  return svcOk({ token, pathname, expiresAt });
+  return svcOk({ uploadUrl: presignedUrl, pathname, expiresAt });
 }
 
 /**
