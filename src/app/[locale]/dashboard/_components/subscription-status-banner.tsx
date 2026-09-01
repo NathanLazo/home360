@@ -3,7 +3,7 @@
 import { AlertTriangle, Lock } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { SubscriptionStatus } from "../../../../../generated/prisma";
+import type { SubscriptionStatus } from "@generated/prisma";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Link } from "~/i18n/navigation";
 

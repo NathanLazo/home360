@@ -2,7 +2,7 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import type { SubscriptionStatus } from "../../../../generated/prisma";
+import type { SubscriptionStatus } from "@generated/prisma";
 
 /**
  * Every Stripe subscription status mapped onto the three local ones.

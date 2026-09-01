@@ -14,7 +14,7 @@ import { ZodError } from "zod";
 import type {
   BusinessStatus,
   SubscriptionStatus,
-} from "../../../generated/prisma";
+} from "@generated/prisma";
 import { auth } from "~/server/auth";
 import { resolveBearerSession } from "~/server/auth/resolve-session";
 import { db } from "~/server/db";

@@ -5,7 +5,7 @@ import {
   BusinessStatus,
   type PrismaClient,
   SubscriptionStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import type { PlanCode } from "~/lib/subscription/plan-codes";
 import { writeAdminAudit } from "./admin-audit";

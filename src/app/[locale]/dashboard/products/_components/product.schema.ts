@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ProductStatus } from "../../../../../../generated/prisma";
+import { ProductStatus } from "@generated/prisma";
 import type { ErrorCode } from "~/server/api/contract";
 
 const productStockSchema = z.object({

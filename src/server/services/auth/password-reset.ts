@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { getPathname } from "~/i18n/navigation";
 import type {
   RequestPasswordResetInput,

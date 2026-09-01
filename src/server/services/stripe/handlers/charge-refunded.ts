@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PaymentStatus } from "../../../../../generated/prisma";
+import { PaymentStatus } from "@generated/prisma";
 import Stripe from "stripe";
 
 import { refundPayment } from "~/server/services/payments/escrow";

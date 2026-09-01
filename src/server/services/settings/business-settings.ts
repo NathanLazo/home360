@@ -4,7 +4,7 @@ import type {
   BusinessType,
   GuaranteeType,
   PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type {
   ChangePasswordInput,
   SettingsErrorCode,

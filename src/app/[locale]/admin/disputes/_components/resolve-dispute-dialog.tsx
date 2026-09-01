@@ -9,7 +9,7 @@ import {
   type ResolveDisputeInput,
 } from "./disputes.schema";
 import type { DisputeDetail } from "./disputes.types";
-import { DisputeResolution } from "../../../../../../generated/prisma";
+import { DisputeResolution } from "@generated/prisma";
 import {
   AlertDialog,
   AlertDialogAction,

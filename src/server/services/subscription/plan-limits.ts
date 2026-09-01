@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { fail, type TrpcResponse } from "~/server/api/contract";
 
 export const LIMITED_RESOURCES = ["branches", "workers", "products"] as const;

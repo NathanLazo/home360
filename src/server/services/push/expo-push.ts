@@ -5,7 +5,7 @@ import Expo, {
   type ExpoPushReceiptId,
 } from "expo-server-sdk";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 
 export type PushDeepLink =
   | `home360app://request/${string}`

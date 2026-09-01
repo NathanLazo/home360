@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { OrderStatus, PrismaClient } from "../../../../generated/prisma";
+import type { OrderStatus, PrismaClient } from "@generated/prisma";
 
 export const ACTIVE_ORDER_STATUSES = [
   "PENDING",

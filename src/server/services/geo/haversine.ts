@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Prisma } from "../../../../generated/prisma";
+import { Prisma } from "@generated/prisma";
 
 /** Mean Earth radius used by the Haversine formula. */
 export const EARTH_RADIUS_KM = 6371;

@@ -1,4 +1,4 @@
-import { Prisma } from "../../../generated/prisma";
+import { Prisma } from "@generated/prisma";
 
 /**
  * Stable error codes shared by every tRPC procedure.

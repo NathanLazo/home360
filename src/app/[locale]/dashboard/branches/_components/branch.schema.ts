@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { BranchStatus } from "../../../../../../generated/prisma";
+import { BranchStatus } from "@generated/prisma";
 
 const branchFields = {
   name: z.string().trim().min(2).max(80),

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { WithdrawalStatus } from "../../../../../generated/prisma";
+import { WithdrawalStatus } from "@generated/prisma";
 
 import { svcOk } from "~/server/services/service-result";
 import type {

@@ -3,7 +3,7 @@ import "server-only";
 import { createId } from "@paralleldrive/cuid2";
 import { issueSignedToken, presignUrl } from "@vercel/blob";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { authorizeMediaRead } from "./authorize-read";

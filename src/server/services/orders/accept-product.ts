@@ -5,7 +5,7 @@ import {
   OrderStatus,
   OrderType,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 export type AcceptProductResult = {

@@ -12,7 +12,7 @@ import {
   type SubscriptionStatus,
   UserRole,
   type WorkerAvailability,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import {
   USERS_PAGE_SIZE,

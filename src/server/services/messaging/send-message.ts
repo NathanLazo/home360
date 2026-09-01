@@ -4,7 +4,7 @@ import type {
   Message,
   MessageType,
   PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { isOwnedMediaPathname } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { conversationChannel } from "./channels";

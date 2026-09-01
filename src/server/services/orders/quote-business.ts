@@ -6,7 +6,7 @@ import {
   RequestStatus,
   type PrismaClient,
   type Quote,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { getOrCreateForRequest } from "~/server/services/messaging/conversations";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";

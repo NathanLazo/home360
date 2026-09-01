@@ -6,7 +6,7 @@ import {
   CorporateTier,
   type PrismaClient,
   type SubscriptionStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   svcFail,
   svcOk,

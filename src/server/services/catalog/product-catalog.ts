@@ -4,7 +4,7 @@ import {
   Prisma,
   type PrismaClient,
   type ProductStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type {
   CsvRowError,
   ProductCreateInput,

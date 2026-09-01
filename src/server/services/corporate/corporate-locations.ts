@@ -3,7 +3,7 @@ import "server-only";
 import {
   Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import type {
   CorporateLocationCreateInput,

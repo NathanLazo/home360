@@ -6,7 +6,7 @@ import {
   Prisma,
   type PrismaClient,
   WithdrawalStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import Stripe from "stripe";
 
 import { writeAdminAudit } from "../admin/admin-audit";

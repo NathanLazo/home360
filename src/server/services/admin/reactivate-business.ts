@@ -6,7 +6,7 @@ import {
   DisputeStatus,
   Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import { writeAdminAudit } from "./admin-audit";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";

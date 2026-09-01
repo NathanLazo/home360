@@ -3,7 +3,7 @@ import "server-only";
 import {
   Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import type { CorporateTierChangeRequestInput } from "~/server/api/schemas/corporate";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";

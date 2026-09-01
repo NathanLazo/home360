@@ -5,7 +5,7 @@ import {
   RequestStatus,
   ServiceStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   haversineKm,
   type GeoPoint,

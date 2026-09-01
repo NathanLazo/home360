@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "../../../../generated/prisma";
+import type { Prisma, PrismaClient } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 
 const SEARCH_PAGE_SIZE = 20;

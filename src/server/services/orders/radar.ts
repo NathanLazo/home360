@@ -4,7 +4,7 @@ import {
   Prisma,
   RequestStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   haversineKm,
   haversineKmSql,

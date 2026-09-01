@@ -5,7 +5,7 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { CorporateTier } from "../../../../../../generated/prisma";
+import { CorporateTier } from "@generated/prisma";
 import type { CorporateMembershipSummary } from "../../_components/corporate.types";
 import { Button } from "~/components/ui/button";
 import {

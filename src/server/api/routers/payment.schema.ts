@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentStatus } from "../../../../generated/prisma";
+import { PaymentMethod, PaymentStatus } from "@generated/prisma";
 import { z } from "zod";
 
 const MAX_PROVIDER_AMOUNT_CENTS = 50_000_000;

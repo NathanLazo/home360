@@ -5,7 +5,7 @@ import {
   type Prisma,
   type PrismaClient,
   WithdrawalStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import {
   WITHDRAWALS_PAGE_SIZE,

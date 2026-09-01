@@ -3,7 +3,7 @@ import {
   Prisma,
   UserRole,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type { AuthErrorCode } from "~/schemas/auth/auth-errors";
 import type { RegisterBusinessInput } from "~/schemas/auth/register-business.schema";
 import {

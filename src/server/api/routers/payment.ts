@@ -2,7 +2,7 @@ import {
   OrderEventType,
   OrderStatus,
   type Prisma,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { env } from "~/env";
 import { splitLocaleFromPathname, type Locale } from "~/i18n/locale-pathname";
 import { routing } from "~/i18n/routing";

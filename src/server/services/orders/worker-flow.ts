@@ -7,7 +7,7 @@ import {
   Prisma,
   type PrismaClient,
   type WorkerAvailability,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   createDownloadUrl,
   isOwnedMediaPathname,

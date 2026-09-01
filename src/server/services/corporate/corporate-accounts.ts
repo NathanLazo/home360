@@ -10,7 +10,7 @@ import {
   SubscriptionStatus,
   UserRole,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   CORPORATE_PAGE_SIZE,
   type CreateCorporateAccountInput,

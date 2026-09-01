@@ -9,7 +9,7 @@ import {
   type LoyaltyPayoutMethod,
   type Prisma,
   type WithdrawalStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 /**
  * Append-only administrative trail.

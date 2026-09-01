@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHmac } from "node:crypto";
 
-import { Prisma, type PrismaClient } from "../../../../generated/prisma";
+import { Prisma, type PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 
 export type AuthAction = "login" | "register" | "password-reset";

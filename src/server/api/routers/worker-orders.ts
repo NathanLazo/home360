@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   OrderEventType,
   WorkerAvailability,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   fail,
   normalizeError,

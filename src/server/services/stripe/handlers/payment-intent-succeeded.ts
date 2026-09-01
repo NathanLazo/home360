@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PaymentMethod } from "../../../../../generated/prisma";
+import { PaymentMethod } from "@generated/prisma";
 import type Stripe from "stripe";
 
 import { capturePayment } from "~/server/services/payments/escrow";

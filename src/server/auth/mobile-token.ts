@@ -2,7 +2,7 @@ import "server-only";
 
 import { decode, encode, type JWT } from "next-auth/jwt";
 
-import type { UserRole } from "../../../generated/prisma";
+import type { UserRole } from "@generated/prisma";
 import { env } from "~/env";
 
 /**

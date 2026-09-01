@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PushPlatform } from "../../../../generated/prisma";
+import { PushPlatform } from "@generated/prisma";
 
 /**
  * Shared Zod schemas for the push token endpoints (M1-W1). The router

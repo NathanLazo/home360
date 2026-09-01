@@ -4,7 +4,7 @@ import type {
   Prisma,
   OrderStatus,
   PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import {
   ESCROW_PAYMENT_STATUSES,

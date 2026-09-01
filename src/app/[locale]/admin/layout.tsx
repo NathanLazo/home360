@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { UserRole } from "../../../../generated/prisma";
+import { UserRole } from "@generated/prisma";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";

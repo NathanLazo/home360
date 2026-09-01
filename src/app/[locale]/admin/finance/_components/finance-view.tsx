@@ -16,8 +16,8 @@ import {
 } from "./use-withdrawal-mutations";
 import { WithdrawalsTable } from "./withdrawals-table";
 import { withdrawalStatusSchema } from "./finance.schema";
-import type { WithdrawalStatus } from "../../../../../../generated/prisma";
-import { WithdrawalStatus as WithdrawalStatusEnum } from "../../../../../../generated/prisma";
+import type { WithdrawalStatus } from "@generated/prisma";
+import { WithdrawalStatus as WithdrawalStatusEnum } from "@generated/prisma";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";

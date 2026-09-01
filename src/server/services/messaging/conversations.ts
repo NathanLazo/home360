@@ -4,7 +4,7 @@ import type {
   MessageType,
   PrismaClient,
   UserRole,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {
   isConversationParticipant,

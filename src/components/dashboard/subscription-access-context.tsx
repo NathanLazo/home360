@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 
-import type { SubscriptionStatus } from "../../../generated/prisma";
+import type { SubscriptionStatus } from "@generated/prisma";
 import { api } from "~/trpc/react";
 
 type SubscriptionAccessContextValue = {

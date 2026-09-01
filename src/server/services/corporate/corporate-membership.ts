@@ -7,7 +7,7 @@ import type {
   Prisma,
   PrismaClient,
   SubscriptionStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import type { CorporateInvoiceListInput } from "~/server/api/schemas/corporate";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";

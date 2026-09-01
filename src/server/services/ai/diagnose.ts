@@ -3,7 +3,7 @@ import "server-only";
 import { generateObject, type ModelMessage } from "ai";
 import { z } from "zod";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 

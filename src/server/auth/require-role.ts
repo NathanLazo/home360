@@ -1,4 +1,4 @@
-import type { UserRole } from "../../../generated/prisma";
+import type { UserRole } from "@generated/prisma";
 import type { Session } from "next-auth";
 
 import { redirect } from "~/i18n/navigation";

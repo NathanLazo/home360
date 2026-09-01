@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { getConversationParticipantIds } from "~/server/services/messaging/participants";
 import { isRequestVisibleOnRadar } from "~/server/services/orders/radar-visibility";
 

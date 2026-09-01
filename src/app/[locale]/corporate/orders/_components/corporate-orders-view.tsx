@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import type { OrderStatus } from "../../../../../../generated/prisma";
+import type { OrderStatus } from "@generated/prisma";
 import { CorporateOrderDetailSheet } from "./corporate-order-detail-sheet";
 import { CorporateOrderFilters } from "./corporate-order-filters";
 import { CorporateOrdersTable } from "./corporate-orders-table";

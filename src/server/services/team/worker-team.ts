@@ -4,7 +4,7 @@ import {
   Prisma,
   type BusinessStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type {
   TeamErrorCode,
   WorkerCreateInput,

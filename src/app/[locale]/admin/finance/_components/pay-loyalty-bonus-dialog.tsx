@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 
 import type { LoyaltyBonusRow } from "./finance.types";
-import { LoyaltyPayoutMethod } from "../../../../../../generated/prisma";
+import { LoyaltyPayoutMethod } from "@generated/prisma";
 import {
   Dialog,
   DialogContent,

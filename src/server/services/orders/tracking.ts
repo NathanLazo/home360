@@ -5,7 +5,7 @@ import {
   OrderStatus,
   OrderType,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { haversineKm } from "~/server/services/geo/haversine";
 import { triggerPusherEvent } from "~/server/services/messaging/pusher-server";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";

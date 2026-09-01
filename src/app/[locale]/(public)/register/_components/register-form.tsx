@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { BusinessType, GuaranteeType } from "generated/prisma";
+import { BusinessType, GuaranteeType } from "@generated/prisma";
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";

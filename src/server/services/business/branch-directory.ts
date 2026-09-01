@@ -4,7 +4,7 @@ import {
   Prisma,
   type BranchStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type {
   BranchCreateInput,
   BranchSetStatusInput,

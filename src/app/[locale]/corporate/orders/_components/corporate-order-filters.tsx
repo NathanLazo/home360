@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { OrderStatus } from "../../../../../../generated/prisma";
+import { OrderStatus } from "@generated/prisma";
 import {
   Select,
   SelectContent,

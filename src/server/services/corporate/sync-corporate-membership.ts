@@ -10,7 +10,7 @@ import {
   SubscriptionStatus,
   type Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { svcOk, type ServiceResult } from "~/server/services/service-result";
 import {
   getRenewsAt,

@@ -3,7 +3,7 @@ import "server-only";
 import {
   PaymentLinkStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import Stripe from "stripe";
 
 import {

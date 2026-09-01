@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "../../../../generated/prisma";
+import type { Prisma, PrismaClient } from "@generated/prisma";
 
 /**
  * Single source of truth for "who can see a conversation" (M4-W1), reused by

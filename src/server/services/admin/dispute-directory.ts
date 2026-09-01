@@ -2,7 +2,7 @@ import {
   DisputeStatus,
   type Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import {
   DISPUTES_PAGE_SIZE,

@@ -6,7 +6,7 @@ import {
   PaymentStatus,
   Prisma,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import Stripe from "stripe";
 
 import {

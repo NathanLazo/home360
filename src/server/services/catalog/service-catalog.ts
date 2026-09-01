@@ -4,7 +4,7 @@ import {
   Prisma,
   type PrismaClient,
   type ServiceStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import type {
   ServiceCreateInput,
   ServiceListInput,

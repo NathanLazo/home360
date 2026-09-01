@@ -1,6 +1,6 @@
 // No "server-only" here: the seed recalculates the same denormalized rating
 // and must be able to import this outside the Next.js runtime.
-import type { Prisma } from "../../../../generated/prisma";
+import type { Prisma } from "@generated/prisma";
 
 /**
  * Recalculates `Business.ratingAvg/ratingCount` from `Review` (aggregated via

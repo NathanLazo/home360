@@ -1,4 +1,4 @@
-import type { Payment } from "../../../../generated/prisma";
+import type { Payment } from "@generated/prisma";
 
 export type ProviderTransferLedger = Pick<
   Payment,

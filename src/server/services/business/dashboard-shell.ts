@@ -3,7 +3,7 @@ import "server-only";
 import type {
   PrismaClient,
   SubscriptionStatus,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { countActiveOrders } from "~/server/services/business/order-activity";
 
 export type DashboardShellData = {

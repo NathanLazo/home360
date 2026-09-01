@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { BusinessType, GuaranteeType } from "../../../generated/prisma";
+import { BusinessType, GuaranteeType } from "@generated/prisma";
 import { passwordSchema } from "./password.schema";
 
 export const registerAccountStepSchema = z.object({

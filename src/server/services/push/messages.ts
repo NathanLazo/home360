@@ -2,7 +2,7 @@ import "server-only";
 
 import { getTranslations } from "next-intl/server";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import {
   sendPushToUser,
   type PushDeepLink,

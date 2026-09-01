@@ -2,7 +2,7 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import type { InvoiceStatus, PrismaClient } from "../../../../../generated/prisma";
+import type { InvoiceStatus, PrismaClient } from "@generated/prisma";
 import { svcOk, type ServiceResult } from "~/server/services/service-result";
 import { syncSubscriptionFromStripe } from "~/server/services/subscription/sync-subscription";
 import type { StripeEventHandler } from "../webhook-dispatcher";

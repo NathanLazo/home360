@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { BusinessType } from "../../../generated/prisma";
+import { BusinessType } from "@generated/prisma";
 import { passwordSchema } from "~/schemas/auth/password.schema";
 import type { ErrorCode } from "~/server/api/contract";
 

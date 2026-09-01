@@ -6,7 +6,7 @@ import {
   SubscriptionStatus,
   type Payment,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import {
   svcFail,

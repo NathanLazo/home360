@@ -12,7 +12,7 @@ import { DisputeResolutionActions } from "./dispute-resolution-actions";
 import { ResolveDisputeDialog } from "./resolve-dispute-dialog";
 import { useDisputeMutations } from "./use-dispute-mutations";
 import type { DisputeDetail as DisputeDetailType } from "./disputes.types";
-import type { DisputeResolution } from "../../../../../../generated/prisma";
+import type { DisputeResolution } from "@generated/prisma";
 import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";

@@ -8,7 +8,7 @@ import {
   RequestStatus,
   type GuaranteeType,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { haversineKm } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 

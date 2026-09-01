@@ -3,7 +3,7 @@ import "server-only";
 import {
   AdminAuditAction,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 
 import { writeAdminAudit } from "./admin-audit";
 

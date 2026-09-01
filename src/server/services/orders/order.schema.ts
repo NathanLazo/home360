@@ -1,4 +1,4 @@
-import { OrderStatus, OrderType } from "../../../../generated/prisma";
+import { OrderStatus, OrderType } from "@generated/prisma";
 import { z } from "zod";
 
 export const orderIdSchema = z.object({

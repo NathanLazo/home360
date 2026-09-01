@@ -2,7 +2,7 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { svcOk, type ServiceResult } from "~/server/services/service-result";
 import {
   getRenewsAt,

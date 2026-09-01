@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PrismaClient, UserRole } from "../../../../generated/prisma";
+import type { PrismaClient, UserRole } from "@generated/prisma";
 import { loginSchema } from "~/schemas/auth/login.schema";
 import { verifyPasswordOrDummy } from "~/server/services/auth/password";
 import {

@@ -4,7 +4,7 @@ import {
   RequestStatus,
   type PrismaClient,
   type ServiceRequest,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   diagnoseProblem,
   type UrgencyLevel,

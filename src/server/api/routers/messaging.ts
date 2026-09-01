@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MessageType } from "../../../../generated/prisma";
+import { MessageType } from "@generated/prisma";
 import {
   fail,
   normalizeError,

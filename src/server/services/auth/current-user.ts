@@ -2,7 +2,7 @@ import type {
   BusinessStatus,
   PrismaClient,
   WorkerAvailability,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import {
   fail,
   normalizeError,

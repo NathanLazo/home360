@@ -1,4 +1,4 @@
-import { ServiceStatus } from "../../../../generated/prisma";
+import { ServiceStatus } from "@generated/prisma";
 import { z } from "zod";
 
 import {

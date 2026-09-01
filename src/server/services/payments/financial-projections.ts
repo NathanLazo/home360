@@ -1,7 +1,7 @@
 import "server-only";
 
-import { PaymentStatus, WithdrawalStatus } from "../../../../generated/prisma";
-import type { Payment } from "../../../../generated/prisma";
+import { PaymentStatus, WithdrawalStatus } from "@generated/prisma";
+import type { Payment } from "@generated/prisma";
 
 import {
   platformGrossRevenueCents,

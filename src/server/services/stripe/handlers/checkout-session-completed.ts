@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PaymentLinkStatus } from "../../../../../generated/prisma";
+import { PaymentLinkStatus } from "@generated/prisma";
 import Stripe from "stripe";
 
 import { svcOk } from "~/server/services/service-result";

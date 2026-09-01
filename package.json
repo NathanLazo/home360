@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "next build",
     "check": "eslint src && tsc --noEmit",
     "db:generate": "prisma migrate dev",

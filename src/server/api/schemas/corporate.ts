@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CorporateTier, OrderStatus } from "../../../../generated/prisma";
+import { CorporateTier, OrderStatus } from "@generated/prisma";
 
 /**
  * Shared Zod schemas for the corporate dashboard (F7-05). The router validates

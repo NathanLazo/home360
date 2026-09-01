@@ -1,4 +1,4 @@
-import { ProductStatus } from "../../../../generated/prisma";
+import { ProductStatus } from "@generated/prisma";
 import { z } from "zod";
 
 import {

@@ -4,7 +4,7 @@ import {
   LoyaltyBonusStatus,
   LoyaltyPayoutMethod,
   WithdrawalStatus,
-} from "../../../../../../generated/prisma";
+} from "@generated/prisma";
 
 /** "YYYY-MM" in the platform's financial time zone; defaults to this month. */
 export const financeMonthSchema = z.string().regex(/^\d{4}-\d{2}$/u);

@@ -1,4 +1,4 @@
-import type { UserRole } from "../../../../../generated/prisma";
+import type { UserRole } from "@generated/prisma";
 
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { Separator } from "~/components/ui/separator";

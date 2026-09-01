@@ -12,7 +12,7 @@ import {
   QuoteStatus,
   RequestStatus,
   type PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import Stripe from "stripe";
 
 import {

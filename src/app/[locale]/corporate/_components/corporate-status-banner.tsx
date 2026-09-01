@@ -1,7 +1,7 @@
 import { TriangleAlertIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import type { CorporateStatus } from "../../../../../generated/prisma";
+import type { CorporateStatus } from "@generated/prisma";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 export type CorporateStatusBannerProps = {

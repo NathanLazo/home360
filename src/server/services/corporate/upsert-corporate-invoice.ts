@@ -2,7 +2,7 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import type { InvoiceStatus, PrismaClient } from "../../../../generated/prisma";
+import type { InvoiceStatus, PrismaClient } from "@generated/prisma";
 import { svcFail, svcOk, type ServiceResult } from "~/server/services/service-result";
 import { resolveInvoiceSubscriptionId } from "~/server/services/stripe/handlers/invoice-paid";
 import {

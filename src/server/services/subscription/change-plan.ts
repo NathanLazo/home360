@@ -2,7 +2,7 @@ import "server-only";
 
 import Stripe from "stripe";
 
-import type { PrismaClient } from "../../../../generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { type PlanCode, planCodeSchema } from "~/lib/subscription/plan-codes";
 import {
   svcFail,

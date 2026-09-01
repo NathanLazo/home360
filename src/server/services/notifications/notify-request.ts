@@ -2,7 +2,7 @@ import "server-only";
 
 import { getTranslations } from "next-intl/server";
 
-import { Prisma, type PrismaClient } from "../../../../generated/prisma";
+import { Prisma, type PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import {
   createResendEmailClientFromApiKey,

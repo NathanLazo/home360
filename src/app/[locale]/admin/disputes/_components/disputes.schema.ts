@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DisputeResolution } from "../../../../../../generated/prisma";
+import { DisputeResolution } from "@generated/prisma";
 
 /** "open" folds OPEN and IN_REVIEW: both are still on the admin's desk. */
 export const disputeFilterSchema = z.enum(["open", "resolved"]);

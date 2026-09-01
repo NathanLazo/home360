@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma, PrismaClient } from "../../../../generated/prisma";
+import type { Prisma, PrismaClient } from "@generated/prisma";
 import {
   productCatalogFilter,
   serviceCatalogFilter,

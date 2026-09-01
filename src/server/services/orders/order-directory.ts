@@ -7,7 +7,7 @@ import type {
   PaymentMethod,
   PaymentStatus,
   PrismaClient,
-} from "../../../../generated/prisma";
+} from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { assertBranchInBusiness } from "~/server/services/business/branch-access";
 import type { OrderListInput } from "~/server/services/orders/order.schema";

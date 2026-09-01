@@ -1,4 +1,4 @@
-import type { UserRole } from "../../generated/prisma";
+import type { UserRole } from "@generated/prisma";
 import { getTranslations } from "next-intl/server";
 
 import { SignOutItem } from "~/components/sign-out-item";

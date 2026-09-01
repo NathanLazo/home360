@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Address, PrismaClient } from "../../../../generated/prisma";
+import type { Address, PrismaClient } from "@generated/prisma";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 /** Hard cap per user; the mobile picker is not paginated. */

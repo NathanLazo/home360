@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import type { DisputeDetail } from "./disputes.types";
-import { DisputeResolution } from "../../../../../../generated/prisma";
+import { DisputeResolution } from "@generated/prisma";
 import { Button } from "~/components/ui/button";
 
 const MONETARY_RESOLUTIONS = [
