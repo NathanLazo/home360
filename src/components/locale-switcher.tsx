@@ -31,9 +31,13 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" size="lg">
-          <LanguagesIcon data-icon="inline-start" aria-hidden="true" />
-          {t("label")}
+        <Button
+          type="button"
+          variant="outline"
+          size="icon-lg"
+          aria-label={t("label")}
+        >
+          <LanguagesIcon aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
