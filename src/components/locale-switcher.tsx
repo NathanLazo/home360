@@ -38,15 +38,15 @@ export function LocaleSwitcher({ tone = "light" }: LocaleSwitcherProps) {
         <Button
           type="button"
           variant="ghost"
-          size="icon-lg"
+          size="icon-sm"
           aria-label={t("label")}
           className={
             tone === "dark"
-              ? "border-0 bg-transparent text-white shadow-none hover:bg-transparent hover:text-white hover:opacity-80 focus-visible:border-transparent focus-visible:ring-white/60"
-              : "border-0 bg-transparent shadow-none hover:bg-transparent hover:opacity-80 focus-visible:border-transparent"
+              ? "border-0 bg-transparent text-white shadow-none hover:bg-transparent hover:text-white hover:opacity-80 focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-white/60"
+              : "border-0 bg-transparent shadow-none hover:bg-transparent hover:opacity-80 focus-visible:border-transparent focus-visible:ring-2"
           }
         >
-          <LanguagesIcon className="size-5" aria-hidden="true" />
+          <LanguagesIcon className="size-4" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
