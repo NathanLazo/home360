@@ -62,7 +62,8 @@
     "loading": "Loading overview…",
     "queryErrorTitle": "We could not load the overview",
     "errorTitle": "Something went wrong",
-    "errorDescription": "We could not show the corporate overview. Please try again."
+    "errorDescription": "We could not show the corporate overview. Please try again.",
+    "primaryAction": "View orders"
   },
   "orders": {
     "title": "Orders",

@@ -10,8 +10,9 @@ import { cn } from "~/lib/utils";
  *
  * `default` is the liquid-metal primary: an ink core wearing a static CSS
  * chrome rim (`metal-rim` in `globals.css`) — cheap, SSR-safe, no WebGL.
- * The decisive action of a screen (≤ 1–2 per screen) can upgrade to the live
- * WebGL ring with `metal="live"` (or `metal="bend"` for the single key CTA).
+ * The decisive action of a screen (≤ 1–2 per screen) upgrades with
+ * `metal="live"` (or `metal="bend"` for the single key CTA) to the landing
+ * hero's button: ink pill + full-strength chromatic WebGL ring.
  */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm text-sm font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,opacity,scale] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -96,12 +97,26 @@ function Button({
 }: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button";
 
+  // A live ring renders the landing hero's metal button everywhere: a plain
+  // ink pill (the static rim would double the edge and wash the shader out)
+  // wearing the full-strength chromatic ring.
+  const underLiveRing =
+    variant === "default" &&
+    metal !== "static" &&
+    metalActive &&
+    !props.disabled;
+
   const button = (
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size }),
+        underLiveRing &&
+          "rounded-pill [--metal-gloss:none] [--metal-rim-width:0px]",
+        className,
+      )}
       {...props}
     />
   );
@@ -112,7 +127,7 @@ function Button({
 
   return (
     <MetalAction
-      active={metalActive && !props.disabled}
+      active={underLiveRing}
       bend={metal === "bend"}
       className={metalClassName}
     >

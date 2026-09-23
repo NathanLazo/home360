@@ -12,6 +12,7 @@ import { PendingBusinessesTable } from "./pending-businesses-table";
 import { SectionHeading } from "./section-heading";
 import { SectionLink } from "./section-link";
 import { TableSkeleton, type TableSkeletonColumn } from "./table-skeleton";
+import { OverviewPrimaryAction } from "./overview-primary-action";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
@@ -42,7 +43,11 @@ export function OverviewView() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={<OverviewPrimaryAction urgent={hasDisputes} />}
+      />
 
       {kpis.status === "pending" ? (
         <KpiGridSkeleton label={t("kpis.loading")} />

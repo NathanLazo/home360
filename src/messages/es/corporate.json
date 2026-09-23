@@ -62,7 +62,8 @@
     "loading": "Cargando resumen…",
     "queryErrorTitle": "No pudimos cargar el resumen",
     "errorTitle": "Algo salió mal",
-    "errorDescription": "No pudimos mostrar el resumen corporativo. Inténtalo de nuevo."
+    "errorDescription": "No pudimos mostrar el resumen corporativo. Inténtalo de nuevo.",
+    "primaryAction": "Ver órdenes"
   },
   "orders": {
     "title": "Órdenes",

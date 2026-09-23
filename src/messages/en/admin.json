@@ -262,7 +262,8 @@
       "updatedAt": "Configuration updated {when}",
       "openSettings": "Go to settings",
       "loading": "Loading AI settings…"
-    }
+    },
+    "primaryAction": "Review disputes"
   },
   "paymentStatus": {
     "PENDING": "Pending",

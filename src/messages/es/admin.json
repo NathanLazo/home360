@@ -262,7 +262,8 @@
       "updatedAt": "Configuración actualizada {when}",
       "openSettings": "Ir a configuración",
       "loading": "Cargando configuración de IA…"
-    }
+    },
+    "primaryAction": "Revisar disputas"
   },
   "paymentStatus": {
     "PENDING": "Pendiente",

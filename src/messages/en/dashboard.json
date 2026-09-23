@@ -160,7 +160,8 @@
     "loadingKpis": "Loading metrics…",
     "loadingChart": "Loading revenue chart…",
     "loadingBranches": "Loading orders by branch…",
-    "loadingOrders": "Loading recent orders…"
+    "loadingOrders": "Loading recent orders…",
+    "primaryAction": "Create payment link"
   },
   "orderStatus": {
     "PENDING": "Pending",

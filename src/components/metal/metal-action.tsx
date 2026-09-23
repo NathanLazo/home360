@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 
+import type { MetalFxPreset } from "metal-fx";
+
 import { MetalRing } from "./metal-ring";
 
 type MetalActionProps = {
@@ -15,22 +17,28 @@ type MetalActionProps = {
   active?: boolean;
   /** Liquid dent under the cursor: only for the single key CTA of a screen. */
   bend?: boolean;
+  /**
+   * `chromatic` is the product's signature (the owner's pick, same as the
+   * landing hero); `silver` is the quieter fallback for crowded surfaces.
+   */
+  preset?: MetalFxPreset;
   strength?: number;
   /** Layout classes for the ring wrapper (e.g. `w-full`, `flex-1`). */
   className?: string;
 };
 
-/** Silver ring around one primary action; the only metal a screen should carry. */
+/** Liquid-metal ring around one primary action; the only live metal a screen should carry. */
 export function MetalAction({
   children,
   active = true,
   bend = false,
-  strength = 0.6,
+  preset = "chromatic",
+  strength = 1,
   className,
 }: MetalActionProps) {
   return (
     <MetalRing
-      preset="silver"
+      preset={preset}
       strength={active ? strength : 0}
       bend={active && bend}
       disableGlow={!active}
