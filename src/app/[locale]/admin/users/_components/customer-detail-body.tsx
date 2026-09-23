@@ -26,7 +26,7 @@ export function CustomerDetailBody({ detail }: { detail: CustomerDetail }) {
       </div>
 
       {detail.accessStatus === "suspended" ? (
-        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border p-3">
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-xl border p-3">
           {detail.suspensionReason
             ? t("suspendedReason", { reason: detail.suspensionReason })
             : t("suspendedNoReason")}
@@ -62,7 +62,7 @@ export function CustomerDetailBody({ detail }: { detail: CustomerDetail }) {
             {detail.recentOrders.map((order) => (
               <li
                 key={order.id}
-                className="text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3"
+                className="text-copy-sm flex items-center justify-between gap-3 rounded-xl border p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>
@@ -106,7 +106,7 @@ export function CustomerDetailBody({ detail }: { detail: CustomerDetail }) {
             {detail.reviews.items.map((review) => (
               <li
                 key={review.id}
-                className="text-copy-sm flex flex-col gap-1 rounded-md border p-3"
+                className="text-copy-sm flex flex-col gap-1 rounded-xl border p-3"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="truncate font-medium">
@@ -143,7 +143,7 @@ export function CustomerDetailBody({ detail }: { detail: CustomerDetail }) {
                 <Link
                   href={`/admin/disputes?dispute=${dispute.id}`}
                   className={cn(
-                    "focus-visible:ring-ring hover:bg-canvas-soft text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3 focus-visible:ring-2 focus-visible:outline-none",
+                    "focus-visible:ring-ring hover:bg-canvas-soft text-copy-sm flex items-center justify-between gap-3 rounded-xl border p-3 focus-visible:ring-2 focus-visible:outline-none",
                     PRESS_SURFACE_CLASS,
                   )}
                 >

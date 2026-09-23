@@ -26,7 +26,7 @@ export default async function RegisterPage({ params }: RegisterPageProps) {
 
   return (
     <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
-      <Card className="bg-canvas-soft w-full max-w-md rounded-lg py-8 shadow-none">
+      <Card className="bg-canvas-soft w-full max-w-md rounded-2xl py-8 shadow-none">
         <CardHeader className="text-center">
           <div
             aria-hidden="true"

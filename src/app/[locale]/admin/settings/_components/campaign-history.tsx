@@ -61,7 +61,7 @@ export function CampaignHistory() {
 
   return (
     <div className="flex flex-col gap-3">
-      <ul className="flex flex-col divide-y rounded-md border">
+      <ul className="flex flex-col divide-y rounded-xl border">
         {campaigns.map((campaign) => (
           <li key={campaign.id} className="flex flex-col gap-1 px-4 py-3">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

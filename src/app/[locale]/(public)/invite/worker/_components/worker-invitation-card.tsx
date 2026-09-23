@@ -44,7 +44,7 @@ export function WorkerInvitationCard({
       : null;
 
   return (
-    <Card className="bg-canvas-soft w-full max-w-md rounded-lg py-8 shadow-none">
+    <Card className="bg-canvas-soft w-full max-w-md rounded-2xl py-8 shadow-none">
       <CardHeader className="text-center">
         <div
           aria-hidden="true"

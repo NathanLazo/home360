@@ -52,7 +52,7 @@ export function OrderDetailActions({
       <h3 id="order-actions-heading" className="sr-only">
         {t("title")}
       </h3>
-      <div className="bg-canvas-soft flex gap-3 rounded-md border p-4">
+      <div className="bg-canvas-soft flex gap-3 rounded-xl border p-4">
         <InfoIcon
           aria-hidden="true"
           className="text-muted-foreground mt-0.5 size-4 shrink-0"

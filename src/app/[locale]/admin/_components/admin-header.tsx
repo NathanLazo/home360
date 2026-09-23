@@ -34,8 +34,8 @@ export function AdminHeader({
   return (
     <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
       <GlassSurface
-        radius="lg"
-        className="flex min-h-14 items-center gap-2 px-3 py-2 sm:pr-2"
+        radius="pill"
+        className="flex min-h-12 items-center gap-2 px-3 py-1.5 sm:pr-1.5"
       >
         <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
         <Separator

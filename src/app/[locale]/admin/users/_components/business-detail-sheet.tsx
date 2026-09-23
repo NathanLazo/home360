@@ -86,7 +86,7 @@ function DetailBody({
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border p-3">
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-xl border p-3">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
@@ -162,7 +162,7 @@ function DetailBody({
             {detail.recentOrders.map((order) => (
               <li
                 key={order.id}
-                className="text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3"
+                className="text-copy-sm flex items-center justify-between gap-3 rounded-xl border p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>
@@ -195,7 +195,7 @@ function DetailBody({
                 <Link
                   href={`/admin/disputes?dispute=${dispute.id}`}
                   className={cn(
-                    "focus-visible:ring-ring hover:bg-canvas-soft text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3 focus-visible:ring-2 focus-visible:outline-none",
+                    "focus-visible:ring-ring hover:bg-canvas-soft text-copy-sm flex items-center justify-between gap-3 rounded-xl border p-3 focus-visible:ring-2 focus-visible:outline-none",
                     PRESS_SURFACE_CLASS,
                   )}
                 >

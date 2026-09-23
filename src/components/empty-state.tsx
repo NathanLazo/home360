@@ -18,7 +18,7 @@ export function EmptyState({
   headingLevel: Heading = "h2",
 }: EmptyStateProps) {
   return (
-    <div className="bg-card border-hairline-strong/60 flex min-h-64 flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center">
+    <div className="bg-card border-hairline-strong/60 flex min-h-64 flex-col items-center justify-center gap-4 rounded-2xl border border-dashed p-8 text-center">
       {Icon ? (
         <div className="bg-canvas-soft text-muted-foreground shadow-hairline flex size-12 items-center justify-center rounded-full [&_svg]:size-5">
           <Icon aria-hidden="true" />

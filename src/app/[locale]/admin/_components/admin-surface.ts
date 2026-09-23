@@ -8,7 +8,7 @@
 /**
  * Flush card around a `DataTable`. The shared table already sets the
  * canvas-soft header strip with mono uppercase labels and hairline rows; the
- * card only drops its padding and clips the corners (radius 8).
+ * card only drops its padding and clips the corners (radius 20).
  */
 export const ADMIN_TABLE_CARD_CLASS =
   "gap-0 overflow-hidden py-0 [&_td]:tabular-nums";
@@ -21,11 +21,11 @@ export const ADMIN_TABLE_HEAD_STRIP_CLASS = "bg-canvas-soft border-b";
  * L2 stack (hairline included, so no `border`), rising to L3 on hover.
  */
 export const ADMIN_LINK_CARD_CLASS =
-  "bg-card rounded-md shadow-subtle transition-[box-shadow,background-color,scale] hover:shadow-soft";
+  "bg-card rounded-2xl shadow-subtle transition-[box-shadow,background-color,scale] hover:shadow-soft";
 
 /** Selected state of a linked card: an ink ring replaces the hairline. */
 export const ADMIN_LINK_CARD_ACTIVE_CLASS =
-  "bg-card rounded-md shadow-[0_0_0_1.5px_var(--ink)]";
+  "bg-card rounded-2xl shadow-[0_0_0_1.5px_var(--ink)]";
 
 /** Eyebrow / data caption: section labels inside sheets and panes. */
 export const ADMIN_EYEBROW_CLASS =

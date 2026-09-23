@@ -159,10 +159,11 @@ contraste por tinta — `font-normal text-mute` (`accentClass` en
 |---|---|---|
 | `rounded-xs` | 4 | Chips mínimos |
 | `rounded-sm` | 6 | Casos puntuales (logos, thumbnails) |
-| `rounded-md` | 8 | Cards (`Card`), popovers/menús |
+| `rounded-md` | 8 | Tooltips de charts |
 | `rounded-lg` | 12 | Items de menú/select/command y su highlight, dialogs, pricing, cards grandes, paneles glass |
-| `rounded-xl` | 16 | Popovers de menú/select, textarea, superficies hero, consolas de landing |
-| `rounded-pill` | 100 | Botones, inputs, selects, search, tabs, ítems del sidebar (y su lente), docks glass |
+| `rounded-xl` | 16 | Paneles internos con borde (en sheets/forms), alerts, popovers de menú/select, textarea, superficies hero, consolas de landing |
+| `rounded-pill` | 100 | Botones, inputs, selects, search, tabs, ítems del sidebar (y su lente), header glass de dashboard/admin/corporate, docks glass |
+| `rounded-2xl` | 20 | **Cards** (`Card`, KPI, cards de tabla — la tabla hereda el recorte), link cards, dialogs |
 | `rounded-full` | — | Avatares, dots |
 
 `--radius` = 8 px (md). El mapeo shadcn es sm 6 · md 8 · lg 12 · xl 16.
@@ -229,7 +230,7 @@ Select, search (`SearchInput`), tabs y `CommandInput` siguen la misma escala; no
 siempre visible; error debajo con `aria-describedby` + `aria-invalid`.
 
 ### Cards
-`Card`: canvas + hairline + `shadow-sm`, radio 8. Cards grandes/pricing: radio 12.
+`Card`: canvas + hairline + `shadow-sm`, radio 20 (`rounded-2xl`); las tablas viven dentro de una `Card` con `overflow-hidden`, así heredan el radio.
 Sin glass, nunca.
 
 ### Liquid Glass (`~/components/glass`)

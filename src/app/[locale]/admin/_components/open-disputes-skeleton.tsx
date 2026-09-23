@@ -15,7 +15,7 @@ export function OpenDisputesSkeleton({
         <div
           key={index}
           aria-hidden="true"
-          className="bg-card shadow-subtle flex items-center gap-4 rounded-md p-4"
+          className="bg-card shadow-subtle flex items-center gap-4 rounded-xl p-4"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <div className="flex items-center gap-2">

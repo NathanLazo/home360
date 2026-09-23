@@ -31,8 +31,8 @@ export function DashboardHeader({
     // on first paint and under reduced transparency / more contrast.
     <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
       <GlassSurface
-        radius="lg"
-        className="flex min-h-14 flex-wrap items-center gap-2 px-3 py-2 sm:flex-nowrap sm:pr-2"
+        radius="pill"
+        className="flex min-h-12 flex-wrap items-center gap-2 px-5 py-2 sm:flex-nowrap sm:px-3 sm:py-1.5 sm:pr-1.5"
       >
         <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
         <Separator

@@ -122,7 +122,7 @@ export function BranchManagerDialog({
               </Button>
             </div>
           ) : workers.length === 0 ? (
-            <div className="text-muted-foreground text-copy-sm flex items-start gap-3 rounded-md border border-dashed p-4">
+            <div className="text-muted-foreground text-copy-sm flex items-start gap-3 rounded-xl border border-dashed p-4">
               <UsersIcon
                 aria-hidden="true"
                 className="mt-0.5 size-4 shrink-0"

@@ -77,7 +77,7 @@ function DetailBody({
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border p-3">
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-xl border p-3">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
@@ -187,7 +187,7 @@ function DetailBody({
             {detail.locations.map((location) => (
               <li
                 key={location.id}
-                className="text-copy-sm flex items-center gap-3 rounded-md border p-3"
+                className="text-copy-sm flex items-center gap-3 rounded-xl border p-3"
               >
                 <MapPinIcon
                   aria-hidden="true"
@@ -221,7 +221,7 @@ function DetailBody({
             {detail.orders.map((order) => (
               <li
                 key={order.id}
-                className="text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3"
+                className="text-copy-sm flex items-center justify-between gap-3 rounded-xl border p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>

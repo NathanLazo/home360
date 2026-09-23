@@ -28,7 +28,7 @@ export function OrderConversationPanel({
     <section
       id="order-conversation"
       aria-labelledby="order-conversation-heading"
-      className="space-y-3 rounded-md border p-4"
+      className="space-y-3 rounded-xl border p-4"
     >
       <div className="space-y-0.5">
         <h3

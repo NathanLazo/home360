@@ -294,7 +294,7 @@ export function ProductImportDialog({
           {phase === "upload" ? (
             <div
               className={cn(
-                "border-hairline-strong flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-10 text-center transition-[border-color,background-color] duration-150 ease-out motion-reduce:transition-none",
+                "border-hairline-strong flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-10 text-center transition-[border-color,background-color] duration-150 ease-out motion-reduce:transition-none",
                 dragActive && canChooseFile && "border-link bg-link-soft/40",
                 !canChooseFile && "bg-canvas-soft opacity-70",
               )}
@@ -396,7 +396,7 @@ export function ProductImportDialog({
               </div>
 
               {validRows.length > 0 ? (
-                <div className="overflow-hidden rounded-md border">
+                <div className="overflow-hidden rounded-xl border">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -494,7 +494,7 @@ export function ProductImportDialog({
                 </p>
               </div>
               <div className="grid w-full max-w-sm grid-cols-2 gap-3">
-                <div className="bg-canvas-soft rounded-md border p-4">
+                <div className="bg-canvas-soft rounded-xl border p-4">
                   <p className="text-display-md font-mono tabular-nums">
                     {result.created}
                   </p>
@@ -502,7 +502,7 @@ export function ProductImportDialog({
                     {t("created")}
                   </p>
                 </div>
-                <div className="bg-canvas-soft rounded-md border p-4">
+                <div className="bg-canvas-soft rounded-xl border p-4">
                   <p className="text-display-md font-mono tabular-nums">
                     {result.updated}
                   </p>
@@ -512,7 +512,7 @@ export function ProductImportDialog({
                 </div>
               </div>
               {result.errors.length > 0 ? (
-                <div className="w-full max-w-lg rounded-md border p-4 text-left">
+                <div className="w-full max-w-lg rounded-xl border p-4 text-left">
                   <h4 className="text-copy-sm mb-2 font-medium">
                     {t("resultErrors")}
                   </h4>

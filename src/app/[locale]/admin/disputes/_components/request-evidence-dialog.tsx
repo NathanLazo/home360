@@ -100,7 +100,7 @@ export function RequestEvidenceDialog({
             </p>
           </div>
 
-          <p className="bg-canvas-soft text-copy-sm rounded-md border p-3">
+          <p className="bg-canvas-soft text-copy-sm rounded-xl border p-3">
             {t("notice")}
           </p>
 

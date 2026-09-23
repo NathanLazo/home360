@@ -24,7 +24,7 @@ export function CorporateInvoiceList({
   }
 
   return (
-    <ul className="divide-hairline divide-y rounded-md border">
+    <ul className="divide-hairline divide-y rounded-xl border">
       {invoices.map((invoice) => (
         <li
           key={invoice.id}

@@ -54,7 +54,7 @@ export function DisputeRecordingSegments({
 
   return (
     <ol
-      className="flex flex-col divide-y rounded-md border"
+      className="flex flex-col divide-y rounded-xl border"
       aria-label={t("title")}
     >
       {segments.map((segment, index) => {

@@ -46,7 +46,7 @@ export function PendingTierRequestNotice({
   return (
     <div
       role="status"
-      className="bg-canvas-soft text-copy-sm flex flex-col gap-3 rounded-md border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="bg-canvas-soft text-copy-sm flex flex-col gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <p className="text-muted-foreground">
         {t("pendingNotice", { tier: tierT(pendingRequest.requestedTier) })}

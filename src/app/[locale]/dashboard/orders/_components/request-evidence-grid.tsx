@@ -13,7 +13,7 @@ function isVideo(item: EvidenceItem): boolean {
 }
 
 const TILE_CLASS =
-  "bg-canvas-soft focus-visible:ring-ring block overflow-hidden rounded-md border focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none";
+  "bg-canvas-soft focus-visible:ring-ring block overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none";
 
 /** Customer photos/videos of the request, served through signed URLs. */
 export function RequestEvidenceGrid({
@@ -47,7 +47,7 @@ export function RequestEvidenceGrid({
                 controls
                 preload="metadata"
                 aria-label={label}
-                className="bg-canvas-soft aspect-square w-full rounded-md border object-cover"
+                className="bg-canvas-soft aspect-square w-full rounded-xl border object-cover"
               />
             ) : (
               <a

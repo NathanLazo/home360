@@ -47,7 +47,7 @@ export function CorporateTierRequests({
         {requests.map((request) => (
           <li
             key={request.id}
-            className="text-copy-sm flex flex-col gap-3 rounded-md border p-3"
+            className="text-copy-sm flex flex-col gap-3 rounded-xl border p-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex items-center gap-2">

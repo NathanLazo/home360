@@ -212,7 +212,7 @@ export function RequestDetailSheet({
                   {t("privacyHint")}
                 </p>
                 {request.description ? (
-                  <div className="bg-canvas-soft mt-4 rounded-md border p-4">
+                  <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
                     <h4 className="text-copy-sm mb-1 font-medium">
                       {t("customerNoteTitle")}
                     </h4>

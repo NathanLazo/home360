@@ -35,7 +35,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
         <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
           {t("title")}
         </h3>
-        <p className="text-muted-foreground text-copy-sm bg-canvas-soft rounded-md border border-dashed p-4">
+        <p className="text-muted-foreground text-copy-sm bg-canvas-soft rounded-xl border border-dashed p-4">
           {t("empty")}
         </p>
       </section>

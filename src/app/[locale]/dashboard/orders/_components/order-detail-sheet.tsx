@@ -277,7 +277,7 @@ export function OrderDetailSheet({
                   </DetailRow>
                 </dl>
                 {order.quote?.message ? (
-                  <div className="bg-canvas-soft mt-4 rounded-md border p-4">
+                  <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
                     <h4 className="text-copy-sm mb-1 font-medium">
                       {t("offerMessageTitle")}
                     </h4>
@@ -400,7 +400,7 @@ export function OrderDetailSheet({
                   />
                 </div>
 
-                <div className="bg-canvas-soft mt-4 rounded-md border p-4">
+                <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
                   <h4 className="text-copy-sm mb-1 font-medium">
                     {t("notesTitle")}
                   </h4>
@@ -420,7 +420,7 @@ export function OrderDetailSheet({
                   {t("materialsTitle")}
                 </h3>
                 {order.materials.length > 0 ? (
-                  <ul className="divide-hairline divide-y rounded-md border">
+                  <ul className="divide-hairline divide-y rounded-xl border">
                     {order.materials.map((material) => (
                       <li
                         key={material.id}
@@ -463,7 +463,7 @@ export function OrderDetailSheet({
                   {t("reviewTitle")}
                 </h3>
                 {order.review ? (
-                  <div className="space-y-2 rounded-md border p-4">
+                  <div className="space-y-2 rounded-xl border p-4">
                     <div
                       className="text-warning flex gap-1"
                       aria-label={t("ratingLabel", {
@@ -535,7 +535,7 @@ function EvidenceGallery({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-canvas-soft hover:bg-canvas-soft-2 hover:border-hairline-strong focus-visible:ring-ring flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border p-2 text-center text-xs font-medium transition-[background-color,border-color] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
+                className="bg-canvas-soft hover:bg-canvas-soft-2 hover:border-hairline-strong focus-visible:ring-ring flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border p-2 text-center text-xs font-medium transition-[background-color,border-color] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
               >
                 <ImageIcon
                   aria-hidden="true"

@@ -122,7 +122,7 @@ export function ProductFormFields({
         onChange={(imageUrl) => set("imageUrl", imageUrl)}
       />
 
-      <div className="bg-canvas-soft mx-4 flex items-center justify-between gap-4 rounded-md border p-4">
+      <div className="bg-canvas-soft mx-4 flex items-center justify-between gap-4 rounded-xl border p-4">
         <div>
           <Label htmlFor="product-published">{t("publishedLabel")}</Label>
           <p className="text-muted-foreground text-copy-sm">

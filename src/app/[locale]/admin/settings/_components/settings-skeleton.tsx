@@ -32,7 +32,7 @@ export function SettingsSkeleton({ label }: { label?: string }) {
         </Card>
       ))}
       <div
-        className="bg-card shadow-float flex items-center justify-between gap-3 rounded-lg p-3"
+        className="bg-card shadow-float flex items-center justify-between gap-3 rounded-2xl p-3"
         aria-hidden="true"
       >
         <Skeleton className="h-4 w-36" />

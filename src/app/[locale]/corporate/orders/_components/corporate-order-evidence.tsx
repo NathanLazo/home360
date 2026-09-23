@@ -30,7 +30,7 @@ function EvidenceGrid({
               href={item.url}
               target="_blank"
               rel="noreferrer"
-              className="focus-visible:ring-ring block overflow-hidden rounded-md border focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring block overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:outline-none"
             >
               {/* Signed, short-lived private blob URLs: outside the image loader. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -53,7 +53,7 @@ export function NotificationsSettingsSection({
         control={form.control}
         name="notifyPaymentRelease"
         render={({ field }) => (
-          <div className="bg-canvas-soft flex items-start justify-between gap-4 rounded-md border p-4">
+          <div className="bg-canvas-soft flex items-start justify-between gap-4 rounded-xl border p-4">
             <div className="flex flex-col gap-1">
               <Label htmlFor="notify-payment-release">
                 {t("paymentRelease")}

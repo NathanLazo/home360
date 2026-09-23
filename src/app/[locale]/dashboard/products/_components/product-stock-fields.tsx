@@ -42,7 +42,7 @@ export function ProductStockFields({
         </p>
       ) : null}
       {stocks.length === 0 ? (
-        <p className="text-muted-foreground text-copy-sm rounded-md border border-dashed p-4">
+        <p className="text-muted-foreground text-copy-sm rounded-xl border border-dashed p-4">
           {t("noBranches")}
         </p>
       ) : null}
@@ -57,7 +57,7 @@ export function ProductStockFields({
             key={stock.branchId}
             className={cn(
               "flex flex-col gap-4",
-              multiple && "rounded-md border p-4",
+              multiple && "rounded-xl border p-4",
             )}
           >
             <div className="flex items-center justify-between gap-4">

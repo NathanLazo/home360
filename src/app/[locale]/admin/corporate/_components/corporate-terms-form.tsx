@@ -243,7 +243,7 @@ function TermsFormBody({
     <>
       <div className="flex flex-col gap-4">
         {request ? (
-          <p className="bg-canvas-soft text-copy-sm flex items-center gap-2 rounded-md border p-3">
+          <p className="bg-canvas-soft text-copy-sm flex items-center gap-2 rounded-xl border p-3">
             <InfoIcon
               aria-hidden="true"
               className="text-muted-foreground size-4 shrink-0"
@@ -435,7 +435,7 @@ function TermsFormBody({
           aria-label={t("example.title", {
             ticket: currency(EXAMPLE_TICKET_CENTS),
           })}
-          className="flex flex-col gap-2 rounded-md border p-3"
+          className="flex flex-col gap-2 rounded-xl border p-3"
         >
           <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("example.title", { ticket: currency(EXAMPLE_TICKET_CENTS) })}

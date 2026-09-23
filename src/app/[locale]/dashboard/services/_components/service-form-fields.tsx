@@ -161,7 +161,7 @@ export function ServiceFormFields({
         <Label id="service-workers-label" htmlFor="service-workers-search">
           {t("workersLabel")}
         </Label>
-        <Command className="rounded-md border">
+        <Command className="rounded-xl border">
           <CommandInput
             id="service-workers-search"
             placeholder={t("workersSearchPlaceholder")}

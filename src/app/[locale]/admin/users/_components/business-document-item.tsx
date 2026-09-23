@@ -44,7 +44,7 @@ export function BusinessDocumentItem({
   const label = documentTypeT(document.type);
 
   return (
-    <li className="flex flex-col gap-3 rounded-md border p-3">
+    <li className="flex flex-col gap-3 rounded-xl border p-3">
       <div className="flex items-start gap-3">
         <BusinessDocumentPreview document={document} label={label} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">

@@ -17,7 +17,7 @@ export function DisputeDetailSkeleton({ label }: { label?: string }) {
         <Skeleton className="aspect-video w-full rounded-lg" />
       </div>
       <div
-        className="grid grid-cols-2 gap-4 rounded-md border p-6 sm:grid-cols-4"
+        className="grid grid-cols-2 gap-4 rounded-xl border p-6 sm:grid-cols-4"
         aria-hidden="true"
       >
         {Array.from({ length: 4 }, (_, index) => (

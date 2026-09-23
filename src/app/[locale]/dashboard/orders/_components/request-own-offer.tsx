@@ -30,7 +30,7 @@ export function RequestOwnOffer({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
-    <div className="space-y-3 rounded-md border p-4">
+    <div className="space-y-3 rounded-xl border p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h4 className="text-copy-sm font-medium">{t("title")}</h4>
         <OfferStatusBadge status={quote.status} label={statusT(quote.status)} />

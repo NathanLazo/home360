@@ -77,7 +77,7 @@ export function CorporateRequestsSection({
       ) : null}
 
       {!query.isPending && errorCode === null && requests.length === 0 ? (
-        <div className="bg-card rounded-lg border p-4 sm:p-6">
+        <div className="bg-card rounded-2xl border p-4 sm:p-6">
           <EmptyState
             headingLevel="h3"
             icon={ClipboardListIcon}

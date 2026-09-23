@@ -60,7 +60,7 @@ export function CorporateRequestCard({
   return (
     <article
       aria-labelledby={headingId}
-      className="bg-card flex flex-col gap-3 rounded-lg border p-4"
+      className="bg-card flex flex-col gap-3 rounded-2xl border p-4"
     >
       <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
