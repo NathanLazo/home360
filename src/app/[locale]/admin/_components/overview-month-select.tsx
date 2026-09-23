@@ -48,7 +48,7 @@ export function OverviewMonthSelect({
       }
     >
       <SelectTrigger
-        className="min-h-11 w-48 sm:min-h-10"
+        className="w-48"
         aria-label={t("label")}
       >
         <CalendarIcon aria-hidden="true" className="text-muted-foreground" />

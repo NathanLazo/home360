@@ -128,7 +128,7 @@ export function TierChangeDialog({
             >
               <SelectTrigger
                 id="tier-change-tier"
-                className="min-h-11 w-full sm:min-h-10"
+                className="w-full"
                 disabled={mutation.isPending}
               >
                 <SelectValue />

@@ -4,7 +4,10 @@ import { PaymentMethod } from "@generated/prisma";
 import type Stripe from "stripe";
 
 import { capturePayment } from "~/server/services/payments/escrow";
-import { finalizePendingCheckoutPayment } from "~/server/services/payments/customer-checkout";
+import {
+  finalizePendingCheckoutPayment,
+  recordCapturedOrderEscrow,
+} from "~/server/services/payments/customer-checkout";
 import { svcOk, type ServiceResult } from "~/server/services/service-result";
 import type {
   StripeEventHandler,
@@ -140,7 +143,15 @@ export async function capturePaymentIntent(
       : {}),
   });
 
-  return capture.ok ? svcOk(null) : handlerFail(capture.code, capture.detail);
+  if (!capture.ok) {
+    return handlerFail(capture.code, capture.detail);
+  }
+
+  if (origin.data.orderId !== undefined) {
+    await recordCapturedOrderEscrow(deps, { orderId: origin.data.orderId });
+  }
+
+  return svcOk(null);
 }
 
 /**

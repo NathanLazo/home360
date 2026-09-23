@@ -55,7 +55,7 @@ export function DisputeFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-44 sm:min-h-10"
+          className="w-44"
           aria-label={t("statusLabel")}
         >
           <SelectValue />
@@ -80,7 +80,7 @@ export function DisputeFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-40 sm:min-h-10"
+          className="w-40"
           aria-label={t("urgencyLabel")}
         >
           <SelectValue />

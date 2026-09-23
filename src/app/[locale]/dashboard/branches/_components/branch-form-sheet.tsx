@@ -28,6 +28,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { parseCoordinate } from "~/lib/geo-coordinates";
 
 const EMPTY_VALUES: BranchFormValues = {
   name: "",
@@ -38,11 +39,6 @@ const EMPTY_VALUES: BranchFormValues = {
   longitude: "",
 };
 
-/** Empty → no coordinate; anything else must parse as a finite number. */
-function parseCoordinate(value: string): number | null {
-  const trimmed = value.trim().replace(",", ".");
-  return trimmed.length === 0 ? null : Number(trimmed);
-}
 
 export function BranchFormSheet({
   open,
@@ -60,6 +56,7 @@ export function BranchFormSheet({
   onUpdate: (input: BranchUpdateInput) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.branches");
+  const tGeo = useTranslations("common.geoLocation");
   // A cancellation arriving mid-edit closes the form instead of letting the
   // user finish something the server will reject.
   useCloseWhenReadOnly(open, onOpenChange);
@@ -100,7 +97,7 @@ export function BranchFormSheet({
       ) {
         next[key] =
           key === "latitude" || key === "longitude"
-            ? t("form.location.invalid")
+            ? tGeo("invalid")
             : t("form.invalidField");
       }
     }

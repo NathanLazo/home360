@@ -64,7 +64,7 @@ export function TransactionFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-48"
+          className="w-full sm:w-48"
           aria-label={t("statusLabel")}
         >
           <SelectValue placeholder={t("allStatuses")} />
@@ -89,7 +89,7 @@ export function TransactionFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-44"
+          className="w-full sm:w-44"
           aria-label={t("methodLabel")}
         >
           <SelectValue placeholder={t("allMethods")} />

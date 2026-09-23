@@ -69,7 +69,7 @@ export function OrderAssignWorkerDialog({
               onValueChange={setWorkerId}
               disabled={loading}
             >
-              <SelectTrigger id={fieldId} className="min-h-11 w-full">
+              <SelectTrigger id={fieldId} className="w-full">
                 <SelectValue placeholder={t("workerPlaceholder")} />
               </SelectTrigger>
               <SelectContent>

@@ -4,12 +4,19 @@ import { useState } from "react";
 import { LoaderCircleIcon, LocateFixedIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { BranchFormErrors, BranchFormValues } from "./branch.types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-type LocationValues = Pick<BranchFormValues, "latitude" | "longitude">;
+export type GeoCoordinateValues = {
+  latitude: string;
+  longitude: string;
+};
+
+export type GeoCoordinateErrors = {
+  latitude?: string;
+  longitude?: string;
+};
 
 type GeolocationState = "idle" | "locating" | "denied" | "unavailable";
 
@@ -19,24 +26,30 @@ function formatCoordinate(value: number): string {
 }
 
 /**
- * Branch coordinates (radar matching needs a point). The browser location is
- * a shortcut for owners filling the form from the branch itself; manual
- * decimal entry covers everyone else.
+ * Latitude/longitude pair shared by every form that places something on the
+ * request radar (business branches, corporate locations). The browser
+ * location is a shortcut for people filling the form on site; manual decimal
+ * entry covers everyone else. `idPrefix` keeps input ids unique per form so
+ * callers can focus `${idPrefix}-latitude` / `${idPrefix}-longitude`.
  */
-export function BranchLocationFields({
+export function GeoCoordinateFields({
+  idPrefix,
   values,
   errors,
   disabled,
   onChange,
 }: {
-  values: LocationValues;
-  errors: BranchFormErrors;
+  idPrefix: string;
+  values: GeoCoordinateValues;
+  errors: GeoCoordinateErrors;
   disabled: boolean;
-  onChange: (values: LocationValues) => void;
+  onChange: (values: GeoCoordinateValues) => void;
 }) {
-  const t = useTranslations("dashboard.branches.form.location");
+  const t = useTranslations("common.geoLocation");
   const [geo, setGeo] = useState<GeolocationState>("idle");
   const error = errors.latitude ?? errors.longitude;
+  const helpId = `${idPrefix}-location-help`;
+  const errorId = `${idPrefix}-location-error`;
 
   function locateCurrentPosition() {
     if (!("geolocation" in navigator)) {
@@ -71,15 +84,12 @@ export function BranchLocationFields({
         : null;
 
   return (
-    <fieldset className="grid gap-3" aria-describedby="branch-location-help">
+    <fieldset className="grid gap-3" aria-describedby={helpId}>
       <legend className="mb-3 text-sm leading-none font-medium">
         {t("title")}
       </legend>
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <p
-          id="branch-location-help"
-          className="text-muted-foreground text-copy-sm max-w-xs"
-        >
+        <p id={helpId} className="text-muted-foreground text-copy-sm max-w-xs">
           {t("help")}
         </p>
         <Button
@@ -102,9 +112,9 @@ export function BranchLocationFields({
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="branch-latitude">{t("latitude")}</Label>
+          <Label htmlFor={`${idPrefix}-latitude`}>{t("latitude")}</Label>
           <Input
-            id="branch-latitude"
+            id={`${idPrefix}-latitude`}
             type="text"
             inputMode="decimal"
             autoComplete="off"
@@ -113,16 +123,16 @@ export function BranchLocationFields({
             value={values.latitude}
             disabled={disabled}
             aria-invalid={Boolean(errors.latitude)}
-            aria-describedby={error ? "branch-location-error" : undefined}
+            aria-describedby={error ? errorId : undefined}
             onChange={(event) =>
               onChange({ ...values, latitude: event.target.value })
             }
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="branch-longitude">{t("longitude")}</Label>
+          <Label htmlFor={`${idPrefix}-longitude`}>{t("longitude")}</Label>
           <Input
-            id="branch-longitude"
+            id={`${idPrefix}-longitude`}
             type="text"
             inputMode="decimal"
             autoComplete="off"
@@ -131,7 +141,7 @@ export function BranchLocationFields({
             value={values.longitude}
             disabled={disabled}
             aria-invalid={Boolean(errors.longitude)}
-            aria-describedby={error ? "branch-location-error" : undefined}
+            aria-describedby={error ? errorId : undefined}
             onChange={(event) =>
               onChange({ ...values, longitude: event.target.value })
             }
@@ -139,11 +149,7 @@ export function BranchLocationFields({
         </div>
       </div>
       {error ? (
-        <p
-          id="branch-location-error"
-          role="alert"
-          className="text-error-deep text-copy-sm"
-        >
+        <p id={errorId} role="alert" className="text-error-deep text-copy-sm">
           {error}
         </p>
       ) : status ? (

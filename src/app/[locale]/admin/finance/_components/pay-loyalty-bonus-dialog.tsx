@@ -89,7 +89,7 @@ export function PayLoyaltyBonusDialog({
                 )
               }
             >
-              <SelectTrigger id={`${fieldId}-method`} className="min-h-11">
+              <SelectTrigger id={`${fieldId}-method`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

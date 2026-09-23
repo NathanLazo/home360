@@ -53,7 +53,7 @@ export function WithdrawalHistoryFilters({
           }
         >
           <SelectTrigger
-            className="min-h-11 w-44 sm:min-h-10"
+            className="w-44"
             aria-label={t("statusLabel")}
           >
             <SelectValue />
@@ -77,7 +77,7 @@ export function WithdrawalHistoryFilters({
           <Input
             id={`${fieldId}-from`}
             type="date"
-            className="min-h-11 w-44 sm:min-h-10"
+            className="w-44"
             value={filters.from}
             max={filters.to || undefined}
             onChange={(event) =>
@@ -92,7 +92,7 @@ export function WithdrawalHistoryFilters({
           <Input
             id={`${fieldId}-to`}
             type="date"
-            className="min-h-11 w-44 sm:min-h-10"
+            className="w-44"
             value={filters.to}
             min={filters.from || undefined}
             onChange={(event) =>

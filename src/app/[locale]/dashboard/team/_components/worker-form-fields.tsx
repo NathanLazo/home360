@@ -123,7 +123,7 @@ export function WorkerFormFields({
         >
           <SelectTrigger
             id="worker-branch"
-            className="min-h-11 w-full sm:min-h-10"
+            className="w-full"
             aria-invalid={Boolean(errors.branchId)}
             aria-describedby={
               errors.branchId ? "worker-branchId-error" : undefined

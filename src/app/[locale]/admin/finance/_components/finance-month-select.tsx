@@ -48,7 +48,7 @@ export function FinanceMonthSelect({
   return (
     <Select value={selected} onValueChange={onChange}>
       <SelectTrigger
-        className="min-h-11 w-48 sm:min-h-10"
+        className="w-48"
         aria-label={t("label")}
       >
         <SelectValue />

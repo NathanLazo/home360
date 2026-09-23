@@ -804,18 +804,7 @@
       "close": "Close form",
       "cancel": "Cancel",
       "save": "Save changes",
-      "create": "Create branch",
-      "location": {
-        "title": "Location",
-        "help": "Requests reach branches whose radius covers the customer’s address.",
-        "useCurrent": "Use my location",
-        "locating": "Locating…",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "permissionDenied": "Location permission denied. Enter the coordinates manually.",
-        "unavailable": "We couldn’t get your location. Enter the coordinates manually.",
-        "invalid": "Enter latitude (−90 to 90) and longitude (−180 to 180), or leave both empty."
-      }
+      "create": "Create branch"
     },
     "feedback": {
       "planLimit": "You've reached your plan's branch limit.",

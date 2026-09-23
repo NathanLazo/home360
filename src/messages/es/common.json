@@ -33,5 +33,16 @@
       "title": "Pago cancelado",
       "description": "No se realizó ningún cargo. Puedes volver a intentarlo con el mismo link si sigue activo."
     }
+  },
+  "geoLocation": {
+    "title": "Ubicación",
+    "help": "Este punto sirve para emparejar solicitudes con negocios cercanos. Usa tu ubicación actual o captura las coordenadas.",
+    "useCurrent": "Usar mi ubicación",
+    "locating": "Ubicando…",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "permissionDenied": "Permiso de ubicación denegado. Captura las coordenadas manualmente.",
+    "unavailable": "No pudimos obtener tu ubicación. Captura las coordenadas manualmente.",
+    "invalid": "Captura latitud (−90 a 90) y longitud (−180 a 180), o deja ambas vacías."
   }
 }

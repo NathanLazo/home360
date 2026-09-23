@@ -35,28 +35,57 @@ const locationFields = {
   city: z.string().trim().min(2).max(80),
   contactName: z.string().trim().min(2).max(80),
   contactPhone: z.string().trim().min(7).max(20),
+  latitude: z.number().finite().min(-90).max(90),
+  longitude: z.number().finite().min(-180).max(180),
 };
 
-export const corporateLocationCreateSchema = z.object({
-  name: locationFields.name,
-  addressLine: locationFields.addressLine,
-  city: locationFields.city,
-  contactName: locationFields.contactName.optional(),
-  contactPhone: locationFields.contactPhone.optional(),
-});
+/** Coordinates travel as a pair: one without the other is meaningless. */
+function coordinatesPaired(value: {
+  latitude?: number | null;
+  longitude?: number | null;
+}): boolean {
+  const hasLatitude = value.latitude !== undefined && value.latitude !== null;
+  const hasLongitude =
+    value.longitude !== undefined && value.longitude !== null;
+  return hasLatitude === hasLongitude;
+}
+
+const coordinatesPairIssue = {
+  message: "Latitude and longitude must be provided together",
+  path: ["longitude"],
+};
+
+export const corporateLocationCreateSchema = z
+  .object({
+    name: locationFields.name,
+    addressLine: locationFields.addressLine,
+    city: locationFields.city,
+    contactName: locationFields.contactName.optional(),
+    contactPhone: locationFields.contactPhone.optional(),
+    // Optional: a location without coordinates is saved, but the request
+    // radar cannot reach nearby businesses from it (Haversine needs a point).
+    latitude: locationFields.latitude.optional(),
+    longitude: locationFields.longitude.optional(),
+  })
+  .refine(coordinatesPaired, coordinatesPairIssue);
 
 export const corporateLocationIdSchema = z.object({
   locationId: z.string().cuid(),
 });
 
-export const corporateLocationUpdateSchema = corporateLocationIdSchema.extend({
-  name: locationFields.name.optional(),
-  addressLine: locationFields.addressLine.optional(),
-  city: locationFields.city.optional(),
-  // `undefined` keeps the current contact; `null` explicitly clears it.
-  contactName: locationFields.contactName.nullable().optional(),
-  contactPhone: locationFields.contactPhone.nullable().optional(),
-});
+export const corporateLocationUpdateSchema = corporateLocationIdSchema
+  .extend({
+    name: locationFields.name.optional(),
+    addressLine: locationFields.addressLine.optional(),
+    city: locationFields.city.optional(),
+    // `undefined` keeps the current contact; `null` explicitly clears it.
+    contactName: locationFields.contactName.nullable().optional(),
+    contactPhone: locationFields.contactPhone.nullable().optional(),
+    // Same convention: `undefined` keeps, `null` clears (both together).
+    latitude: locationFields.latitude.nullable().optional(),
+    longitude: locationFields.longitude.nullable().optional(),
+  })
+  .refine(coordinatesPaired, coordinatesPairIssue);
 
 export const corporateInvoiceListSchema = z.object({
   cursor: z.string().cuid().optional(),

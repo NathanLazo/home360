@@ -267,7 +267,6 @@ function TermsFormBody({
             >
               <SelectTrigger
                 id={`${baseId}-tier`}
-                className="min-h-11 sm:min-h-10"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -394,7 +393,6 @@ function TermsFormBody({
           <Select value={managerId} onValueChange={setManagerId}>
             <SelectTrigger
               id={`${baseId}-manager`}
-              className="min-h-11 sm:min-h-10"
               aria-invalid={submitted && managerMissing}
               aria-describedby={
                 submitted && managerMissing

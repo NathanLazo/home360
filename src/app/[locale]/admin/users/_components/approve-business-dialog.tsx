@@ -181,7 +181,7 @@ export function ApproveBusinessDialog({
                     setPlanCode(planCodeSchema.parse(value))
                   }
                 >
-                  <SelectTrigger id="approve-plan" className="min-h-11">
+                  <SelectTrigger id="approve-plan">
                     <SelectValue placeholder={t("planPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>

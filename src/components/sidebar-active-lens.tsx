@@ -27,9 +27,9 @@ export function SidebarActiveLens({ layoutId }: { layoutId: string }) {
       aria-hidden="true"
       layoutId={layoutId}
       transition={reduceMotion ? INSTANT : SLIDE}
-      className="pointer-events-none absolute inset-0 rounded-sm"
+      className="pointer-events-none absolute inset-0 rounded-pill"
     >
-      <GlassLens radius="sm" />
+      <GlassLens radius="pill" />
     </motion.span>
   );
 }

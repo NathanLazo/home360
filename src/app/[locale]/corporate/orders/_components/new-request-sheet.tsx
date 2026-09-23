@@ -197,7 +197,7 @@ export function NewRequestSheet({
               >
                 <SelectTrigger
                   id={FIELD_IDS.corporateLocationId}
-                  className="min-h-11 w-full"
+                  className="w-full"
                   aria-invalid={Boolean(errors.corporateLocationId)}
                 >
                   <SelectValue placeholder={t("locationPlaceholder")} />
@@ -224,7 +224,7 @@ export function NewRequestSheet({
               >
                 <SelectTrigger
                   id={FIELD_IDS.category}
-                  className="min-h-11 w-full"
+                  className="w-full"
                   aria-invalid={Boolean(errors.category)}
                 >
                   <SelectValue placeholder={t("categoryPlaceholder")} />

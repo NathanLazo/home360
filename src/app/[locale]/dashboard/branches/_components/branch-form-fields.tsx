@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-import { BranchLocationFields } from "./branch-location-fields";
 import type { BranchFormErrors, BranchFormValues } from "./branch.types";
+import { GeoCoordinateFields } from "~/components/geo-coordinate-fields";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
@@ -152,9 +152,10 @@ export function BranchFormFields({
         ) : null}
       </div>
 
-      <BranchLocationFields
-        values={values}
-        errors={errors}
+      <GeoCoordinateFields
+        idPrefix="branch"
+        values={{ latitude: values.latitude, longitude: values.longitude }}
+        errors={{ latitude: errors.latitude, longitude: errors.longitude }}
         disabled={disabled}
         onChange={(location) => onChange({ ...values, ...location })}
       />

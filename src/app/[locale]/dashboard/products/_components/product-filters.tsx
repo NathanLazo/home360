@@ -50,7 +50,7 @@ export function ProductFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-48"
+          className="w-full sm:w-48"
           aria-label={t("categoryLabel")}
         >
           <SelectValue placeholder={t("allCategories")} />
@@ -74,7 +74,7 @@ export function ProductFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-40"
+          className="w-full sm:w-40"
           aria-label={t("statusLabel")}
         >
           <SelectValue placeholder={t("allStatuses")} />

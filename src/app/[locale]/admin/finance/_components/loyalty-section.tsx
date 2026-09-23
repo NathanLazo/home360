@@ -99,7 +99,7 @@ export function LoyaltySection() {
             }
           >
             <SelectTrigger
-              className="min-h-11 w-44 sm:min-h-10"
+              className="w-44"
               aria-label={t("statusFilterLabel")}
             >
               <SelectValue />

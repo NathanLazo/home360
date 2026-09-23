@@ -51,7 +51,7 @@ export function CorporateFilters({
           )
         }
       >
-        <SelectTrigger className="min-h-11 w-48 sm:min-h-10">
+        <SelectTrigger className="w-48">
           <SelectValue aria-label={t("tierFilterLabel")} />
         </SelectTrigger>
         <SelectContent>

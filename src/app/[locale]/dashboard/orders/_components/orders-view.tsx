@@ -36,7 +36,7 @@ export function OrdersView({ branchId }: { branchId?: string }) {
           aria-label={t("tabs.label")}
         >
           {ordersTabSchema.options.map((tab) => (
-            <TabsTrigger key={tab} value={tab} className="min-h-9 px-3">
+            <TabsTrigger key={tab} value={tab} className="px-3">
               {t(`tabs.${tab}`)}
             </TabsTrigger>
           ))}

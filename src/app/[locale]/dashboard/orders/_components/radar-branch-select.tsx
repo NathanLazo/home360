@@ -32,7 +32,7 @@ export function RadarBranchSelect({
   return (
     <Select value={value ?? ""} onValueChange={onChange}>
       <SelectTrigger
-        className="min-h-11 w-full sm:min-h-10 sm:w-56"
+        className="w-full sm:w-56"
         aria-label={t("branchLabel")}
       >
         <SelectValue placeholder={t("branchPlaceholder")} />

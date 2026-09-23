@@ -18,6 +18,8 @@ const locationListSelect = {
   city: true,
   contactName: true,
   contactPhone: true,
+  latitude: true,
+  longitude: true,
   isActive: true,
   createdAt: true,
   _count: { select: { orders: true } },
@@ -34,6 +36,9 @@ export type CorporateLocationItem = {
   city: string;
   contactName: string | null;
   contactPhone: string | null;
+  /** `null` pair: saved, but invisible to the request radar. */
+  latitude: number | null;
+  longitude: number | null;
   isActive: boolean;
   createdAt: Date;
   ordersCount: number;
@@ -61,6 +66,8 @@ function toLocationItem(location: LocationListPayload): CorporateLocationItem {
     city: location.city,
     contactName: location.contactName,
     contactPhone: location.contactPhone,
+    latitude: location.latitude,
+    longitude: location.longitude,
     isActive: location.isActive,
     createdAt: location.createdAt,
     ordersCount: location._count.orders,
@@ -152,6 +159,8 @@ export async function createCorporateLocation(
               city: input.city,
               contactName: input.contactName,
               contactPhone: input.contactPhone,
+              latitude: input.latitude,
+              longitude: input.longitude,
             },
             select: { id: true },
           });
@@ -194,6 +203,9 @@ export async function updateCorporateLocation(
           : {}),
         ...(input.contactPhone !== undefined
           ? { contactPhone: input.contactPhone }
+          : {}),
+        ...(input.latitude !== undefined && input.longitude !== undefined
+          ? { latitude: input.latitude, longitude: input.longitude }
           : {}),
       },
       select: { id: true },

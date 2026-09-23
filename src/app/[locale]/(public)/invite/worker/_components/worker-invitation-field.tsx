@@ -27,7 +27,6 @@ export function WorkerInvitationField({
         id={id}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
-        className="min-h-11"
         {...inputProps}
       />
       {error ? (

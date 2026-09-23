@@ -33,5 +33,16 @@
       "title": "Payment cancelled",
       "description": "No charge was made. You can try again with the same link while it is still active."
     }
+  },
+  "geoLocation": {
+    "title": "Location",
+    "help": "This point is used to match requests with nearby businesses. Use your current location or enter the coordinates.",
+    "useCurrent": "Use my location",
+    "locating": "Locating…",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "permissionDenied": "Location permission denied. Enter the coordinates manually.",
+    "unavailable": "We couldn’t get your location. Enter the coordinates manually.",
+    "invalid": "Enter latitude (−90 to 90) and longitude (−180 to 180), or leave both empty."
   }
 }

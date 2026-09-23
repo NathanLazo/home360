@@ -138,7 +138,6 @@ export function CorporatePasswordForm({
                   autoComplete={autoComplete}
                   value={values[key]}
                   disabled={mutation.isPending}
-                  className="min-h-11"
                   aria-invalid={Boolean(errors[key])}
                   aria-describedby={
                     errors[key] ? `corporate-${key}-error` : undefined

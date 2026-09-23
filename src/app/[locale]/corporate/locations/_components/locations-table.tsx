@@ -1,6 +1,12 @@
 "use client";
 
-import { MapPinIcon, PencilIcon, PowerIcon, PowerOffIcon } from "lucide-react";
+import {
+  MapPinIcon,
+  MapPinOffIcon,
+  PencilIcon,
+  PowerIcon,
+  PowerOffIcon,
+} from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { CorporateLocationItem } from "../../_components/corporate.types";
@@ -59,9 +65,20 @@ export function LocationsTable({
       key: "address",
       header: t("table.address"),
       cell: (location) => (
-        <span className="block max-w-64 truncate">
-          {location.addressLine}, {location.city}
-        </span>
+        <div className="flex max-w-64 flex-col gap-0.5">
+          <span className="truncate">
+            {location.addressLine}, {location.city}
+          </span>
+          {location.latitude === null || location.longitude === null ? (
+            <span className="text-warning-deep text-copy-sm flex items-start gap-1 whitespace-normal">
+              <MapPinOffIcon
+                aria-hidden="true"
+                className="mt-0.5 size-3.5 shrink-0"
+              />
+              {t("noCoordinates")}
+            </span>
+          ) : null}
+        </div>
       ),
     },
     {

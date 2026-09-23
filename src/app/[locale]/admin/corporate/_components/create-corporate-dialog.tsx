@@ -234,7 +234,7 @@ function CreateFormBody({
             >
               <SelectTrigger
                 id={`${baseId}-locale`}
-                className="min-h-11 w-28 sm:min-h-10"
+                className="w-28"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -267,7 +267,6 @@ function CreateFormBody({
           >
             <SelectTrigger
               id={`${baseId}-tier`}
-              className="min-h-11 sm:min-h-10"
               aria-invalid={submitted && tier === null}
               aria-describedby={
                 submitted && tier === null
@@ -421,7 +420,6 @@ function CreateFormBody({
           <Select value={managerId} onValueChange={setManagerId}>
             <SelectTrigger
               id={`${baseId}-manager`}
-              className="min-h-11 sm:min-h-10"
               aria-invalid={submitted && managerMissing}
               aria-describedby={
                 submitted && managerMissing

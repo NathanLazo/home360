@@ -36,7 +36,7 @@ export function OrderDateFilter({
           value={from}
           max={to || undefined}
           onChange={(event) => onChange({ from: event.target.value, to })}
-          className="min-h-11 sm:min-h-10 sm:w-44"
+          className="sm:w-44"
         />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -50,7 +50,7 @@ export function OrderDateFilter({
           min={from || undefined}
           aria-invalid={inverted || undefined}
           onChange={(event) => onChange({ from, to: event.target.value })}
-          className="min-h-11 sm:min-h-10 sm:w-44"
+          className="sm:w-44"
         />
       </div>
       {from !== "" || to !== "" ? (

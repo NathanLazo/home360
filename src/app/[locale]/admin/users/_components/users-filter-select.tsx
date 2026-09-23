@@ -39,7 +39,7 @@ export function UsersFilterSelect<TValue extends string>({
       }
     >
       <SelectTrigger
-        className="min-h-11 w-48 sm:min-h-10"
+        className="w-48"
         aria-label={ariaLabel}
       >
         <SelectValue />

@@ -47,7 +47,7 @@ export function SearchInput({
     <div className={cn("relative min-w-0", className)}>
       <SearchIcon
         aria-hidden="true"
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2"
       />
       <Input
         ref={inputRef}
@@ -56,7 +56,7 @@ export function SearchInput({
         onChange={(event) => onValueChange(event.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="pr-9 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+        className="pr-8 pl-8 [&::-webkit-search-cancel-button]:appearance-none"
       />
       {ghost ? (
         <SearchClearGhost
@@ -72,9 +72,9 @@ export function SearchInput({
         aria-hidden={!hasValue}
         tabIndex={hasValue ? 0 : -1}
         data-visible={hasValue}
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute top-1/2 right-1 flex size-7 -translate-y-1/2 items-center justify-center rounded-sm transition-[opacity,scale,color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] outline-none focus-visible:ring-[3px] active:scale-[0.97] data-[visible=false]:pointer-events-none data-[visible=false]:scale-75 data-[visible=false]:opacity-0 motion-reduce:transition-none"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-full transition-[opacity,scale,color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] outline-none focus-visible:ring-[3px] active:scale-[0.97] data-[visible=false]:pointer-events-none data-[visible=false]:scale-75 data-[visible=false]:opacity-0 motion-reduce:transition-none"
       >
-        <XIcon aria-hidden="true" className="size-4" />
+        <XIcon aria-hidden="true" className="size-3.5" />
       </button>
     </div>
   );

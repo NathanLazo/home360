@@ -24,7 +24,7 @@ export function SearchClearGhost({
   return (
     <motion.span
       aria-hidden="true"
-      className="text-foreground pointer-events-none absolute inset-y-0 right-9 left-9 flex items-center overflow-hidden text-base whitespace-pre md:text-sm"
+      className="text-foreground pointer-events-none absolute inset-y-0 right-8 left-8 flex items-center overflow-hidden text-base whitespace-pre md:text-[0.8125rem]"
       initial={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       animate={{
         opacity: 0,

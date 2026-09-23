@@ -188,7 +188,7 @@ export function BusinessProfileForm({
             >
               <SelectTrigger
                 id="settings-business-type"
-                className="min-h-11 w-full sm:min-h-10"
+                className="w-full"
                 aria-invalid={Boolean(errors.businessType)}
               >
                 <SelectValue placeholder={t("typePlaceholder")} />

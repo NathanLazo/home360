@@ -86,7 +86,7 @@ export function CampaignForm({
               })
             }
           >
-            <SelectTrigger id={`${fieldId}-audience`} className="min-h-11">
+            <SelectTrigger id={`${fieldId}-audience`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

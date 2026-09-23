@@ -64,7 +64,7 @@ export function CorporateOrderFilters({
         onValueChange={(value) => setParam("location", value)}
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-56"
+          className="w-full sm:w-56"
           aria-label={t("locationLabel")}
         >
           <SelectValue placeholder={t("allLocations")} />
@@ -83,7 +83,7 @@ export function CorporateOrderFilters({
         onValueChange={(value) => setParam("status", value)}
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-44"
+          className="w-full sm:w-44"
           aria-label={t("statusLabel")}
         >
           <SelectValue placeholder={t("allStatuses")} />

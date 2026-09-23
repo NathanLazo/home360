@@ -116,13 +116,13 @@ export function MenuGlassHighlight() {
     <span ref={anchorRef} aria-hidden="true" className="contents">
       <motion.span
         {...shared}
-        className="bg-accent pointer-events-none absolute top-0 left-0 z-0 rounded-xs"
+        className="bg-accent pointer-events-none absolute top-0 left-0 z-0 rounded-lg"
       />
       <motion.span
         {...shared}
-        className="pointer-events-none absolute top-0 left-0 z-[2] rounded-xs"
+        className="pointer-events-none absolute top-0 left-0 z-[2] rounded-lg"
       >
-        {visible ? <GlassLens radius="xs" /> : null}
+        {visible ? <GlassLens radius="lg" /> : null}
       </motion.span>
     </span>
   );

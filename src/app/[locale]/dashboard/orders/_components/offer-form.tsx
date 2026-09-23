@@ -137,7 +137,7 @@ export function OfferForm({
           >
             <SelectTrigger
               id={fieldId("workerId")}
-              className="min-h-11 w-full"
+              className="w-full"
               aria-invalid={errors.workerId}
               aria-describedby={
                 errors.workerId ? errorId("workerId") : undefined
@@ -182,7 +182,7 @@ export function OfferForm({
             aria-invalid={errors.price}
             aria-describedby={errors.price ? errorId("price") : undefined}
             onChange={(event) => update("price", event.target.value)}
-            className="min-h-11 font-mono tabular-nums"
+            className="font-mono tabular-nums"
           />
           {errors.price ? (
             <p
@@ -209,7 +209,6 @@ export function OfferForm({
               errors.scheduledAt ? errorId("scheduledAt") : undefined
             }
             onChange={(event) => update("scheduledAt", event.target.value)}
-            className="min-h-11"
           />
           {errors.scheduledAt ? (
             <p

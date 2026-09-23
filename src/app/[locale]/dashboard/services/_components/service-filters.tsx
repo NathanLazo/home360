@@ -53,7 +53,7 @@ export function ServiceFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-48"
+          className="w-full sm:w-48"
           aria-label={t("filters.categoryLabel")}
         >
           <SelectValue placeholder={t("filters.allCategories")} />
@@ -77,7 +77,7 @@ export function ServiceFilters({
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-40"
+          className="w-full sm:w-40"
           aria-label={t("filters.statusLabel")}
         >
           <SelectValue placeholder={t("filters.allStatuses")} />

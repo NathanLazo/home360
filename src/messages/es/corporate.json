@@ -333,7 +333,8 @@
     "errorTitle": "Algo salió mal",
     "errorDescription": "No pudimos mostrar tus ubicaciones. Inténtalo de nuevo.",
     "reactivate": "Reactivar",
-    "ordersLink": "Ver {count, plural, one {# orden} other {# órdenes}} de {name}"
+    "ordersLink": "Ver {count, plural, one {# orden} other {# órdenes}} de {name}",
+    "noCoordinates": "Sin ubicación — tus solicitudes no llegarán a negocios cercanos."
   },
   "membership": {
     "title": "Membresía",

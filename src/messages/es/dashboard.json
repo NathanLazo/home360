@@ -804,18 +804,7 @@
       "close": "Cerrar formulario",
       "cancel": "Cancelar",
       "save": "Guardar cambios",
-      "create": "Crear sucursal",
-      "location": {
-        "title": "Ubicación",
-        "help": "Las solicitudes llegan a las sucursales cuyo radio cubre la dirección del cliente.",
-        "useCurrent": "Usar mi ubicación",
-        "locating": "Ubicando…",
-        "latitude": "Latitud",
-        "longitude": "Longitud",
-        "permissionDenied": "Permiso de ubicación denegado. Captura las coordenadas manualmente.",
-        "unavailable": "No pudimos obtener tu ubicación. Captura las coordenadas manualmente.",
-        "invalid": "Captura latitud (−90 a 90) y longitud (−180 a 180), o deja ambas vacías."
-      }
+      "create": "Crear sucursal"
     },
     "feedback": {
       "planLimit": "Alcanzaste el límite de sucursales de tu plan.",

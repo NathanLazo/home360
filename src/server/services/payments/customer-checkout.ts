@@ -688,3 +688,52 @@ export async function finalizePendingCheckoutPayment(
 
   return result;
 }
+
+/**
+ * Completes the order side of a capture that went through the generic
+ * `capturePayment` path (web Checkout Session, F7 corporate portal): records
+ * the ESCROW_HELD event once and tells the business, like the PaymentSheet
+ * path above. Idempotent across webhook retries: only the call that creates
+ * the event sends the push.
+ */
+export async function recordCapturedOrderEscrow(
+  deps: Pick<CustomerCheckoutDeps, "db">,
+  input: { orderId: string },
+): Promise<void> {
+  const order = await deps.db.order.findUnique({
+    where: { id: input.orderId },
+    select: {
+      id: true,
+      status: true,
+      business: { select: { ownerId: true } },
+    },
+  });
+
+  if (!order || order.status !== OrderStatus.PAID) {
+    return;
+  }
+
+  const created = await deps.db.$transaction(async (tx) => {
+    const heldEvent = await tx.orderEvent.findFirst({
+      where: { orderId: order.id, type: OrderEventType.ESCROW_HELD },
+      select: { id: true },
+    });
+
+    if (heldEvent) {
+      return false;
+    }
+
+    await tx.orderEvent.create({
+      data: { orderId: order.id, type: OrderEventType.ESCROW_HELD },
+    });
+
+    return true;
+  });
+
+  if (created) {
+    await sendLocalizedPushToUser(deps.db, order.business.ownerId, {
+      message: "escrowHeld",
+      url: `home360app://orders/${order.id}`,
+    });
+  }
+}

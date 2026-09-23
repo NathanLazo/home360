@@ -266,7 +266,7 @@ export function ProductImportDialog({
             >
               <SelectTrigger
                 id="product-import-branch"
-                className="min-h-11 w-full sm:min-h-10"
+                className="w-full"
                 aria-describedby="product-import-branch-help"
               >
                 <SelectValue placeholder={t("branchPlaceholder")} />

@@ -89,7 +89,7 @@ export function OverviewFilters({ month, locationId }: OverviewFiltersProps) {
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-52"
+          className="w-full sm:w-52"
           aria-label={t("monthLabel")}
         >
           <SelectValue placeholder={t("currentMonth")} />
@@ -123,7 +123,7 @@ export function OverviewFilters({ month, locationId }: OverviewFiltersProps) {
         }
       >
         <SelectTrigger
-          className="min-h-11 w-full sm:min-h-10 sm:w-56"
+          className="w-full sm:w-56"
           aria-label={t("locationLabel")}
         >
           <SelectValue placeholder={t("allLocations")} />

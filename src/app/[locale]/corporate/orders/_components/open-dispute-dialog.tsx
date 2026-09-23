@@ -115,7 +115,7 @@ export function OpenDisputeDialog({
             >
               <SelectTrigger
                 id="dispute-reason"
-                className="min-h-11 w-full"
+                className="w-full"
                 aria-invalid={error === "reason"}
               >
                 <SelectValue placeholder={t("reasonPlaceholder")} />

@@ -14,7 +14,8 @@ import { isRequestVisibleOnRadar } from "~/server/services/orders/radar-visibili
  *   that sees the request on the radar (OPEN + radius + category) or that
  *   already has a quote on it.
  * - order evidence (M6-W1): request/before/after/recording media for the
- *   customer, business owner, assigned worker or an administrator.
+ *   customer, business owner, assigned worker or an administrator, including
+ *   evidence attached to the order's dispute by either party.
  */
 export async function authorizeMediaRead(
   db: PrismaClient,
@@ -59,6 +60,8 @@ async function authorizeOrderEvidenceRead(
         { afterUrls: { has: pathname } },
         { recordingUrl: pathname },
         { recordingSegments: { some: { pathname } } },
+        // Dispute evidence is shared by both parties of the order (W11).
+        { dispute: { is: { evidenceUrls: { has: pathname } } } },
       ],
     },
     select: {

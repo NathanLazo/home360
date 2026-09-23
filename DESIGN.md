@@ -158,11 +158,11 @@ contraste por tinta — `font-normal text-mute` (`accentClass` en
 | Token | px | Uso |
 |---|---|---|
 | `rounded-xs` | 4 | Chips mínimos |
-| `rounded-sm` | 6 | Inputs, selects, items de menú |
+| `rounded-sm` | 6 | Casos puntuales (logos, thumbnails) |
 | `rounded-md` | 8 | Cards (`Card`), popovers/menús |
-| `rounded-lg` | 12 | Dialogs, pricing, cards grandes, paneles glass |
-| `rounded-xl` | 16 | Superficies hero, consolas de landing |
-| `rounded-pill` | 100 | Todos los botones, docks glass |
+| `rounded-lg` | 12 | Items de menú/select/command y su highlight, dialogs, pricing, cards grandes, paneles glass |
+| `rounded-xl` | 16 | Popovers de menú/select, textarea, superficies hero, consolas de landing |
+| `rounded-pill` | 100 | Botones, inputs, selects, search, tabs, ítems del sidebar (y su lente), docks glass |
 | `rounded-full` | — | Avatares, dots |
 
 `--radius` = 8 px (md). El mapeo shadcn es sm 6 · md 8 · lg 12 · xl 16.
@@ -222,8 +222,10 @@ fuerces alto con `min-h-*`/`h-*`/`size-*` en call-sites: en punteros táctiles u
   `~/components/metal`; cuentan para el mismo presupuesto.
 
 ### Inputs
-Alto 40 (`sm` 32, `lg` 48), radio 6, hairline, fondo canvas, 14 px (16 en móvil para
-evitar zoom iOS). Hover `hairline-strong`, foco `border-ring` + anillo azul. Label
+Mismo grosor y forma que los botones: alto 32 (`sm` 28), **pill**, hairline, fondo
+canvas, 13 px (16 en móvil para evitar zoom iOS). `Textarea` usa radio 16 (`rounded-xl`).
+Select, search (`SearchInput`), tabs y `CommandInput` siguen la misma escala; no fuerces
+`min-h-*`/`h-*` en call-sites. Hover `hairline-strong`, foco `border-ring` + anillo azul. Label
 siempre visible; error debajo con `aria-describedby` + `aria-invalid`.
 
 ### Cards

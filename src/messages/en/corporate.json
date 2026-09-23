@@ -333,7 +333,8 @@
     "errorTitle": "Something went wrong",
     "errorDescription": "We could not show your locations. Please try again.",
     "reactivate": "Reactivate",
-    "ordersLink": "View {count, plural, one {# order} other {# orders}} of {name}"
+    "ordersLink": "View {count, plural, one {# order} other {# orders}} of {name}",
+    "noCoordinates": "No location — your requests won't reach nearby businesses."
   },
   "membership": {
     "title": "Membership",

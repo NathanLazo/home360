@@ -60,7 +60,7 @@ export function AiSettingsSection({
             <div className="flex flex-col gap-2">
               <Label htmlFor="ai-pricing-model">{t("model")}</Label>
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger id="ai-pricing-model" className="min-h-11">
+                <SelectTrigger id="ai-pricing-model">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -166,7 +166,6 @@ export function WeeklyRevenueChart({
               <TabsTrigger
                 key={mode}
                 value={mode}
-                className="min-h-11 sm:min-h-10"
               >
                 {t(`${mode}Tab`)}
               </TabsTrigger>
