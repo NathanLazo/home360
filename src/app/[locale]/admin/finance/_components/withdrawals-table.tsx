@@ -79,7 +79,7 @@ export function WithdrawalsTable({
       key: "destination",
       header: t("columns.destination"),
       cell: (row) => (
-        <span className="text-muted-foreground font-mono text-sm tabular-nums">
+        <span className="text-muted-foreground text-copy-sm font-mono tabular-nums">
           {row.bankName} ••••{row.accountLast4}
         </span>
       ),
@@ -90,7 +90,7 @@ export function WithdrawalsTable({
       cell: (row) => (
         <time
           dateTime={row.requestedAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-copy-sm"
           suppressHydrationWarning
         >
           {formatter.relativeTime(row.requestedAt, now)}

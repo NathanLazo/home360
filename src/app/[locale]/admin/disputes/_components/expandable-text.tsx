@@ -11,7 +11,7 @@ import {
 } from "../../_components/admin-motion";
 import { cn } from "~/lib/utils";
 
-/** Collapsed height: four lines of `text-sm` (4 × 1.25rem). */
+/** Collapsed height: four lines of `text-copy-sm` (4 × 1.25rem). */
 const COLLAPSED_HEIGHT_PX = 80;
 
 /**

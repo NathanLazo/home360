@@ -31,7 +31,7 @@ export function GuaranteeReadonlyField({
       />
       <p
         id="settings-guarantee-note"
-        className="text-muted-foreground flex items-start gap-2 text-sm"
+        className="text-muted-foreground text-copy-sm flex items-start gap-2"
       >
         <LockIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         {t("guaranteeNote")}

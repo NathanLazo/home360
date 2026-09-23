@@ -77,13 +77,13 @@ function DetailBody({
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-canvas-soft text-muted-foreground rounded-md border p-3 text-sm">
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border p-3">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
 
       <DetailSection title={t("terms")}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="text-copy-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <dt className="text-muted-foreground">{t("commission")}</dt>
           <dd className="tabular-nums">{detail.commissionPct}%</dd>
           <dt className="text-muted-foreground">{t("monthlyFee")}</dt>
@@ -112,7 +112,7 @@ function DetailBody({
       <Separator />
 
       <DetailSection title={t("owner")}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="text-copy-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <dt className="text-muted-foreground">{t("ownerName")}</dt>
           <dd className="truncate">{detail.owner.name ?? t("notAvailable")}</dd>
           <dt className="text-muted-foreground">{t("ownerEmail")}</dt>
@@ -126,7 +126,7 @@ function DetailBody({
 
       <DetailSection title={t("membership")}>
         {detail.membership ? (
-          <div className="flex flex-wrap items-center gap-2 text-sm">
+          <div className="text-copy-sm flex flex-wrap items-center gap-2">
             <StatusBadge
               status={detail.membership.status}
               variantMap={membershipStatusVariants}
@@ -148,14 +148,16 @@ function DetailBody({
             ) : null}
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm">{t("noMembership")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noMembership")}
+          </p>
         )}
       </DetailSection>
 
       <Separator />
 
       <DetailSection title={t("spending")}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="text-copy-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <dt className="text-muted-foreground">{t("monthSpend")}</dt>
           <dd className="font-mono font-semibold tabular-nums">
             {currency(detail.monthSpendCents)}
@@ -177,13 +179,15 @@ function DetailBody({
 
       <DetailSection title={t("locations", { count: detail.activeLocations })}>
         {detail.locations.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noLocations")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noLocations")}
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.locations.map((location) => (
               <li
                 key={location.id}
-                className="flex items-center gap-3 rounded-md border p-3 text-sm"
+                className="text-copy-sm flex items-center gap-3 rounded-md border p-3"
               >
                 <MapPinIcon
                   aria-hidden="true"
@@ -211,13 +215,13 @@ function DetailBody({
 
       <DetailSection title={t("recentOrders", { count: detail.ordersCount })}>
         {detail.orders.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noOrders")}</p>
+          <p className="text-muted-foreground text-copy-sm">{t("noOrders")}</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.orders.map((order) => (
               <li
                 key={order.id}
-                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                className="text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>

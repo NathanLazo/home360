@@ -134,7 +134,7 @@ export function ApproveBusinessDialog({
               </h3>
               <GuaranteeBadge guaranteeType={business.guaranteeType} />
               {business.guaranteeNotes ? (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-copy-sm">
                   {business.guaranteeNotes}
                 </p>
               ) : null}
@@ -145,7 +145,7 @@ export function ApproveBusinessDialog({
                 {t("documents")}
               </h3>
               {business.documents.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-copy-sm">
                   {t("noDocuments")}
                 </p>
               ) : (

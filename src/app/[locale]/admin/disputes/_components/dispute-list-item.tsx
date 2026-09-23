@@ -61,7 +61,7 @@ export function DisputeListItem({
           {toneT(tone)}
         </Badge>
       </div>
-      <span className="text-muted-foreground truncate text-sm">
+      <span className="text-muted-foreground text-copy-sm truncate">
         {t("parties", {
           business: dispute.businessName,
           customer: dispute.customerName ?? t("unknownParty"),
@@ -71,7 +71,7 @@ export function DisputeListItem({
         <span className="text-muted-foreground font-mono text-xs tabular-nums">
           #{dispute.orderFolio}
         </span>
-        <span className="font-mono text-sm font-semibold tabular-nums">
+        <span className="text-copy-sm font-mono font-semibold tabular-nums">
           {formatter.number(dispute.amountCents / 100, {
             style: "currency",
             currency: "MXN",

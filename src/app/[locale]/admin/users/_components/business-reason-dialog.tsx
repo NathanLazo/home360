@@ -83,7 +83,11 @@ export function BusinessReasonDialog({
             onBlur={() => setTouched(true)}
           />
           {showError ? (
-            <p id={errorId} role="alert" className="text-destructive text-sm">
+            <p
+              id={errorId}
+              role="alert"
+              className="text-destructive text-copy-sm"
+            >
               {t("invalid")}
             </p>
           ) : null}

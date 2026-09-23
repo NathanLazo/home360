@@ -326,7 +326,7 @@ export function ProductImportDialog({
               )}
               <div className="space-y-1">
                 <h3 className="text-display-sm">{t("dropTitle")}</h3>
-                <p className="text-muted-foreground max-w-md text-sm">
+                <p className="text-muted-foreground text-copy-sm max-w-md">
                   {t("dropDescription")}
                 </p>
                 <p className="text-muted-foreground max-w-md font-mono text-xs leading-relaxed">
@@ -388,7 +388,7 @@ export function ProductImportDialog({
                 <p className="text-muted-foreground text-copy-sm">
                   {t("previewDescription", { file: fileName })}
                 </p>
-                <p className="text-sm font-medium" role="status">
+                <p className="text-copy-sm font-medium" role="status">
                   {t("validSummary", {
                     valid: validRows.length,
                     errors: rowErrors.length,
@@ -431,7 +431,7 @@ export function ProductImportDialog({
                     </Table>
                   </div>
                   {validRows.length > 10 ? (
-                    <p className="text-muted-foreground border-t px-4 py-2 text-sm">
+                    <p className="text-muted-foreground text-copy-sm border-t px-4 py-2">
                       {t("moreRows", { count: validRows.length - 10 })}
                     </p>
                   ) : null}
@@ -447,7 +447,7 @@ export function ProductImportDialog({
                     />
                     <h4>{t("errorsTitle")}</h4>
                   </div>
-                  <ul className="max-h-40 space-y-2 overflow-y-auto text-sm">
+                  <ul className="text-copy-sm max-h-40 space-y-2 overflow-y-auto">
                     {rowErrors.map((error, index) => (
                       <li key={`${error.line}-${error.code}-${index}`}>
                         {t("lineError", {
@@ -517,7 +517,7 @@ export function ProductImportDialog({
                   <h4 className="text-copy-sm mb-2 font-medium">
                     {t("resultErrors")}
                   </h4>
-                  <ul className="space-y-1 text-sm">
+                  <ul className="text-copy-sm space-y-1">
                     {result.errors.map((error, index) => (
                       <li key={`${error.line}-${error.code}-${index}`}>
                         {t("lineError", {

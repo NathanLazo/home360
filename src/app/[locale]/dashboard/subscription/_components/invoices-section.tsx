@@ -28,7 +28,8 @@ export function InvoicesSection() {
   );
 
   const pages = invoicesQuery.data?.pages;
-  const responseError = pages?.find((page) => page.error !== null)?.error ?? null;
+  const responseError =
+    pages?.find((page) => page.error !== null)?.error ?? null;
   const invoicesError =
     responseError ?? (invoicesQuery.error ? "UNKNOWN_ERROR" : null);
   const invoices = (pages ?? []).flatMap((page) =>
@@ -39,7 +40,9 @@ export function InvoicesSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>
+          <h2>{t("title")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {invoicesQuery.isPending ? (

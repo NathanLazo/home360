@@ -129,7 +129,7 @@ export function BranchFormFields({
           />
           <span
             aria-hidden="true"
-            className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm"
+            className="text-muted-foreground text-copy-sm pointer-events-none absolute inset-y-0 right-3 flex items-center"
           >
             km
           </span>

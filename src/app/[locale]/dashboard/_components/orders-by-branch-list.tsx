@@ -146,7 +146,7 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
           {rows.map((row) => (
             <li
               key={row.key}
-              className="flex items-center justify-between gap-4 text-sm"
+              className="text-copy-sm flex items-center justify-between gap-4"
               aria-label={t("branchCountLabel", {
                 branch: row.label,
                 count: row.count,

@@ -94,16 +94,23 @@ export function PlanCard({
 
   return (
     <Card
-      className={cn(plan.isCurrent && "border-primary ring-primary/20 ring-1")}
+      className={cn(plan.isCurrent && "border-hairline-strong shadow-float")}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
-          <CardTitle>{plan.name}</CardTitle>
-          {plan.isCurrent ? <Badge>{t("currentPlanTag")}</Badge> : null}
+          <CardTitle>
+            <h2>{plan.name}</h2>
+          </CardTitle>
+          {plan.isCurrent ? (
+            // Same static-chrome chip as the sidebar plan: "yours" reads as metal.
+            <Badge className="bg-metal text-ink shadow-hairline">
+              {t("currentPlanTag")}
+            </Badge>
+          ) : null}
         </div>
         <CardDescription className="text-foreground text-display-md font-mono tabular-nums">
           {currency(plan.priceCents)}
-          <span className="text-muted-foreground ml-1 text-sm font-normal">
+          <span className="text-muted-foreground text-copy-sm ml-1 font-normal">
             {t("perMonth")}
           </span>
         </CardDescription>

@@ -57,7 +57,7 @@ export function BranchCard({
         />
       </CardHeader>
       <BranchCoverageMap radiusKm={branch.coverageRadiusKm} />
-      <CardContent className="grid gap-3 px-5 py-4 text-sm">
+      <CardContent className="text-copy-sm grid gap-3 px-5 py-4">
         <p className="flex items-center gap-2">
           <UserRoundIcon
             aria-hidden="true"

@@ -33,7 +33,7 @@ export function DisputeArguments({
             text={customerArgument}
             expandLabel={t("expand")}
             collapseLabel={t("collapse")}
-            className="text-muted-foreground text-sm text-pretty"
+            className="text-muted-foreground text-copy-sm text-pretty"
           />
         </blockquote>
       </figure>
@@ -41,7 +41,7 @@ export function DisputeArguments({
         <DisputePartyCaption party={business} role={t("business")} />
         <blockquote className="mt-2">
           {businessArgument === null ? (
-            <p className="text-muted-foreground text-sm italic">
+            <p className="text-muted-foreground text-copy-sm italic">
               {t("noBusinessAnswer")}
             </p>
           ) : (
@@ -49,7 +49,7 @@ export function DisputeArguments({
               text={businessArgument}
               expandLabel={t("expand")}
               collapseLabel={t("collapse")}
-              className="text-muted-foreground text-sm text-pretty"
+              className="text-muted-foreground text-copy-sm text-pretty"
             />
           )}
         </blockquote>

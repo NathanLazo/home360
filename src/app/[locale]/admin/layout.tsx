@@ -69,7 +69,7 @@ export default async function AdminLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <a
         href="#admin-content"
-        className="bg-card text-foreground focus-visible:ring-ring shadow-float fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="bg-card text-foreground focus-visible:ring-ring shadow-float text-copy-sm fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
       >
         {t("header.skipToContent")}
       </a>

@@ -23,7 +23,7 @@ export function DisputeAiSummary({ summary }: { summary: string | null }) {
           <p className="text-link-deep text-label font-mono font-medium tracking-wide uppercase">
             {t("title")}
           </p>
-          <p className="text-body text-sm text-pretty">{summary}</p>
+          <p className="text-body text-copy-sm text-pretty">{summary}</p>
         </div>
       </CardContent>
     </Card>

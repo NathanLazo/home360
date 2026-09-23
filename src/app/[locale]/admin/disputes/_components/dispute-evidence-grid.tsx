@@ -89,7 +89,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
               aria-label={t("showAll", { count: urls.length })}
               onClick={() => setExpanded(true)}
               className={cn(
-                "bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring hover:bg-canvas-soft-2 flex aspect-square w-full items-center justify-center rounded-md font-mono text-sm font-medium tabular-nums focus-visible:ring-2 focus-visible:outline-none",
+                "bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring hover:bg-canvas-soft-2 text-copy-sm flex aspect-square w-full items-center justify-center rounded-md font-mono font-medium tabular-nums focus-visible:ring-2 focus-visible:outline-none",
                 PRESS_CONTROL_CLASS,
               )}
             >

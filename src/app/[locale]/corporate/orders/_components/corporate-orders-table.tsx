@@ -96,7 +96,7 @@ export function CorporateOrdersTable({
       cell: (order) => (
         <time
           dateTime={order.createdAt.toISOString()}
-          className="text-muted-foreground text-sm tabular-nums"
+          className="text-muted-foreground text-copy-sm tabular-nums"
         >
           {formatter.dateTime(order.createdAt, {
             day: "numeric",

@@ -33,7 +33,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
       <CardContent className="flex flex-col gap-4">
         <dl className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">
+            <dt className="text-muted-foreground text-copy-sm">
               {t("ai.threshold")}
             </dt>
             <dd className="font-mono text-lg font-semibold tabular-nums">
@@ -44,16 +44,18 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">{t("ai.model")}</dt>
-            <dd className="font-mono text-sm font-medium">
+            <dt className="text-muted-foreground text-copy-sm">
+              {t("ai.model")}
+            </dt>
+            <dd className="text-copy-sm font-mono font-medium">
               {config.pricingModel}
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">
+            <dt className="text-muted-foreground text-copy-sm">
               {t("ai.humanReview")}
             </dt>
-            <dd className="text-sm font-medium">
+            <dd className="text-copy-sm font-medium">
               {config.humanReviewBelowThreshold
                 ? t("ai.humanReviewOn")
                 : t("ai.humanReviewOff")}

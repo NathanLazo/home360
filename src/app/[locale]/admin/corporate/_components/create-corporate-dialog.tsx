@@ -181,7 +181,7 @@ function CreateFormBody({
               <p
                 id={`${baseId}-name-error`}
                 role="alert"
-                className="text-destructive text-sm"
+                className="text-destructive text-copy-sm"
               >
                 {t("fields.nameInvalid")}
               </p>
@@ -217,7 +217,7 @@ function CreateFormBody({
               <p
                 id={`${baseId}-email-error`}
                 role="alert"
-                className="text-destructive text-sm"
+                className="text-destructive text-copy-sm"
               >
                 {t("fields.ownerEmailInvalid")}
               </p>
@@ -249,7 +249,7 @@ function CreateFormBody({
           </div>
         </div>
 
-        <p className="bg-canvas-soft-2 text-body flex items-start gap-2 rounded-md p-3 text-sm">
+        <p className="bg-canvas-soft-2 text-body text-copy-sm flex items-start gap-2 rounded-md p-3">
           <MailIcon
             aria-hidden="true"
             className="text-muted-foreground mt-0.5 size-4 shrink-0"
@@ -302,7 +302,7 @@ function CreateFormBody({
             <p
               id={`${baseId}-tier-error`}
               role="alert"
-              className="text-destructive text-sm"
+              className="text-destructive text-copy-sm"
             >
               {t("fields.tierRequired")}
             </p>
@@ -340,7 +340,7 @@ function CreateFormBody({
                 <p
                   id={`${baseId}-commission-error`}
                   role="alert"
-                  className="text-destructive text-sm"
+                  className="text-destructive text-copy-sm"
                 >
                   {t("fields.commissionRequired")}
                 </p>
@@ -376,7 +376,7 @@ function CreateFormBody({
                 <p
                   id={`${baseId}-fee-error`}
                   role="alert"
-                  className="text-destructive text-sm"
+                  className="text-destructive text-copy-sm"
                 >
                   {t("fields.monthlyFeeRequired")}
                 </p>
@@ -446,7 +446,7 @@ function CreateFormBody({
             <p
               id={`${baseId}-manager-error`}
               role="alert"
-              className="text-destructive text-sm"
+              className="text-destructive text-copy-sm"
             >
               {t("fields.managerRequired")}
             </p>

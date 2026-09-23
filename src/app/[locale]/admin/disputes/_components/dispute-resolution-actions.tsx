@@ -97,7 +97,7 @@ export function DisputeResolutionActions({
               renderButton(resolution, resolution === primaryResolution),
             )}
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-copy-sm">
             {t("disabled.alreadyResolved")}
           </p>
         </>

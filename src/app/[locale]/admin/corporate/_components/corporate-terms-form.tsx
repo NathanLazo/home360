@@ -243,7 +243,7 @@ function TermsFormBody({
     <>
       <div className="flex flex-col gap-4">
         {request ? (
-          <p className="bg-canvas-soft flex items-center gap-2 rounded-md border p-3 text-sm">
+          <p className="bg-canvas-soft text-copy-sm flex items-center gap-2 rounded-md border p-3">
             <InfoIcon
               aria-hidden="true"
               className="text-muted-foreground size-4 shrink-0"
@@ -303,7 +303,7 @@ function TermsFormBody({
               <p
                 id={`${baseId}-commission-error`}
                 role="alert"
-                className="text-destructive text-sm"
+                className="text-destructive text-copy-sm"
               >
                 {t("fields.commissionInvalid")}
               </p>
@@ -337,7 +337,7 @@ function TermsFormBody({
               <p
                 id={`${baseId}-fee-error`}
                 role="alert"
-                className="text-destructive text-sm"
+                className="text-destructive text-copy-sm"
               >
                 {t("fields.monthlyFeeInvalid")}
               </p>
@@ -372,7 +372,7 @@ function TermsFormBody({
               <p
                 id={`${baseId}-locations-error`}
                 role="alert"
-                className="text-destructive text-sm"
+                className="text-destructive text-copy-sm"
               >
                 {t("fields.maxLocationsInvalid")}
               </p>
@@ -419,7 +419,7 @@ function TermsFormBody({
             <p
               id={`${baseId}-manager-error`}
               role="alert"
-              className="text-destructive text-sm"
+              className="text-destructive text-copy-sm"
             >
               {t("fields.managerRequired")}
             </p>
@@ -442,7 +442,7 @@ function TermsFormBody({
           <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("example.title", { ticket: currency(EXAMPLE_TICKET_CENTS) })}
           </h3>
-          <div className="text-sm">
+          <div className="text-copy-sm">
             <div className="text-muted-foreground grid grid-cols-4 gap-2 px-2 py-1 text-xs">
               <span>{t("example.commission")}</span>
               <span className="text-right">{t("example.fee")}</span>
@@ -463,7 +463,7 @@ function TermsFormBody({
                 highlighted
               />
             ) : (
-              <p className="text-muted-foreground px-2 py-1.5 text-sm">
+              <p className="text-muted-foreground text-copy-sm px-2 py-1.5">
                 {t("example.awaitingCommission")}
               </p>
             )}
@@ -475,7 +475,7 @@ function TermsFormBody({
 
         <p
           role="note"
-          className="bg-canvas-soft-2 text-body flex items-start gap-2 rounded-md p-3 text-sm"
+          className="bg-canvas-soft-2 text-body text-copy-sm flex items-start gap-2 rounded-md p-3"
         >
           <InfoIcon
             aria-hidden="true"

@@ -98,7 +98,7 @@ export function TeamTable({
             variantMap={INVITATION_VARIANTS}
             label={t(`invitationStatus.${worker.invitationStatus}`)}
           />
-          <span className="text-muted-foreground max-w-full truncate text-sm">
+          <span className="text-muted-foreground text-copy-sm max-w-full truncate">
             {worker.invitedEmail ?? t("noEmail")}
           </span>
         </span>
