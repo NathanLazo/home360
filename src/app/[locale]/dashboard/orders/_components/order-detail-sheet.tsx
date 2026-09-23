@@ -27,6 +27,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
+import { UserAvatar } from "~/components/user-avatar";
 
 function DetailRow({
   label,
@@ -186,7 +187,18 @@ export function OrderDetailSheet({
                 </h3>
                 <dl className="space-y-3">
                   <DetailRow label={t("customerLabel")}>
-                    {order.customer.name ?? t("notAvailable")}
+                    {order.customer.email ? (
+                      <span className="inline-flex items-center justify-end gap-2">
+                        <UserAvatar
+                          seed={order.customer.email}
+                          name={order.customer.name ?? order.customer.email}
+                          size={20}
+                        />
+                        {order.customer.name ?? t("notAvailable")}
+                      </span>
+                    ) : (
+                      (order.customer.name ?? t("notAvailable"))
+                    )}
                   </DetailRow>
                   <DetailRow label={t("emailLabel")}>
                     {order.customer.email ?? t("notAvailable")}

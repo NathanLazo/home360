@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { InfoIcon, LoaderCircleIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { GuaranteeReadonlyField } from "./guarantee-readonly-field";
@@ -34,6 +34,14 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import {
+  SubmitStatusIcon,
+  useErrorShake,
+  useTransientFlag,
+} from "~/components/motion";
+
+/** How long the save button holds its success check. */
+const SAVED_FEEDBACK_MS = 2000;
 
 const BUSINESS_TYPES: BusinessTypeValue[] = ["SERVICES", "PRODUCTS", "MIXED"];
 
@@ -68,8 +76,12 @@ export function BusinessProfileForm({
       ? t("notActiveNotice")
       : null;
 
+  const shakeInvalid = useErrorShake();
+  const [saved, flashSaved] = useTransientFlag(SAVED_FEEDBACK_MS);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const notes = values.guaranteeNotes.trim();
     const parsed = updateBusinessProfileSchema.safeParse({
       businessName: values.businessName,
@@ -87,6 +99,7 @@ export function BusinessProfileForm({
         else if (field === "businessType") next.businessType = t("typeError");
       }
       setErrors(next);
+      shakeInvalid(formElement);
       const target = parsed.error.issues[0]?.path[0];
       window.requestAnimationFrame(() =>
         document
@@ -105,6 +118,7 @@ export function BusinessProfileForm({
     setErrors({});
     const outcome = await onSubmit(parsed.data);
     setBlocked(outcome.code === "BUSINESS_NOT_ACTIVE");
+    if (outcome.ok) flashSaved();
   }
 
   return (
@@ -232,12 +246,7 @@ export function BusinessProfileForm({
               disabled={saving || !isDirty || isReadOnly}
               className="min-h-11 sm:min-h-10"
             >
-              {saving ? (
-                <LoaderCircleIcon
-                  aria-hidden="true"
-                  className="animate-spin motion-reduce:animate-none"
-                />
-              ) : null}
+              <SubmitStatusIcon pending={saving} succeeded={saved} />
               {t("save")}
             </Button>
           </div>

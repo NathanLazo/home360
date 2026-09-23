@@ -8,8 +8,10 @@ import { UserMenu } from "~/components/user-menu";
 
 export type DashboardHeaderProps = {
   user: {
+    id: string;
     name: string;
     email: string;
+    image: string | null;
     role: UserRole;
   };
   branches: Array<{ id: string; name: string }>;

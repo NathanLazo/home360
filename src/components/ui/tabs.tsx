@@ -27,9 +27,10 @@ const TabsListContext = React.createContext<TabsListState>({
   animatedIndicator: false,
 });
 
+// transitions.dev tabs sliding: 250 ms, smooth-out, symmetric both ways.
 const INDICATOR_TRANSITION = {
-  duration: 0.2,
-  ease: [0.23, 1, 0.32, 1],
+  duration: 0.25,
+  ease: [0.22, 1, 0.36, 1],
 } as const;
 const INSTANT_TRANSITION = { duration: 0 } as const;
 
@@ -111,7 +112,7 @@ function TabsList({
   VariantProps<typeof tabsListVariants> & {
     /**
      * Opt-in: the active pill (default variant) slides between triggers with
-     * a 200 ms ease-out layout animation. Pointer only; keyboard changes and
+     * a 250 ms smooth-out layout animation. Pointer only; keyboard changes and
      * reduced motion snap instantly.
      */
     animatedIndicator?: boolean;

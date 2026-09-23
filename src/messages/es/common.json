@@ -2,6 +2,9 @@
   "appName": "Home 360",
   "retry": "Reintentar",
   "close": "Cerrar",
+  "search": {
+    "clear": "Borrar búsqueda"
+  },
   "toggleSidebar": "Mostrar u ocultar menú lateral",
   "localeSwitcher": {
     "label": "Idioma",

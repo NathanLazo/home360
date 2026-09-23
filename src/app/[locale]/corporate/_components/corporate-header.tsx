@@ -7,8 +7,10 @@ import { UserMenu } from "~/components/user-menu";
 
 export type CorporateHeaderProps = {
   user: {
+    id: string;
     name: string;
     email: string;
+    image: string | null;
     role: UserRole;
   };
   toggleSidebarLabel: string;

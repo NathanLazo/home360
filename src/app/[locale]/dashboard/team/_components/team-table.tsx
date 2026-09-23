@@ -14,6 +14,7 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { UserAvatar } from "~/components/user-avatar";
 
 const INVITATION_VARIANTS: Record<
   WorkerListItem["invitationStatus"],
@@ -47,10 +48,13 @@ export function TeamTable({
       header: t("columns.worker"),
       className: "min-w-56",
       cell: (worker) => (
-        <span className="flex flex-col gap-0.5">
-          <span className="font-medium">{worker.fullName}</span>
-          <span className="text-muted-foreground text-sm">
-            {worker.specialty ?? t("noSpecialty")}
+        <span className="flex items-center gap-3">
+          <UserAvatar seed={worker.id} name={worker.fullName} />
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="font-medium">{worker.fullName}</span>
+            <span className="text-muted-foreground text-sm">
+              {worker.specialty ?? t("noSpecialty")}
+            </span>
           </span>
         </span>
       ),

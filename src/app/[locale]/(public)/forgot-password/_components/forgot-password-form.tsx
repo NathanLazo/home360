@@ -10,6 +10,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { requestPasswordResetSchema } from "~/schemas/auth/password-reset.schema";
 import { api } from "~/trpc/react";
+import { useErrorShake } from "~/components/motion";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth.forgotPassword");
@@ -20,8 +21,11 @@ export function ForgotPasswordForm() {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const requestPasswordReset = api.auth.requestPasswordReset.useMutation();
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const parsed = requestPasswordResetSchema.safeParse({ email, locale });
     if (!parsed.success) {
       const hasEmailError = parsed.error.issues.some(
@@ -29,6 +33,7 @@ export function ForgotPasswordForm() {
       );
       setEmailError(hasEmailError);
       setTransportError(!hasEmailError);
+      shakeInvalid(formElement);
       if (hasEmailError) {
         requestAnimationFrame(() =>
           document.getElementById("forgot-password-email")?.focus(),

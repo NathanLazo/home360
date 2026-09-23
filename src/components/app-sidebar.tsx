@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "~/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { UserAvatar } from "~/components/user-avatar";
 import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
@@ -38,7 +38,9 @@ export type AppSidebarProps = {
   user: {
     name: string;
     subtitle?: string;
-    initials: string;
+    /** Stable user id (or email) for the bot avatar; defaults to the name. */
+    seed?: string;
+    image?: string | null;
   };
   footerSlot?: ReactNode;
 };
@@ -145,11 +147,13 @@ export function AppSidebar({
               className="cursor-default hover:bg-transparent active:scale-100 active:bg-transparent"
             >
               <div>
-                <Avatar className="size-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg text-xs font-semibold">
-                    {user.initials}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  seed={user.seed ?? user.name}
+                  name={user.name}
+                  image={user.image}
+                  theme={variant}
+                  className="rounded-lg"
+                />
                 <div className="grid min-w-0 flex-1 leading-tight">
                   <span className="truncate text-sm font-medium">
                     {user.name}

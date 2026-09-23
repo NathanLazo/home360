@@ -8,6 +8,7 @@ import type { CorporateLocationItem } from "../../_components/corporate.types";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useErrorShake } from "~/components/motion";
 import {
   Sheet,
   SheetClose,
@@ -118,8 +119,11 @@ export function LocationFormSheet({
     }
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const common = {
       name: values.name,
       addressLine: values.addressLine,
@@ -135,6 +139,7 @@ export function LocationFormSheet({
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
+        shakeInvalid(formElement);
         return;
       }
       setErrors({});
@@ -151,6 +156,7 @@ export function LocationFormSheet({
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
+      shakeInvalid(formElement);
       return;
     }
     setErrors({});

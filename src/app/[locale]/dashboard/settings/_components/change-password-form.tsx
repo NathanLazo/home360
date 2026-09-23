@@ -16,6 +16,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getPathname } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
+import { useErrorShake } from "~/components/motion";
 
 const EMPTY_VALUES: ChangePasswordFormValues = {
   currentPassword: "",
@@ -55,8 +56,11 @@ export function ChangePasswordForm({
     );
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const parsed = changePasswordFormSchema.safeParse(values);
 
     if (!parsed.success) {
@@ -72,6 +76,7 @@ export function ChangePasswordForm({
           next.confirmPassword = t("confirmError");
       }
       setErrors(next);
+      shakeInvalid(formElement);
       const first = parsed.error.issues[0]?.path[0];
       if (
         first === "currentPassword" ||
@@ -93,6 +98,7 @@ export function ChangePasswordForm({
       // The typed values are dropped: nothing is kept after a failed check.
       setValues(EMPTY_VALUES);
       setErrors({ currentPassword: t("currentInvalid") });
+      shakeInvalid(formElement);
       focusField("currentPassword");
       return;
     }

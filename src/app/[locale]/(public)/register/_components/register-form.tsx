@@ -33,6 +33,7 @@ import { Button } from "~/components/ui/button";
 import { useRouter } from "~/i18n/navigation";
 import type { AuthErrorCode } from "~/schemas/auth/auth-errors";
 import { api } from "~/trpc/react";
+import { useErrorShake } from "~/components/motion";
 
 type Step = 0 | 1 | 2;
 type ErrorMessageKey =
@@ -204,17 +205,25 @@ export function RegisterForm() {
     return false;
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (step === 0) {
       if (validateAccount()) setStep(1);
+      else shakeInvalid(formElement);
       return;
     }
     if (step === 1) {
       if (validateBusiness()) setStep(2);
+      else shakeInvalid(formElement);
       return;
     }
-    if (!validateGuarantee()) return;
+    if (!validateGuarantee()) {
+      shakeInvalid(formElement);
+      return;
+    }
 
     const parsed = registerBusinessSchema.safeParse({
       ...account,
@@ -232,6 +241,7 @@ export function RegisterForm() {
         const message = tErrors("EMAIL_TAKEN");
         setAccountErrors({ ...NO_ACCOUNT_ERRORS, email: message });
         setStep(0);
+        shakeInvalid(formElement);
         focusField("register-email");
         toast.error(message);
         return;

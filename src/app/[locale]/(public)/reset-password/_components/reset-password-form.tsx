@@ -12,6 +12,7 @@ import { Label } from "~/components/ui/label";
 import { Link, useRouter } from "~/i18n/navigation";
 import { resetPasswordSchema } from "~/schemas/auth/password-reset.schema";
 import { api } from "~/trpc/react";
+import { useErrorShake } from "~/components/motion";
 
 type PasswordErrors = {
   password: string | undefined;
@@ -44,8 +45,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setIsInvalidToken(true);
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (token === null) {
       showInvalidToken();
       return;
@@ -71,6 +75,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           next.confirmPassword = t("validation.passwordMismatch");
       }
       setErrors(next);
+      shakeInvalid(formElement);
       const firstField = parsed.error.issues[0]?.path[0];
       if (firstField === "password") focusField("reset-password-password");
       if (firstField === "confirmPassword")
@@ -90,6 +95,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           password: t("validation.passwordLength"),
           confirmPassword: undefined,
         });
+        shakeInvalid(formElement);
         focusField("reset-password-password");
         return;
       }

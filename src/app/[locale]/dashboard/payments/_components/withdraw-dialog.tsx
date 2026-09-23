@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -11,6 +11,7 @@ import { parsePesosToCents } from "./payment-amount";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
+import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -57,6 +58,8 @@ export function WithdrawDialog({
   const formatter = useFormatter();
   const { requestWithdrawal, requestingWithdrawal } = usePaymentMutations();
   const [confirming, setConfirming] = useState(false);
+  const shakeInvalid = useErrorShake();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<WithdrawFormValues>({
     resolver: zodResolver(withdrawFormSchema),
@@ -87,23 +90,28 @@ export function WithdrawDialog({
   const exceedsAvailable =
     requestedCents !== null && requestedCents > availableCents;
 
-  const openConfirmation = form.handleSubmit((submitted) => {
-    const cents = parsePesosToCents(submitted.amount);
+  const openConfirmation = form.handleSubmit(
+    (submitted) => {
+      const cents = parsePesosToCents(submitted.amount);
 
-    if (cents === null) {
-      form.setError("amount", { message: t("amountInvalid") });
-      return;
-    }
+      if (cents === null) {
+        form.setError("amount", { message: t("amountInvalid") });
+        shakeInvalid(formRef.current);
+        return;
+      }
 
-    // Client-side gate is UX only; F3-07 revalidates inside a serializable
-    // transaction, so INSUFFICIENT_BALANCE can still come back from the server.
-    if (cents > availableCents) {
-      form.setError("amount", { message: t("amountExceedsAvailable") });
-      return;
-    }
+      // Client-side gate is UX only; F3-07 revalidates inside a serializable
+      // transaction, so INSUFFICIENT_BALANCE can still come back from the server.
+      if (cents > availableCents) {
+        form.setError("amount", { message: t("amountExceedsAvailable") });
+        shakeInvalid(formRef.current);
+        return;
+      }
 
-    setConfirming(true);
-  });
+      setConfirming(true);
+    },
+    () => shakeInvalid(formRef.current),
+  );
 
   async function handleConfirm() {
     const cents = parsePesosToCents(form.getValues("amount"));
@@ -149,6 +157,7 @@ export function WithdrawDialog({
           </DialogHeader>
 
           <form
+            ref={formRef}
             onSubmit={openConfirmation}
             className="flex flex-col gap-4"
             noValidate

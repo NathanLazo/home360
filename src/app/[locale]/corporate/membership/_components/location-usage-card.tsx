@@ -43,7 +43,7 @@ export function LocationUsageCard({
             className="bg-muted h-2 w-full overflow-hidden rounded-full"
           >
             <div
-              className="bg-primary h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+              className="bg-primary h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               style={{ transform: `translateX(-${100 - percent}%)` }}
             />
           </div>

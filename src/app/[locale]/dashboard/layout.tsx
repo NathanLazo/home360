@@ -47,12 +47,6 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
   const userName = user.name ?? t("sidebar.placeholderName");
   const userEmail = user.email ?? common("emailUnavailable");
-  const initials = userName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
   const labels = {
     home: t("nav.home"),
     services: t("nav.services"),
@@ -82,12 +76,19 @@ export default async function DashboardLayout({
         user={{
           name: userName,
           subtitle: shell.business.name,
-          initials: initials || t("sidebar.placeholderInitials"),
+          seed: user.id,
+          image: user.image ?? null,
         }}
       />
       <SidebarInset className="min-w-0">
         <DashboardHeader
-          user={{ name: userName, email: userEmail, role: user.role }}
+          user={{
+            id: user.id,
+            name: userName,
+            email: userEmail,
+            image: user.image ?? null,
+            role: user.role,
+          }}
           branches={shell.branches}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />

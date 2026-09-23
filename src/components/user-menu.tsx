@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { MetalRing } from "~/components/metal";
 import { SignOutItem } from "~/components/sign-out-item";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { UserAvatar } from "~/components/user-avatar";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -16,8 +16,11 @@ import {
 import { cn } from "~/lib/utils";
 
 export type UserMenuProps = {
+  /** Stable user id; seeds the bot avatar. Falls back to the email. */
+  id?: string;
   name: string;
   email: string;
+  image?: string | null;
   role: UserRole;
   variant: "light" | "dark";
   /**
@@ -28,25 +31,18 @@ export type UserMenuProps = {
   metalAvatar?: boolean;
 };
 
-function getInitials(name: string, email: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const initials = parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-
-  return initials || email.slice(0, 2).toUpperCase();
-}
-
 export async function UserMenu({
+  id,
   name,
   email,
+  image,
   role,
   variant,
   metalAvatar = false,
 }: UserMenuProps) {
   const t = await getTranslations("common.userMenu");
-  const initials = getInitials(name, email);
+  const seed = id ?? email;
+  const botTheme = variant === "dark" ? "dark" : "light";
 
   const trigger = (
     <DropdownMenuTrigger asChild>
@@ -60,13 +56,13 @@ export async function UserMenu({
           variant === "dark" && "text-zinc-100 hover:bg-zinc-800",
         )}
       >
-        <Avatar>
-          <AvatarFallback
-            className={cn(variant === "dark" && "bg-zinc-800 text-zinc-100")}
-          >
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          seed={seed}
+          name={name}
+          image={image}
+          theme={botTheme}
+          interactive
+        />
       </Button>
     </DropdownMenuTrigger>
   );
@@ -85,16 +81,26 @@ export async function UserMenu({
         className={cn("w-64", variant === "dark" && "dark")}
       >
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex flex-col gap-1 font-normal">
-            <span className="truncate font-medium">{name}</span>
-            <span
-              className="text-muted-foreground truncate text-xs"
-              title={email}
-            >
-              {email}
-            </span>
-            <span className="text-muted-foreground text-xs">
-              {t(`roles.${role}`)}
+          <DropdownMenuLabel className="flex items-start gap-3 font-normal">
+            <UserAvatar
+              seed={seed}
+              name={name}
+              image={image}
+              size={40}
+              theme={botTheme}
+              interactive
+            />
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="truncate font-medium">{name}</span>
+              <span
+                className="text-muted-foreground truncate text-xs"
+                title={email}
+              >
+                {email}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {t(`roles.${role}`)}
+              </span>
             </span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

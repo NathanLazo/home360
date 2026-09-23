@@ -35,6 +35,7 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { api } from "~/trpc/react";
+import { useErrorShake } from "~/components/motion";
 
 function pesosToCents(value: string) {
   const normalized = value.trim().replace(",", ".");
@@ -173,8 +174,11 @@ export function ProductFormSheet({
     if (firstId) focus(firstId);
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const nextErrors: ProductFormErrors = { stockRows: {} };
     const priceCents = pesosToCents(values.price);
     if (priceCents === null) nextErrors.price = t("invalidField");
@@ -195,6 +199,7 @@ export function ProductFormSheet({
     }
     if (nextErrors.price || Object.keys(nextErrors.stockRows!).length > 0) {
       setErrors(nextErrors);
+      shakeInvalid(formElement);
       const firstStockId = Object.keys(nextErrors.stockRows!)[0];
       focus(
         nextErrors.price ? "product-price" : `product-stock-${firstStockId}`,
@@ -217,6 +222,7 @@ export function ProductFormSheet({
         });
     if (!parsed.success) {
       showSchemaErrors(parsed.error.issues);
+      shakeInvalid(formElement);
       return;
     }
 
@@ -239,6 +245,7 @@ export function ProductFormSheet({
     if (result.ok) onOpenChange(false);
     else if (result.error === "SKU_TAKEN") {
       setErrors({ sku: t("skuTaken") });
+      shakeInvalid(formElement);
       focus("product-sku");
     }
   }

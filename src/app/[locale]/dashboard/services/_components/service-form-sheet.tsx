@@ -19,6 +19,7 @@ import type {
 } from "./service.types";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
+import { useErrorShake } from "~/components/motion";
 import {
   Sheet,
   SheetClose,
@@ -83,8 +84,11 @@ export function ServiceFormSheet({
     );
   }, [open, service]);
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const common = {
       name: values.name,
       category: values.category,
@@ -141,6 +145,7 @@ export function ServiceFormSheet({
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
+        shakeInvalid(formElement);
         return;
       }
       setErrors({});
@@ -156,6 +161,7 @@ export function ServiceFormSheet({
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
+      shakeInvalid(formElement);
       return;
     }
     setErrors({});

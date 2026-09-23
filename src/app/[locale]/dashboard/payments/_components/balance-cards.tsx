@@ -12,6 +12,13 @@ type BalanceCardsProps = {
   commissionPct: number | null;
 };
 
+const CURRENCY_FORMAT = {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+} as const;
+
 export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
   const t = useTranslations("dashboard.payments");
   const formatter = useFormatter();
@@ -19,12 +26,12 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
   // `Intl.NumberFormat`. Every amount below arrives already derived from the
   // server (XC-03 net formula).
   const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    formatter.number(cents / 100, CURRENCY_FORMAT);
+  // Same figure for NumberFlow, so a withdrawal rolls the balance in place.
+  const numeric = (cents: number) => ({
+    value: cents / 100,
+    format: CURRENCY_FORMAT,
+  });
 
   return (
     <section
@@ -34,12 +41,14 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
       <KpiCard
         label={t("balances.available")}
         value={currency(balances.availableCents)}
+        numeric={numeric(balances.availableCents)}
         icon={WalletIcon}
         delta={{ text: t("balances.availableHint"), trend: "neutral" }}
       />
       <KpiCard
         label={t("balances.escrow")}
         value={currency(balances.escrowCents)}
+        numeric={numeric(balances.escrowCents)}
         icon={LockKeyholeIcon}
         delta={{
           text: t("balances.escrowOrders", {
@@ -51,6 +60,7 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
       <KpiCard
         label={t("balances.commission")}
         value={currency(balances.monthCommissionCents)}
+        numeric={numeric(balances.monthCommissionCents)}
         icon={PercentIcon}
         delta={{
           text:
