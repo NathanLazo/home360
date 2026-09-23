@@ -1,4 +1,3 @@
-import { ArrowRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { BentoCard } from "./bento-card";
@@ -11,6 +10,7 @@ import {
   LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS,
 } from "./landing-data";
 import { formatMxnFromCents } from "./landing-money";
+import { LearnMoreChevron } from "./learn-more-chevron";
 import {
   anchorOffsetClass,
   containerClass,
@@ -122,15 +122,12 @@ export async function FeaturesSection() {
                 <a
                   href={`#${LANDING_ANCHORS.guarantees}`}
                   className={cn(
-                    "group/link text-foreground inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md text-sm font-medium underline-offset-4 hover:underline",
+                    "group/learn text-foreground inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md text-sm font-medium underline-offset-4 hover:underline",
                     focusRingClass,
                   )}
                 >
                   {t("realGuarantees.link")}
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/link:translate-x-0.5 motion-reduce:transition-none"
-                  />
+                  <LearnMoreChevron />
                 </a>
               </div>
             </BentoCard>

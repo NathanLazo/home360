@@ -1,10 +1,12 @@
 import { ArrowRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { LandingBeam } from "./landing-beam";
 import {
   containerClass,
   displayTitleClass,
   focusRingClass,
+  LANDING_BEAM_RADIUS,
   leadClass,
   pressClass,
 } from "./landing-styles";
@@ -15,7 +17,8 @@ import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
 /**
- * Closing dark band. The app button is genuinely disabled instead of pointing
+ * Closing dark band. The register button breathes a spectral halo — the
+ * page's last color, bookending the beam around the hero console. The app button is genuinely disabled instead of pointing
  * at a `#` that goes nowhere; the note next to it says so.
  */
 export async function CtaSection() {
@@ -48,20 +51,29 @@ export async function CtaSection() {
         <Reveal delayMs={320}>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <Magnetic>
-              <Link
-                href="/register"
-                className={cn(
-                  "group/cta bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-12 items-center gap-2 rounded-full px-6 text-base font-medium",
-                  pressClass,
-                  focusRingClass,
-                )}
+              <LandingBeam
+                size="pulse-outside"
+                colorVariant="colorful"
+                theme="dark"
+                strength={0.8}
+                borderRadius={LANDING_BEAM_RADIUS.pill}
+                className="inline-flex rounded-full"
               >
-                {t("register")}
-                <ArrowRightIcon
-                  aria-hidden="true"
-                  className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/cta:translate-x-0.5 motion-reduce:transition-none"
-                />
-              </Link>
+                <Link
+                  href="/register"
+                  className={cn(
+                    "group/cta bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-12 items-center gap-2 rounded-full px-6 text-base font-medium",
+                    pressClass,
+                    focusRingClass,
+                  )}
+                >
+                  {t("register")}
+                  <ArrowRightIcon
+                    aria-hidden="true"
+                    className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/cta:translate-x-0.5 motion-reduce:transition-none"
+                  />
+                </Link>
+              </LandingBeam>
             </Magnetic>
 
             <div className="flex flex-col items-center gap-1.5">

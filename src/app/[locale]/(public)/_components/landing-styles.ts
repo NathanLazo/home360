@@ -87,3 +87,15 @@ export const focusRingClass =
  */
 export const pressClass =
   "transition-[scale,background-color,color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100";
+
+/**
+ * Pixel radii for the border beam, which takes a number instead of a class.
+ * They mirror the zinc scale in `globals.css` (`--radius: 0.5rem`):
+ * `rounded-xl` = 1.4 × 8 px, `rounded-2xl` = 1.8 × 8 px, `rounded-full` on a
+ * 48 px pill = 24 px.
+ */
+export const LANDING_BEAM_RADIUS = {
+  xl: 11.2,
+  twoXl: 14.4,
+  pill: 24,
+} as const;
