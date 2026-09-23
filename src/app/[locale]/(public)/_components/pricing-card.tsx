@@ -1,12 +1,15 @@
-import { CheckIcon, StarIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 
 import {
-  eyebrowClass,
-  focusRingOnCream,
+  dataLabelClass,
+  focusRingClass,
+  pressClass,
   subheadingClass,
 } from "./landing-styles";
-import { Button } from "~/components/ui/button";
+import { MetalRecommendedPill } from "./metal-recommended-pill";
+import { SpotlightCard } from "./spotlight-card";
 import { Link } from "~/i18n/navigation";
+import { cn } from "~/lib/utils";
 
 type PricingCardProps = {
   name: string;
@@ -21,6 +24,11 @@ type PricingCardProps = {
   highlighted: boolean;
 };
 
+/**
+ * A plan. The recommended one is the same card inverted through `.dark` — the
+ * zinc dark tokens, not a special palette — and wears the silver ring on its
+ * label.
+ */
 export function PricingCard({
   name,
   price,
@@ -32,73 +40,64 @@ export function PricingCard({
   highlighted,
 }: PricingCardProps) {
   return (
-    <div
-      className={`flex h-full flex-col gap-6 rounded-lg bg-white p-6 transition-[box-shadow,border-color] duration-300 ${
+    <SpotlightCard
+      className={cn(
+        "flex h-full flex-col gap-8 p-7",
         highlighted
-          ? "border-2 border-[var(--brand-gold)] shadow-[0_18px_44px_-28px_rgb(13_27_42/0.5)]"
-          : "border border-[color-mix(in_srgb,var(--brand-navy)_14%,transparent)]"
-      }`}
+          ? "dark border-foreground/20 bg-background"
+          : "bg-background",
+      )}
     >
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className={`${subheadingClass} text-[var(--brand-navy)]`}>
-            {name}
-          </h3>
+      <div className="flex flex-col gap-5">
+        <div className="flex min-h-7 flex-wrap items-center justify-between gap-2">
+          <h3 className={subheadingClass}>{name}</h3>
           {highlighted ? (
-            <p
-              className={`${eyebrowClass} inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-navy)] px-2.5 py-1 text-[var(--brand-cream)]`}
-            >
-              <StarIcon aria-hidden="true" className="size-3" />
-              {recommendedLabel}
-            </p>
+            <MetalRecommendedPill label={recommendedLabel} />
           ) : null}
         </div>
 
-        <p className="flex items-baseline gap-1 text-[var(--brand-navy)]">
-          <span className="font-mono text-4xl font-semibold tracking-[-0.02em] tabular-nums">
+        <p className="flex items-baseline gap-1.5">
+          <span className="font-mono text-5xl font-medium tracking-[-0.04em] tabular-nums">
             {price}
           </span>
-          <span className="text-sm text-[color-mix(in_srgb,var(--brand-navy)_65%,transparent)]">
-            {perMonth}
-          </span>
+          <span className="text-muted-foreground text-sm">{perMonth}</span>
         </p>
 
-        <p
-          className={`${eyebrowClass} text-[color-mix(in_srgb,var(--brand-navy)_70%,transparent)]`}
-        >
+        <p className={cn(dataLabelClass, "text-muted-foreground")}>
           {commission}
         </p>
       </div>
 
-      <ul className="flex flex-1 flex-col gap-3">
+      <ul className="flex flex-1 flex-col gap-3 border-t pt-6">
         {features.map((feature) => (
           <li
             key={feature}
-            className="flex items-start gap-2.5 text-[0.9375rem] leading-relaxed text-[color-mix(in_srgb,var(--brand-navy)_78%,transparent)]"
+            className="text-foreground/85 flex items-start gap-2.5 text-[0.9375rem] leading-relaxed"
           >
             <CheckIcon
               aria-hidden="true"
-              className="mt-0.5 size-4 shrink-0 text-[var(--brand-navy)]"
+              className="text-foreground mt-1 size-4 shrink-0"
             />
             {feature}
           </li>
         ))}
       </ul>
 
-      <Button
-        asChild
-        className={`h-12 rounded-md px-6 text-base font-medium active:scale-[0.98] ${focusRingOnCream} ${
+      <Link
+        href="/register"
+        className={cn(
+          "inline-flex h-12 items-center justify-center rounded-full px-6 text-base font-medium",
+          pressClass,
+          focusRingClass,
           highlighted
-            ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] hover:bg-[color-mix(in_srgb,var(--brand-navy)_88%,white)]"
-            : "border border-[var(--brand-navy)] bg-transparent text-[var(--brand-navy)] shadow-none hover:bg-[color-mix(in_srgb,var(--brand-navy)_8%,transparent)]"
-        }`}
+            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+            : "bg-card text-foreground hover:bg-foreground/5 border",
+        )}
       >
-        <Link href="/register">
-          {ctaLabel}
-          {/* Three identical CTAs would be ambiguous out of context. */}
-          <span className="sr-only"> {name}</span>
-        </Link>
-      </Button>
-    </div>
+        {ctaLabel}
+        {/* Three identical CTAs would be ambiguous out of context. */}
+        <span className="sr-only"> {name}</span>
+      </Link>
+    </SpotlightCard>
   );
 }

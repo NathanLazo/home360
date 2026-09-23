@@ -1,12 +1,14 @@
 "use client";
 
-import { BarChart3Icon } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { BarChart3Icon, RotateCcwIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { WeeklyRevenuePoint } from "./dashboard.types";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   StackedCurrencyBarChart,
   type CurrencyBarSeries,
@@ -33,17 +35,21 @@ export function WeeklyRevenueChart({
   const errors = useTranslations("errors");
   const formatter = useFormatter();
   const input = branchId ? { branchId } : {};
-  const query = api.dashboard.getWeeklyRevenue.useQuery(input);
+  const query = api.dashboard.getWeeklyRevenue.useQuery(input, {
+    placeholderData: keepPreviousData,
+  });
   const response = query.data;
 
   if (query.isPending) {
     return (
-      <Card className={className} aria-busy="true">
+      <Card className={className} aria-busy="true" role="status">
         <CardHeader>
-          <div className="bg-accent h-5 w-44 animate-pulse rounded motion-reduce:animate-none" />
+          <span className="sr-only">{t("loadingChart")}</span>
+          <Skeleton className="h-5 w-44" />
         </CardHeader>
-        <CardContent>
-          <div className="bg-accent h-64 animate-pulse rounded-lg motion-reduce:animate-none" />
+        <CardContent className="flex flex-col gap-2">
+          <Skeleton className="h-9 w-56 self-start sm:self-end" />
+          <Skeleton className="mt-2 h-64 rounded-lg sm:h-72" />
         </CardContent>
       </Card>
     );
@@ -72,6 +78,7 @@ export function WeeklyRevenueChart({
             className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
+            <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
         </CardContent>
@@ -94,6 +101,7 @@ export function WeeklyRevenueChart({
         </CardHeader>
         <CardContent>
           <EmptyState
+            headingLevel="h3"
             icon={BarChart3Icon}
             title={t("revenueEmptyTitle")}
             description={t("revenueEmptyDescription")}
@@ -147,6 +155,7 @@ export function WeeklyRevenueChart({
       <CardContent>
         <Tabs defaultValue="all">
           <TabsList
+            animatedIndicator
             aria-label={t("chartFilterLabel")}
             className="self-start sm:self-end"
           >

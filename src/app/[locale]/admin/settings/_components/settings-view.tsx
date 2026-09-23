@@ -10,16 +10,13 @@ import { EscrowSettingsSection } from "./escrow-settings-section";
 import { FeesSettingsSection } from "./fees-settings-section";
 import { NotificationsSettingsSection } from "./notifications-settings-section";
 import { SettingsSaveBar } from "./settings-save-bar";
+import { SettingsSkeleton } from "./settings-skeleton";
 import { useSettingsMutations } from "./use-settings-mutations";
-import {
-  settingsFormSchema,
-  type SettingsFormValues,
-} from "./settings.form";
+import { settingsFormSchema, type SettingsFormValues } from "./settings.form";
 import { toFormValues, toSaveInput } from "./settings.mappers";
 import type { PlatformSettingsResult } from "./settings.types";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { Skeleton } from "~/components/ui/skeleton";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
@@ -71,19 +68,13 @@ export function SettingsView() {
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {state.status === "pending" ? (
-        <div className="flex flex-col gap-6" aria-busy="true">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-64 w-full rounded-xl" />
-          ))}
-        </div>
+        <SettingsSkeleton label={t("loading")} />
       ) : null}
 
       {state.status === "error" ? (
         <SectionError
           title={
-            state.code === "NOT_FOUND"
-              ? t("notSeededTitle")
-              : t("errorTitle")
+            state.code === "NOT_FOUND" ? t("notSeededTitle") : t("errorTitle")
           }
           code={state.code}
           onRetry={() => void query.refetch()}

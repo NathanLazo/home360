@@ -4,6 +4,8 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { AnimatedTabsList } from "../../_components/animated-tabs-list";
+import { ClearFiltersButton } from "../../_components/clear-filters-button";
 import { BusinessDetailActions } from "./business-detail-actions";
 import { BusinessDetailSheet } from "./business-detail-sheet";
 import {
@@ -17,16 +19,15 @@ import { useUserMutations } from "./use-user-mutations";
 import { useDebouncedValue } from "./use-debounced-value";
 import { useUsersUrlState } from "./use-users-url-state";
 import { UsersFilters } from "./users-filters";
-import { usersTabSchema } from "./users.schema";
+import { UsersTableSkeleton } from "./users-table-skeleton";
+import { USERS_CSV_ROW_CAP, usersTabSchema } from "./users.schema";
 import { WorkersTable } from "./workers-table";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { USERS_CSV_ROW_CAP } from "./users.schema";
+import { Tabs } from "~/components/ui/tabs";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -46,6 +47,16 @@ export function UsersView() {
   const counts = query.state.status === "success" ? query.state.counts : null;
   const [pendingModeration, setPendingModeration] =
     useState<PendingModeration | null>(null);
+  const filtersActive =
+    debouncedSearch.trim().length > 0 || urlState.status !== undefined;
+  const emptyAction = filtersActive ? (
+    <ClearFiltersButton
+      onClear={() => {
+        setSearch("");
+        urlState.setStatus(undefined);
+      }}
+    />
+  ) : undefined;
   const mutations = useUserMutations({
     onSettledSuccess: () => setPendingModeration(null),
   });
@@ -58,15 +69,16 @@ export function UsersView() {
         value={urlState.tab}
         onValueChange={(value) => urlState.setTab(usersTabSchema.parse(value))}
       >
-        <TabsList>
-          {usersTabSchema.options.map((tab) => (
-            <TabsTrigger key={tab} value={tab}>
-              {counts
-                ? t(`tabs.${tab}WithCount`, { count: counts[tab] })
-                : t(`tabs.${tab}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <AnimatedTabsList
+          value={urlState.tab}
+          className="max-w-full justify-start overflow-x-auto"
+          items={usersTabSchema.options.map((tab) => ({
+            value: tab,
+            label: counts
+              ? t(`tabs.${tab}WithCount`, { count: counts[tab] })
+              : t(`tabs.${tab}`),
+          }))}
+        />
       </Tabs>
 
       <UsersFilters
@@ -94,12 +106,7 @@ export function UsersView() {
       ) : null}
 
       {query.state.status === "pending" ? (
-        <div className="flex flex-col gap-3" aria-busy="true" role="status">
-          <span className="sr-only">{t("loading")}</span>
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
+        <UsersTableSkeleton tab={urlState.tab} label={t("loading")} />
       ) : null}
 
       {query.state.status === "error" ? (
@@ -120,13 +127,20 @@ export function UsersView() {
                 onAction={(businessId, action) =>
                   setPendingModeration({ businessId, action })
                 }
+                emptyAction={emptyAction}
               />
             ) : null}
             {query.state.page.tab === "customers" ? (
-              <CustomersTable customers={query.state.page.items} />
+              <CustomersTable
+                customers={query.state.page.items}
+                emptyAction={emptyAction}
+              />
             ) : null}
             {query.state.page.tab === "workers" ? (
-              <WorkersTable workers={query.state.page.items} />
+              <WorkersTable
+                workers={query.state.page.items}
+                emptyAction={emptyAction}
+              />
             ) : null}
           </CardContent>
           {query.hasMore ? (

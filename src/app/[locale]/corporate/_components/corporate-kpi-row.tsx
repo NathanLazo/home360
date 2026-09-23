@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import {
   BanknoteIcon,
   InboxIcon,
@@ -9,9 +10,17 @@ import {
 import { useFormatter, useTranslations } from "next-intl";
 
 import { KpiCard } from "~/components/kpi-card";
+import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
 import { SectionError } from "~/components/section-error";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
+
+const CURRENCY_FORMAT = {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+} as const;
 
 export type CorporateKpiRowProps = {
   month?: string;
@@ -26,26 +35,15 @@ export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
   const t = useTranslations("corporate.home");
   const tierT = useTranslations("corporate.tier");
   const formatter = useFormatter();
-  const query = api.corporate.getOverview.useQuery(month ? { month } : {});
+  const query = api.corporate.getOverview.useQuery(month ? { month } : {}, {
+    // Month switches keep the old figures until the new ones roll in.
+    placeholderData: keepPreviousData,
+  });
   const membershipQuery = api.corporate.getMembership.useQuery();
   const state = unwrapEnvelope(query);
 
   if (state.status === "pending") {
-    return (
-      <div
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-        aria-busy="true"
-        role="status"
-      >
-        <span className="sr-only">{t("loading")}</span>
-        {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="bg-accent h-36 animate-pulse rounded-xl motion-reduce:animate-none"
-          />
-        ))}
-      </div>
-    );
+    return <KpiRowSkeleton label={t("loading")} />;
   }
 
   if (state.status === "error") {
@@ -60,12 +58,7 @@ export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
 
   const data = state.data;
   const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    formatter.number(cents / 100, CURRENCY_FORMAT);
   // Envelope-aware: the membership query only decorates the hints, so while
   // it is pending or failed the hint is omitted instead of guessing — saying
   // "no tier limit" before knowing the tier would be a lie.
@@ -82,10 +75,12 @@ export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
         showSavings ? "xl:grid-cols-4" : "xl:grid-cols-3"
       }`}
       aria-label={t("kpisLabel")}
+      aria-busy={query.isPlaceholderData}
     >
       <KpiCard
         label={t("spent")}
         value={currency(data.spentCents)}
+        numeric={{ value: data.spentCents / 100, format: CURRENCY_FORMAT }}
         icon={BanknoteIcon}
         delta={{
           text: t("spentHint", { count: data.ordersMonth }),
@@ -95,12 +90,14 @@ export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
       <KpiCard
         label={t("ordersActive")}
         value={formatter.number(data.ordersActive)}
+        numeric={{ value: data.ordersActive }}
         icon={InboxIcon}
         delta={{ text: t("ordersActiveHint"), trend: "neutral" }}
       />
       <KpiCard
         label={t("locations")}
         value={formatter.number(data.locationsActive)}
+        numeric={{ value: data.locationsActive }}
         icon={MapPinIcon}
         delta={
           membership
@@ -118,6 +115,10 @@ export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
         <KpiCard
           label={t("savings")}
           value={currency(data.savedByRateCents)}
+          numeric={{
+            value: data.savedByRateCents / 100,
+            format: CURRENCY_FORMAT,
+          }}
           icon={PiggyBankIcon}
           delta={
             tier

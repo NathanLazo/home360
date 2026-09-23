@@ -39,7 +39,7 @@ export default async function CorporateLayout({
   const [account, t, common, cookieStore] = await Promise.all([
     db.corporateAccount.findUnique({
       where: { ownerId: user.id },
-      select: { name: true, status: true, statusReason: true },
+      select: { name: true, status: true, statusReason: true, tier: true },
     }),
     getTranslations({ locale, namespace: "corporate" }),
     getTranslations({ locale, namespace: "common.userMenu" }),
@@ -71,7 +71,7 @@ export default async function CorporateLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <a
         href="#corporate-content"
-        className="bg-background text-foreground focus-visible:ring-ring fixed top-2 left-2 z-[60] -translate-y-16 rounded-md px-3 py-2 text-sm font-medium shadow-md transition-transform focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+        className="bg-background text-foreground focus-visible:ring-ring fixed top-2 left-2 z-[60] -translate-y-16 rounded-md px-3 py-2 text-sm font-medium shadow-md focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
       >
         {t("header.skipToContent")}
       </a>
@@ -84,6 +84,10 @@ export default async function CorporateLayout({
           name: userName,
           subtitle: account.name,
           initials: initials || t("sidebar.placeholderInitials"),
+        }}
+        tierChip={{
+          label: t(`tier.${account.tier}`),
+          ariaLabel: t("sidebar.tierLink", { tier: t(`tier.${account.tier}`) }),
         }}
       />
       <SidebarInset className="min-w-0">

@@ -24,6 +24,8 @@ export type DataTableProps<TData> = {
   data: TData[];
   emptyState?: ReactNode;
   onRowClick?: (row: TData) => void;
+  /** Stable identity per row; falls back to the index. */
+  getRowId?: (row: TData, index: number) => string;
 };
 
 export function DataTable<TData>({
@@ -31,6 +33,7 @@ export function DataTable<TData>({
   data,
   emptyState,
   onRowClick,
+  getRowId,
 }: DataTableProps<TData>) {
   function handleRowKeyDown(
     event: KeyboardEvent<HTMLTableRowElement>,
@@ -49,7 +52,7 @@ export function DataTable<TData>({
   return (
     <Table>
       <TableHeader>
-        <TableRow>
+        <TableRow className="hover:bg-transparent">
           {columns.map((column) => (
             <TableHead key={column.key} className={column.className}>
               {column.header}
@@ -60,12 +63,12 @@ export function DataTable<TData>({
       <TableBody>
         {data.map((row, rowIndex) => (
           <TableRow
-            key={rowIndex}
+            key={getRowId ? getRowId(row, rowIndex) : rowIndex}
             role={onRowClick ? "button" : undefined}
             tabIndex={onRowClick ? 0 : undefined}
             className={cn(
               onRowClick &&
-                "focus-visible:ring-ring cursor-pointer focus-visible:ring-2",
+                "focus-visible:outline-ring focus-visible:bg-muted/50 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2",
             )}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             onKeyDown={

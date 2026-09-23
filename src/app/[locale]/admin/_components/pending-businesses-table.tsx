@@ -88,6 +88,15 @@ export function PendingBusinessesTable({
           icon={BuildingIcon}
           title={t("pending.emptyTitle")}
           description={t("pending.emptyDescription")}
+          action={
+            <Button
+              asChild
+              variant="outline"
+              className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+            >
+              <Link href="/admin/users">{t("pending.emptyCta")}</Link>
+            </Button>
+          }
         />
       }
     />

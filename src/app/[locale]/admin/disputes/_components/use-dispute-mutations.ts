@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
+import { useMutationFeedback } from "../../_components/use-mutation-feedback";
 import type { ResolveDisputeInput } from "./disputes.schema";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
@@ -22,15 +22,17 @@ export function useDisputeMutations(options?: {
   const t = useTranslations("admin.disputes.toasts");
   const errorsT = useTranslations("errors");
   const utils = api.useUtils();
+  const feedback = useMutationFeedback();
 
   const mutation = api.admin.disputes.resolve.useMutation({
+    onMutate: () => feedback.start("resolve", t("resolving")),
     onSuccess: async (response) => {
       if (response.error !== null) {
-        toast.error(errorsT(response.error));
+        feedback.error("resolve", errorsT(response.error));
         return;
       }
 
-      toast.success(t("resolved"));
+      feedback.success("resolve", t("resolved"));
       await Promise.all([
         utils.admin.disputes.list.invalidate(),
         utils.admin.disputes.getById.invalidate(),
@@ -38,7 +40,7 @@ export function useDisputeMutations(options?: {
       ]);
       options?.onResolved?.();
     },
-    onError: (error) => toast.error(errorsT(toErrorCode(error))),
+    onError: (error) => feedback.error("resolve", errorsT(toErrorCode(error))),
   });
 
   return {

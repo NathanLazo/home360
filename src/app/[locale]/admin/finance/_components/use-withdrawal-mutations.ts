@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
+import { useMutationFeedback } from "../../_components/use-mutation-feedback";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
 
@@ -18,6 +18,7 @@ export function useWithdrawalMutations(options?: {
   const t = useTranslations("admin.finance.toasts");
   const errorsT = useTranslations("errors");
   const utils = api.useUtils();
+  const feedback = useMutationFeedback();
 
   const invalidate = async () => {
     await Promise.all([
@@ -26,29 +27,28 @@ export function useWithdrawalMutations(options?: {
     ]);
   };
 
-  const handle = (
-    error: Parameters<typeof errorsT>[0] | null,
-    successKey: "approved" | "rejected",
-  ) => {
-    if (error !== null) {
-      toast.error(errorsT(error));
-      return;
-    }
+  const lifecycle = (key: "approved" | "rejected") => ({
+    onMutate: () => feedback.start(key, t(`pending.${key}`)),
+    onSuccess: (response: { error: Parameters<typeof errorsT>[0] | null }) => {
+      if (response.error !== null) {
+        feedback.error(key, errorsT(response.error));
+        return;
+      }
 
-    toast.success(t(successKey));
-    void invalidate();
-    options?.onSettled?.();
-  };
-
-  const approve = api.admin.finance.approveWithdrawal.useMutation({
-    onSuccess: (response) => handle(response.error, "approved"),
-    onError: (error) => toast.error(errorsT(toErrorCode(error))),
+      feedback.success(key, t(key));
+      void invalidate();
+      options?.onSettled?.();
+    },
+    onError: (error: unknown) =>
+      feedback.error(key, errorsT(toErrorCode(error))),
   });
 
-  const reject = api.admin.finance.rejectWithdrawal.useMutation({
-    onSuccess: (response) => handle(response.error, "rejected"),
-    onError: (error) => toast.error(errorsT(toErrorCode(error))),
-  });
+  const approve = api.admin.finance.approveWithdrawal.useMutation(
+    lifecycle("approved"),
+  );
+  const reject = api.admin.finance.rejectWithdrawal.useMutation(
+    lifecycle("rejected"),
+  );
 
   return {
     approve: (input) => approve.mutate(input),
@@ -77,6 +77,7 @@ export function useLoyaltyMutations(options?: {
   const t = useTranslations("admin.finance.loyalty.toasts");
   const errorsT = useTranslations("errors");
   const utils = api.useUtils();
+  const feedback = useMutationFeedback();
 
   const invalidate = async () => {
     await Promise.all([
@@ -85,29 +86,26 @@ export function useLoyaltyMutations(options?: {
     ]);
   };
 
-  const handle = (
-    error: Parameters<typeof errorsT>[0] | null,
-    successKey: "paid" | "cancelled",
-  ) => {
-    if (error !== null) {
-      toast.error(errorsT(error));
-      return;
-    }
+  const lifecycle = (key: "paid" | "cancelled") => ({
+    onMutate: () => feedback.start(key, t(`pending.${key}`)),
+    onSuccess: (response: { error: Parameters<typeof errorsT>[0] | null }) => {
+      if (response.error !== null) {
+        feedback.error(key, errorsT(response.error));
+        return;
+      }
 
-    toast.success(t(successKey));
-    void invalidate();
-    options?.onSettled?.();
-  };
-
-  const pay = api.admin.finance.payLoyaltyBonus.useMutation({
-    onSuccess: (response) => handle(response.error, "paid"),
-    onError: (error) => toast.error(errorsT(toErrorCode(error))),
+      feedback.success(key, t(key));
+      void invalidate();
+      options?.onSettled?.();
+    },
+    onError: (error: unknown) =>
+      feedback.error(key, errorsT(toErrorCode(error))),
   });
 
-  const cancel = api.admin.finance.cancelLoyaltyBonus.useMutation({
-    onSuccess: (response) => handle(response.error, "cancelled"),
-    onError: (error) => toast.error(errorsT(toErrorCode(error))),
-  });
+  const pay = api.admin.finance.payLoyaltyBonus.useMutation(lifecycle("paid"));
+  const cancel = api.admin.finance.cancelLoyaltyBonus.useMutation(
+    lifecycle("cancelled"),
+  );
 
   return {
     pay: (input) => pay.mutate(input),

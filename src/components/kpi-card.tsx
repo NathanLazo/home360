@@ -1,3 +1,5 @@
+import type { Format } from "@number-flow/react";
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -7,11 +9,24 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { KpiValue } from "~/components/kpi-value";
 import { cn } from "~/lib/utils";
 
 export type KpiCardProps = {
   label: string;
-  value: string;
+  /**
+   * Pre-formatted figure (or any node, e.g. a custom animated number);
+   * rendered as-is when `numeric` is not provided.
+   */
+  value: ReactNode;
+  /**
+   * Raw number + Intl format. When present the figure rolls to its new value
+   * on in-place updates instead of swapping abruptly.
+   */
+  numeric?: {
+    value: number;
+    format?: Format;
+  };
   delta?: {
     text: string;
     trend: "up" | "down" | "neutral";
@@ -28,9 +43,15 @@ const deltaClasses: Record<
   neutral: "text-muted-foreground",
 };
 
-export function KpiCard({ label, value, delta, icon: Icon }: KpiCardProps) {
+export function KpiCard({
+  label,
+  value,
+  numeric,
+  delta,
+  icon: Icon,
+}: KpiCardProps) {
   return (
-    <Card className="transition-[border-color,box-shadow] duration-150 ease-out hover:shadow-sm">
+    <Card>
       <CardHeader>
         <CardTitle className="text-muted-foreground text-sm">{label}</CardTitle>
         {Icon ? (
@@ -40,11 +61,20 @@ export function KpiCard({ label, value, delta, icon: Icon }: KpiCardProps) {
         ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <p className="font-mono text-2xl font-semibold tracking-tight">
-          {value}
+        <p className="font-mono text-2xl font-semibold tracking-tight tabular-nums">
+          {numeric ? (
+            <KpiValue value={numeric.value} format={numeric.format} />
+          ) : (
+            value
+          )}
         </p>
         {delta ? (
-          <p className={cn("text-xs font-medium", deltaClasses[delta.trend])}>
+          <p
+            className={cn(
+              "text-xs font-medium tabular-nums",
+              deltaClasses[delta.trend],
+            )}
+          >
             {delta.text}
           </p>
         ) : null}

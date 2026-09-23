@@ -116,7 +116,7 @@ export function OrdersTable({
       cell: (order) => (
         <time
           dateTime={order.createdAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-sm tabular-nums"
         >
           {formatter.dateTime(order.createdAt, {
             day: "2-digit",
@@ -135,6 +135,7 @@ export function OrdersTable({
           columns={columns}
           data={orders}
           onRowClick={onSelect}
+          getRowId={(order) => order.id}
           emptyState={
             <div className="p-4 sm:p-6">
               <EmptyState

@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { CorporateStatusBadge } from "./corporate-status-badge";
 import { CorporateTierBadge } from "./corporate-tier-badge";
 import type { CorporateAccountDetail } from "./corporate.types";
+import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
 import { useCurrencyFormatter } from "../../_components/use-currency-formatter";
 import { SectionError } from "~/components/section-error";
 import {
@@ -23,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Skeleton } from "~/components/ui/skeleton";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
@@ -84,7 +84,9 @@ function DetailBody({
           <dt className="text-muted-foreground">{t("commission")}</dt>
           <dd className="tabular-nums">{detail.commissionPct}%</dd>
           <dt className="text-muted-foreground">{t("monthlyFee")}</dt>
-          <dd className="tabular-nums">{currency(detail.monthlyFeeCents)}</dd>
+          <dd className="font-mono tabular-nums">
+            {currency(detail.monthlyFeeCents)}
+          </dd>
           <dt className="text-muted-foreground">{t("maxLocations")}</dt>
           <dd className="tabular-nums">
             {detail.maxLocations ?? t("unlimited")}
@@ -170,9 +172,7 @@ function DetailBody({
 
       <Separator />
 
-      <DetailSection
-        title={t("locations", { count: detail.activeLocations })}
-      >
+      <DetailSection title={t("locations", { count: detail.activeLocations })}>
         {detail.locations.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("noLocations")}</p>
         ) : (
@@ -281,12 +281,7 @@ export function CorporateDetailSheet({
 
         <div className="px-4 pb-6">
           {state.status === "pending" ? (
-            <div className="flex flex-col gap-4" aria-busy="true">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-32 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-40 w-full rounded-lg" />
-            </div>
+            <DetailSheetSkeleton label={t("loading")} />
           ) : null}
 
           {state.status === "error" ? (

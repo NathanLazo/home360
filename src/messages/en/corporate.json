@@ -8,7 +8,8 @@
   "sidebar": {
     "brandLabel": "HOME360, go to corporate overview",
     "placeholderName": "Corporate account",
-    "placeholderInitials": "CA"
+    "placeholderInitials": "CA",
+    "tierLink": "{tier} membership, view details"
   },
   "header": {
     "skipToContent": "Skip to content",

@@ -21,36 +21,63 @@
     "cta": "Register your business"
   },
   "hero": {
-    "badge": "AI diagnosis + protected payments",
-    "title": "The only place where you can hand over your house key with complete peace of mind.",
+    "badge": "Payment held until delivery",
+    "title": "The only place you can hand over your house key with *complete peace of mind.*",
     "subtitle": "We connect homes with verified businesses: AI diagnoses the problem, the payment stays protected until the job is done, and every service is backed by a real guarantee.",
     "ctaPrimary": "Register your business",
-    "ctaSecondary": "See how it works"
+    "ctaSecondary": "See how it works",
+    "badgeNew": "New"
   },
   "heroVisual": {
     "photoLabel": "Photo of the problem",
     "diagnosisLabel": "AI diagnosis",
     "escrowLabel": "Protected payment",
-    "alt": "A HOME360 service journey: the photo of the problem moves to the AI diagnosis and from there to the protected payment."
+    "alt": "A HOME360 service journey: the photo of the problem moves to the AI diagnosis and from there to the protected payment.",
+    "sampleLabel": "Sample order",
+    "status": "In escrow",
+    "amountLabel": "Held until delivery is confirmed",
+    "logTitle": "Order log",
+    "pending": "Pending",
+    "events": {
+      "photo": "Photo of the problem received",
+      "diagnosis": "AI diagnosis ready",
+      "escrow": "Payment held in escrow",
+      "recording": "Service recorded start to finish",
+      "release": "Released once delivery is confirmed"
+    }
   },
   "features": {
-    "title": "Home service that can actually be audited",
+    "title": "Home service that can actually be *audited*",
     "subtitle": "Three pieces that change the conversation between customer and business: what will be done, what it costs and who answers if something goes wrong.",
     "aiDiagnosis": {
       "title": "AI diagnosis",
-      "description": "The customer uploads a photo and the AI describes the likely fault, the materials and the price range before anyone sets foot in the house."
+      "description": "The customer uploads a photo and the AI describes the likely fault, the materials and the price range before anyone sets foot in the house.",
+      "sample": {
+        "label": "Sample diagnosis",
+        "fault": "Likely fault",
+        "faultValue": "Leaking shut-off valve",
+        "materials": "Materials",
+        "materialsValue": "½″ valve and PTFE tape",
+        "range": "Price range"
+      }
     },
     "protectedPayments": {
       "title": "Protected payments",
-      "description": "The money is held until the service is completed. The business collects with certainty and the customer pays without fear."
+      "description": "The money is held until the service is completed. The business collects with certainty and the customer pays without fear.",
+      "states": {
+        "held": "Held",
+        "delivered": "Delivered",
+        "released": "Released"
+      }
     },
     "realGuarantees": {
       "title": "Real guarantees",
-      "description": "Escrow deposit, per-service insurance or identity verification: every business chooses how it backs its work, and it is published."
+      "description": "Escrow deposit, per-service insurance or identity verification: every business chooses how it backs its work, and it is published.",
+      "link": "See all five options"
     }
   },
   "howItWorks": {
-    "title": "How it works",
+    "title": "How it *works*",
     "subtitle": "Three steps, with no blind phone calls and no quotes improvised at the door.",
     "steps": {
       "1": {
@@ -68,7 +95,7 @@
     }
   },
   "metrics": {
-    "title": "The market we are organizing",
+    "title": "The market we are *organizing*",
     "subtitle": "Figures from the Mexican home maintenance market, not from our own operation.",
     "households": "households in Mexico need maintenance every year",
     "marketSize": "annual market in home services",
@@ -82,7 +109,7 @@
     }
   },
   "guaranteeTypes": {
-    "title": "Five guarantee options",
+    "title": "Five *guarantee* options",
     "subtitle": "No competitor has a single one. Every business picks its own at sign-up and it stays visible to the customer.",
     "recording": {
       "title": "Mandatory service recording",
@@ -109,10 +136,12 @@
         "title": "Registered asset",
         "description": "A registered property or asset stands as formal backing for the business commitment."
       }
-    }
+    },
+    "recommended": "Recommended",
+    "listLabel": "Guarantee options"
   },
   "pricing": {
-    "title": "Plans for businesses",
+    "title": "Plans for *businesses*",
     "subtitle": "A monthly subscription plus a per-service commission that drops as your operation grows.",
     "perMonth": "/month",
     "commission": "{pct} % commission per service",
@@ -150,7 +179,7 @@
     }
   },
   "cta": {
-    "title": "Your home, in good hands.",
+    "title": "Your home, in *good hands.*",
     "subtitle": "Register your business today and start taking jobs with guaranteed payment from day one.",
     "register": "Register your business",
     "downloadApp": "Download the app",

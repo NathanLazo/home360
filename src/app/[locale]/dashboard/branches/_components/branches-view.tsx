@@ -10,12 +10,14 @@ import {
 import { useTranslations } from "next-intl";
 
 import { BranchCard } from "./branch-card";
+import { BranchesSkeleton } from "./branches-skeleton";
 import { BranchFormSheet } from "./branch-form-sheet";
 import type { BranchListItem } from "./branch.types";
 import { useBranchMutations } from "./use-branch-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -34,19 +36,7 @@ export function BranchesView() {
   const transportError = query.error;
 
   if (query.isPending) {
-    return (
-      <div className="space-y-6" aria-busy="true">
-        <div className="bg-accent h-20 animate-pulse rounded-xl motion-reduce:animate-none" />
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div
-              key={index}
-              className="bg-accent h-80 animate-pulse rounded-xl motion-reduce:animate-none"
-            />
-          ))}
-        </div>
-      </div>
-    );
+    return <BranchesSkeleton />;
   }
 
   if (transportError || responseError || !data) {
@@ -102,17 +92,19 @@ export function BranchesView() {
                   : undefined
             }
           >
-            <Button
-              type="button"
-              className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-              aria-disabled={atLimit}
-              aria-describedby={atLimit ? "branch-limit-help" : undefined}
-              onClick={create}
-              disabled={isReadOnly}
-            >
-              <PlusIcon aria-hidden="true" />
-              {t("new")}
-            </Button>
+            <MetalAction active={!isReadOnly && !atLimit}>
+              <Button
+                type="button"
+                className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                aria-disabled={atLimit}
+                aria-describedby={atLimit ? "branch-limit-help" : undefined}
+                onClick={create}
+                disabled={isReadOnly}
+              >
+                <PlusIcon aria-hidden="true" />
+                {t("new")}
+              </Button>
+            </MetalAction>
           </span>
           {atLimit ? (
             <span id="branch-limit-help" className="sr-only">

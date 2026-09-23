@@ -3,40 +3,26 @@
 import { useTranslations } from "next-intl";
 
 import { AiConfigCard } from "./ai-config-card";
+import { AiConfigCardSkeleton } from "./ai-config-card-skeleton";
+import { KpiGridSkeleton } from "./kpi-grid-skeleton";
 import { KpiRow } from "./kpi-row";
 import { OpenDisputesList } from "./open-disputes-list";
+import { OpenDisputesSkeleton } from "./open-disputes-skeleton";
 import { PendingBusinessesTable } from "./pending-businesses-table";
+import { SectionHeading } from "./section-heading";
+import { SectionLink } from "./section-link";
+import { TableSkeleton, type TableSkeletonColumn } from "./table-skeleton";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { Skeleton } from "~/components/ui/skeleton";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
-function GridSkeleton({ count, label }: { count: number; label: string }) {
-  return (
-    <div
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-      aria-busy="true"
-      role="status"
-    >
-      <span className="sr-only">{label}</span>
-      {Array.from({ length: count }, (_, index) => (
-        <Skeleton key={index} className="h-36 w-full rounded-xl" />
-      ))}
-    </div>
-  );
-}
-
-function ListSkeleton({ count, label }: { count: number; label: string }) {
-  return (
-    <div className="flex flex-col gap-3" aria-busy="true" role="status">
-      <span className="sr-only">{label}</span>
-      {Array.from({ length: count }, (_, index) => (
-        <Skeleton key={index} className="h-20 w-full rounded-xl" />
-      ))}
-    </div>
-  );
-}
+const PENDING_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { width: "w-36" },
+  { width: "w-20" },
+  { width: "w-24" },
+  { width: "w-32", align: "end" },
+];
 
 export function OverviewView() {
   const t = useTranslations("admin.overview");
@@ -51,12 +37,15 @@ export function OverviewView() {
   const disputes = unwrapEnvelope(disputesQuery);
   const ai = unwrapEnvelope(aiQuery);
 
+  const hasPending = pending.status === "success" && pending.data.length > 0;
+  const hasDisputes = disputes.status === "success" && disputes.data.length > 0;
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {kpis.status === "pending" ? (
-        <GridSkeleton count={4} label={t("kpis.loading")} />
+        <KpiGridSkeleton label={t("kpis.loading")} />
       ) : null}
       {kpis.status === "error" ? (
         <SectionError
@@ -68,10 +57,25 @@ export function OverviewView() {
       {kpis.status === "success" ? <KpiRow kpis={kpis.data} /> : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section className="flex flex-col gap-3" aria-label={t("pending.title")}>
-          <h2 className="text-lg font-semibold">{t("pending.title")}</h2>
+        <section
+          className="flex min-w-0 flex-col gap-3"
+          aria-labelledby="admin-overview-pending"
+        >
+          <SectionHeading
+            id="admin-overview-pending"
+            title={t("pending.title")}
+            action={
+              hasPending ? (
+                <SectionLink href="/admin/users" label={t("pending.viewAll")} />
+              ) : null
+            }
+          />
           {pending.status === "pending" ? (
-            <ListSkeleton count={3} label={t("pending.loading")} />
+            <TableSkeleton
+              columns={PENDING_SKELETON_COLUMNS}
+              rows={3}
+              label={t("pending.loading")}
+            />
           ) : null}
           {pending.status === "error" ? (
             <SectionError
@@ -85,10 +89,13 @@ export function OverviewView() {
           ) : null}
         </section>
 
-        <section className="flex flex-col gap-3" aria-label={t("ai.title")}>
-          <h2 className="text-lg font-semibold">{t("ai.sectionTitle")}</h2>
+        <section
+          className="flex min-w-0 flex-col gap-3"
+          aria-labelledby="admin-overview-ai"
+        >
+          <SectionHeading id="admin-overview-ai" title={t("ai.sectionTitle")} />
           {ai.status === "pending" ? (
-            <Skeleton className="h-72 w-full rounded-xl" />
+            <AiConfigCardSkeleton label={t("ai.loading")} />
           ) : null}
           {ai.status === "error" ? (
             <SectionError
@@ -101,10 +108,24 @@ export function OverviewView() {
         </section>
       </div>
 
-      <section className="flex flex-col gap-3" aria-label={t("disputes.title")}>
-        <h2 className="text-lg font-semibold">{t("disputes.title")}</h2>
+      <section
+        className="flex flex-col gap-3"
+        aria-labelledby="admin-overview-disputes"
+      >
+        <SectionHeading
+          id="admin-overview-disputes"
+          title={t("disputes.title")}
+          action={
+            hasDisputes ? (
+              <SectionLink
+                href="/admin/disputes"
+                label={t("disputes.viewAll")}
+              />
+            ) : null
+          }
+        />
         {disputes.status === "pending" ? (
-          <ListSkeleton count={3} label={t("disputes.loading")} />
+          <OpenDisputesSkeleton label={t("disputes.loading")} />
         ) : null}
         {disputes.status === "error" ? (
           <SectionError

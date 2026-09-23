@@ -6,32 +6,27 @@ import {
   PercentIcon,
   RepeatIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
+import { AnimatedKpiCard } from "../../_components/animated-kpi-card";
+import { MXN_FORMAT } from "../../_components/animated-number";
 import type { FinanceKpis } from "./finance.types";
-import { KpiCard } from "~/components/kpi-card";
 
 export function FinanceKpiRow({ kpis }: { kpis: FinanceKpis }) {
   const t = useTranslations("admin.finance.kpis");
-  const formatter = useFormatter();
-  const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
   const delta = kpis.platformGrossRevenueDeltaPct;
 
+  // Approving a withdrawal invalidates these figures; NumberFlow rolls the
+  // changed digits so the admin sees exactly which total moved.
   return (
     <section
       className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       aria-label={t("label")}
     >
-      <KpiCard
+      <AnimatedKpiCard
         label={t("platformGrossRevenue")}
-        value={currency(kpis.platformGrossRevenueCents)}
+        value={kpis.platformGrossRevenueCents / 100}
+        format={MXN_FORMAT}
         icon={PercentIcon}
         delta={{
           text:
@@ -39,30 +34,37 @@ export function FinanceKpiRow({ kpis }: { kpis: FinanceKpis }) {
               ? t("noBaseline")
               : t("platformGrossRevenueDelta", { value: delta }),
           trend:
-            delta === null || delta === 0 ? "neutral" : delta > 0 ? "up" : "down",
+            delta === null || delta === 0
+              ? "neutral"
+              : delta > 0
+                ? "up"
+                : "down",
         }}
       />
-      <KpiCard
+      <AnimatedKpiCard
         label={t("subscriptions")}
-        value={currency(kpis.subscriptionCents)}
+        value={kpis.subscriptionCents / 100}
+        format={MXN_FORMAT}
         icon={RepeatIcon}
         delta={{
           text: t("activeBusinesses", { count: kpis.activeBusinesses }),
           trend: "neutral",
         }}
       />
-      <KpiCard
+      <AnimatedKpiCard
         label={t("escrow")}
-        value={currency(kpis.escrowCents)}
+        value={kpis.escrowCents / 100}
+        format={MXN_FORMAT}
         icon={LockKeyholeIcon}
         delta={{
           text: t("escrowOrders", { count: kpis.escrowOrdersCount }),
           trend: "neutral",
         }}
       />
-      <KpiCard
+      <AnimatedKpiCard
         label={t("pendingWithdrawals")}
-        value={currency(kpis.pendingWithdrawalsCents)}
+        value={kpis.pendingWithdrawalsCents / 100}
+        format={MXN_FORMAT}
         icon={BanknoteIcon}
         delta={{
           text: t("pendingWithdrawalsCount", {

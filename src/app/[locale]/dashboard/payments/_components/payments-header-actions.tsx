@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { CreatePaymentLinkDialog } from "./create-payment-link-dialog";
 import { WithdrawDialog } from "./withdraw-dialog";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -57,22 +58,24 @@ export function PaymentsHeaderActions({
         {t("createLink")}
       </Button>
 
-      <Button
-        type="button"
-        className="min-h-11 sm:min-h-10"
-        disabled={!canWithdraw || isReadOnly}
-        title={
-          isReadOnly
-            ? readOnlyT("actionDisabled")
-            : payoutsReady
-              ? undefined
-              : t("withdrawNeedsConnect")
-        }
-        onClick={() => setWithdrawDialogOpen(true)}
-      >
-        <BanknoteArrowDownIcon aria-hidden="true" />
-        {withdrawLabel}
-      </Button>
+      <MetalAction active={canWithdraw && !isReadOnly}>
+        <Button
+          type="button"
+          className="min-h-11 sm:min-h-10"
+          disabled={!canWithdraw || isReadOnly}
+          title={
+            isReadOnly
+              ? readOnlyT("actionDisabled")
+              : payoutsReady
+                ? undefined
+                : t("withdrawNeedsConnect")
+          }
+          onClick={() => setWithdrawDialogOpen(true)}
+        >
+          <BanknoteArrowDownIcon aria-hidden="true" />
+          {withdrawLabel}
+        </Button>
+      </MetalAction>
 
       <CreatePaymentLinkDialog
         open={linkDialogOpen}

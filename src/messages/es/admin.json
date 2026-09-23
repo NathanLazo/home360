@@ -133,7 +133,13 @@
       "approved": "Negocio aprobado.",
       "rejected": "Negocio rechazado.",
       "suspended": "Negocio suspendido.",
-      "reactivated": "Negocio reactivado."
+      "reactivated": "Negocio reactivado.",
+      "pending": {
+        "approved": "Aprobando negocio…",
+        "rejected": "Rechazando negocio…",
+        "suspended": "Suspendiendo negocio…",
+        "reactivated": "Reactivando negocio…"
+      }
     },
     "reasonDialog": {
       "label": "Motivo",
@@ -194,7 +200,8 @@
       "recentOrders": "Órdenes recientes ({count} en total)",
       "noOrders": "Este negocio aún no tiene órdenes.",
       "disputes": "Disputas ({count} abiertas)",
-      "noDisputes": "Este negocio no tiene disputas."
+      "noDisputes": "Este negocio no tiene disputas.",
+      "loading": "Cargando expediente del negocio…"
     }
   },
   "overview": {
@@ -229,7 +236,9 @@
         "type": "Tipo",
         "guarantee": "Garantía",
         "actions": "Acciones"
-      }
+      },
+      "viewAll": "Ver todos los negocios",
+      "emptyCta": "Ir a negocios"
     },
     "disputes": {
       "title": "Disputas abiertas",
@@ -238,7 +247,9 @@
       "emptyTitle": "No hay disputas abiertas",
       "emptyDescription": "Las disputas de clientes y negocios aparecerán aquí en cuanto se abran.",
       "parties": "{business} · {customer}",
-      "unknownParty": "Cliente sin nombre"
+      "unknownParty": "Cliente sin nombre",
+      "viewAll": "Ver todas las disputas",
+      "emptyCta": "Ver disputas resueltas"
     },
     "ai": {
       "sectionTitle": "Inteligencia artificial",
@@ -250,7 +261,8 @@
       "humanReviewOn": "Activada bajo el umbral",
       "humanReviewOff": "Desactivada",
       "updatedAt": "Configuración actualizada {when}",
-      "openSettings": "Ir a configuración"
+      "openSettings": "Ir a configuración",
+      "loading": "Cargando configuración de IA…"
     }
   },
   "paymentStatus": {
@@ -286,7 +298,8 @@
     },
     "empty": {
       "title": "Sin disputas",
-      "description": "No hay disputas con el filtro seleccionado."
+      "description": "No hay disputas con el filtro seleccionado.",
+      "showResolved": "Ver disputas resueltas"
     },
     "detail": {
       "back": "Volver a la lista",
@@ -294,7 +307,8 @@
       "noSelectionTitle": "Selecciona una disputa",
       "noSelectionDescription": "Elige una disputa de la lista para ver su expediente completo.",
       "errorTitle": "No pudimos cargar el expediente",
-      "resolutionNotes": "Justificación registrada"
+      "resolutionNotes": "Justificación registrada",
+      "loading": "Cargando expediente de la disputa…"
     },
     "recording": {
       "title": "Grabación del servicio",
@@ -306,13 +320,16 @@
     "evidence": {
       "title": "Evidencia",
       "itemAlt": "Evidencia {index}",
-      "more": "+{count}"
+      "more": "+{count}",
+      "showAll": "Mostrar las {count} evidencias"
     },
     "arguments": {
       "title": "Argumentos",
       "customer": "Cliente",
       "business": "Negocio",
-      "noBusinessAnswer": "El negocio aún no responde."
+      "noBusinessAnswer": "El negocio aún no responde.",
+      "expand": "Leer completo",
+      "collapse": "Mostrar menos"
     },
     "aiSummary": {
       "title": "Resumen de IA"
@@ -354,8 +371,10 @@
       "confirm": "Confirmar resolución"
     },
     "toasts": {
-      "resolved": "Disputa resuelta."
-    }
+      "resolved": "Disputa resuelta.",
+      "resolving": "Resolviendo disputa…"
+    },
+    "loading": "Cargando disputas…"
   },
   "withdrawalStatus": {
     "REQUESTED": "Pendiente",
@@ -381,7 +400,8 @@
       "escrow": "En escrow",
       "escrowOrders": "{count, plural, =0 {Sin órdenes} one {# orden} other {# órdenes}}",
       "pendingWithdrawals": "Retiros pendientes",
-      "pendingWithdrawalsCount": "{count, plural, =0 {Sin solicitudes} one {# solicitud} other {# solicitudes}}"
+      "pendingWithdrawalsCount": "{count, plural, =0 {Sin solicitudes} one {# solicitud} other {# solicitudes}}",
+      "loading": "Cargando indicadores financieros…"
     },
     "chart": {
       "title": "Ingresos por mes",
@@ -398,7 +418,8 @@
       "loyaltyBonuses": "Bonos de lealtad pagados",
       "net": "Ingreso neto",
       "chartCenterLabel": "Ingreso bruto",
-      "pendingBonuses": "Bonos de lealtad pendientes de pago: {amount}"
+      "pendingBonuses": "Bonos de lealtad pendientes de pago: {amount}",
+      "loading": "Cargando desglose de ingresos…"
     },
     "withdrawals": {
       "title": "Retiros",
@@ -418,7 +439,8 @@
       "empty": {
         "title": "Sin retiros",
         "description": "No hay solicitudes de retiro con el filtro seleccionado."
-      }
+      },
+      "loading": "Cargando retiros…"
     },
     "actions": {
       "approve": "Aprobar",
@@ -433,7 +455,11 @@
     },
     "toasts": {
       "approved": "Retiro aprobado.",
-      "rejected": "Retiro rechazado."
+      "rejected": "Retiro rechazado.",
+      "pending": {
+        "approved": "Aprobando retiro…",
+        "rejected": "Rechazando retiro…"
+      }
     },
     "loyalty": {
       "title": "Bonos de lealtad",
@@ -469,7 +495,18 @@
       },
       "toasts": {
         "paid": "Bono registrado como pagado.",
-        "cancelled": "Bono cancelado."
+        "cancelled": "Bono cancelado.",
+        "pending": {
+          "paid": "Registrando pago del bono…",
+          "cancelled": "Cancelando bono…"
+        }
+      },
+      "loading": "Cargando bonos de lealtad…",
+      "cancelDialog": {
+        "title": "¿Cancelar este bono?",
+        "description": "El bono de {business} quedará cancelado y ya no podrá registrarse como pagado. Esta acción no se puede deshacer.",
+        "confirm": "Cancelar bono",
+        "dismiss": "Conservar bono"
       }
     }
   },
@@ -543,7 +580,16 @@
       "suspended": "Cuenta suspendida. El acceso y el cobro quedaron en pausa.",
       "reactivated": "Cuenta reactivada. El acceso y el cobro se reanudaron.",
       "billingReconciled": "Facturación reconciliada. La cuenta quedó alineada con Stripe.",
-      "requestRejected": "Solicitud de cambio de tier rechazada."
+      "requestRejected": "Solicitud de cambio de tier rechazada.",
+      "pending": {
+        "created": "Creando cuenta corporativa…",
+        "activated": "Activando cuenta…",
+        "termsUpdated": "Actualizando términos…",
+        "suspended": "Suspendiendo cuenta…",
+        "reactivated": "Reactivando cuenta…",
+        "billingReconciled": "Reconciliando facturación con Stripe…",
+        "requestRejected": "Rechazando solicitud…"
+      }
     },
     "reasonDialog": {
       "label": "Motivo",
@@ -694,7 +740,8 @@
       "noLocations": "Esta cuenta aún no tiene ubicaciones.",
       "inactiveLocation": "Inactiva",
       "recentOrders": "Órdenes recientes ({count} en total)",
-      "noOrders": "Esta cuenta aún no tiene órdenes."
+      "noOrders": "Esta cuenta aún no tiene órdenes.",
+      "loading": "Cargando expediente de la cuenta…"
     }
   },
   "settings": {
@@ -755,11 +802,14 @@
       "unsaved": "Tienes cambios sin guardar.",
       "upToDate": "Todo está guardado.",
       "save": "Guardar cambios",
-      "discard": "Descartar"
+      "discard": "Descartar",
+      "saving": "Guardando…"
     },
     "toasts": {
-      "saved": "Configuración guardada."
-    }
+      "saved": "Configuración guardada.",
+      "saving": "Guardando configuración…"
+    },
+    "loading": "Cargando configuración…"
   },
   "loyaltyBonusStatus": {
     "PENDING": "Pendiente",
@@ -772,7 +822,11 @@
   },
   "header": {
     "toggleSidebar": "Mostrar u ocultar la navegación",
+    "roleBadge": "Admin",
     "navigationTitle": "Navegación de administración",
     "navigationDescription": "Secciones del panel de administración"
+  },
+  "filters": {
+    "clear": "Limpiar filtros"
   }
 }

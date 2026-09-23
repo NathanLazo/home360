@@ -1,61 +1,89 @@
 /**
  * Shared presentation tokens for the landing sections, so the type scale, the
- * container rhythm and the anchor offset of `spec/DESIGN-DIRECTIVE.md` §2 and
- * §5 live in one place instead of being retyped per section.
+ * container rhythm, the motion curve and the anchor offset live in one place
+ * instead of being retyped per section.
  *
- * Only `(public)/` imports this module: the brand tokens stay on this side of
- * the D7 boundary.
+ * The landing speaks the same monochrome zinc language as the dashboard: every
+ * color comes from the shadcn tokens (`--background`, `--foreground`,
+ * `--muted-foreground`, `--border`, `--primary`…). Dark bands are the same
+ * tokens scoped under `.dark`, never a parallel palette.
  */
 
-/** Signature easing of the landing (§4). Overshoot 0. */
-export const LANDING_EASE: [number, number, number, number] = [0.4, 0, 0.2, 1];
+/** Strong ease-out: entrances start fast and settle softly, overshoot 0. */
+export const LANDING_EASE: [number, number, number, number] = [
+  0.23, 1, 0.32, 1,
+];
 
-/** Duration palette in milliseconds (§4). */
+/** Same curve for CSS arbitrary values. */
+export const landingEaseCss = "ease-[cubic-bezier(0.23,1,0.32,1)]";
+
+/** Duration palette in milliseconds. UI ≤ 300 ms, reveals ≤ 700 ms. */
 export const LANDING_DURATION = {
-  fast: 150,
+  fast: 160,
   standard: 300,
-  slow: 500,
+  reveal: 600,
+  slow: 700,
 } as const;
 
-/** Stagger between siblings; total budget stays under 500 ms per section. */
-export const LANDING_STAGGER_MS = 80;
+/** Stagger between siblings: short enough that no section waits on itself. */
+export const LANDING_STAGGER_MS = 70;
 
-/** Centered content column shared by every section (§5). */
+/** Centered content column shared by every section. */
 export const containerClass = "mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8";
 
-/** Vertical rhythm of a regular section (§5). */
-export const sectionPaddingClass = "py-20 lg:py-28";
+/** Vertical rhythm of a regular section. */
+export const sectionPaddingClass = "py-24 lg:py-32";
 
-/** Clears the sticky 4rem header with room to spare (§5: minimum 5rem). */
+/** Clears the sticky 4rem header with room to spare (minimum 5rem). */
 export const anchorOffsetClass = "scroll-mt-24";
 
-/** `h1`, display face, hero only. */
+/** `h1`, hero only. Sans, tight, heavy; the accent phrase takes the serif. */
 export const displayTitleClass =
-  "font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.05] font-bold tracking-[-0.02em] text-balance";
+  "text-[clamp(2.625rem,7vw,5.25rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-balance";
 
-/** `h2`, display face, one per section. */
+/** `h2`, one per section. */
 export const displayHeadingClass =
-  "font-display text-[clamp(1.875rem,3.5vw,2.75rem)] leading-[1.1] font-semibold tracking-[-0.015em] text-balance";
+  "text-[clamp(2rem,4.2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance";
 
-/** `h3`, body face: cards and steps never take the display face. */
+/**
+ * Serif accent inside a display heading (editorial contrast): Fraunces at its
+ * soft, high optical size, upright — the layout loads no italic cut, and a
+ * synthesized slant would look cheap.
+ */
+export const accentClass =
+  "font-display font-light tracking-[-0.03em] [font-variation-settings:'SOFT'_100,'opsz'_144]";
+
+/** `h3`, body face. */
 export const subheadingClass =
-  "text-lg leading-snug font-semibold tracking-[-0.01em]";
+  "text-lg leading-snug font-semibold tracking-[-0.015em]";
 
-/** Eyebrows, step numbers and data labels: mono carries "this is a fact". */
-export const eyebrowClass =
-  "font-mono text-xs font-medium tracking-[0.08em] uppercase";
+/** Data labels: mono only where the text is a verifiable datum. */
+export const dataLabelClass =
+  "font-mono text-xs font-medium tracking-[0.06em] uppercase";
 
 /** Figures: mono, tabular, never shifting while they animate. */
 export const figureClass =
-  "font-mono text-[clamp(2rem,4vw,3rem)] leading-none font-semibold tracking-[-0.02em] tabular-nums";
+  "font-mono text-[clamp(2.5rem,5vw,3.75rem)] leading-none font-medium tracking-[-0.04em] tabular-nums";
 
-/** Body copy capped near 70 characters. */
-export const leadClass = "text-base leading-relaxed text-pretty sm:text-[1.0625rem]";
+/** Body copy capped near 65 characters. */
+export const leadClass =
+  "max-w-[62ch] text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg";
 
-/** Focus ring over cream surfaces (add the radius at the call site). */
-export const focusRingOnCream =
-  "focus-visible:ring-2 focus-visible:ring-[var(--brand-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--brand-cream)] focus-visible:outline-none";
+/** Card/step body copy. */
+export const bodyClass =
+  "text-[0.9375rem] leading-relaxed text-pretty text-muted-foreground";
 
-/** Focus ring over navy surfaces (add the radius at the call site). */
-export const focusRingOnNavy =
-  "focus-visible:ring-2 focus-visible:ring-[var(--brand-cream)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--brand-navy)] focus-visible:outline-none";
+/**
+ * Focus ring that reads on light and dark bands alike: it takes the section's
+ * own `--ring`/`--background`, so `.dark` bands flip it automatically.
+ */
+export const focusRingClass =
+  "focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+
+/**
+ * Press feedback shared by every pressable element. Tailwind 4 scales through
+ * the `scale` property, and the hover tint rides the same transition list, so
+ * callers never stack two `transition-*` utilities.
+ */
+export const pressClass =
+  "transition-[scale,background-color,color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100";

@@ -1,90 +1,81 @@
-import { ShieldCheckIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { HeroBackdrop } from "./hero-backdrop";
+import { HeroSubtitle } from "./hero-subtitle";
 import { HeroVisual } from "./hero-visual";
+import { HeroVisualStage } from "./hero-visual-stage";
 import { LANDING_ANCHORS } from "./landing-data";
 import {
   containerClass,
   displayTitleClass,
-  eyebrowClass,
-  focusRingOnNavy,
-  leadClass,
-  LANDING_DURATION,
+  focusRingClass,
+  pressClass,
 } from "./landing-styles";
+import { MetalCta } from "./metal-cta";
+import { MetalNewBadge } from "./metal-new-badge";
 import { Reveal } from "./reveal";
-import { Button } from "~/components/ui/button";
-import { ShimmerButton } from "~/components/ui/shimmer-button";
-import { TextAnimate } from "~/components/ui/text-animate";
-import { Link } from "~/i18n/navigation";
+import { SplitHeading } from "./split-heading";
+import { cn } from "~/lib/utils";
 
 /**
- * Navy opening band (§3). Choreography of §4: badge 0 ms → headline by word
- * 80 ms → subtitle 240 ms → CTAs 320 ms → visual 400 ms, under 900 ms total.
+ * Opening band. One authored sequence, not scattered effects: announcement
+ * (0 ms) → headline rising word by word out of its masks (80 ms) → subtitle
+ * blurring in (420 ms) → CTAs (560 ms) → the custody console, which then
+ * comes forward with the scroll.
  */
 export async function HeroSection() {
   const t = await getTranslations("landing.hero");
 
   return (
-    <section className="w-full bg-[var(--brand-navy)] text-[var(--brand-cream)]">
+    <section className="relative isolate overflow-hidden">
+      <HeroBackdrop />
+
       <div
-        className={`${containerClass} grid grid-cols-1 items-center gap-12 py-24 lg:grid-cols-2 lg:gap-16 lg:py-32`}
+        className={cn(
+          containerClass,
+          "flex flex-col items-center pt-20 text-center sm:pt-24 lg:pt-32",
+        )}
       >
-        <div className="flex flex-col items-start gap-6">
-          <Reveal durationMs={LANDING_DURATION.standard}>
-            <p
-              className={`${eyebrowClass} inline-flex items-center gap-2 rounded-full border-2 border-[color-mix(in_srgb,var(--brand-gold)_70%,transparent)] px-3 py-1.5 text-[var(--brand-cream)]`}
+        <Reveal durationMs={500}>
+          <p className="bg-card/80 text-muted-foreground inline-flex items-center gap-3 rounded-full border py-1 pr-4 pl-1 text-sm shadow-[0_1px_2px_rgb(0_0_0/0.04)] backdrop-blur-sm">
+            <MetalNewBadge label={t("badgeNew")} />
+            {t("badge")}
+          </p>
+        </Reveal>
+
+        <SplitHeading
+          as="h1"
+          text={t("title")}
+          delayMs={80}
+          className={cn(displayTitleClass, "mt-8 max-w-[17ch] sm:max-w-5xl")}
+        />
+
+        <HeroSubtitle text={t("subtitle")} className="mx-auto mt-7" />
+
+        <Reveal delayMs={560} durationMs={500}>
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+            <MetalCta href="/register" label={t("ctaPrimary")} />
+            <a
+              href={`#${LANDING_ANCHORS.howItWorks}`}
+              className={cn(
+                "text-foreground hover:bg-foreground/5 inline-flex h-12 items-center rounded-full px-6 text-base font-medium",
+                pressClass,
+                focusRingClass,
+              )}
             >
-              <ShieldCheckIcon aria-hidden="true" className="size-4 shrink-0" />
-              {t("badge")}
-            </p>
-          </Reveal>
+              {t("ctaSecondary")}
+            </a>
+          </div>
+        </Reveal>
+      </div>
 
-          <TextAnimate
-            as="h1"
-            by="word"
-            once
-            startOnView
-            animation="blurInUp"
-            delay={0.08}
-            duration={0.45}
-            className={`${displayTitleClass} text-[var(--brand-cream)]`}
-          >
-            {t("title")}
-          </TextAnimate>
-
-          <Reveal delayMs={240} durationMs={LANDING_DURATION.slow}>
-            <p className={`${leadClass} max-w-xl text-[var(--brand-gray)]`}>
-              {t("subtitle")}
-            </p>
-          </Reveal>
-
-          <Reveal delayMs={320} durationMs={LANDING_DURATION.slow}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              {/* The single ShimmerButton of the whole product (§4). */}
-              <ShimmerButton
-                asChild
-                background="var(--brand-gold)"
-                shimmerColor="var(--brand-cream)"
-                className={`h-12 px-6 text-base font-semibold text-[var(--brand-navy)] ${focusRingOnNavy}`}
-              >
-                <Link href="/register">{t("ctaPrimary")}</Link>
-              </ShimmerButton>
-
-              <Button
-                asChild
-                variant="outline"
-                className={`h-12 rounded-md border-[color-mix(in_srgb,var(--brand-cream)_45%,transparent)] bg-transparent px-6 text-base font-medium text-[var(--brand-cream)] hover:border-[var(--brand-cream)] hover:bg-[color-mix(in_srgb,var(--brand-cream)_10%,transparent)] hover:text-[var(--brand-cream)] active:scale-[0.98] ${focusRingOnNavy}`}
-              >
-                <a href={`#${LANDING_ANCHORS.howItWorks}`}>
-                  {t("ctaSecondary")}
-                </a>
-              </Button>
+      <div className={cn(containerClass, "mt-16 pb-24 sm:mt-20 lg:pb-32")}>
+        <Reveal delayMs={700} durationMs={700}>
+          <HeroVisualStage>
+            <div className="mx-auto max-w-5xl">
+              <HeroVisual />
             </div>
-          </Reveal>
-        </div>
-
-        <Reveal delayMs={400} durationMs={LANDING_DURATION.slow}>
-          <HeroVisual />
+          </HeroVisualStage>
         </Reveal>
       </div>
     </section>

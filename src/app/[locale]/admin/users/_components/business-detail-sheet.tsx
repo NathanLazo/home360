@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { ExternalLinkIcon, FileTextIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
+import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
 import { BusinessStatusBadge } from "./business-status-badge";
 import { GuaranteeBadge } from "./guarantee-badge";
 import type { BusinessDetail } from "./users.types";
@@ -22,8 +24,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Link } from "~/i18n/navigation";
+import { cn } from "~/lib/utils";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
@@ -94,9 +96,11 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
       <DetailSection title={t("owner")}>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">{t("ownerName")}</dt>
-          <dd>{detail.ownerName ?? t("notAvailable")}</dd>
+          <dd className="min-w-0">{detail.ownerName ?? t("notAvailable")}</dd>
           <dt className="text-muted-foreground">{t("ownerEmail")}</dt>
-          <dd className="truncate">{detail.ownerEmail ?? t("notAvailable")}</dd>
+          <dd className="min-w-0 truncate">
+            {detail.ownerEmail ?? t("notAvailable")}
+          </dd>
           <dt className="text-muted-foreground">{t("registeredAt")}</dt>
           <dd suppressHydrationWarning>
             {formatter.dateTime(detail.createdAt, { dateStyle: "medium" })}
@@ -216,7 +220,9 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
       <Separator />
 
-      <DetailSection title={t("disputes", { count: detail.disputes.openCount })}>
+      <DetailSection
+        title={t("disputes", { count: detail.disputes.openCount })}
+      >
         {detail.disputes.items.length === 0 ? (
           <p className="text-muted-foreground text-sm">{t("noDisputes")}</p>
         ) : (
@@ -225,7 +231,10 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
               <li key={dispute.id}>
                 <Link
                   href={`/admin/disputes?dispute=${dispute.id}`}
-                  className="focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border p-3 text-sm transition-colors duration-150 ease-out hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none"
+                  className={cn(
+                    "focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border p-3 text-sm hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none",
+                    PRESS_SURFACE_CLASS,
+                  )}
                 >
                   <span className="truncate font-medium">{dispute.title}</span>
                   <span className="text-muted-foreground shrink-0 text-xs">
@@ -278,12 +287,7 @@ export function BusinessDetailSheet({
 
         <div className="px-4 pb-6">
           {state.status === "pending" ? (
-            <div className="flex flex-col gap-4" aria-busy="true">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-24 w-full rounded-lg" />
-              <Skeleton className="h-40 w-full rounded-lg" />
-            </div>
+            <DetailSheetSkeleton label={t("loading")} />
           ) : null}
 
           {state.status === "error" ? (

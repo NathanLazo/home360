@@ -1,13 +1,32 @@
 "use client";
 
+import { motion, useReducedMotion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import {
+  ADMIN_DURATION,
+  ADMIN_EASE_OUT,
+  PRESS_CONTROL_CLASS,
+} from "../../_components/admin-motion";
+import { cn } from "~/lib/utils";
 
 const VISIBLE_LIMIT = 4;
+const REVEAL_STAGGER_S = 0.03;
 
 export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
   const t = useTranslations("admin.disputes.evidence");
+  const reduceMotion = useReducedMotion();
   const [expanded, setExpanded] = useState(false);
+  const firstRevealedRef = useRef<HTMLAnchorElement>(null);
+
+  // The "+N" button unmounts on click; focus moves to the first revealed
+  // tile so keyboard users keep their place.
+  useEffect(() => {
+    if (expanded) {
+      firstRevealedRef.current?.focus();
+    }
+  }, [expanded]);
 
   if (urls.length === 0) {
     return null;
@@ -22,31 +41,59 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
         {t("title")}
       </h3>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {visible.map((url, index) => (
-          <li key={url}>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="focus-visible:ring-ring block overflow-hidden rounded-lg outline outline-black/10 focus-visible:ring-2 focus-visible:outline-none"
+        {visible.map((url, index) => {
+          // Only the tiles revealed by "+N" enter with motion; the first
+          // batch is part of the file and paints statically.
+          const revealed = index >= VISIBLE_LIMIT;
+
+          return (
+            <motion.li
+              key={url}
+              initial={
+                revealed
+                  ? reduceMotion
+                    ? { opacity: 0 }
+                    : { opacity: 0, transform: "scale(0.96)" }
+                  : false
+              }
+              animate={{ opacity: 1, transform: "scale(1)" }}
+              transition={{
+                duration: ADMIN_DURATION.standard,
+                ease: ADMIN_EASE_OUT,
+                delay: revealed
+                  ? (index - VISIBLE_LIMIT) * REVEAL_STAGGER_S
+                  : 0,
+              }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- evidence
-                  lives on arbitrary external hosts, outside the image loader. */}
-              <img
-                src={url}
-                alt={t("itemAlt", { index: index + 1 })}
-                loading="lazy"
-                className="aspect-square w-full object-cover transition-transform duration-150 ease-out hover:scale-[1.02]"
-              />
-            </a>
-          </li>
-        ))}
+              <a
+                ref={index === VISIBLE_LIMIT ? firstRevealedRef : undefined}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="focus-visible:ring-ring group block overflow-hidden rounded-lg outline outline-black/10 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- evidence
+                    lives on arbitrary external hosts, outside the image loader. */}
+                <img
+                  src={url}
+                  alt={t("itemAlt", { index: index + 1 })}
+                  loading="lazy"
+                  className="aspect-square w-full object-cover transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
+                />
+              </a>
+            </motion.li>
+          );
+        })}
         {hidden > 0 ? (
           <li>
             <button
               type="button"
+              aria-label={t("showAll", { count: urls.length })}
               onClick={() => setExpanded(true)}
-              className="bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring flex aspect-square w-full items-center justify-center rounded-lg text-sm font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none"
+              className={cn(
+                "bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring flex aspect-square w-full items-center justify-center rounded-lg font-mono text-sm font-medium tabular-nums hover:bg-zinc-200/70 focus-visible:ring-2 focus-visible:outline-none",
+                PRESS_CONTROL_CLASS,
+              )}
             >
               {t("more", { count: hidden })}
             </button>

@@ -4,6 +4,12 @@ import { LoaderCircleIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { AnimatedTabsList } from "../../_components/animated-tabs-list";
+import { ClearFiltersButton } from "../../_components/clear-filters-button";
+import {
+  TableSkeleton,
+  type TableSkeletonColumn,
+} from "../../_components/table-skeleton";
 import { ActivateCorporateDialog } from "./activate-corporate-dialog";
 import { CorporateAccountsTable } from "./corporate-accounts-table";
 import { CorporateDetailActions } from "./corporate-detail-actions";
@@ -30,12 +36,21 @@ import { useCorporateUrlState } from "./use-corporate-url-state";
 import { useDebouncedValue } from "./use-debounced-value";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Tabs } from "~/components/ui/tabs";
 
 const SEARCH_DEBOUNCE_MS = 300;
+
+const TABLE_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { width: "w-40" },
+  { width: "w-16" },
+  { width: "w-16" },
+  { width: "w-24", align: "end" },
+  { width: "w-20" },
+  { width: "w-8", align: "end" },
+];
 
 type PendingCorporateAction = {
   target: CorporateActionTarget;
@@ -65,6 +80,8 @@ export function CorporateView() {
     search: debouncedSearch,
   });
   const counts = query.state.status === "success" ? query.state.counts : null;
+  const filtersActive =
+    debouncedSearch.trim().length > 0 || urlState.tier !== undefined;
 
   const [createOpen, setCreateOpen] = useState(false);
   const [pendingAction, setPendingAction] =
@@ -93,7 +110,9 @@ export function CorporateView() {
     setPendingAction({ target, action });
   };
 
-  const detailTarget = (detail: CorporateAccountDetail): CorporateActionTarget => ({
+  const detailTarget = (
+    detail: CorporateAccountDetail,
+  ): CorporateActionTarget => ({
     id: detail.id,
     name: detail.name,
     tier: detail.tier,
@@ -118,7 +137,11 @@ export function CorporateView() {
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
-        actions={createButton}
+        actions={
+          // The page's one metal detail. The empty-state CTA below reuses the
+          // plain button so the screen never shows two rings.
+          <MetalRing strength={0.6}>{createButton}</MetalRing>
+        }
       />
 
       <Tabs
@@ -129,15 +152,16 @@ export function CorporateView() {
       >
         {/* Five status tabs with counts overflow a 375 px viewport; the list
             scrolls on its own instead of widening the page. */}
-        <TabsList className="max-w-full justify-start overflow-x-auto">
-          {corporateTabSchema.options.map((tab) => (
-            <TabsTrigger key={tab} value={tab}>
-              {counts
-                ? t(`tabs.${tab}WithCount`, { count: counts[tab] })
-                : t(`tabs.${tab}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <AnimatedTabsList
+          value={urlState.tab}
+          className="max-w-full justify-start overflow-x-auto"
+          items={corporateTabSchema.options.map((tab) => ({
+            value: tab,
+            label: counts
+              ? t(`tabs.${tab}WithCount`, { count: counts[tab] })
+              : t(`tabs.${tab}`),
+          }))}
+        />
       </Tabs>
 
       <CorporateFilters
@@ -148,12 +172,7 @@ export function CorporateView() {
       />
 
       {query.state.status === "pending" ? (
-        <div className="flex flex-col gap-3" aria-busy="true" role="status">
-          <span className="sr-only">{t("loading")}</span>
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
+        <TableSkeleton columns={TABLE_SKELETON_COLUMNS} label={t("loading")} />
       ) : null}
 
       {query.state.status === "error" ? (
@@ -171,7 +190,18 @@ export function CorporateView() {
               accounts={query.state.items}
               onOpenAccount={urlState.openAccount}
               onAction={(row, action) => raiseAction(row, action)}
-              emptyAction={createButton}
+              emptyAction={
+                filtersActive ? (
+                  <ClearFiltersButton
+                    onClear={() => {
+                      setSearch("");
+                      urlState.setTier(undefined);
+                    }}
+                  />
+                ) : (
+                  createButton
+                )
+              }
             />
           </CardContent>
           {query.hasMore ? (
@@ -243,7 +273,9 @@ export function CorporateView() {
       />
 
       <ActivateCorporateDialog
-        target={pendingAction?.action === "activate" ? pendingAction.target : null}
+        target={
+          pendingAction?.action === "activate" ? pendingAction.target : null
+        }
         onOpenChange={(open) => {
           if (!open) {
             setPendingAction(null);
@@ -254,7 +286,9 @@ export function CorporateView() {
       />
 
       <SuspendCorporateDialog
-        target={pendingAction?.action === "suspend" ? pendingAction.target : null}
+        target={
+          pendingAction?.action === "suspend" ? pendingAction.target : null
+        }
         onOpenChange={(open) => {
           if (!open) {
             setPendingAction(null);

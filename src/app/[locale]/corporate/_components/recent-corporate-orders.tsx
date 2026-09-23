@@ -8,9 +8,9 @@ import type { CorporateOrderItem } from "./corporate.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
+import { TableSkeleton } from "~/components/table-skeleton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Link } from "~/i18n/navigation";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
@@ -84,16 +84,17 @@ export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("recentTitle")}</CardTitle>
+        <CardTitle>
+          <h2>{t("recentTitle")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {state.status === "pending" ? (
-          <div className="flex flex-col gap-3" aria-busy="true" role="status">
-            <span className="sr-only">{t("loading")}</span>
-            {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="h-12 w-full rounded-lg" />
-            ))}
-          </div>
+          <TableSkeleton
+            columns={columns.length}
+            rows={4}
+            label={t("loading")}
+          />
         ) : null}
 
         {state.status === "error" ? (
@@ -109,8 +110,10 @@ export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
             <DataTable
               columns={columns}
               data={state.data.items}
+              getRowId={(order) => order.id}
               emptyState={
                 <EmptyState
+                  headingLevel="h3"
                   icon={InboxIcon}
                   title={t("recentEmptyTitle")}
                   description={t("recentEmptyDescription")}

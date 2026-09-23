@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RotateCcwIcon, TriangleAlertIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { OrderDetailSheet } from "./order-detail-sheet";
 import { OrderFilters } from "./order-filters";
 import type { OrderFiltersState } from "./order.types";
 import { OrdersTable } from "./orders-table";
-import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
-import { Button } from "~/components/ui/button";
-import { Skeleton } from "~/components/ui/skeleton";
+import { SectionError } from "~/components/section-error";
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent } from "~/components/ui/card";
+import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
 
 const INITIAL_FILTERS: OrderFiltersState = {
@@ -22,18 +22,16 @@ const INITIAL_FILTERS: OrderFiltersState = {
 
 function OrdersLoadingState({ label }: { label: string }) {
   return (
-    <div className="space-y-3" aria-busy="true">
-      <span className="sr-only">{label}</span>
-      {Array.from({ length: 8 }, (_, index) => (
-        <Skeleton key={index} className="h-14 w-full rounded-lg" />
-      ))}
-    </div>
+    <Card className="overflow-hidden py-0">
+      <CardContent className="px-0">
+        <TableSkeleton columns={8} rows={8} label={label} />
+      </CardContent>
+    </Card>
   );
 }
 
 export function OrdersView({ branchId }: { branchId?: string }) {
   const t = useTranslations("dashboard.orders");
-  const errorsT = useTranslations("errors");
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [searchDraft, setSearchDraft] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -65,6 +63,8 @@ export function OrdersView({ branchId }: { branchId?: string }) {
   const pages = listQuery.data?.pages;
   const responseError =
     pages?.find((page) => page.error !== null)?.error ?? null;
+  const errorCode =
+    responseError ?? (listQuery.error ? toErrorCode(listQuery.error) : null);
   const orders = pages?.flatMap((page) => page.result?.items ?? []) ?? [];
   const filtered = [
     branchId !== undefined,
@@ -88,27 +88,15 @@ export function OrdersView({ branchId }: { branchId?: string }) {
 
       {listQuery.isPending ? <OrdersLoadingState label={t("loading")} /> : null}
 
-      {!listQuery.isPending && (listQuery.error || responseError) ? (
-        <EmptyState
-          icon={TriangleAlertIcon}
+      {!listQuery.isPending && errorCode !== null ? (
+        <SectionError
           title={t("queryErrorTitle")}
-          description={
-            responseError ? errorsT(responseError) : t("queryErrorDescription")
-          }
-          action={
-            <Button
-              type="button"
-              className="min-h-11"
-              onClick={() => void listQuery.refetch()}
-            >
-              <RotateCcwIcon aria-hidden="true" />
-              {t("retry")}
-            </Button>
-          }
+          code={errorCode}
+          onRetry={() => void listQuery.refetch()}
         />
       ) : null}
 
-      {!listQuery.isPending && !listQuery.error && !responseError ? (
+      {!listQuery.isPending && errorCode === null ? (
         <OrdersTable
           orders={orders}
           filtered={filtered}

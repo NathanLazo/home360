@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
+import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
 import type { DisputeListItem as DisputeListItemType } from "./disputes.types";
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
@@ -44,10 +45,11 @@ export function DisputeListItem({
       aria-current={active ? "true" : undefined}
       onClick={onSelect}
       className={cn(
-        "focus-visible:ring-ring flex w-full flex-col gap-2 rounded-xl border p-4 text-left transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none",
+        "focus-visible:ring-ring flex w-full flex-col gap-2 rounded-xl border p-4 text-left focus-visible:ring-2 focus-visible:outline-none",
+        PRESS_SURFACE_CLASS,
         active
           ? "border-zinc-900 bg-zinc-50"
-          : "bg-card hover:bg-zinc-50",
+          : "bg-card hover:border-zinc-300 hover:bg-zinc-50",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -63,13 +65,14 @@ export function DisputeListItem({
         })}
       </span>
       <div className="flex items-center justify-between gap-3">
-        <span className="text-muted-foreground font-mono text-xs">
+        <span className="text-muted-foreground font-mono text-xs tabular-nums">
           #{dispute.orderFolio}
         </span>
         <span className="font-mono text-sm font-semibold tabular-nums">
           {formatter.number(dispute.amountCents / 100, {
             style: "currency",
             currency: "MXN",
+            minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
         </span>

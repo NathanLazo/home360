@@ -5,17 +5,17 @@ import { formatMxnFromCents } from "./landing-money";
 import {
   anchorOffsetClass,
   containerClass,
-  displayHeadingClass,
-  leadClass,
   LANDING_STAGGER_MS,
   sectionPaddingClass,
 } from "./landing-styles";
 import { PricingCard } from "./pricing-card";
 import { Reveal } from "./reveal";
+import { SectionIntro } from "./section-intro";
+import { cn } from "~/lib/utils";
 
 /**
- * Cream band and destination of the "Pricing" anchor. The plans mirror the
- * seed through `LANDING_PLANS`; there is no database call on the landing.
+ * Destination of the "Pricing" anchor. The plans mirror the seed through
+ * `LANDING_PLANS`; there is no database call on the landing.
  */
 export async function PricingSection() {
   const t = await getTranslations("landing.pricing");
@@ -32,23 +32,16 @@ export async function PricingSection() {
     <section
       id={LANDING_ANCHORS.pricing}
       aria-labelledby="pricing-title"
-      className={`${anchorOffsetClass} w-full bg-[var(--brand-cream)] text-[var(--brand-navy)]`}
+      className={cn(anchorOffsetClass, "bg-card w-full border-t")}
     >
-      <div className={`${containerClass} ${sectionPaddingClass}`}>
-        <Reveal>
-          <div className="flex max-w-2xl flex-col gap-4">
-            <h2 id="pricing-title" className={displayHeadingClass}>
-              {t("title")}
-            </h2>
-            <p
-              className={`${leadClass} text-[color-mix(in_srgb,var(--brand-navy)_72%,transparent)]`}
-            >
-              {t("subtitle")}
-            </p>
-          </div>
-        </Reveal>
+      <div className={cn(containerClass, sectionPaddingClass)}>
+        <SectionIntro
+          titleId="pricing-title"
+          title={t("title")}
+          subtitle={t("subtitle")}
+        />
 
-        <div className="mt-12 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
+        <div className="mt-14 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
           {LANDING_PLANS.map((plan, index) => (
             <Reveal
               key={plan.code}

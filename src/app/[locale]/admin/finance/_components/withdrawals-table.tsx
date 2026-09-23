@@ -2,7 +2,7 @@
 
 import { BanknoteIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { WithdrawalRow } from "./finance.types";
 import { WithdrawalRowActions } from "./withdrawal-row-actions";
@@ -28,11 +28,13 @@ export function WithdrawalsTable({
   pending,
   onApprove,
   onReject,
+  emptyAction,
 }: {
   withdrawals: WithdrawalRow[];
   pending: boolean;
   onApprove: (withdrawalId: string) => void;
   onReject: (input: { withdrawalId: string; reason: string }) => void;
+  emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.finance.withdrawals");
   const statusT = useTranslations("admin.withdrawalStatus");
@@ -77,7 +79,7 @@ export function WithdrawalsTable({
       key: "destination",
       header: t("columns.destination"),
       cell: (row) => (
-        <span className="text-muted-foreground font-mono text-sm">
+        <span className="text-muted-foreground font-mono text-sm tabular-nums">
           {row.bankName} ••••{row.accountLast4}
         </span>
       ),
@@ -138,6 +140,7 @@ export function WithdrawalsTable({
             icon={BanknoteIcon}
             title={t("empty.title")}
             description={t("empty.description")}
+            action={emptyAction}
           />
         </div>
       }

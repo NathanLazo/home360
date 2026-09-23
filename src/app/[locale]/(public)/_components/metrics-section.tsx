@@ -4,15 +4,14 @@ import { LANDING_METRICS } from "./landing-data";
 import { formatMxnFromCents } from "./landing-money";
 import {
   containerClass,
-  displayHeadingClass,
-  eyebrowClass,
-  figureClass,
-  leadClass,
   LANDING_STAGGER_MS,
   sectionPaddingClass,
 } from "./landing-styles";
+import { MetricItem } from "./metric-item";
 import { Reveal } from "./reveal";
+import { SectionIntro } from "./section-intro";
 import { NumberTicker } from "~/components/ui/number-ticker";
+import { cn } from "~/lib/utils";
 
 type Metric = {
   key: string;
@@ -22,9 +21,9 @@ type Metric = {
 };
 
 /**
- * Navy band (§3): the heaviest moment, between two cream sections. Every
- * figure is market data (D8), never our own traction, and the source stays
- * visible — a number without a source is a claim, with one it is data.
+ * The dark band: the heaviest moment between two light sections, scoped with
+ * `.dark` so it reuses the zinc dark tokens. Every figure is market data
+ * (D8), never our own traction, and the source stays visible.
  */
 export async function MetricsSection() {
   const t = await getTranslations("landing.metrics");
@@ -35,7 +34,8 @@ export async function MetricsSection() {
       <>
         <NumberTicker
           value={value}
-          delay={((index + 1) * LANDING_STAGGER_MS) / 1000}
+          delay={0.2 + (index * LANDING_STAGGER_MS) / 1000}
+          className="tracking-[-0.04em]"
         />
         {suffix}
       </>
@@ -45,7 +45,11 @@ export async function MetricsSection() {
   const metrics: Metric[] = [
     {
       key: "households",
-      figure: ticker(LANDING_METRICS.households / 1_000_000, t("units.million"), 0),
+      figure: ticker(
+        LANDING_METRICS.households / 1_000_000,
+        t("units.million"),
+        0,
+      ),
       label: t("households"),
     },
     {
@@ -70,44 +74,30 @@ export async function MetricsSection() {
   return (
     <section
       aria-labelledby="metrics-title"
-      className="w-full bg-[var(--brand-navy)] text-[var(--brand-cream)]"
+      className="dark bg-background text-foreground w-full"
     >
-      <div className={`${containerClass} ${sectionPaddingClass}`}>
-        <Reveal>
-          <div className="flex max-w-2xl flex-col gap-4">
-            <h2
-              id="metrics-title"
-              className={`${displayHeadingClass} text-[var(--brand-cream)]`}
-            >
-              {t("title")}
-            </h2>
-            <p className={`${leadClass} text-[var(--brand-gray)]`}>
-              {t("subtitle")}
-            </p>
-          </div>
-        </Reveal>
+      <div className={cn(containerClass, sectionPaddingClass)}>
+        <SectionIntro
+          titleId="metrics-title"
+          title={t("title")}
+          subtitle={t("subtitle")}
+        />
 
-        <ul className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        <ul className="bg-border mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-xl border sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
-            <li key={metric.key}>
-              <Reveal delayMs={(index + 1) * LANDING_STAGGER_MS}>
-                <div className="flex flex-col gap-3 border-t border-[color-mix(in_srgb,var(--brand-gray)_40%,transparent)] pt-5">
-                  <p className={`${figureClass} text-[var(--brand-gold)]`}>
-                    {metric.figure}
-                  </p>
-                  <p className="text-[0.9375rem] leading-relaxed text-pretty text-[var(--brand-gray)]">
-                    {metric.label}
-                  </p>
-                </div>
+            <li key={metric.key} className="bg-background">
+              <Reveal
+                className="h-full"
+                delayMs={(index + 1) * LANDING_STAGGER_MS}
+              >
+                <MetricItem figure={metric.figure} label={metric.label} />
               </Reveal>
             </li>
           ))}
         </ul>
 
         <Reveal delayMs={5 * LANDING_STAGGER_MS}>
-          <p
-            className={`${eyebrowClass} mt-10 text-[color-mix(in_srgb,var(--brand-gray)_88%,transparent)]`}
-          >
+          <p className="text-muted-foreground mt-6 font-mono text-xs">
             {t("source")}
           </p>
         </Reveal>

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { LoaderCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -95,16 +96,18 @@ export function ForgotPasswordForm() {
         </p>
       ) : null}
 
-      <Button
-        type="submit"
-        className="h-11 w-full"
-        disabled={requestPasswordReset.isPending}
-      >
-        {requestPasswordReset.isPending ? (
-          <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
-        ) : null}
-        {requestPasswordReset.isPending ? t("submitting") : t("submit")}
-      </Button>
+      <MetalRing bend className="w-full">
+        <Button
+          type="submit"
+          className="h-11 w-full"
+          disabled={requestPasswordReset.isPending}
+        >
+          {requestPasswordReset.isPending ? (
+            <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
+          ) : null}
+          {requestPasswordReset.isPending ? t("submitting") : t("submit")}
+        </Button>
+      </MetalRing>
       {requestPasswordReset.isPending ? (
         <span className="sr-only" role="status">
           {t("submitting")}

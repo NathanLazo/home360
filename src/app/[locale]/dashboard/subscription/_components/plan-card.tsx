@@ -6,6 +6,7 @@ import { PlanFeatureList } from "./plan-feature-list";
 import type { PlanListItem } from "./subscription.types";
 import { useCurrencyFormatter } from "./use-currency-formatter";
 import { Badge } from "~/components/ui/badge";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -19,6 +20,8 @@ import { cn } from "~/lib/utils";
 
 type PlanCardProps = {
   plan: PlanListItem;
+  /** The next tier up: its upgrade button carries the page's metal ring. */
+  recommended: boolean;
   /** `null` while the current subscription is still unknown. */
   currentPriceCents: number | null;
   canChangePlan: boolean;
@@ -34,6 +37,7 @@ type PlanCardProps = {
  */
 export function PlanCard({
   plan,
+  recommended,
   currentPriceCents,
   canChangePlan,
   onSelectPlan,
@@ -63,36 +67,46 @@ export function PlanCard({
       );
     }
 
+    const actionable = canChangePlan && plan.isAvailable;
+
     return (
-      <Button
-        type="button"
-        variant={isUpgrade ? "default" : "outline"}
-        className="min-h-11 w-full sm:min-h-10"
-        onClick={() => onSelectPlan(plan.code)}
-        disabled={!canChangePlan || !plan.isAvailable}
-        title={
-          !plan.isAvailable
-            ? t("actions.unavailableHint")
-            : canChangePlan
-              ? undefined
-              : t("readOnly.actionDisabled")
-        }
+      <MetalAction
+        active={recommended && isUpgrade && actionable}
+        bend
+        className="w-full"
       >
-        {isUpgrade
-          ? t("actions.upgrade")
-          : t("actions.switchTo", { plan: plan.name })}
-      </Button>
+        <Button
+          type="button"
+          variant={isUpgrade ? "default" : "outline"}
+          className="min-h-11 w-full sm:min-h-10"
+          onClick={() => onSelectPlan(plan.code)}
+          disabled={!canChangePlan || !plan.isAvailable}
+          title={
+            !plan.isAvailable
+              ? t("actions.unavailableHint")
+              : canChangePlan
+                ? undefined
+                : t("readOnly.actionDisabled")
+          }
+        >
+          {isUpgrade
+            ? t("actions.upgrade")
+            : t("actions.switchTo", { plan: plan.name })}
+        </Button>
+      </MetalAction>
     );
   }
 
   return (
-    <Card className={cn(plan.isCurrent && "border-primary ring-primary/20 ring-1")}>
+    <Card
+      className={cn(plan.isCurrent && "border-primary ring-primary/20 ring-1")}
+    >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle>{plan.name}</CardTitle>
           {plan.isCurrent ? <Badge>{t("currentPlanTag")}</Badge> : null}
         </div>
-        <CardDescription className="text-foreground text-2xl font-semibold">
+        <CardDescription className="text-foreground text-2xl font-semibold tabular-nums">
           {currency(plan.priceCents)}
           <span className="text-muted-foreground ml-1 text-sm font-normal">
             {t("perMonth")}

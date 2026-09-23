@@ -112,7 +112,8 @@
   "sidebar": {
     "placeholderName": "—",
     "placeholderInitials": "PG",
-    "brandLabel": "HOME360, ir al inicio del panel"
+    "brandLabel": "HOME360, ir al inicio del panel",
+    "planLink": "Plan {plan}, ver suscripción"
   },
   "home": {
     "title": "Inicio",
@@ -156,7 +157,11 @@
     "queryErrorDescription": "Actualiza la página para volver a intentarlo.",
     "errorTitle": "No pudimos cargar el inicio",
     "errorDescription": "Ocurrió un problema al preparar tus indicadores. Inténtalo de nuevo.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "loadingKpis": "Cargando indicadores…",
+    "loadingChart": "Cargando gráfica de ingresos…",
+    "loadingBranches": "Cargando órdenes por sucursal…",
+    "loadingOrders": "Cargando órdenes recientes…"
   },
   "orderStatus": {
     "PENDING": "Pendiente",

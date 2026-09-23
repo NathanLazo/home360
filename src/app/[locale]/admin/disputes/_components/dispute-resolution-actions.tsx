@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import type { DisputeDetail } from "./disputes.types";
 import { DisputeResolution } from "@generated/prisma";
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 
 const MONETARY_RESOLUTIONS = [
@@ -62,7 +63,7 @@ export function DisputeResolutionActions({
             ? resolution === DisputeResolution.FULL_REFUND
             : resolution === DisputeResolution.RELEASE_PAYMENT;
 
-          return (
+          const button = (
             <Button
               key={resolution}
               type="button"
@@ -75,6 +76,18 @@ export function DisputeResolutionActions({
               {t(resolution)}
             </Button>
           );
+
+          // The decisive action of the pane is the only one wearing metal,
+          // and only while it can actually be taken.
+          if (primary && reason === null) {
+            return (
+              <MetalRing key={resolution} strength={0.65} bend>
+                {button}
+              </MetalRing>
+            );
+          }
+
+          return button;
         })}
       </div>
       {alreadyResolved ? (

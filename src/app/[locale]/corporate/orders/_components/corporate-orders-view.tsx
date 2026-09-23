@@ -10,7 +10,8 @@ import { CorporateOrdersTable } from "./corporate-orders-table";
 import type { CorporateOrderItem } from "../../_components/corporate.types";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { Skeleton } from "~/components/ui/skeleton";
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent } from "~/components/ui/card";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
 
@@ -24,8 +25,9 @@ export function CorporateOrdersView({
   status,
 }: CorporateOrdersViewProps) {
   const t = useTranslations("corporate.orders");
-  const [selectedOrder, setSelectedOrder] =
-    useState<CorporateOrderItem | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<CorporateOrderItem | null>(
+    null,
+  );
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const listInput = {
@@ -68,12 +70,11 @@ export function CorporateOrdersView({
       />
 
       {listQuery.isPending ? (
-        <div className="space-y-3" aria-busy="true" role="status">
-          <span className="sr-only">{t("loading")}</span>
-          {Array.from({ length: 8 }, (_, index) => (
-            <Skeleton key={index} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
+        <Card className="overflow-hidden py-0">
+          <CardContent className="px-0">
+            <TableSkeleton columns={7} rows={8} label={t("loading")} />
+          </CardContent>
+        </Card>
       ) : null}
 
       {!listQuery.isPending && errorCode !== null ? (

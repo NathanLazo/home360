@@ -1,6 +1,7 @@
 "use client";
 
-import { InboxIcon } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { InboxIcon, RotateCcwIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { RecentOrder } from "./dashboard.types";
@@ -10,8 +11,10 @@ import {
   StatusBadge,
   type StatusBadgeVariant,
 } from "~/components/status-badge";
+import { TableSkeleton } from "~/components/table-skeleton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Link } from "~/i18n/navigation";
 import { api } from "~/trpc/react";
 
@@ -35,7 +38,9 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
   const errors = useTranslations("errors");
   const formatter = useFormatter();
   const input = branchId ? { branchId } : {};
-  const query = api.dashboard.getRecentOrders.useQuery(input);
+  const query = api.dashboard.getRecentOrders.useQuery(input, {
+    placeholderData: keepPreviousData,
+  });
   const response = query.data;
   const ordersHref = branchId
     ? `/dashboard/orders?branch=${encodeURIComponent(branchId)}`
@@ -43,18 +48,13 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
 
   if (query.isPending) {
     return (
-      <Card aria-busy="true">
-        <CardHeader className="flex-row items-center justify-between">
-          <div className="bg-accent h-5 w-36 animate-pulse rounded motion-reduce:animate-none" />
-          <div className="bg-accent h-5 w-16 animate-pulse rounded motion-reduce:animate-none" />
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b py-4">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-5 w-16" />
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {Array.from({ length: 5 }, (_, index) => (
-            <div
-              key={index}
-              className="bg-accent h-10 animate-pulse rounded motion-reduce:animate-none"
-            />
-          ))}
+        <CardContent className="px-0">
+          <TableSkeleton columns={6} label={t("loadingOrders")} />
         </CardContent>
       </Card>
     );
@@ -83,6 +83,7 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
             className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
+            <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
         </CardContent>
@@ -177,9 +178,11 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
         <DataTable
           columns={columns}
           data={data}
+          getRowId={(row) => row.id}
           emptyState={
             <div className="p-6">
               <EmptyState
+                headingLevel="h3"
                 icon={InboxIcon}
                 title={t("ordersEmptyTitle")}
                 description={t("ordersEmptyDescription")}

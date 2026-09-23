@@ -4,9 +4,11 @@ import { ChevronRightIcon, ScaleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { OpenDisputeItem } from "./overview.types";
+import { PRESS_SURFACE_CLASS } from "./admin-motion";
 import { useCurrencyFormatter } from "./use-currency-formatter";
 import { EmptyState } from "~/components/empty-state";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
@@ -31,6 +33,17 @@ export function OpenDisputesList({
         icon={ScaleIcon}
         title={t("disputes.emptyTitle")}
         description={t("disputes.emptyDescription")}
+        action={
+          <Button
+            asChild
+            variant="outline"
+            className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          >
+            <Link href="/admin/disputes?status=resolved">
+              {t("disputes.emptyCta")}
+            </Link>
+          </Button>
+        }
       />
     );
   }
@@ -41,7 +54,10 @@ export function OpenDisputesList({
         <li key={dispute.id}>
           <Link
             href={`/admin/disputes?dispute=${dispute.id}`}
-            className="bg-card focus-visible:ring-ring group flex items-center gap-4 rounded-xl border p-4 transition-colors duration-150 ease-out hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none"
+            className={cn(
+              "bg-card focus-visible:ring-ring group flex items-center gap-4 rounded-xl border p-4 hover:border-zinc-300 hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none",
+              PRESS_SURFACE_CLASS,
+            )}
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -59,17 +75,21 @@ export function OpenDisputesList({
                   customer: dispute.customerName ?? t("disputes.unknownParty"),
                 })}
               </p>
-              <p className="text-muted-foreground text-xs">
+              <time
+                dateTime={dispute.createdAt.toISOString()}
+                className="text-muted-foreground text-xs"
+                suppressHydrationWarning
+              >
                 {formatter.relativeTime(dispute.createdAt)}
-              </p>
+              </time>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <span className="font-mono text-sm font-semibold">
+              <span className="font-mono text-sm font-semibold tabular-nums">
                 {currency(dispute.escrowCents)}
               </span>
               <ChevronRightIcon
                 aria-hidden="true"
-                className="text-muted-foreground size-4 transition-transform duration-150 ease-out group-hover:translate-x-0.5"
+                className="text-muted-foreground size-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
               />
             </div>
           </Link>

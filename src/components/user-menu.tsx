@@ -1,6 +1,7 @@
 import type { UserRole } from "@generated/prisma";
 import { getTranslations } from "next-intl/server";
 
+import { MetalRing } from "~/components/metal";
 import { SignOutItem } from "~/components/sign-out-item";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -19,6 +20,12 @@ export type UserMenuProps = {
   email: string;
   role: UserRole;
   variant: "light" | "dark";
+  /**
+   * Thin silver ring on the avatar trigger. Opt-in, for shells that carry no
+   * other persistent metal (the dashboard and corporate shells already show
+   * the plan chip in the sidebar, so they leave this off).
+   */
+  metalAvatar?: boolean;
 };
 
 function getInitials(name: string, email: string): string {
@@ -31,32 +38,48 @@ function getInitials(name: string, email: string): string {
   return initials || email.slice(0, 2).toUpperCase();
 }
 
-export async function UserMenu({ name, email, role, variant }: UserMenuProps) {
+export async function UserMenu({
+  name,
+  email,
+  role,
+  variant,
+  metalAvatar = false,
+}: UserMenuProps) {
   const t = await getTranslations("common.userMenu");
   const initials = getInitials(name, email);
 
+  const trigger = (
+    <DropdownMenuTrigger asChild>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={t("open")}
+        className={cn(
+          "rounded-full",
+          variant === "dark" && "text-zinc-100 hover:bg-zinc-800",
+        )}
+      >
+        <Avatar>
+          <AvatarFallback
+            className={cn(variant === "dark" && "bg-zinc-800 text-zinc-100")}
+          >
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+      </Button>
+    </DropdownMenuTrigger>
+  );
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={t("open")}
-          className={cn(
-            "rounded-full",
-            variant === "dark" && "text-zinc-100 hover:bg-zinc-800",
-          )}
-        >
-          <Avatar>
-            <AvatarFallback
-              className={cn(variant === "dark" && "bg-zinc-800 text-zinc-100")}
-            >
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
+      {metalAvatar ? (
+        <MetalRing variant="circle" theme={variant} strength={0.45} disableGlow>
+          {trigger}
+        </MetalRing>
+      ) : (
+        trigger
+      )}
       <DropdownMenuContent
         align="end"
         className={cn("w-64", variant === "dark" && "dark")}

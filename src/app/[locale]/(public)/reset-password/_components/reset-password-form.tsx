@@ -5,6 +5,7 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -182,16 +183,18 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           </p>
         ) : null}
       </div>
-      <Button
-        type="submit"
-        className="h-11 w-full"
-        disabled={resetPassword.isPending}
-      >
-        {resetPassword.isPending ? (
-          <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
-        ) : null}
-        {resetPassword.isPending ? t("submitting") : t("submit")}
-      </Button>
+      <MetalRing bend className="w-full">
+        <Button
+          type="submit"
+          className="h-11 w-full"
+          disabled={resetPassword.isPending}
+        >
+          {resetPassword.isPending ? (
+            <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
+          ) : null}
+          {resetPassword.isPending ? t("submitting") : t("submit")}
+        </Button>
+      </MetalRing>
       {resetPassword.isPending ? (
         <span className="sr-only" role="status">
           {t("submitting")}

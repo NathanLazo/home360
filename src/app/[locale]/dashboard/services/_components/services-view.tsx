@@ -7,11 +7,13 @@ import { useTranslations } from "next-intl";
 import { ServiceFilters } from "./service-filters";
 import { ServiceFormSheet } from "./service-form-sheet";
 import type { ServiceFiltersState, ServiceListItem } from "./service.types";
+import { ServicesSkeleton } from "./services-skeleton";
 import { ServicesTable } from "./services-table";
 import { useServiceMutations } from "./use-service-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -86,13 +88,7 @@ export function ServicesView() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-6" aria-busy="true">
-        <div className="bg-accent h-20 animate-pulse rounded-xl motion-reduce:animate-none" />
-        <div className="bg-accent h-11 animate-pulse rounded-lg motion-reduce:animate-none" />
-        <div className="bg-accent h-96 animate-pulse rounded-xl motion-reduce:animate-none" />
-      </div>
-    );
+    return <ServicesSkeleton />;
   }
 
   if (transportError || responseError) {
@@ -123,16 +119,18 @@ export function ServicesView() {
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <Button
-            type="button"
-            onClick={openCreate}
-            className="min-h-11 sm:min-h-10"
-            disabled={isReadOnly}
-            title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
-          >
-            <PlusIcon aria-hidden="true" />
-            {t("newService")}
-          </Button>
+          <MetalAction active={!isReadOnly}>
+            <Button
+              type="button"
+              onClick={openCreate}
+              className="min-h-11 sm:min-h-10"
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            >
+              <PlusIcon aria-hidden="true" />
+              {t("newService")}
+            </Button>
+          </MetalAction>
         }
       />
 

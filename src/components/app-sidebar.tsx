@@ -81,11 +81,7 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              size="lg"
-              className="duration-150 active:scale-[0.98] motion-reduce:active:scale-100"
-            >
+            <SidebarMenuButton asChild size="lg">
               <Link href={homeHref} aria-label={brandLabel}>
                 <span
                   aria-hidden="true"
@@ -118,7 +114,6 @@ export function AppSidebar({
                       asChild
                       isActive={isActive}
                       tooltip={tooltip}
-                      className="duration-150 active:scale-[0.98] motion-reduce:active:scale-100"
                     >
                       <Link
                         href={item.href}
@@ -147,7 +142,7 @@ export function AppSidebar({
             <SidebarMenuButton
               asChild
               size="lg"
-              className="cursor-default hover:bg-transparent active:bg-transparent"
+              className="cursor-default hover:bg-transparent active:scale-100 active:bg-transparent"
             >
               <div>
                 <Avatar className="size-8 rounded-lg">

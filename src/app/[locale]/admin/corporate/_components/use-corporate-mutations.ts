@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
+import { useMutationFeedback } from "../../_components/use-mutation-feedback";
 import type {
   CreateCorporateAccountInput,
   UpdateCorporateTermsInput,
@@ -41,6 +41,7 @@ export function useCorporateMutations(options?: {
   const t = useTranslations("admin.corporate.toasts");
   const errorsT = useTranslations("errors");
   const utils = api.useUtils();
+  const feedback = useMutationFeedback();
 
   const invalidate = async () => {
     await Promise.all([
@@ -49,63 +50,55 @@ export function useCorporateMutations(options?: {
     ]);
   };
 
+  type ToastKey =
+    | "created"
+    | "activated"
+    | "termsUpdated"
+    | "suspended"
+    | "reactivated"
+    | "billingReconciled"
+    | "requestRejected";
+
   // The corporate namespace adds codes (EMAIL_TAKEN, PLAN_NOT_SYNCED,
   // EMAIL_DELIVERY_FAILED) beyond the base contract union; every one of them
   // exists in `errors.json`, so the translation channel stays uniform.
-  const handleEnvelope = (
-    error: string | null,
-    successKey: string,
-  ): boolean => {
-    if (error !== null) {
-      toast.error(errorsT(error));
-      return false;
-    }
+  // These calls talk to Stripe and can take a moment: a loading toast opens
+  // on click and morphs into the outcome in place.
+  const lifecycle = (key: ToastKey) => ({
+    onMutate: () => feedback.start(key, t(`pending.${key}`)),
+    onSuccess: (response: { error: string | null }) => {
+      if (response.error !== null) {
+        feedback.error(key, errorsT(response.error));
+        return;
+      }
 
-    toast.success(t(successKey));
-    void invalidate();
-    options?.onSettledSuccess?.();
-    return true;
-  };
-
-  const onTransportError = (error: unknown) => {
-    toast.error(errorsT(toErrorCode(error)));
-  };
-
-  const create = api.admin.corporate.create.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "created"),
-    onError: onTransportError,
+      feedback.success(key, t(key));
+      void invalidate();
+      options?.onSettledSuccess?.();
+    },
+    onError: (error: unknown) =>
+      feedback.error(key, errorsT(toErrorCode(error))),
   });
 
-  const activate = api.admin.corporate.activate.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "activated"),
-    onError: onTransportError,
-  });
-
-  const updateTerms = api.admin.corporate.updateTerms.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "termsUpdated"),
-    onError: onTransportError,
-  });
-
-  const suspend = api.admin.corporate.suspend.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "suspended"),
-    onError: onTransportError,
-  });
-
-  const reactivate = api.admin.corporate.reactivate.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "reactivated"),
-    onError: onTransportError,
-  });
-
-  const reconcileBilling = api.admin.corporate.reconcileBilling.useMutation({
-    onSuccess: (response) =>
-      handleEnvelope(response.error, "billingReconciled"),
-    onError: onTransportError,
-  });
-
-  const rejectTierChange = api.admin.corporate.rejectTierChange.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "requestRejected"),
-    onError: onTransportError,
-  });
+  const create = api.admin.corporate.create.useMutation(lifecycle("created"));
+  const activate = api.admin.corporate.activate.useMutation(
+    lifecycle("activated"),
+  );
+  const updateTerms = api.admin.corporate.updateTerms.useMutation(
+    lifecycle("termsUpdated"),
+  );
+  const suspend = api.admin.corporate.suspend.useMutation(
+    lifecycle("suspended"),
+  );
+  const reactivate = api.admin.corporate.reactivate.useMutation(
+    lifecycle("reactivated"),
+  );
+  const reconcileBilling = api.admin.corporate.reconcileBilling.useMutation(
+    lifecycle("billingReconciled"),
+  );
+  const rejectTierChange = api.admin.corporate.rejectTierChange.useMutation(
+    lifecycle("requestRejected"),
+  );
 
   return {
     create: {

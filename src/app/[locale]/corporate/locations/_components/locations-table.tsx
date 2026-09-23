@@ -11,6 +11,7 @@ import {
   type StatusBadgeVariant,
 } from "~/components/status-badge";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 
 const ACTIVITY_VARIANTS: Record<"active" | "inactive", StatusBadgeVariant> = {
   active: "success",
@@ -62,7 +63,7 @@ export function LocationsTable({
       key: "contact",
       header: t("table.contact"),
       cell: (location) =>
-        location.contactName ?? location.contactPhone ? (
+        (location.contactName ?? location.contactPhone) ? (
           <span className="block max-w-44 truncate">
             {[location.contactName, location.contactPhone]
               .filter(Boolean)
@@ -131,19 +132,24 @@ export function LocationsTable({
   ];
 
   return (
-    <div aria-label={t("listLabel")}>
-      <DataTable
-        columns={columns}
-        data={locations}
-        emptyState={
-          <EmptyState
-            icon={MapPinIcon}
-            title={t("emptyTitle")}
-            description={t("emptyDescription")}
-            action={emptyAction}
-          />
-        }
-      />
-    </div>
+    <Card className="overflow-hidden py-0" aria-label={t("listLabel")}>
+      <CardContent className="px-0">
+        <DataTable
+          columns={columns}
+          data={locations}
+          getRowId={(location) => location.id}
+          emptyState={
+            <div className="p-4 sm:p-6">
+              <EmptyState
+                icon={MapPinIcon}
+                title={t("emptyTitle")}
+                description={t("emptyDescription")}
+                action={emptyAction}
+              />
+            </div>
+          }
+        />
+      </CardContent>
+    </Card>
   );
 }

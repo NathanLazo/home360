@@ -11,7 +11,10 @@ import type { CorporateLocationItem } from "../../_components/corporate.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Link } from "~/i18n/navigation";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
@@ -45,11 +48,11 @@ export function LocationsView() {
             <Skeleton className="h-11 w-44 rounded-md" />
           </div>
         </div>
-        <div className="space-y-3">
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
+        <Card className="overflow-hidden py-0">
+          <CardContent className="px-0">
+            <TableSkeleton columns={6} rows={6} />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -91,17 +94,19 @@ export function LocationsView() {
             : undefined
       }
     >
-      <Button
-        type="button"
-        className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-        aria-disabled={createDisabled}
-        aria-describedby={atLimit ? "location-limit-help" : undefined}
-        onClick={create}
-        disabled={!canMutate}
-      >
-        <PlusIcon aria-hidden="true" />
-        {t("new")}
-      </Button>
+      <MetalAction active={!createDisabled}>
+        <Button
+          type="button"
+          className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+          aria-disabled={createDisabled}
+          aria-describedby={atLimit ? "location-limit-help" : undefined}
+          onClick={create}
+          disabled={!canMutate}
+        >
+          <PlusIcon aria-hidden="true" />
+          {t("new")}
+        </Button>
+      </MetalAction>
     </span>
   );
 
@@ -117,7 +122,10 @@ export function LocationsView() {
           </p>
           {createButton}
           {atLimit && data.limits.max !== null ? (
-            <p id="location-limit-help" className="text-muted-foreground text-xs">
+            <p
+              id="location-limit-help"
+              className="text-muted-foreground text-xs"
+            >
               {t("limitTooltip", { max: data.limits.max })}{" "}
               <Link
                 href="/corporate/membership"

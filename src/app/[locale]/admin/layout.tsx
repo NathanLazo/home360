@@ -81,6 +81,7 @@ export default async function AdminLayout({
         <AdminHeader
           user={{ name: userName, email: userEmail, role: user.role }}
           toggleSidebarLabel={t("header.toggleSidebar")}
+          roleLabel={t("header.roleBadge")}
         />
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </SidebarInset>

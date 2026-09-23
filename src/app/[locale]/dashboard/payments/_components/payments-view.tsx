@@ -11,32 +11,21 @@ import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
+import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
+import { TableSkeleton } from "~/components/table-skeleton";
 import { api } from "~/trpc/react";
 
 function BalancesLoadingState({ label }: { label: string }) {
-  return (
-    <div
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
-      aria-busy="true"
-      role="status"
-    >
-      <span className="sr-only">{label}</span>
-      {Array.from({ length: 3 }, (_, index) => (
-        <Skeleton key={index} className="h-36 w-full rounded-xl" />
-      ))}
-    </div>
-  );
+  return <KpiRowSkeleton count={3} label={label} className="xl:grid-cols-3" />;
 }
 
 function TransactionsLoadingState({ label }: { label: string }) {
   return (
-    <div className="space-y-3" aria-busy="true" role="status">
-      <span className="sr-only">{label}</span>
-      {Array.from({ length: 8 }, (_, index) => (
-        <Skeleton key={index} className="h-14 w-full rounded-lg" />
-      ))}
-    </div>
+    <Card className="overflow-hidden py-0">
+      <CardContent className="px-0">
+        <TableSkeleton columns={6} rows={8} label={label} />
+      </CardContent>
+    </Card>
   );
 }
 

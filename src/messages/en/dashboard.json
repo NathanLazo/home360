@@ -112,7 +112,8 @@
   "sidebar": {
     "placeholderName": "—",
     "placeholderInitials": "PG",
-    "brandLabel": "HOME360, go to dashboard home"
+    "brandLabel": "HOME360, go to dashboard home",
+    "planLink": "{plan} plan, view subscription"
   },
   "home": {
     "title": "Home",
@@ -156,7 +157,11 @@
     "queryErrorDescription": "Refresh the page to try again.",
     "errorTitle": "We couldn't load your home page",
     "errorDescription": "Something went wrong while preparing your metrics. Try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "loadingKpis": "Loading metrics…",
+    "loadingChart": "Loading revenue chart…",
+    "loadingBranches": "Loading orders by branch…",
+    "loadingOrders": "Loading recent orders…"
   },
   "orderStatus": {
     "PENDING": "Pending",
