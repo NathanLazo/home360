@@ -2,6 +2,7 @@
 
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { ADMIN_EYEBROW_CLASS } from "./admin-surface";
 import type { AiConfigSummary } from "./overview.types";
@@ -18,6 +19,7 @@ import { Link } from "~/i18n/navigation";
 export function AiConfigCard({ config }: { config: AiConfigSummary }) {
   const t = useTranslations("admin.overview");
   const formatter = useFormatter();
+  const [now] = useState(() => new Date());
 
   return (
     <Card>
@@ -64,7 +66,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
         </dl>
         <p className="text-muted-foreground text-xs">
           {t("ai.updatedAt", {
-            when: formatter.relativeTime(config.updatedAt),
+            when: formatter.relativeTime(config.updatedAt, now),
           })}
         </p>
         <Button

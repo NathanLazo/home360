@@ -44,5 +44,11 @@
     "permissionDenied": "Permiso de ubicación denegado. Captura las coordenadas manualmente.",
     "unavailable": "No pudimos obtener tu ubicación. Captura las coordenadas manualmente.",
     "invalid": "Captura latitud (−90 a 90) y longitud (−180 a 180), o deja ambas vacías."
+  },
+  "impersonation": {
+    "title": "Modo administrador · solo lectura",
+    "description": "Estás viendo el panel de {name} tal como lo ve su dueño. Los cambios están desactivados.",
+    "exit": "Volver al admin",
+    "exiting": "Volviendo…"
   }
 }

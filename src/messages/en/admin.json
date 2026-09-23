@@ -1062,5 +1062,9 @@
       "suspended": "Suspended",
       "resolved": "Resolved"
     }
+  },
+  "impersonation": {
+    "viewPanel": "View their panel",
+    "opening": "Opening panel…"
   }
 }

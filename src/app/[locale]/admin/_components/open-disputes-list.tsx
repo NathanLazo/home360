@@ -2,6 +2,7 @@
 
 import { ChevronRightIcon, ScaleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { OpenDisputeEvidenceLink } from "./open-dispute-evidence-link";
 import type { OpenDisputeItem } from "./overview.types";
@@ -27,6 +28,7 @@ export function OpenDisputesList({
   const t = useTranslations("admin.overview");
   const urgencyT = useTranslations("admin.disputeUrgency");
   const formatter = useFormatter();
+  const [now] = useState(() => new Date());
   const currency = useCurrencyFormatter();
 
   if (disputes.length === 0) {
@@ -81,7 +83,7 @@ export function OpenDisputesList({
                 className="text-muted-foreground text-xs"
                 suppressHydrationWarning
               >
-                {formatter.relativeTime(dispute.createdAt)}
+                {formatter.relativeTime(dispute.createdAt, now)}
               </time>
             </div>
             <div className="flex shrink-0 items-center gap-3">

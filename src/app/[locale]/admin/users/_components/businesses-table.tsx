@@ -18,6 +18,7 @@ export type BusinessesTableProps = {
   onOpenBusiness: (businessId: string) => void;
   onReviewDocuments: (businessId: string) => void;
   onAction?: (businessId: string, action: BusinessRowAction) => void;
+  onImpersonate?: (businessId: string) => void;
   emptyAction?: ReactNode;
 };
 
@@ -26,6 +27,7 @@ export function BusinessesTable({
   onOpenBusiness,
   onReviewDocuments,
   onAction,
+  onImpersonate,
   emptyAction,
 }: BusinessesTableProps) {
   const t = useTranslations("admin.users");
@@ -100,6 +102,9 @@ export function BusinessesTable({
           onViewDetail={() => onOpenBusiness(row.id)}
           onReviewDocuments={() => onReviewDocuments(row.id)}
           onAction={onAction ? (action) => onAction(row.id, action) : undefined}
+          onImpersonate={
+            onImpersonate ? () => onImpersonate(row.id) : undefined
+          }
         />
       ),
     },

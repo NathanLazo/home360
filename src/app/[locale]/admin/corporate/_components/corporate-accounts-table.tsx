@@ -20,6 +20,7 @@ export type CorporateAccountsTableProps = {
   accounts: CorporateAccountRow[];
   onOpenAccount: (accountId: string) => void;
   onAction: (account: CorporateAccountRow, action: CorporateRowAction) => void;
+  onImpersonate?: (accountId: string) => void;
   emptyAction?: React.ReactNode;
 };
 
@@ -27,6 +28,7 @@ export function CorporateAccountsTable({
   accounts,
   onOpenAccount,
   onAction,
+  onImpersonate,
   emptyAction,
 }: CorporateAccountsTableProps) {
   const t = useTranslations("admin.corporate");
@@ -99,6 +101,9 @@ export function CorporateAccountsTable({
           status={row.status}
           onViewDetail={() => onOpenAccount(row.id)}
           onAction={(action) => onAction(row, action)}
+          onImpersonate={
+            onImpersonate ? () => onImpersonate(row.id) : undefined
+          }
         />
       ),
     },

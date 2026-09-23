@@ -35,10 +35,35 @@ export type WebSessionRequestMetadata = {
   ip: string | null;
 };
 
-export type VerifiedWebSession = {
-  userId: string;
+export type WebSessionIdentity = {
+  id: string;
   role: UserRole;
+  name: string | null;
+  email: string | null;
+  image: string | null;
 };
+
+export type VerifiedWebSession = {
+  /** Who the request acts as: the owner, or the impersonated user. */
+  user: WebSessionIdentity;
+  /** The ADMIN behind an active impersonation, `null` otherwise. */
+  impersonator: { id: string; name: string | null } | null;
+};
+
+/** Roles an ADMIN may impersonate (read-only) to see their panels. */
+export const IMPERSONATABLE_ROLES = ["BUSINESS", "CORPORATE"] as const;
+
+function isImpersonatableRole(role: UserRole): boolean {
+  return IMPERSONATABLE_ROLES.some((allowed) => allowed === role);
+}
+
+const identitySelect = {
+  id: true,
+  role: true,
+  name: true,
+  email: true,
+  image: true,
+} as const;
 
 /**
  * Thrown when a login without the "replace" intent finds an active session on
@@ -146,10 +171,15 @@ async function revokeById(
 }
 
 /**
- * Server-side check behind every `auth()`. Returns the fresh user id and role
- * for a live session, or `null` when the session must end. Lazily records why
- * a session ended (expired, credentials rotated, suspended, superseded) and
+ * Server-side check behind every `auth()`. Returns the fresh identity for a
+ * live session, or `null` when the session must end. Lazily records why a
+ * session ended (expired, credentials rotated, suspended, superseded) and
  * slides the idle timeout with throttled writes.
+ *
+ * Impersonation is resolved here, from the database, on every request: the
+ * cookie never decides who the request acts as. An impersonation that
+ * expired, whose owner is no longer ADMIN or whose target is no longer an
+ * impersonatable role is cleared and the session falls back to its owner.
  */
 export async function verifyWebSession(
   db: PrismaClient,
@@ -170,8 +200,14 @@ export async function verifyWebSession(
       lastSeenAt: true,
       lastIp: true,
       createdAt: true,
+      impersonationExpiresAt: true,
+      impersonatedUser: { select: identitySelect },
       user: {
-        select: { role: true, sessionsValidFrom: true, suspendedAt: true },
+        select: {
+          ...identitySelect,
+          sessionsValidFrom: true,
+          suspendedAt: true,
+        },
       },
     },
   });
@@ -234,7 +270,41 @@ export async function verifyWebSession(
     });
   }
 
-  return { userId: session.userId, role: session.user.role };
+  const owner: WebSessionIdentity = {
+    id: session.user.id,
+    role: session.user.role,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+  };
+  const target = session.impersonatedUser;
+
+  if (target === null) {
+    return { user: owner, impersonator: null };
+  }
+
+  const impersonationValid =
+    owner.role === "ADMIN" &&
+    isImpersonatableRole(target.role) &&
+    session.impersonationExpiresAt !== null &&
+    session.impersonationExpiresAt > now;
+
+  if (!impersonationValid) {
+    await clearImpersonation(db, session.id);
+    return { user: owner, impersonator: null };
+  }
+
+  return {
+    user: target,
+    impersonator: { id: owner.id, name: owner.name },
+  };
+}
+
+async function clearImpersonation(db: PrismaClient, id: string): Promise<void> {
+  await db.session.updateMany({
+    where: { id, impersonatedUserId: { not: null } },
+    data: { impersonatedUserId: null, impersonationExpiresAt: null },
+  });
 }
 
 export async function revokeWebSession(

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
 
 /**
  * Shared contract for `admin.corporate` (F7-03/F7-04): the router validates
@@ -63,6 +64,7 @@ export const listCorporateAccountsSchema = z
     tier: corporateTierSchema.optional(),
     search: z.string().trim().max(100).optional(),
     cursor: z.string().cuid().optional(),
+    direction: infiniteQueryDirectionSchema,
   })
   .strict();
 

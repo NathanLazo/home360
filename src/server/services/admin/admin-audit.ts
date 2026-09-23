@@ -108,6 +108,13 @@ export type AdminAuditEvent =
       metadata: { notePresent: boolean; notifiedUsers: number };
     }
   | {
+      action:
+        | typeof AdminAuditAction.IMPERSONATION_STARTED
+        | typeof AdminAuditAction.IMPERSONATION_ENDED;
+      userId: string;
+      metadata: { role: UserRole };
+    }
+  | {
       action: typeof AdminAuditAction.CAMPAIGN_SENT;
       campaignId: string;
       metadata: { audience: CampaignAudience; recipientCount: number };
@@ -203,6 +210,15 @@ function toRow(event: AdminAuditEvent): AuditRow {
         targetId: event.disputeId,
         before: event.before,
         after: event.after,
+        metadata: event.metadata,
+      };
+    case AdminAuditAction.IMPERSONATION_STARTED:
+    case AdminAuditAction.IMPERSONATION_ENDED:
+      return {
+        targetType: AdminAuditTarget.USER,
+        targetId: event.userId,
+        before: undefined,
+        after: undefined,
         metadata: event.metadata,
       };
     case AdminAuditAction.CAMPAIGN_SENT:

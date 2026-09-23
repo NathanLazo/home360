@@ -2,6 +2,9 @@ import { z } from "zod";
 
 import { DisputeResolution, DisputeUrgency } from "@generated/prisma";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
+
 /**
  * "open" folds OPEN and IN_REVIEW: both are still on the admin's desk.
  * "in_review" narrows to files waiting on more evidence; "all" drops the gate.
@@ -27,14 +30,15 @@ export const listDisputesSchema = z
     urgency: disputeUrgencyFilterSchema.optional(),
     /** Order folio (digits, optional "#") or a party / title fragment. */
     search: z.string().trim().max(DISPUTE_SEARCH_MAX_LENGTH).optional(),
-    cursor: z.string().cuid().optional(),
+    cursor: recordIdSchema.optional(),
+    direction: infiniteQueryDirectionSchema,
   })
   .strict();
 
 export type ListDisputesInput = z.infer<typeof listDisputesSchema>;
 
 export const getDisputeSchema = z
-  .object({ disputeId: z.string().cuid() })
+  .object({ disputeId: recordIdSchema })
   .strict();
 
 export const MIN_JUSTIFICATION_LENGTH = 20;
@@ -45,7 +49,7 @@ export const EVIDENCE_NOTE_MAX_LENGTH = 1000;
 /** "Pedir más evidencia": the admin must say what evidence is missing. */
 export const requestDisputeEvidenceSchema = z
   .object({
-    disputeId: z.string().cuid(),
+    disputeId: recordIdSchema,
     note: z
       .string()
       .trim()
@@ -67,7 +71,7 @@ export const generateDisputeSummarySchema = getDisputeSchema;
  */
 export const resolveDisputeSchema = z
   .object({
-    disputeId: z.string().cuid(),
+    disputeId: recordIdSchema,
     resolution: z.nativeEnum(DisputeResolution),
     providerRefundCents: z.number().int().nonnegative().optional(),
     serviceFeeRefundCents: z.number().int().nonnegative().optional(),

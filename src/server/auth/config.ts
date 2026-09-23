@@ -140,7 +140,14 @@ export const authConfig = {
           return null;
         }
 
-        token.role = verified.role;
+        // The effective identity comes from the database on every request,
+        // so starting or ending an impersonation needs no cookie rewrite.
+        token.id = verified.user.id;
+        token.role = verified.user.role;
+        token.name = verified.user.name;
+        token.email = verified.user.email;
+        token.picture = verified.user.image;
+        token.impersonator = verified.impersonator;
         token.authInvalidated = false;
       } catch (error) {
         // Fail closed without logging the user out: a transient database

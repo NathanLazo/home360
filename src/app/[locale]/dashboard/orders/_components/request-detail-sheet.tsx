@@ -8,6 +8,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { EMPTY_OFFER, OfferForm, toDateTimeLocal } from "./offer-form";
 import type { RadarRequestDetail, WorkerOption } from "./order.types";
@@ -82,6 +83,7 @@ export function RequestDetailSheet({
   const t = useTranslations("dashboard.requests.detail");
   const errorsT = useTranslations("errors");
   const formatter = useFormatter();
+  const [now] = useState(() => new Date());
   const money = useMoney();
   const { isReadOnly } = useSubscriptionAccess();
   const open = requestId !== null;
@@ -125,7 +127,7 @@ export function RequestDetailSheet({
           <SheetDescription>
             {request
               ? t("postedAt", {
-                  date: formatter.relativeTime(request.createdAt),
+                  date: formatter.relativeTime(request.createdAt, now),
                 })
               : t("description")}
           </SheetDescription>

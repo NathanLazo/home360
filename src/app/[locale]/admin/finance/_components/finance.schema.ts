@@ -6,6 +6,8 @@ import {
   WithdrawalStatus,
 } from "@generated/prisma";
 
+import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
+
 /** "YYYY-MM" in the platform's financial time zone; defaults to this month. */
 export const financeMonthSchema = z.string().regex(/^\d{4}-\d{2}$/u);
 
@@ -49,6 +51,7 @@ export const listWithdrawalsSchema = z
     from: withdrawalDateSchema.optional(),
     to: withdrawalDateSchema.optional(),
     cursor: z.string().cuid().optional(),
+    direction: infiniteQueryDirectionSchema,
   })
   .strict();
 
@@ -89,6 +92,7 @@ export const listLoyaltyBonusesSchema = z
     status: loyaltyBonusStatusSchema.optional(),
     businessId: z.string().cuid().optional(),
     cursor: z.string().cuid().optional(),
+    direction: infiniteQueryDirectionSchema,
   })
   .strict();
 

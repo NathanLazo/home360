@@ -36,7 +36,14 @@ export default auth((request) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session && wantsProtectedRoute) {
+  // An ADMIN session may be impersonating (resolved from the database, which
+  // the edge cannot read), so its cookie role can lag behind. Let it through
+  // and leave the decision to the layout's `requireRole`, which sees the
+  // effective identity; redirecting here could loop against it.
+  const mayImpersonate =
+    session?.user.role === "ADMIN" || session?.user.impersonator != null;
+
+  if (session && wantsProtectedRoute && !mayImpersonate) {
     const home = homeForRole(session.user.role);
     const isAllowed =
       (wantsDashboard && home === "/dashboard") ||

@@ -11,10 +11,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type {
-  BusinessStatus,
-  SubscriptionStatus,
-} from "@generated/prisma";
+import type { BusinessStatus, SubscriptionStatus } from "@generated/prisma";
+import { IMPERSONATION_READ_ONLY } from "~/lib/auth/impersonation";
 import { auth } from "~/server/auth";
 import { resolveBearerSession } from "~/server/auth/resolve-session";
 import { db } from "~/server/db";
@@ -52,8 +50,7 @@ type CustomerContext = {
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // The Bearer fallback only runs when the cookie path resolved nothing, so
   // web requests pay zero extra latency.
-  const session =
-    (await auth()) ?? (await resolveBearerSession(opts.headers));
+  const session = (await auth()) ?? (await resolveBearerSession(opts.headers));
 
   return {
     db,
@@ -144,7 +141,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure
+export const authenticatedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user || ctx.session.user.authInvalidated) {
@@ -157,6 +154,25 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Impersonation is read-only: while an ADMIN views a business or corporate
+ * panel, every mutation behind a role guard is refused, so the admin can
+ * never move money or edit data on the owner's behalf. Only
+ * `authenticatedProcedure` (used to end the impersonation) skips this.
+ */
+export const protectedProcedure = authenticatedProcedure.use(
+  ({ ctx, type, next }) => {
+    if (type === "mutation" && ctx.session.user.impersonator !== null) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: IMPERSONATION_READ_ONLY,
+      });
+    }
+
+    return next();
+  },
+);
 
 export const userProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.session.user.role !== "CUSTOMER") {

@@ -30,6 +30,7 @@ export const edgeAuthConfig = {
         id: token.id,
         role: token.role,
         authInvalidated: token.authInvalidated ?? true,
+        impersonator: token.impersonator ?? null,
       },
     }),
   },

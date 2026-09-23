@@ -44,5 +44,11 @@
     "permissionDenied": "Location permission denied. Enter the coordinates manually.",
     "unavailable": "We couldn’t get your location. Enter the coordinates manually.",
     "invalid": "Enter latitude (−90 to 90) and longitude (−180 to 180), or leave both empty."
+  },
+  "impersonation": {
+    "title": "Admin mode · read-only",
+    "description": "You are viewing {name}'s panel exactly as its owner sees it. Changes are disabled.",
+    "exit": "Back to admin",
+    "exiting": "Going back…"
   }
 }

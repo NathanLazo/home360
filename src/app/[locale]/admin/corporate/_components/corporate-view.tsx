@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
 import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
+import { useStartImpersonation } from "../../_components/use-start-impersonation";
 import {
   TableSkeleton,
   type TableSkeletonColumn,
@@ -90,6 +91,7 @@ export function CorporateView() {
     null,
   );
 
+  const impersonation = useStartImpersonation();
   const mutations = useCorporateMutations({
     onSettledSuccess: () => {
       setCreateOpen(false);
@@ -122,11 +124,7 @@ export function CorporateView() {
   });
 
   const renderCreateButton = (metal: ButtonMetal) => (
-    <Button
-      type="button"
-      metal={metal}
-      onClick={() => setCreateOpen(true)}
-    >
+    <Button type="button" metal={metal} onClick={() => setCreateOpen(true)}>
       <PlusIcon aria-hidden="true" />
       {t("create.button")}
     </Button>
@@ -190,6 +188,7 @@ export function CorporateView() {
               accounts={query.state.items}
               onOpenAccount={urlState.openAccount}
               onAction={(row, action) => raiseAction(row, action)}
+              onImpersonate={(id) => impersonation.start("CORPORATE", id)}
               emptyAction={
                 filtersActive ? (
                   <ClearFiltersButton

@@ -1,6 +1,7 @@
 import { adminCorporateRouter } from "~/server/api/routers/admin/corporate";
 import { adminDisputesRouter } from "~/server/api/routers/admin/disputes";
 import { adminFinanceRouter } from "~/server/api/routers/admin/finance";
+import { adminImpersonationRouter } from "~/server/api/routers/admin/impersonation";
 import { adminOverviewRouter } from "~/server/api/routers/admin/overview";
 import { adminSettingsRouter } from "~/server/api/routers/admin/settings";
 import { adminUsersRouter } from "~/server/api/routers/admin/users";
@@ -15,6 +16,7 @@ export const adminRouter = createTRPCRouter({
   corporate: adminCorporateRouter,
   disputes: adminDisputesRouter,
   finance: adminFinanceRouter,
+  impersonation: adminImpersonationRouter,
   overview: adminOverviewRouter,
   settings: adminSettingsRouter,
   users: adminUsersRouter,

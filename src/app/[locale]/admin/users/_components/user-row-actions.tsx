@@ -50,6 +50,8 @@ export type UserRowActionsProps = {
   onViewDetail: () => void;
   onReviewDocuments: () => void;
   onAction?: (action: BusinessRowAction) => void;
+  /** Opens the business dashboard as its owner (read-only). */
+  onImpersonate?: () => void;
 };
 
 export function UserRowActions({
@@ -58,8 +60,10 @@ export function UserRowActions({
   onViewDetail,
   onReviewDocuments,
   onAction,
+  onImpersonate,
 }: UserRowActionsProps) {
   const t = useTranslations("admin.users.actions");
+  const impersonationT = useTranslations("admin.impersonation");
   const actions = onAction ? availableActions(derivedStatus) : [];
 
   return (
@@ -95,6 +99,16 @@ export function UserRowActions({
         >
           {t("reviewDocuments")}
         </DropdownMenuItem>
+        {onImpersonate ? (
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              onImpersonate();
+            }}
+          >
+            {impersonationT("viewPanel")}
+          </DropdownMenuItem>
+        ) : null}
         {firstOpenDisputeId ? (
           <DropdownMenuItem asChild>
             <Link href={`/admin/disputes?dispute=${firstOpenDisputeId}`}>

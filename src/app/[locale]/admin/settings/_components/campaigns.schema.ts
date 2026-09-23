@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { CampaignAudience } from "@generated/prisma";
+import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
 
 /** Kept within what iOS/Android show without truncating a push banner. */
 export const CAMPAIGN_TITLE_MAX_LENGTH = 65;
@@ -21,5 +22,8 @@ export const sendCampaignSchema = z
 export type SendCampaignInput = z.infer<typeof sendCampaignSchema>;
 
 export const listCampaignsSchema = z
-  .object({ cursor: z.string().cuid().optional() })
+  .object({
+    cursor: z.string().cuid().optional(),
+    direction: infiniteQueryDirectionSchema,
+  })
   .strict();

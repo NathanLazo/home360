@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
 import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
+import { useStartImpersonation } from "../../_components/use-start-impersonation";
 import { useSuccessBeat } from "../../_components/use-success-beat";
 import { BusinessDetailActions } from "./business-detail-actions";
 import { BusinessDetailSheet } from "./business-detail-sheet";
@@ -108,6 +109,7 @@ export function UsersView() {
     }
   }, [approveRequested, businessId, clearApproveRequest]);
 
+  const impersonation = useStartImpersonation();
   const successBeat = useSuccessBeat();
   const mutations = useUserMutations({
     onSettledSuccess: () => {
@@ -208,6 +210,7 @@ export function UsersView() {
                 onAction={(id, action) =>
                   setPendingModeration({ businessId: id, action })
                 }
+                onImpersonate={(id) => impersonation.start("BUSINESS", id)}
                 emptyAction={emptyAction}
               />
             ) : null}

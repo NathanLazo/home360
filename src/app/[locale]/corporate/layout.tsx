@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AppShellContent } from "~/components/app-shell-content";
+import { ImpersonationBanner } from "~/components/impersonation-banner";
 import { SessionGuard } from "~/components/session-guard";
 import { CorporateHeader } from "./_components/corporate-header";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
@@ -101,6 +102,9 @@ export default async function CorporateLayout({
         />
         <SessionGuard />
         <AppShellContent id="corporate-content">
+          {user.impersonator ? (
+            <ImpersonationBanner subjectName={account.name} />
+          ) : null}
           <CorporateStatusBanner
             status={account.status}
             statusReason={account.statusReason}

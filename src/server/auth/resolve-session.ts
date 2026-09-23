@@ -51,6 +51,8 @@ export async function resolveBearerSession(
       id: payload.id,
       role: payload.role,
       authInvalidated,
+      // Impersonation is a web-only (cookie session) feature.
+      impersonator: null,
     },
     expires:
       typeof payload.exp === "number"

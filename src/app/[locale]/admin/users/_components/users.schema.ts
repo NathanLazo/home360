@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { WorkerAvailability } from "@generated/prisma";
 import { planCodeSchema } from "~/lib/subscription/plan-codes";
+import { recordIdSchema } from "~/schemas/record-id.schema";
+import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
 
 export const usersTabSchema = z.enum(["businesses", "customers", "workers"]);
 
@@ -43,7 +45,11 @@ const usersFiltersShape = {
 };
 
 export const listUsersSchema = z
-  .object({ ...usersFiltersShape, cursor: z.string().cuid().optional() })
+  .object({
+    ...usersFiltersShape,
+    cursor: recordIdSchema.optional(),
+    direction: infiniteQueryDirectionSchema,
+  })
   .strict();
 
 export type ListUsersInput = z.infer<typeof listUsersSchema>;
@@ -51,7 +57,7 @@ export type ListUsersInput = z.infer<typeof listUsersSchema>;
 export type UsersFiltersInput = Omit<ListUsersInput, "cursor">;
 
 export const getBusinessDetailSchema = z
-  .object({ businessId: z.string().cuid() })
+  .object({ businessId: recordIdSchema })
   .strict();
 
 /** The export honors the very filters on screen, never the whole table. */
@@ -62,7 +68,7 @@ export const moderationReasonSchema = z.string().trim().min(5).max(500);
 
 export const approveBusinessSchema = z
   .object({
-    businessId: z.string().cuid(),
+    businessId: recordIdSchema,
     planCode: planCodeSchema,
   })
   .strict();
@@ -71,25 +77,25 @@ export type ApproveBusinessInput = z.infer<typeof approveBusinessSchema>;
 
 export const rejectBusinessSchema = z
   .object({
-    businessId: z.string().cuid(),
+    businessId: recordIdSchema,
     reason: moderationReasonSchema,
   })
   .strict();
 
 export const suspendBusinessSchema = z
   .object({
-    businessId: z.string().cuid(),
+    businessId: recordIdSchema,
     reason: moderationReasonSchema,
   })
   .strict();
 
 export const reactivateBusinessSchema = z
-  .object({ businessId: z.string().cuid() })
+  .object({ businessId: recordIdSchema })
   .strict();
 
 /** A REJECTED business goes back to the PENDING review queue. */
 export const reopenBusinessReviewSchema = z
-  .object({ businessId: z.string().cuid() })
+  .object({ businessId: recordIdSchema })
   .strict();
 
 /**
@@ -99,14 +105,14 @@ export const reopenBusinessReviewSchema = z
 export const reviewDocumentSchema = z.discriminatedUnion("status", [
   z
     .object({
-      documentId: z.string().cuid(),
+      documentId: recordIdSchema,
       status: z.literal("APPROVED"),
       notes: moderationReasonSchema.optional(),
     })
     .strict(),
   z
     .object({
-      documentId: z.string().cuid(),
+      documentId: recordIdSchema,
       status: z.literal("REJECTED"),
       notes: moderationReasonSchema,
     })
@@ -116,12 +122,12 @@ export const reviewDocumentSchema = z.discriminatedUnion("status", [
 export type ReviewDocumentInput = z.infer<typeof reviewDocumentSchema>;
 
 export const getCustomerDetailSchema = z
-  .object({ userId: z.string().cuid() })
+  .object({ userId: recordIdSchema })
   .strict();
 
 export const suspendUserSchema = z
   .object({
-    userId: z.string().cuid(),
+    userId: recordIdSchema,
     reason: moderationReasonSchema,
   })
   .strict();
@@ -129,7 +135,7 @@ export const suspendUserSchema = z
 export type SuspendUserInput = z.infer<typeof suspendUserSchema>;
 
 export const reactivateUserSchema = z
-  .object({ userId: z.string().cuid() })
+  .object({ userId: recordIdSchema })
   .strict();
 
 export type ReactivateUserInput = z.infer<typeof reactivateUserSchema>;

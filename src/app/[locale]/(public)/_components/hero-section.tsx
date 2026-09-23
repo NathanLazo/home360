@@ -35,10 +35,10 @@ export async function HeroSection() {
         )}
       >
         <Reveal durationMs={500}>
-          <p className="bg-canvas/80 text-copy-sm text-muted-foreground rounded-pill shadow-subtle inline-flex items-center gap-3 py-1 pr-4 pl-1">
+          <div className="bg-canvas/80 text-copy-sm text-muted-foreground rounded-pill shadow-subtle inline-flex items-center gap-3 py-1 pr-4 pl-1">
             <MetalNewBadge label={t("badgeNew")} />
             {t("badge")}
-          </p>
+          </div>
         </Reveal>
 
         <SplitHeading

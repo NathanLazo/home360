@@ -43,14 +43,18 @@ export type CorporateRowActionsProps = {
   status: CorporateStatusValue;
   onViewDetail: () => void;
   onAction: (action: CorporateRowAction) => void;
+  /** Opens the corporate panel as its owner (read-only). */
+  onImpersonate?: () => void;
 };
 
 export function CorporateRowActions({
   status,
   onViewDetail,
   onAction,
+  onImpersonate,
 }: CorporateRowActionsProps) {
   const t = useTranslations("admin.corporate.actions");
+  const impersonationT = useTranslations("admin.impersonation");
   const actions = availableCorporateActions(status);
 
   return (
@@ -75,6 +79,16 @@ export function CorporateRowActions({
         >
           {t("viewDetail")}
         </DropdownMenuItem>
+        {onImpersonate ? (
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              onImpersonate();
+            }}
+          >
+            {impersonationT("viewPanel")}
+          </DropdownMenuItem>
+        ) : null}
         {actions.map((action) => (
           <DropdownMenuItem
             key={action}

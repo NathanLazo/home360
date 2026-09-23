@@ -19,6 +19,7 @@ export const ERROR_CODES = [
   "INTERNAL_ERROR",
   "UNKNOWN_ERROR",
   "INVALID_TOKEN",
+  "IMPERSONATION_READ_ONLY",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

@@ -2,6 +2,7 @@
 
 import { HandCoinsIcon, LoaderCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { OfferRowActions } from "./offer-row-actions";
 import { OfferStatusBadge } from "./offer-status-badge";
@@ -34,6 +35,7 @@ export function OffersTable({
   const t = useTranslations("dashboard.requests.offers");
   const statusT = useTranslations("dashboard.requests.offerStatus");
   const formatter = useFormatter();
+  const [now] = useState(() => new Date());
   const money = useMoney();
   const columns: Array<DataTableColumn<MyQuoteItem>> = [
     {
@@ -104,7 +106,7 @@ export function OffersTable({
           dateTime={quote.updatedAt.toISOString()}
           className="text-muted-foreground text-copy-sm tabular-nums"
         >
-          {formatter.relativeTime(quote.updatedAt)}
+          {formatter.relativeTime(quote.updatedAt, now)}
         </time>
       ),
     },

@@ -1,5 +1,6 @@
 import { TRPCClientError } from "@trpc/client";
 
+import { IMPERSONATION_READ_ONLY } from "~/lib/auth/impersonation";
 import type { ErrorCode } from "~/server/api/contract";
 
 const getTransportCode = (error: unknown): unknown => {
@@ -26,7 +27,9 @@ export function toErrorCode(error: unknown): ErrorCode {
     }
 
     if (code === "FORBIDDEN") {
-      return "FORBIDDEN";
+      return error.message === IMPERSONATION_READ_ONLY
+        ? "IMPERSONATION_READ_ONLY"
+        : "FORBIDDEN";
     }
   }
 
