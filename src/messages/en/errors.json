@@ -46,5 +46,7 @@
   "BUSINESS_SUSPENDED": "The business account is suspended.",
   "SETTINGS_STALE": "Someone else changed the settings. Reload the screen.",
   "AI_UNAVAILABLE": "Smart diagnosis is unavailable right now. Try again in a few minutes.",
-  "ADDRESS_LIMIT_REACHED": "You reached the limit of 10 saved addresses. Delete one to add another."
+  "ADDRESS_LIMIT_REACHED": "You reached the limit of 10 saved addresses. Delete one to add another.",
+  "ORDER_NOT_REVIEWABLE": "You can only rate a completed order.",
+  "REVIEW_ALREADY_EXISTS": "You already rated this order."
 }

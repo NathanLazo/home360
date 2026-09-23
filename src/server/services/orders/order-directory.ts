@@ -219,6 +219,20 @@ export async function listOrders(
     return fail("NOT_FOUND", 404, "Branch not found");
   }
 
+  if (input.workerId) {
+    // Tenancy (P-WEB-02): a foreign or unknown worker answers the same
+    // generic NOT_FOUND as a foreign branch, so the response never reveals
+    // whether the worker exists in another business.
+    const worker = await db.worker.findFirst({
+      where: { id: input.workerId, businessId },
+      select: { id: true },
+    });
+
+    if (!worker) {
+      return fail("NOT_FOUND", 404, "Worker not found");
+    }
+  }
+
   if (input.cursor) {
     const cursor = await db.order.findFirst({
       where: { id: input.cursor, businessId },
@@ -234,6 +248,7 @@ export async function listOrders(
     where: {
       businessId,
       ...(input.branchId ? { branchId: input.branchId } : {}),
+      ...(input.workerId ? { workerId: input.workerId } : {}),
       ...(input.status ? { status: input.status } : {}),
       ...(input.type ? { type: input.type } : {}),
       ...(input.search ? searchWhere(input.search) : {}),
