@@ -824,7 +824,8 @@
     "toggleSidebar": "Mostrar u ocultar la navegación",
     "roleBadge": "Admin",
     "navigationTitle": "Navegación de administración",
-    "navigationDescription": "Secciones del panel de administración"
+    "navigationDescription": "Secciones del panel de administración",
+    "skipToContent": "Saltar al contenido"
   },
   "filters": {
     "clear": "Limpiar filtros"

@@ -103,7 +103,7 @@ export function FinanceView() {
   const withdrawals = pages.flatMap((page) => page.result?.items ?? []);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {kpis.status === "pending" ? (

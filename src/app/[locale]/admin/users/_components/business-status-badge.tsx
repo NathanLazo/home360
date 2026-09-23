@@ -24,10 +24,6 @@ export function BusinessStatusBadge({
   const t = useTranslations("admin.users.derivedStatus");
 
   return (
-    <StatusBadge
-      status={status}
-      variantMap={variantMap}
-      label={t(status)}
-    />
+    <StatusBadge status={status} variantMap={variantMap} label={t(status)} />
   );
 }

@@ -72,6 +72,8 @@ export function PaymentsHeaderActions({
 
       <Button
         metal="live"
+        // The open dialog's confirm takes over the live ring.
+        metalActive={!withdrawDialogOpen}
         type="button"
         className="min-h-11 sm:min-h-10"
         disabled={!canWithdraw || isReadOnly}

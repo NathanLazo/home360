@@ -40,6 +40,7 @@ import {
   useErrorShake,
   useTransientFlag,
 } from "~/components/motion";
+import { cn } from "~/lib/utils";
 
 /** How long the save button holds its success check. */
 const SAVED_FEEDBACK_MS = 2000;
@@ -260,8 +261,19 @@ export function BusinessProfileForm({
           >
             <p
               aria-live="polite"
-              className="text-muted-foreground text-copy-sm"
+              className="text-muted-foreground text-copy-sm flex items-center gap-2"
             >
+              {/* Second cue beside the text, never the only signal: the dot
+                  settles in when the form turns dirty. */}
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "bg-warning size-2 shrink-0 rounded-full transition-[opacity,scale] duration-150 ease-out motion-reduce:transition-opacity",
+                  isDirty && !isReadOnly
+                    ? "scale-100 opacity-100"
+                    : "scale-50 opacity-0",
+                )}
+              />
               {isDirty && !isReadOnly ? t("unsavedChanges") : null}
             </p>
           </GlassDock>

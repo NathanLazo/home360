@@ -151,11 +151,24 @@ function AlertDialogAction({
   className,
   variant = "default",
   size = "default",
+  metal,
+  metalActive,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action> &
-  Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+  Pick<
+    React.ComponentProps<typeof Button>,
+    "variant" | "size" | "metal" | "metalActive"
+  >) {
   return (
-    <Button variant={variant} size={size} asChild>
+    <Button
+      variant={variant}
+      size={size}
+      metal={metal}
+      // `asChild` hides `disabled` from Button: a disabled action never wears
+      // the live ring.
+      metalActive={metalActive !== false && !props.disabled}
+      asChild
+    >
       <AlertDialogPrimitive.Action
         data-slot="alert-dialog-action"
         className={cn(className)}

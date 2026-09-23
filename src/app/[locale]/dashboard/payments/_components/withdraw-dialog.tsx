@@ -239,6 +239,7 @@ export function WithdrawDialog({
               </Button>
               <Button
                 type="submit"
+                metal="live"
                 className="min-h-11"
                 disabled={requestingWithdrawal || exceedsAvailable}
               >

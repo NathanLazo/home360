@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { AppShellContent } from "~/components/app-shell-content";
 import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
 import { AdminSidebar } from "./_components/admin-sidebar";
@@ -66,6 +67,12 @@ export default async function AdminLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <a
+        href="#admin-content"
+        className="bg-card text-foreground focus-visible:ring-ring shadow-float fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {t("header.skipToContent")}
+      </a>
       <AdminSidebar
         labels={labels}
         openDisputes={openDisputes}
@@ -90,9 +97,7 @@ export default async function AdminLayout({
           toggleSidebarLabel={t("header.toggleSidebar")}
           roleLabel={t("header.roleBadge")}
         />
-        <div className="bg-canvas-soft flex-1 p-4 sm:p-6 lg:p-8">
-          {children}
-        </div>
+        <AppShellContent id="admin-content">{children}</AppShellContent>
       </SidebarInset>
     </SidebarProvider>
   );

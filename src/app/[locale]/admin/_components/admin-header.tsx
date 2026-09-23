@@ -1,7 +1,7 @@
 import type { UserRole } from "@generated/prisma";
 
+import { GlassSurface } from "~/components/glass";
 import { LocaleSwitcher } from "~/components/locale-switcher";
-import { MetalPill } from "~/components/metal";
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { UserMenu } from "~/components/user-menu";
@@ -15,16 +15,16 @@ export type AdminHeaderProps = {
     role: UserRole;
   };
   toggleSidebarLabel: string;
-  /** Role label shown as the shell's single metal detail. */
+  /** Role label shown as a static-chrome identity chip. */
   roleLabel: string;
 };
 
 /**
- * Admin top bar: a solid canvas strip with a hairline, the same chrome the
- * business dashboard uses, so the ink sidebar alone carries the "operator
- * mode" weight. It stays solid (no glass): it is persistent structure over
- * dense tables, and the screens' one glass surface is reserved for their
- * decisive action bar (settings save, dispute resolution).
+ * Admin top bar: the same floating Liquid Glass toolbar as the dashboard and
+ * corporate shells (solid canvas on first paint and under reduced
+ * transparency / more contrast). The role chip is static chrome (`bg-metal`,
+ * no WebGL) so every admin screen keeps its live-metal budget for the
+ * decisive action (resolve dispute, save settings).
  */
 export function AdminHeader({
   user,
@@ -32,18 +32,24 @@ export function AdminHeader({
   roleLabel,
 }: AdminHeaderProps) {
   return (
-    <header className="bg-canvas border-hairline sticky top-0 z-30 flex min-h-16 items-center gap-2 border-b px-4 sm:px-6">
-      <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1.5" />
-      <Separator
-        orientation="vertical"
-        className="mr-1 data-[orientation=vertical]:h-4"
-      />
-      {/* Identity marker, not a control: the admin shell's only metal. */}
-      <MetalPill label={roleLabel} scale={0.9} theme="light" />
-      <div className="ml-auto flex items-center gap-2">
-        <LocaleSwitcher />
-        <UserMenu {...user} variant="light" />
-      </div>
+    <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
+      <GlassSurface
+        radius="lg"
+        className="flex min-h-14 items-center gap-2 px-3 py-2 sm:pr-2"
+      >
+        <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="mr-1 data-[orientation=vertical]:h-4"
+        />
+        <span className="bg-metal text-ink shadow-hairline inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium tracking-tight">
+          {roleLabel}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <LocaleSwitcher />
+          <UserMenu {...user} variant="light" />
+        </div>
+      </GlassSurface>
     </header>
   );
 }

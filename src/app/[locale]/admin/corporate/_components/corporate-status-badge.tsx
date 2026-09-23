@@ -22,5 +22,7 @@ export function CorporateStatusBadge({
 }) {
   const t = useTranslations("admin.corporate.status");
 
-  return <StatusBadge status={status} variantMap={variantMap} label={t(status)} />;
+  return (
+    <StatusBadge status={status} variantMap={variantMap} label={t(status)} />
+  );
 }

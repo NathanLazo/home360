@@ -38,6 +38,8 @@ export function StackedCurrencyBarChart({
       className={className}
       margin={{ top: 8, right: 8, bottom: 36, left: 8 }}
       barGap={0.35}
+      // Tool surfaces: a brief load-state reveal, not a showcase entrance.
+      animationDuration={300}
     >
       <Grid strokeDasharray="4,4" />
       <BarXAxis />

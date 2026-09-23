@@ -218,6 +218,8 @@ export function ApproveBusinessDialog({
           </Button>
           <Button
             type="button"
+            metal="live"
+            metalActive={!succeeded}
             className="min-h-11 sm:min-h-10"
             disabled={loading || !business || planCode === null}
             aria-disabled={succeeded || undefined}

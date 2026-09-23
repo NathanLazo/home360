@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { AppShellContent } from "~/components/app-shell-content";
 import { CorporateHeader } from "./_components/corporate-header";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
 import { CorporateStatusBanner } from "./_components/corporate-status-banner";
@@ -96,17 +97,14 @@ export default async function CorporateLayout({
           }}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
-        <main
-          id="corporate-content"
-          className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8"
-        >
+        <AppShellContent id="corporate-content">
           <CorporateStatusBanner
             status={account.status}
             statusReason={account.statusReason}
             locale={locale}
           />
           {children}
-        </main>
+        </AppShellContent>
       </SidebarInset>
     </SidebarProvider>
   );
