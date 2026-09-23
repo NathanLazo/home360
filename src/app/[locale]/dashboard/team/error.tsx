@@ -17,7 +17,7 @@ export default function TeamError({ reset }: { reset: () => void }) {
         <Button
           type="button"
           onClick={reset}
-          className="min-h-11 active:scale-[0.98]"
+          className="min-h-11"
         >
           <RotateCcwIcon aria-hidden="true" />
           {t("retry")}

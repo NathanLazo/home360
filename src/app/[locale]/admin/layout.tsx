@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
 import { AdminSidebar } from "./_components/admin-sidebar";
+import { SkipLink } from "~/components/skip-link";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
@@ -66,6 +67,7 @@ export default async function AdminLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <SkipLink targetId="admin-content" />
       <AdminSidebar
         labels={labels}
         openDisputes={openDisputes}
@@ -82,7 +84,9 @@ export default async function AdminLayout({
           user={{ name: userName, email: userEmail, role: user.role }}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main id="admin-content" className="p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

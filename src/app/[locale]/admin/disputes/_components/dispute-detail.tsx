@@ -132,7 +132,7 @@ export function DisputeDetail({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 transition-transform duration-150 ease-out active:scale-[0.96] xl:hidden"
+          className="size-9 shrink-0 xl:hidden"
           aria-label={t("back")}
           onClick={onBack}
         >

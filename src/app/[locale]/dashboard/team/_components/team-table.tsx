@@ -133,7 +133,7 @@ export function TeamTable({
                     type="button"
                     onClick={onCreate}
                     disabled={!canCreate}
-                    className="min-h-11 active:scale-[0.98]"
+                    className="min-h-11"
                   >
                     {t("newWorker")}
                   </Button>

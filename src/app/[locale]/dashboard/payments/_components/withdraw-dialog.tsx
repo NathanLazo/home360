@@ -165,7 +165,11 @@ export function WithdrawDialog({
                 aria-invalid={
                   (amountError ?? exceedsAvailable) ? true : undefined
                 }
-                aria-describedby="withdraw-amount-hint"
+                aria-describedby={
+                  amountError
+                    ? "withdraw-amount-hint withdraw-amount-error"
+                    : "withdraw-amount-hint"
+                }
                 {...form.register("amount")}
               />
               <p
@@ -175,7 +179,11 @@ export function WithdrawDialog({
                 {t("amountHint", { amount: currency(availableCents) })}
               </p>
               {amountError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p
+                  id="withdraw-amount-error"
+                  role="alert"
+                  className="text-destructive text-sm"
+                >
                   {amountError.message ?? t("amountInvalid")}
                 </p>
               ) : null}
@@ -188,10 +196,15 @@ export function WithdrawDialog({
                 autoComplete="off"
                 disabled={requestingWithdrawal}
                 aria-invalid={bankError ? true : undefined}
+                aria-describedby={bankError ? "withdraw-bank-error" : undefined}
                 {...form.register("bankName")}
               />
               {bankError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p
+                  id="withdraw-bank-error"
+                  role="alert"
+                  className="text-destructive text-sm"
+                >
                   {t("bankInvalid")}
                 </p>
               ) : null}
@@ -209,10 +222,17 @@ export function WithdrawDialog({
                 disabled={requestingWithdrawal}
                 className="font-mono tabular-nums"
                 aria-invalid={last4Error ? true : undefined}
+                aria-describedby={
+                  last4Error ? "withdraw-last4-error" : undefined
+                }
                 {...form.register("accountLast4")}
               />
               {last4Error ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p
+                  id="withdraw-last4-error"
+                  role="alert"
+                  className="text-destructive text-sm"
+                >
                   {t("last4Invalid")}
                 </p>
               ) : null}

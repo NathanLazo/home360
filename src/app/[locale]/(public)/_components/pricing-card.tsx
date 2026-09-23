@@ -33,7 +33,7 @@ export function PricingCard({
 }: PricingCardProps) {
   return (
     <div
-      className={`flex h-full flex-col gap-6 rounded-lg bg-white p-6 transition-[box-shadow,border-color] duration-300 ${
+      className={`flex h-full flex-col gap-6 rounded-lg bg-white p-6 transition-[box-shadow,border-color] duration-150 ease-brand ${
         highlighted
           ? "border-2 border-[var(--brand-gold)] shadow-[0_18px_44px_-28px_rgb(13_27_42/0.5)]"
           : "border border-[color-mix(in_srgb,var(--brand-navy)_14%,transparent)]"

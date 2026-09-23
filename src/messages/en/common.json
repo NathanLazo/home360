@@ -28,5 +28,11 @@
       "title": "Payment cancelled",
       "description": "No charge was made. You can try again with the same link while it is still active."
     }
+  },
+  "a11y": {
+    "skipToContent": "Skip to main content",
+    "close": "Close",
+    "toggleSidebar": "Toggle sidebar",
+    "updating": "Updating figures…"
   }
 }
