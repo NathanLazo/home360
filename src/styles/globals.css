@@ -11,6 +11,9 @@
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Landing-only editorial accent (owner's pick); never on product surfaces. */
+  --font-display:
+    var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
 
   /*
    * Weight ceiling is 600. Tailwind's heavier steps collapse onto it so a

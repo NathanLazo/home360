@@ -6,8 +6,8 @@ mueve*. Ante contradicción sobre alcance manda el ticket; sobre estética y mot
 este archivo. El sistema visual (tokens, primitivas, budgets) está en `DESIGN.md`.
 
 > **Actualización (sistema "Vercel-inspired" + metal líquido + Liquid Glass).** Por
-> decisión del product owner la paleta de marca navy/gold/cream/gray y Fraunces quedan
-> **retiradas**: toda la plataforma, landing incluida, usa el sistema ink/zinc de
+> decisión del product owner la paleta de marca navy/gold/cream/gray queda
+> **retirada** (Fraunces sobrevive solo como acento editorial de la landing): toda la plataforma, landing incluida, usa el sistema ink/zinc de
 > `DESIGN.md`. D7 se reinterpreta en §1.
 
 Fuentes: `roger-arq` (arquitectura), `frontend-design` (dirección de arte), `motion-design`
@@ -52,8 +52,8 @@ lectura, se usa una banda `.dark`.
 ## 2. Tipografía
 
 **Una sola familia: Geist.** Sans para todo, Geist Mono para etiquetas técnicas,
-eyebrows, código y cifras verificables. **Fraunces y cualquier serif están
-prohibidas.** Pesos 400/500/600; 600 es el techo (Tailwind remapea `font-bold` a 600).
+eyebrows, código y cifras verificables. Única serif: Fraunces como acento de
+headings de la landing (`accentClass`); prohibida en producto. Pesos 400/500/600; 600 es el techo (Tailwind remapea `font-bold` a 600).
 Sentence case.
 
 Escala (utilidades de `globals.css`, tracking proporcional ya incluido):
@@ -199,6 +199,6 @@ La misma disciplina, otra personalidad. Aplica a F6-09 y F6-11:
 - [ ] Sin `transition: all`; solo `transform`/`opacity` animados.
 - [ ] 375 / 768 / 1024 sin desbordes; áreas táctiles ≥44 px.
 - [ ] Loading, empty, error y éxito implementados.
-- [ ] Frontera D7 intacta (sin `--brand-*`, sin Fraunces; mesh/beams/entradas solo en landing).
+- [ ] Frontera D7 intacta (sin `--brand-*`, Fraunces solo en acentos de landing; mesh/beams/entradas solo en landing).
 - [ ] Budgets de metal vivo (≤2) y glass + metal (1) respetados; fallbacks de glass verificados.
 - [ ] `pnpm typecheck`, `pnpm check` y `pnpm build` en verde.
