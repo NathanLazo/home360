@@ -203,7 +203,7 @@ export function WorkerFormSheet({
                 type="button"
                 variant="outline"
                 disabled={submitting}
-                className="min-h-11 active:scale-[0.98]"
+                className="min-h-11"
               >
                 {t("form.cancel")}
               </Button>
@@ -211,7 +211,7 @@ export function WorkerFormSheet({
             <Button
               type="submit"
               disabled={submitting || (isEditing && !isDirty)}
-              className="min-h-11 active:scale-[0.98]"
+              className="min-h-11"
             >
               {submitting ? (
                 <LoaderCircleIcon

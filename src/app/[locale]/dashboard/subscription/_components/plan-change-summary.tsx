@@ -31,7 +31,7 @@ export function PlanChangeSummary({ preview }: { preview: PlanChangePreview }) {
             ? t("changeDialog.creditLabel")
             : t("changeDialog.chargeLabel")}
         </dt>
-        <dd className="font-mono font-medium">
+        <dd className="font-mono font-medium tabular-nums">
           {currency(Math.abs(preview.prorationCents))}
         </dd>
       </div>

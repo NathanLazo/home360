@@ -14,7 +14,11 @@ import { Button } from "~/components/ui/button";
  * `pdfUrl` downloads the document; it is not a way to pay an invoice, so the
  * button never doubles as a "settle your debt" call to action.
  */
-export function LatestInvoiceSummary({ invoice }: { invoice: InvoiceListItem }) {
+export function LatestInvoiceSummary({
+  invoice,
+}: {
+  invoice: InvoiceListItem;
+}) {
   const t = useTranslations("dashboard.subscription.invoices");
   const format = useFormatter();
   const currency = useCurrencyFormatter();
@@ -23,7 +27,7 @@ export function LatestInvoiceSummary({ invoice }: { invoice: InvoiceListItem }) 
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="flex flex-wrap items-center gap-2 text-sm">
         <span className="text-muted-foreground">{t("latestLabel")}</span>
-        <span className="font-mono font-medium">
+        <span className="font-mono font-medium tabular-nums">
           {currency(invoice.amountCents)}
         </span>
         <span className="text-muted-foreground">

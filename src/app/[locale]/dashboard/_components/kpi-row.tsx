@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import {
   BanknoteIcon,
   InboxIcon,
@@ -9,68 +10,54 @@ import {
 import { useFormatter, useTranslations } from "next-intl";
 
 import { KpiCard } from "~/components/kpi-card";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
+import { SectionError } from "~/components/section-error";
+import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
 export type KpiRowProps = {
   branchId?: string;
 };
 
+const CURRENCY_FORMAT = {
+  style: "currency",
+  currency: "MXN",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+} as const;
+const RATING_FORMAT = {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+} as const;
+
 export function KpiRow({ branchId }: KpiRowProps) {
   const t = useTranslations("dashboard.home");
-  const errors = useTranslations("errors");
   const formatter = useFormatter();
   const input = branchId ? { branchId } : {};
-  const query = api.dashboard.getKpis.useQuery(input);
-  const response = query.data;
+  // Keep the previous figures on screen while a branch switch refetches, so
+  // the numbers roll to their new values instead of flashing a skeleton.
+  const query = api.dashboard.getKpis.useQuery(input, {
+    placeholderData: keepPreviousData,
+  });
+  const state = unwrapEnvelope(query);
 
-  if (query.isPending) {
+  if (state.status === "pending") {
+    return <KpiRowSkeleton label={t("loadingKpis")} />;
+  }
+
+  if (state.status === "error") {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="bg-accent h-36 animate-pulse rounded-xl motion-reduce:animate-none"
-          />
-        ))}
-      </div>
+      <SectionError
+        title={t("queryErrorTitle")}
+        code={state.code}
+        onRetry={() => void query.refetch()}
+      />
     );
   }
 
-  if (query.error || !response || response.error || !response.result) {
-    const description = response?.error
-      ? errors(response.error)
-      : t("queryErrorDescription");
-
-    return (
-      <Card role="alert">
-        <CardContent className="flex flex-col items-start gap-3">
-          <div className="flex flex-col gap-1">
-            <p className="font-semibold">{t("queryErrorTitle")}</p>
-            <p className="text-muted-foreground text-sm">{description}</p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11 sm:min-h-10"
-            onClick={() => void query.refetch()}
-          >
-            {t("retry")}
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const data = response.result;
+  const data = state.data;
   const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    formatter.number(cents / 100, CURRENCY_FORMAT);
   const revenueDelta =
     data.revenueDeltaPct === null
       ? t("notAvailable")
@@ -86,10 +73,12 @@ export function KpiRow({ branchId }: KpiRowProps) {
     <section
       className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       aria-label={t("kpisLabel")}
+      aria-busy={query.isPlaceholderData}
     >
       <KpiCard
         label={t("revenue")}
         value={currency(data.revenueCents)}
+        numeric={{ value: data.revenueCents / 100, format: CURRENCY_FORMAT }}
         icon={BanknoteIcon}
         delta={{
           text: revenueDelta,
@@ -104,6 +93,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
       <KpiCard
         label={t("orders")}
         value={formatter.number(data.ordersCount)}
+        numeric={{ value: data.ordersCount }}
         icon={InboxIcon}
         delta={{
           text: t("ordersBreakdown", {
@@ -116,6 +106,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
       <KpiCard
         label={t("escrow")}
         value={currency(data.escrowCents)}
+        numeric={{ value: data.escrowCents / 100, format: CURRENCY_FORMAT }}
         icon={LockKeyholeIcon}
         delta={{
           text: t("escrowOrders", { count: data.escrowOrdersCount }),
@@ -127,10 +118,12 @@ export function KpiRow({ branchId }: KpiRowProps) {
         value={
           data.avgRating === null
             ? t("notAvailable")
-            : formatter.number(data.avgRating, {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })
+            : formatter.number(data.avgRating, RATING_FORMAT)
+        }
+        numeric={
+          data.avgRating === null
+            ? undefined
+            : { value: data.avgRating, format: RATING_FORMAT }
         }
         icon={StarIcon}
         delta={{

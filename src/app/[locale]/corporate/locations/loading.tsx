@@ -1,3 +1,5 @@
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function CorporateLocationsLoading() {
@@ -7,11 +9,11 @@ export default function CorporateLocationsLoading() {
         <Skeleton className="h-8 w-44" />
         <Skeleton className="h-4 w-full max-w-sm" />
       </div>
-      <div className="space-y-3">
-        {Array.from({ length: 6 }, (_, index) => (
-          <Skeleton key={index} className="h-14 w-full rounded-lg" />
-        ))}
-      </div>
+      <Card className="overflow-hidden py-0">
+        <CardContent className="px-0">
+          <TableSkeleton columns={6} rows={6} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function PaymentsLoading() {
@@ -7,13 +10,13 @@ export default function PaymentsLoading() {
         <Skeleton className="h-8 w-36" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => (
-          <Skeleton key={index} className="h-36 w-full rounded-xl" />
-        ))}
-      </div>
+      <KpiRowSkeleton count={3} className="xl:grid-cols-3" />
       <Skeleton className="h-6 w-40" />
-      <Skeleton className="h-96 rounded-xl" />
+      <Card className="overflow-hidden py-0">
+        <CardContent className="px-0">
+          <TableSkeleton columns={6} rows={8} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

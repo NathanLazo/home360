@@ -1,6 +1,6 @@
 "use client";
 
-import { InboxIcon, SearchXIcon } from "lucide-react";
+import { InboxIcon, LoaderCircleIcon, SearchXIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { CorporateOrderStatusBadge } from "../../_components/corporate-order-status-badge";
@@ -8,6 +8,7 @@ import type { CorporateOrderItem } from "../../_components/corporate.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 
 export type CorporateOrdersTableProps = {
   orders: CorporateOrderItem[];
@@ -92,48 +93,67 @@ export function CorporateOrdersTable({
     {
       key: "date",
       header: t("table.date"),
-      cell: (order) =>
-        formatter.dateTime(order.createdAt, {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }),
+      cell: (order) => (
+        <time
+          dateTime={order.createdAt.toISOString()}
+          className="text-muted-foreground text-sm tabular-nums"
+        >
+          {formatter.dateTime(order.createdAt, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </time>
+      ),
     },
   ];
 
   return (
-    <div className="flex flex-col gap-4" aria-label={t("table.label")}>
-      <DataTable
-        columns={columns}
-        data={orders}
-        onRowClick={onSelect}
-        emptyState={
-          filtered ? (
-            <EmptyState
-              icon={SearchXIcon}
-              title={t("filteredEmptyTitle")}
-              description={t("filteredEmptyDescription")}
-            />
-          ) : (
-            <EmptyState
-              icon={InboxIcon}
-              title={t("emptyTitle")}
-              description={t("emptyDescription")}
-            />
-          )
-        }
-      />
+    <Card className="overflow-hidden py-0" aria-label={t("table.label")}>
+      <CardContent className="px-0">
+        <DataTable
+          columns={columns}
+          data={orders}
+          onRowClick={onSelect}
+          getRowId={(order) => order.id}
+          emptyState={
+            <div className="p-4 sm:p-6">
+              {filtered ? (
+                <EmptyState
+                  icon={SearchXIcon}
+                  title={t("filteredEmptyTitle")}
+                  description={t("filteredEmptyDescription")}
+                />
+              ) : (
+                <EmptyState
+                  icon={InboxIcon}
+                  title={t("emptyTitle")}
+                  description={t("emptyDescription")}
+                />
+              )}
+            </div>
+          }
+        />
+      </CardContent>
       {hasMore ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11 self-start sm:min-h-10"
-          onClick={onLoadMore}
-          disabled={loadingMore}
-        >
-          {t("loadMore")}
-        </Button>
+        <div className="flex justify-center border-t p-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 sm:min-h-10"
+            onClick={onLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? (
+              <LoaderCircleIcon
+                aria-hidden="true"
+                className="animate-spin motion-reduce:animate-none"
+              />
+            ) : null}
+            {t("loadMore")}
+          </Button>
+        </div>
       ) : null}
-    </div>
+    </Card>
   );
 }

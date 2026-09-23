@@ -13,6 +13,7 @@ import { ProductFilters } from "./product-filters";
 import { ProductFormSheet } from "./product-form-sheet";
 import { ProductImportDialog } from "./product-import-dialog";
 import type { ProductFiltersState, ProductListItem } from "./product.types";
+import { ProductsSkeleton } from "./products-skeleton";
 import { ProductsTable } from "./products-table";
 import { useProductMutations } from "./use-product-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
@@ -88,13 +89,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-6" aria-busy="true">
-        <div className="bg-accent h-20 animate-pulse rounded-xl motion-reduce:animate-none" />
-        <div className="bg-accent h-11 animate-pulse rounded-lg motion-reduce:animate-none" />
-        <div className="bg-accent h-96 animate-pulse rounded-xl motion-reduce:animate-none" />
-      </div>
-    );
+    return <ProductsSkeleton />;
   }
 
   if (transportError || responseError) {

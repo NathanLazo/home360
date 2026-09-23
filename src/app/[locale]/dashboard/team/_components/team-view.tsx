@@ -62,7 +62,7 @@ export function TeamView() {
         action={
           <Button
             type="button"
-            className="min-h-11 active:scale-[0.98]"
+            className="min-h-11"
             onClick={() => void listQuery.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -105,7 +105,7 @@ export function TeamView() {
               aria-describedby={
                 createBlockedReason ? "team-create-hint" : undefined
               }
-              className="min-h-11 active:scale-[0.98] sm:min-h-10"
+              className="min-h-11 sm:min-h-10"
             >
               <PlusIcon aria-hidden="true" />
               {t("newWorker")}

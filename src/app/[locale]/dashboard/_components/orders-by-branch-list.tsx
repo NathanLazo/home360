@@ -1,6 +1,7 @@
 "use client";
 
-import { Building2Icon } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { Building2Icon, RotateCcwIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import {
@@ -11,6 +12,7 @@ import {
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
 
 /** Slices beyond this count collapse into a single "others" slice. */
@@ -25,23 +27,29 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
   const errors = useTranslations("errors");
   const formatter = useFormatter();
   const input = branchId ? { branchId } : {};
-  const query = api.dashboard.getOrdersByBranch.useQuery(input);
+  const query = api.dashboard.getOrdersByBranch.useQuery(input, {
+    placeholderData: keepPreviousData,
+  });
   const response = query.data;
 
   if (query.isPending) {
     return (
-      <Card aria-busy="true">
+      <Card aria-busy="true" role="status">
         <CardHeader>
-          <div className="bg-accent h-5 w-44 animate-pulse rounded motion-reduce:animate-none" />
+          <span className="sr-only">{t("loadingBranches")}</span>
+          <Skeleton className="h-5 w-44" />
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-5">
-          <div className="bg-accent size-44 animate-pulse rounded-full motion-reduce:animate-none" />
+          <Skeleton className="aspect-square w-full max-w-56 rounded-full" />
           <div className="flex w-full flex-col gap-3">
             {Array.from({ length: 3 }, (_, index) => (
-              <div
-                key={index}
-                className="bg-accent h-4 animate-pulse rounded motion-reduce:animate-none"
-              />
+              <div key={index} className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Skeleton className="size-2.5 rounded-full" />
+                  <Skeleton className="h-4 w-28" />
+                </span>
+                <Skeleton className="h-4 w-8" />
+              </div>
             ))}
           </div>
         </CardContent>
@@ -72,6 +80,7 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
             className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
+            <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
         </CardContent>
@@ -91,6 +100,7 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
         </CardHeader>
         <CardContent>
           <EmptyState
+            headingLevel="h3"
             icon={Building2Icon}
             title={t("branchEmptyTitle")}
             description={t("branchEmptyDescription")}

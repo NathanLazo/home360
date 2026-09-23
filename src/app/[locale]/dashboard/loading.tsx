@@ -1,3 +1,6 @@
+import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
+import { TableSkeleton } from "~/components/table-skeleton";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function DashboardLoading() {
@@ -8,18 +11,22 @@ export default function DashboardLoading() {
         <Skeleton className="h-4 w-full max-w-sm" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="h-36 rounded-xl" />
-        ))}
-      </div>
+      <KpiRowSkeleton />
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Skeleton className="h-80 rounded-xl xl:col-span-2" />
         <Skeleton className="h-80 rounded-xl" />
       </div>
 
-      <Skeleton className="h-72 rounded-xl" />
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="flex-row items-center justify-between gap-4 border-b py-4">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-5 w-16" />
+        </CardHeader>
+        <CardContent className="px-0">
+          <TableSkeleton columns={6} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

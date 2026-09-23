@@ -86,13 +86,15 @@ export function PlanCard({
   }
 
   return (
-    <Card className={cn(plan.isCurrent && "border-primary ring-primary/20 ring-1")}>
+    <Card
+      className={cn(plan.isCurrent && "border-primary ring-primary/20 ring-1")}
+    >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle>{plan.name}</CardTitle>
           {plan.isCurrent ? <Badge>{t("currentPlanTag")}</Badge> : null}
         </div>
-        <CardDescription className="text-foreground text-2xl font-semibold">
+        <CardDescription className="text-foreground text-2xl font-semibold tabular-nums">
           {currency(plan.priceCents)}
           <span className="text-muted-foreground ml-1 text-sm font-normal">
             {t("perMonth")}

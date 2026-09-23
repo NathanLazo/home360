@@ -50,13 +50,19 @@ export function ConfirmDialog({
           <AlertDialogAction
             variant={destructive ? "destructive" : "default"}
             disabled={loading}
-            onClick={onConfirm}
+            aria-busy={loading || undefined}
+            onClick={(event) => {
+              // Stay open while the request runs so the spinner is visible;
+              // callers close the dialog once the mutation settles.
+              event.preventDefault();
+              onConfirm();
+            }}
           >
             {loading ? (
               <LoaderCircleIcon
                 data-icon="inline-start"
                 aria-hidden="true"
-                className="animate-spin"
+                className="animate-spin motion-reduce:animate-none"
               />
             ) : null}
             {confirmLabel}

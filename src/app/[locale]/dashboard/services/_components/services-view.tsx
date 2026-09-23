@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { ServiceFilters } from "./service-filters";
 import { ServiceFormSheet } from "./service-form-sheet";
 import type { ServiceFiltersState, ServiceListItem } from "./service.types";
+import { ServicesSkeleton } from "./services-skeleton";
 import { ServicesTable } from "./services-table";
 import { useServiceMutations } from "./use-service-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
@@ -86,13 +87,7 @@ export function ServicesView() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col gap-6" aria-busy="true">
-        <div className="bg-accent h-20 animate-pulse rounded-xl motion-reduce:animate-none" />
-        <div className="bg-accent h-11 animate-pulse rounded-lg motion-reduce:animate-none" />
-        <div className="bg-accent h-96 animate-pulse rounded-xl motion-reduce:animate-none" />
-      </div>
-    );
+    return <ServicesSkeleton />;
   }
 
   if (transportError || responseError) {
