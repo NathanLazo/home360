@@ -18,6 +18,7 @@ import type {
   ServiceWorker,
 } from "./service.types";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
+import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
 import { useErrorShake } from "~/components/motion";
 import {
@@ -25,7 +26,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -199,8 +199,11 @@ export function ServiceFormSheet({
             </Button>
           </SheetClose>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto py-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
+          <div className="flex-1 py-4">
             <ServiceFormFields
               values={values}
               errors={errors}
@@ -210,7 +213,7 @@ export function ServiceFormSheet({
               onChange={setValues}
             />
           </div>
-          <SheetFooter className="border-t sm:flex-row sm:justify-end">
+          <SheetFormDock>
             <SheetClose asChild>
               <Button
                 type="button"
@@ -221,7 +224,12 @@ export function ServiceFormSheet({
                 {t("form.cancel")}
               </Button>
             </SheetClose>
-            <Button type="submit" disabled={submitting} className="min-h-11">
+            <Button
+              type="submit"
+              metal="live"
+              disabled={submitting}
+              className="min-h-11"
+            >
               {submitting ? (
                 <LoaderCircleIcon
                   aria-hidden="true"
@@ -230,7 +238,7 @@ export function ServiceFormSheet({
               ) : null}
               {t(service ? "form.save" : "form.create")}
             </Button>
-          </SheetFooter>
+          </SheetFormDock>
         </form>
       </SheetContent>
     </Sheet>

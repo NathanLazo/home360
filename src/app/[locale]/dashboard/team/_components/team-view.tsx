@@ -99,6 +99,7 @@ export function TeamView() {
           <div className="flex flex-col items-start gap-1 sm:items-end">
             <Button
               metal="live"
+              metalActive={!sheetOpen}
               type="button"
               onClick={openCreate}
               disabled={!canCreate}

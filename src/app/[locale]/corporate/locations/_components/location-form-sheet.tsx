@@ -5,6 +5,7 @@ import { LoaderCircleIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { CorporateLocationItem } from "../../_components/corporate.types";
+import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -14,7 +15,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -234,15 +234,18 @@ export function LocationFormSheet({
             </Button>
           </SheetClose>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
+          <div className="flex flex-1 flex-col gap-4 py-4">
             {field("name", { autoComplete: "organization" })}
             {field("addressLine", { autoComplete: "street-address" })}
             {field("city", { autoComplete: "address-level2" })}
             {field("contactName", { optional: true, autoComplete: "name" })}
             {field("contactPhone", { optional: true, autoComplete: "tel" })}
           </div>
-          <SheetFooter className="border-t sm:flex-row sm:justify-end">
+          <SheetFormDock>
             <SheetClose asChild>
               <Button
                 type="button"
@@ -253,7 +256,12 @@ export function LocationFormSheet({
                 {t("cancel")}
               </Button>
             </SheetClose>
-            <Button type="submit" disabled={submitting} className="min-h-11">
+            <Button
+              type="submit"
+              metal="live"
+              disabled={submitting}
+              className="min-h-11"
+            >
               {submitting ? (
                 <LoaderCircleIcon
                   aria-hidden="true"
@@ -262,7 +270,7 @@ export function LocationFormSheet({
               ) : null}
               {t(location ? "save" : "create")}
             </Button>
-          </SheetFooter>
+          </SheetFormDock>
         </form>
       </SheetContent>
     </Sheet>

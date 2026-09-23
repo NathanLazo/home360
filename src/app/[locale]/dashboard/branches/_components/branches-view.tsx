@@ -73,44 +73,51 @@ export function BranchesView() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <PageHeader title={t("title")} subtitle={t("description")} />
-        <div className="flex flex-col items-start gap-2 sm:items-end">
-          <p className="text-muted-foreground text-copy-sm" aria-live="polite">
-            {data.limits.max === null
-              ? t("usageUnlimited", { used: data.limits.used })
-              : t("usage", { used: data.limits.used, max: data.limits.max })}
-          </p>
-          <span
-            title={
-              isReadOnly
-                ? readOnlyT("actionDisabled")
-                : atLimit
-                  ? t("limitTooltip")
-                  : undefined
-            }
-          >
-            <Button
-              metal={atLimit ? "static" : "live"}
-              type="button"
-              className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-              aria-disabled={atLimit}
-              aria-describedby={atLimit ? "branch-limit-help" : undefined}
-              onClick={create}
-              disabled={isReadOnly}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t("title")}
+        subtitle={t("description")}
+        actions={
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <p
+              className="text-muted-foreground text-copy-sm"
+              aria-live="polite"
             >
-              <PlusIcon aria-hidden="true" />
-              {t("new")}
-            </Button>
-          </span>
-          {atLimit ? (
-            <span id="branch-limit-help" className="sr-only">
-              {t("limitTooltip")}
+              {data.limits.max === null
+                ? t("usageUnlimited", { used: data.limits.used })
+                : t("usage", { used: data.limits.used, max: data.limits.max })}
+            </p>
+            <span
+              title={
+                isReadOnly
+                  ? readOnlyT("actionDisabled")
+                  : atLimit
+                    ? t("limitTooltip")
+                    : undefined
+              }
+            >
+              <Button
+                metal={atLimit ? "static" : "live"}
+                metalActive={!sheetOpen}
+                type="button"
+                className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                aria-disabled={atLimit}
+                aria-describedby={atLimit ? "branch-limit-help" : undefined}
+                onClick={create}
+                disabled={isReadOnly}
+              >
+                <PlusIcon aria-hidden="true" />
+                {t("new")}
+              </Button>
             </span>
-          ) : null}
-        </div>
-      </div>
+            {atLimit ? (
+              <span id="branch-limit-help" className="sr-only">
+                {t("limitTooltip")}
+              </span>
+            ) : null}
+          </div>
+        }
+      />
 
       {data.items.length === 0 ? (
         <EmptyState
@@ -132,7 +139,7 @@ export function BranchesView() {
         />
       ) : (
         <ul
-          className="grid gap-5 md:grid-cols-2 xl:grid-cols-3"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           aria-label={t("listLabel")}
         >
           {data.items.map((branch) => (

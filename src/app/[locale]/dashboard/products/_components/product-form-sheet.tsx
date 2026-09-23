@@ -24,13 +24,13 @@ import type {
   ProductStockBranch,
 } from "./product.types";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
+import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -316,10 +316,10 @@ export function ProductFormSheet({
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="flex min-h-0 flex-1 flex-col"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
             aria-busy={busy || detailLoading}
           >
-            <div className="min-h-0 flex-1 overflow-y-auto py-4">
+            <div className="flex-1 py-4">
               {detailLoading ? (
                 <div className="flex h-64 items-center justify-center">
                   <LoaderCircleIcon
@@ -337,7 +337,7 @@ export function ProductFormSheet({
                 />
               )}
             </div>
-            <SheetFooter className="border-t sm:flex-row sm:justify-end">
+            <SheetFormDock>
               <SheetClose asChild>
                 <Button
                   type="button"
@@ -350,6 +350,7 @@ export function ProductFormSheet({
               </SheetClose>
               <Button
                 type="submit"
+                metal="live"
                 disabled={busy || detailLoading}
                 className="min-h-11"
               >
@@ -361,7 +362,7 @@ export function ProductFormSheet({
                 ) : null}
                 {t(product ? "save" : "create")}
               </Button>
-            </SheetFooter>
+            </SheetFormDock>
           </form>
         )}
       </SheetContent>

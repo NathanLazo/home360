@@ -95,6 +95,7 @@ export function LocationsView() {
     >
       <Button
         metal={createDisabled ? "static" : "live"}
+        metalActive={!sheetOpen}
         type="button"
         className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
         aria-disabled={createDisabled}

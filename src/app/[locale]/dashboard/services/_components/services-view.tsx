@@ -120,6 +120,7 @@ export function ServicesView() {
         actions={
           <Button
             metal="live"
+            metalActive={!sheetOpen}
             type="button"
             onClick={openCreate}
             className="min-h-11 sm:min-h-10"
