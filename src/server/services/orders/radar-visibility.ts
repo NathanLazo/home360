@@ -13,6 +13,21 @@ import {
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 const PLATFORM_SETTINGS_ID = 1;
+
+/**
+ * Request statuses that still accept quotes (P-WEB-02): OPEN (no active
+ * offer yet) and QUOTED (at least one PENDING offer). Every radar gate reads
+ * this list so the OPEN → QUOTED transition never hides a request from the
+ * businesses that have not quoted it yet.
+ */
+export const QUOTABLE_REQUEST_STATUSES = [
+  RequestStatus.OPEN,
+  RequestStatus.QUOTED,
+] as const satisfies readonly RequestStatus[];
+
+export function isQuotableRequestStatus(status: RequestStatus): boolean {
+  return status === RequestStatus.OPEN || status === RequestStatus.QUOTED;
+}
 const DEFAULT_NOTIFY_RADIUS_KM = 10;
 
 export type RadarBranch = {
@@ -105,7 +120,7 @@ export async function listBusinessCategories(
 
 /**
  * True when the business may see the request under radar privacy rules:
- * OPEN, category in the catalog, within the effective radius of some ACTIVE
+ * quotable (OPEN or QUOTED), category in the catalog, within the effective radius of some ACTIVE
  * branch with coordinates. Used by authorizeMediaRead (MA-02) and quote.submit.
  */
 export async function isRequestVisibleOnRadar(
@@ -115,7 +130,7 @@ export async function isRequestVisibleOnRadar(
   const request = await db.serviceRequest.findFirst({
     where: {
       id: input.requestId,
-      status: RequestStatus.OPEN,
+      status: { in: [...QUOTABLE_REQUEST_STATUSES] },
       latitude: { not: null },
       longitude: { not: null },
     },

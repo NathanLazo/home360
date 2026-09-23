@@ -41,6 +41,8 @@ export const DOMAIN_ERROR_CODES = [
   "SETTINGS_STALE",
   "AI_UNAVAILABLE",
   "ADDRESS_LIMIT_REACHED",
+  "ORDER_NOT_REVIEWABLE",
+  "REVIEW_ALREADY_EXISTS",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

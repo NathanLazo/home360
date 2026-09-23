@@ -46,5 +46,7 @@
   "BUSINESS_SUSPENDED": "La cuenta del negocio está suspendida.",
   "SETTINGS_STALE": "Alguien más cambió la configuración. Vuelve a cargar la pantalla.",
   "AI_UNAVAILABLE": "El diagnóstico inteligente no está disponible por ahora. Inténtalo de nuevo en unos minutos.",
-  "ADDRESS_LIMIT_REACHED": "Llegaste al límite de 10 direcciones guardadas. Elimina una para agregar otra."
+  "ADDRESS_LIMIT_REACHED": "Llegaste al límite de 10 direcciones guardadas. Elimina una para agregar otra.",
+  "ORDER_NOT_REVIEWABLE": "Solo puedes calificar una orden completada.",
+  "REVIEW_ALREADY_EXISTS": "Ya calificaste esta orden."
 }

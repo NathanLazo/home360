@@ -7,6 +7,8 @@ export const orderIdSchema = z.object({
 
 export const orderListSchema = z.object({
   branchId: z.string().cuid().optional(),
+  // N5 (P-WEB-02): orders assigned to one worker of the caller's business.
+  workerId: z.string().cuid().optional(),
   status: z.nativeEnum(OrderStatus).optional(),
   type: z.nativeEnum(OrderType).optional(),
   search: z.string().trim().min(1).max(100).optional(),

@@ -2,8 +2,9 @@ import "server-only";
 
 import {
   Prisma,
-  RequestStatus,
   type PrismaClient,
+  type QuoteStatus,
+  type RequestStatus,
 } from "@generated/prisma";
 import {
   haversineKm,
@@ -14,7 +15,9 @@ import { createDownloadUrl } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {
   getEffectiveRadiusKm,
+  isQuotableRequestStatus,
   listBusinessCategories,
+  QUOTABLE_REQUEST_STATUSES,
   resolveRadarBranch,
   isRequestVisibleOnRadar,
 } from "./radar-visibility";
@@ -56,6 +59,28 @@ export type RadarRequestItem = {
   customerName: string | null;
   zone: RadarCustomerZone;
   evidence: RadarEvidenceItem[];
+};
+
+/**
+ * The caller business's own offer on the request (P-WEB-02 / N2). Lets the
+ * app tell "no offer" (null), "quoted" (PENDING) and "withdrawn" (WITHDRAWN)
+ * apart without inferring it from the radar list.
+ */
+export type RadarOwnQuote = {
+  id: string;
+  status: QuoteStatus;
+  amountCents: number;
+  scheduledFor: Date | null;
+  branchId: string | null;
+  worker: { id: string; fullName: string } | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RadarRequestDetail = RadarRequestItem & {
+  description: string | null;
+  status: RequestStatus;
+  ownQuote: RadarOwnQuote | null;
 };
 
 export type RadarRequestList = {
@@ -142,7 +167,7 @@ function toRadarItem(
 }
 
 /**
- * OPEN requests inside the branch radius, matching the business catalog and
+ * Quotable (OPEN or QUOTED) requests inside the branch radius, matching the business catalog and
  * without an existing quote from this business (including WITHDRAWN — the
  * unique pair blocks re-quoting).
  */
@@ -228,7 +253,7 @@ export async function listOpenRequests(
       )} AS "distanceKm"
     FROM "ServiceRequest" AS r
     INNER JOIN "User" AS u ON u."id" = r."customerId"
-    WHERE r."status"::text = ${RequestStatus.OPEN}
+    WHERE r."status"::text IN (${Prisma.join([...QUOTABLE_REQUEST_STATUSES])})
       AND r."latitude" IS NOT NULL
       AND r."longitude" IS NOT NULL
       AND r."category" IN (${Prisma.join(categories)})
@@ -268,9 +293,10 @@ export async function listOpenRequests(
 }
 
 /**
- * Detail for N2. Visible when the request is on the radar (OPEN + radius +
- * category) OR the business already has a quote on it (so withdraw UI works).
- * Never exposes `addressLine` — only neighborhood + coords to 3 decimals.
+ * Detail for N2. Visible when the request is on the radar (OPEN/QUOTED +
+ * radius + category) OR the business already has a quote on it (so withdraw
+ * UI works). Returns that own quote, if any (P-WEB-02). Never exposes
+ * `addressLine` — only neighborhood + coords to 3 decimals.
  */
 export async function getRadarRequest(
   db: PrismaClient,
@@ -280,7 +306,7 @@ export async function getRadarRequest(
     requestId: string;
     branchId?: string;
   },
-): Promise<ServiceResult<RadarRequestItem & { description: string | null }>> {
+): Promise<ServiceResult<RadarRequestDetail>> {
   const request = await db.serviceRequest.findUnique({
     where: { id: input.requestId },
     select: {
@@ -300,9 +326,19 @@ export async function getRadarRequest(
       createdAt: true,
       status: true,
       customer: { select: { name: true } },
+      // @@unique([requestId, businessId]): at most one own quote.
       quotes: {
         where: { businessId: input.businessId },
-        select: { id: true },
+        select: {
+          id: true,
+          status: true,
+          amountCents: true,
+          scheduledFor: true,
+          branchId: true,
+          worker: { select: { id: true, fullName: true } },
+          createdAt: true,
+          updatedAt: true,
+        },
         take: 1,
       },
     },
@@ -312,15 +348,15 @@ export async function getRadarRequest(
     return svcFail("NOT_FOUND", "Request not found");
   }
 
-  const hasOwnQuote = request.quotes.length > 0;
+  const ownQuote = request.quotes.at(0) ?? null;
   const onRadar =
-    request.status === RequestStatus.OPEN &&
+    isQuotableRequestStatus(request.status) &&
     (await isRequestVisibleOnRadar(db, {
       businessId: input.businessId,
       requestId: request.id,
     }));
 
-  if (!hasOwnQuote && !onRadar) {
+  if (!ownQuote && !onRadar) {
     return svcFail("NOT_FOUND", "Request not found");
   }
 
@@ -352,6 +388,7 @@ export async function getRadarRequest(
     id: request.id,
     title: request.title,
     description: request.description,
+    status: request.status,
     category: request.category,
     aiDiagnosis: request.aiDiagnosis,
     aiConfidencePct: request.aiConfidencePct,
@@ -367,5 +404,6 @@ export async function getRadarRequest(
       request.longitude,
     ),
     evidence,
+    ownQuote,
   });
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  QuoteStatus,
   RequestStatus,
   type PrismaClient,
   type ServiceRequest,
@@ -22,6 +23,12 @@ import { notifyNearbyBusinesses } from "~/server/services/notifications/notify-r
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 const PAGE_SIZE = 20;
+
+/** Statuses a customer may still cancel (P-WEB-02: QUOTED joins OPEN). */
+const CANCELLABLE_REQUEST_STATUSES: readonly RequestStatus[] = [
+  RequestStatus.OPEN,
+  RequestStatus.QUOTED,
+];
 
 const TITLE_MAX_LENGTH = 80;
 
@@ -235,7 +242,16 @@ export async function listMyRequests(
   return svcOk({ items, nextCursor });
 }
 
-/** Only OPEN requests can be cancelled; anything else is a CONFLICT. */
+/** Thrown inside the cancel transaction to roll it back with CONFLICT. */
+class RequestNotCancellableError extends Error {}
+
+/**
+ * Only requests still collecting offers (OPEN or QUOTED, P-WEB-02) can be
+ * cancelled; anything else is a CONFLICT. In one transaction the PENDING
+ * quotes are expired first (quote-then-request lock order, same as
+ * `acceptQuote`) and the request moves to CANCELLED conditionally, so a
+ * concurrent accept either wins cleanly or rolls the cancel back.
+ */
 export async function cancelMyRequest(
   db: PrismaClient,
   input: { customerId: string; id: string },
@@ -249,14 +265,41 @@ export async function cancelMyRequest(
     return svcFail("NOT_FOUND", "Request not found");
   }
 
-  if (request.status !== RequestStatus.OPEN) {
+  if (!CANCELLABLE_REQUEST_STATUSES.includes(request.status)) {
     return svcFail("CONFLICT", "Only open requests can be cancelled");
   }
 
-  const cancelled = await db.serviceRequest.update({
-    where: { id: request.id },
-    data: { status: RequestStatus.CANCELLED },
-  });
+  try {
+    const cancelled = await db.$transaction(async (tx) => {
+      await tx.quote.updateMany({
+        where: { requestId: request.id, status: QuoteStatus.PENDING },
+        data: { status: QuoteStatus.EXPIRED },
+      });
 
-  return svcOk(cancelled);
+      const updated = await tx.serviceRequest.updateMany({
+        where: {
+          id: request.id,
+          customerId: input.customerId,
+          status: { in: [...CANCELLABLE_REQUEST_STATUSES] },
+        },
+        data: { status: RequestStatus.CANCELLED },
+      });
+
+      if (updated.count === 0) {
+        throw new RequestNotCancellableError();
+      }
+
+      return tx.serviceRequest.findUniqueOrThrow({
+        where: { id: request.id },
+      });
+    });
+
+    return svcOk(cancelled);
+  } catch (error) {
+    if (error instanceof RequestNotCancellableError) {
+      return svcFail("CONFLICT", "Only open requests can be cancelled");
+    }
+
+    throw error;
+  }
 }
