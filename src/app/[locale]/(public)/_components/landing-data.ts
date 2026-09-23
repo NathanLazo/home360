@@ -1,5 +1,9 @@
 import {
   BadgeCheckIcon,
+  CameraIcon,
+  CircleDashedIcon,
+  LockIcon,
+  VideoIcon,
   BuildingIcon,
   FileCheckIcon,
   LayersIcon,
@@ -117,3 +121,34 @@ export const LANDING_GUARANTEES: readonly {
 ];
 
 export const LANDING_STEP_KEYS = ["1", "2", "3"] as const;
+
+/**
+ * Illustrative order shown by the hero visual. It is labelled "sample order"
+ * on screen: it shows how custody reads, it never claims volume (D8).
+ */
+export const LANDING_SAMPLE_ORDER = {
+  reference: "H360-0418",
+  amountCents: 185_000,
+  events: [
+    { key: "photo", time: "09:12", icon: CameraIcon, done: true },
+    { key: "diagnosis", time: "09:13", icon: ScanSearchIcon, done: true },
+    { key: "escrow", time: "09:21", icon: LockIcon, done: true },
+    { key: "recording", time: "00:42:17", icon: VideoIcon, done: true },
+    { key: "release", time: null, icon: CircleDashedIcon, done: false },
+  ],
+} as const satisfies {
+  reference: string;
+  amountCents: number;
+  events: readonly {
+    key: "photo" | "diagnosis" | "escrow" | "recording" | "release";
+    time: string | null;
+    icon: LucideIcon;
+    done: boolean;
+  }[];
+};
+
+/** Price range of the sample diagnosis in the features bento, in cents. */
+export const LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS = {
+  min: 65_000,
+  max: 120_000,
+} as const;

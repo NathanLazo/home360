@@ -11,7 +11,7 @@
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
-  /* Display face: landing `h1`/`h2` only (see DESIGN-DIRECTIVE §2). */
+  /* Serif accent face: landing heading accents only. */
   --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman",
     serif;
 }
@@ -128,11 +128,6 @@
 }
 
 :root {
-  /* Brand tokens are reserved exclusively for the public landing pages. */
-  --brand-navy: #0d1b2a;
-  --brand-gold: #c8a96e;
-  --brand-cream: #f5f0e8;
-  --brand-gray: #8a9bb0;
   --chart-1:
     oklch(0.32 0 none);
   --chart-2:
@@ -297,6 +292,19 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Landing guarantee rail: the track holds two copies of the list and slides by
+ * exactly one, so the loop has no seam. Linear on purpose: constant motion.
+ */
+@keyframes landing-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
