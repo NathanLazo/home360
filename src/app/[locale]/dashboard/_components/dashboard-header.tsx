@@ -1,6 +1,5 @@
 import type { UserRole } from "@generated/prisma";
 
-import { DashboardRangeSelect } from "./dashboard-range-select";
 import { NotificationsBell } from "./notifications-bell";
 import { BranchSelector } from "~/components/branch-selector";
 import { GlassSurface } from "~/components/glass";
@@ -28,21 +27,22 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     // Floating Liquid Glass toolbar: content scrolls under it. Solid canvas
-    // on first paint and under reduced transparency / more contrast.
+    // on first paint and under reduced transparency / more contrast. Always a
+    // single row: the branch filter flexes to fill the space on mobile.
     <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
       <GlassSurface
         radius="pill"
-        className="flex min-h-12 flex-wrap items-center gap-2 px-5 py-2 sm:flex-nowrap sm:px-3 sm:py-1.5 sm:pr-1.5"
+        className="flex min-h-12 items-center gap-2 px-3 py-1.5 pr-1.5"
       >
         <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
         <Separator
           orientation="vertical"
           className="mr-1 data-[orientation=vertical]:h-4"
         />
-        <div className="order-last flex w-full gap-2 sm:order-none sm:ml-auto sm:w-auto">
-          <DashboardRangeSelect />
-          <BranchSelector branches={branches} className="flex-1 sm:flex-none" />
-        </div>
+        <BranchSelector
+          branches={branches}
+          className="flex-1 sm:ml-auto sm:flex-none"
+        />
         <NotificationsBell />
         <LocaleSwitcher />
         <UserMenu {...user} variant="light" />

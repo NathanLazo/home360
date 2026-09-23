@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { DashboardRangeSelect } from "./dashboard-range-select";
 import { HomePrimaryAction } from "./home-primary-action";
 import { KpiRow } from "./kpi-row";
 import { OrdersByBranchList } from "./orders-by-branch-list";
@@ -23,7 +24,12 @@ export function DashboardView({ branchId, days }: DashboardViewProps) {
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
-        actions={<HomePrimaryAction />}
+        actions={
+          <>
+            <DashboardRangeSelect />
+            <HomePrimaryAction />
+          </>
+        }
       />
       <KpiRow branchId={branchId} days={days} />
       <div className="grid items-stretch gap-4 xl:grid-cols-3">

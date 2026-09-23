@@ -19,19 +19,14 @@ import {
 } from "~/lib/search-params";
 
 /**
- * Header date range for the home indicators (`?range=7|30|90`). Only the
- * home screen consumes it, so the control hides elsewhere instead of
- * pretending to filter screens that ignore it.
+ * Date range for the home indicators (`?range=7|30|90`), rendered next to
+ * the home's primary action since only the home consumes it.
  */
 export function DashboardRangeSelect() {
   const t = useTranslations("dashboard.rangeSelector");
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  if (pathname !== "/dashboard") {
-    return null;
-  }
 
   const selected = parseRangeParam({ range: searchParams.get("range") });
 
