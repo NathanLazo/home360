@@ -1,198 +1,316 @@
 ---
 name: HOME360
-description: Marketplace de mantenimiento del hogar con pago en escrow — landing Premium (brand) y dashboard Corporate (zinc), separados por la frontera D7.
+description: Marketplace de mantenimiento del hogar con pago en escrow — sistema único inspirado en Vercel (ink + hairlines + Geist), con primary de metal líquido y Liquid Glass como firma.
 colors:
-  brand-navy: "#0d1b2a"
-  brand-gold: "#c8a96e"
-  brand-cream: "#f5f0e8"
-  brand-gray: "#8a9bb0"
-  zinc-background: "oklch(0.967 0.001 286.375)"
-  zinc-foreground: "oklch(0.141 0.005 285.823)"
-  zinc-primary: "oklch(0.21 0.006 285.885)"
-  zinc-muted-foreground: "oklch(0.552 0.016 285.938)"
-  zinc-border: "oklch(0.92 0.004 286.32)"
-  zinc-card: "oklch(1 0 0)"
-  destructive: "oklch(0.577 0.245 27.325)"
+  ink: "#171717"
+  on-ink: "#ffffff"
+  body: "#4d4d4d"
+  mute: "#888888"
+  hairline: "#ebebeb"
+  hairline-strong: "#a1a1a1"
+  canvas: "#ffffff"
+  canvas-soft: "#fafafa"
+  canvas-soft-2: "#f5f5f5"
+  link: "#0070f3"
+  link-deep: "#0761d1"
+  link-soft: "#d3e5ff"
+  error: "#ee0000"
+  error-soft: "#f7d4d6"
+  error-deep: "#c50000"
+  warning: "#f5a623"
+  warning-soft: "#ffefcf"
+  warning-deep: "#ab570a"
+  success: "#1a9b50"
+  success-soft: "#d9f2e3"
+  success-deep: "#0f7b3f"
+  selection-bg: "#171717"
+  selection-fg: "#f2f2f2"
+  mesh-develop: "#007cf0 → #00dfd8"
+  mesh-preview: "#7928ca → #ff0080"
+  mesh-ship: "#ff4d4d → #f9cb28"
 typography:
-  display:
-    fontFamily: "Fraunces, ui-serif, Georgia, serif"
-    fontSize: "clamp(2.5rem, 6vw, 4.5rem)"
-    fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: "-0.02em"
-  headline:
-    fontFamily: "Fraunces, ui-serif, Georgia, serif"
-    fontSize: "clamp(1.875rem, 3.5vw, 2.75rem)"
-    fontWeight: 600
-    letterSpacing: "-0.015em"
-  title:
-    fontFamily: "Geist Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
-    fontWeight: 600
-    letterSpacing: "-0.01em"
-  body:
-    fontFamily: "Geist Sans, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: 1.6
-  label:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "0.75rem"
-    fontWeight: 500
-    letterSpacing: "0.08em"
-  metric:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "clamp(2rem, 4vw, 3rem)"
-    fontWeight: 600
-    letterSpacing: "-0.02em"
+  display-hero: { fontFamily: "Geist", fontSize: "clamp(2.75rem, 6.5vw, 4.5rem)", fontWeight: 600, letterSpacing: "-0.05em", lineHeight: 1.02 }
+  display-xl: { fontFamily: "Geist", fontSize: "48px", fontWeight: 600, letterSpacing: "-2.4px", lineHeight: "56px" }
+  display-lg: { fontFamily: "Geist", fontSize: "32px", fontWeight: 600, letterSpacing: "-1.28px", lineHeight: "40px" }
+  display-md: { fontFamily: "Geist", fontSize: "24px", fontWeight: 600, letterSpacing: "-0.96px", lineHeight: "32px" }
+  display-sm: { fontFamily: "Geist", fontSize: "20px", fontWeight: 600, letterSpacing: "-0.6px", lineHeight: "26px" }
+  copy: { fontFamily: "Geist", fontSize: "16px", fontWeight: 400, lineHeight: "24px" }
+  copy-sm: { fontFamily: "Geist", fontSize: "14px", fontWeight: 400, letterSpacing: "-0.28px", lineHeight: "20px" }
+  label: { fontFamily: "Geist Mono", fontSize: "12px", fontWeight: 500, lineHeight: "16px" }
 rounded:
-  sm: "0.3rem"
-  md: "0.4rem"
-  lg: "0.5rem"
-  xl: "0.7rem"
+  xs: "4px"
+  sm: "6px"
+  md: "8px"
+  lg: "12px"
+  xl: "16px"
+  pill: "100px"
 spacing:
   unit: "4px"
-  section: "5rem"
-  section-lg: "7rem"
-components:
-  cta-gold:
-    backgroundColor: "{colors.brand-gold}"
-    textColor: "{colors.brand-navy}"
-    rounded: "{rounded.lg}"
-  button-primary:
-    backgroundColor: "{colors.zinc-primary}"
-    textColor: "oklch(0.985 0 0)"
-    rounded: "{rounded.md}"
-  card:
-    backgroundColor: "{colors.zinc-card}"
-    textColor: "{colors.zinc-foreground}"
-    rounded: "{rounded.lg}"
-  input:
-    backgroundColor: "{colors.zinc-card}"
-    textColor: "{colors.zinc-foreground}"
-    rounded: "{rounded.md}"
+motion:
+  ease-out: "cubic-bezier(0.22, 1, 0.36, 1)"
 ---
 
 # Design System: HOME360
 
+> Fuente de verdad del sistema visual. Tokens en `src/styles/globals.css`;
+> primitivas en `src/components/ui/button.tsx`, `src/components/metal/`,
+> `src/components/glass/`. Ejecución normativa en `spec/DESIGN-DIRECTIVE.md`.
+
 ## 1. Overview
 
-**Creative North Star: "La bóveda del oficio"**
+**Norte creativo: "Herramienta de precisión, con un solo metal."**
 
-HOME360 custodia el dinero de una persona mientras otra entrega trabajo manual verificable. El sistema visual traduce eso literalmente: el navy es la bóveda (peso, cierre, custodia), el gold es el sello (escaso, solo donde hay acción o dinero custodiado), y el mono es el comprobante (toda cifra verificable se compone en Geist Mono). Nada decorativo que no diga algo verdadero sobre custodia, oficio o confianza.
+HOME360 custodia el dinero de una persona mientras otra entrega trabajo verificable.
+El sistema es **inspirado en Vercel**: lienzo claro, tinta casi negra, hairlines en
+vez de bordes pesados, Geist en todo y elevación por sombras apiladas. Sobre esa base
+neutra hay **un giro propio**: el primary es **metal líquido** (tinta con aro de
+cromo), y en los momentos firma el metal se sienta dentro de **Liquid Glass**.
 
-El sistema vive partido en dos personalidades bajo una frontera inviolable (D7, `spec/08-business-model-alignment.md`): la landing pública (`(public)/`) habla en registro **Premium** con la paleta de marca y Fraunces como display; dashboard, admin y auth hablan en registro **Corporate** con zinc shadcn, donde la herramienta *está*, no se revela. Los tokens `--brand-*` jamás cruzan a dashboard; los tokens zinc jamás se reescriben para complacer a la landing.
+**Una sola personalidad, dos intensidades.** Por decisión del product owner la paleta
+de marca navy/gold/cream y Fraunces quedan **retiradas**. Landing, dashboard, admin,
+corporate y auth comparten los mismos tokens ink/zinc. La landing sube la intensidad
+(tipografía display grande, mesh gradient atmosférico solo en el hero, CTAs pill,
+beams) pero no tiene paleta propia.
 
-Rechaza explícitamente el default reconocible de diseño IA (titular Geist sobre cream con acento gold), el SaaS genérico de productividad, los gradientes ajenos al sistema y el motion elástico: un producto que custodia dinero ajeno no rebota.
+**Rasgos:**
+- Ink + hairline + Geist. El color aparece solo cuando significa algo (link, error,
+  warning, éxito) o como atmósfera del hero de la landing.
+- Mono = dato verificable: precios, métricas, IDs, pasos y eyebrows en Geist Mono.
+- Metal = la acción que la pantalla pide. Glass = la cromática flotante que la sostiene.
+- Motion decelerado (`cubic-bezier(0.22, 1, 0.36, 1)`), overshoot 0 salvo micro-éxitos.
+- Espaciado en múltiplos de 4 px.
 
-**Key Characteristics:**
-- Dos registros, una disciplina: Premium (brand) en landing, Corporate (zinc) en herramienta.
-- Mono = dato verificable: precios, métricas, pasos y etiquetas de dato en Geist Mono.
-- Gold escaso y significativo: ≤4 apariciones por pantalla; siempre acción o custodia.
-- Motion decelerado, overshoot 0, reduced-motion como requisito de entrega.
-- Espaciado en múltiplos de 4 px; agrupamiento por espacio, no por líneas.
+## 2. Color
 
-## 2. Colors
+Todos los tokens viven en `:root` (claro) y se redefinen bajo `.dark` (bandas oscuras
+de la landing, superficies `tone="dark"`). En Tailwind cada rol es una utilidad de
+color (`bg-canvas`, `text-body`, `border-hairline`, `text-link-deep`…).
 
-Cuatro tokens de marca del brandbook para la landing; escala zinc neutra de shadcn para la herramienta.
+| Rol | Token / utilidad | Valor claro | Uso |
+|---|---|---|---|
+| Ink / primary | `ink`, `primary` | #171717 | Titulares, texto por defecto, core del botón primario |
+| On ink | `on-ink`, `primary-foreground` | #ffffff | Texto sobre ink |
+| Body | `body`, `muted-foreground` | #4d4d4d | Copy secundario, descripciones (8.1:1 sobre canvas-soft) |
+| Mute | `mute` | #888888 | Terciario: placeholders, metadatos no esenciales, texto ≥18 px (3.4:1 — **nunca** copy de 14 px esencial) |
+| Hairline | `hairline`, `border`, `input` | #ebebeb | Bordes y divisores |
+| Hairline strong | `hairline-strong` | #a1a1a1 | Borde de `outline`, hover de inputs |
+| Canvas | `canvas`, `card`, `popover` | #ffffff | Cards, dialogs, inputs, menús |
+| Canvas soft | `canvas-soft`, `background`, `sidebar` | #fafafa | **Fondo de página** |
+| Canvas soft 2 | `canvas-soft-2`, `accent`, `muted`, `secondary` | #f5f5f5 | Inset, hover de menús |
+| Link | `link`, `ring` | #0070f3 | Links sobre canvas blanco, anillo de foco |
+| Link deep | `link-deep` | #0761d1 | Texto link sobre cualquier superficie (el #0070f3 da 4.36:1 sobre canvas-soft) |
+| Link soft | `link-soft` | #d3e5ff | Fondo de estado info |
+| Error | `error`, `destructive` | #ee0000 / soft #f7d4d6 / deep #c50000 | Destructivo (texto blanco 4.53:1), hover `error-deep` |
+| Warning | `warning` | #f5a623 / soft #ffefcf / deep #ab570a | `warning` solo como relleno/icono; texto en `warning-deep` |
+| Success | `success` | #1a9b50 / soft #d9f2e3 / deep #0f7b3f | Estados liberado/pagado; texto en `success-deep` |
+| Selección | `selection-bg/fg` | #171717 / #f2f2f2 | `::selection` global |
 
-### Primary
-- **Navy bóveda** (#0d1b2a): fondo del hero y del CTA final de la landing — los dos momentos de mayor peso. Nunca dos secciones navy consecutivas. También es el color del texto sobre gold.
-- **Zinc ink** (oklch(0.21 0.006 285.885)): el primary de dashboard/admin; botones primarios y acentos de la herramienta.
+**Decisión success:** el sistema Vercel usa azul para éxito, pero la app ya distingue
+`info` (azul) de `success` en badges de estado del escrow. Para no dar dos significados
+a un mismo tono, **success se queda verde** (familia `success-*`) y **info usa la
+familia `link-*`**. `StatusBadge` puede migrar de `emerald-*/amber-*/red-*/blue-*` a
+`success-*/warning-*/error-*/link-*` (soft = fondo, deep = texto).
 
-### Secondary
-- **Gold sello** (#c8a96e): exclusivo de acción y custodia — CTA primario, subrayado del wordmark, borde del badge del hero, BorderBeam en hover, acento del plan recomendado. Prohibido como fondo amplio, texto de párrafo o icono decorativo.
-
-### Neutral
-- **Cream** (#f5f0e8): fondo de las secciones de contenido de la landing (features, how-it-works, pricing), alternando con navy.
-- **Brand gray** (#8a9bb0): texto secundario sobre navy, nunca un quinto acento.
-- **Zinc background** (oklch(0.967 0.001 286.375)) / **Zinc card** (oklch(1 0 0)) / **Zinc border** (oklch(0.92 0.004 286.32)): la superficie de trabajo del dashboard.
-- **Zinc foreground** (oklch(0.141 0.005 285.823)) y **muted** (oklch(0.552 0.016 285.938)): texto principal y secundario de la herramienta.
-- **Destructive** (oklch(0.577 0.245 27.325)): acciones destructivas, siempre detrás de `ConfirmDialog` y nunca solo con color.
+**Mesh gradient (solo hero de landing).** `--mesh-develop-*` (#007cf0→#00dfd8),
+`--mesh-preview-*` (#7928ca→#ff0080), `--mesh-ship-*` (#ff4d4d→#f9cb28), compuestos en
+la utilidad `bg-mesh-hero`. Es un fondo atmosférico a escala de hero, difuminado y
+tenue. **Nunca** miniaturizado: ni en chips, iconos, botones, bordes ni texto
+(`background-clip: text` sigue prohibido).
 
 ### Named Rules
-**La Regla D7.** Los tokens `--brand-*` solo existen dentro de `src/app/[locale]/(public)/**`. Cualquier tarea que necesite cruzarlos a dashboard/admin está mal planteada: se reporta y se detiene.
+**La Regla del Color con Significado.** Un color, un significado. Azul = link/foco/info;
+rojo = error/destructivo; ámbar = advertencia; verde = éxito. Ninguno decora.
 
-**La Regla del Gold Escaso.** Gold sobre cream ≈ 1.9:1 — nunca texto ni iconografía portadora de significado; solo bordes/filetes ≥2 px acompañados de otro indicador. El texto del CTA gold es navy. Más de ~4 apariciones de gold en una pantalla: sobra una.
+**La Regla del Gris Terciario.** `mute` (#888) no porta información esencial en tamaño
+de cuerpo. El copy secundario usa `muted-foreground` (= `body`).
 
 ## 3. Typography
 
-**Display Font:** Fraunces (variable, ejes `opsz`/`SOFT`, con fallback ui-serif/Georgia)
-**Body Font:** Geist Sans (con fallback system-ui)
-**Label/Mono Font:** Geist Mono
+**Una sola familia: Geist.** Geist Sans para todo; Geist Mono para etiquetas técnicas,
+eyebrows, código y cifras verificables. **Fraunces está prohibida** (y cualquier serif).
+Pesos 400 / 500 / 600 — **600 es el techo**; `font-bold`, `font-extrabold` y
+`font-black` están remapeados a 600 en `@theme` y `<b>/<strong>` renderizan 600.
+Sentence case siempre.
 
-**Character:** Una serif de corte de herramienta —terminaciones angulosas, contraste alto— que evoca oficio y permanencia, sobre un cuerpo sans neutro. El mono no es decoración: marca "esto es un dato verificable".
+| Utilidad | Tamaño / interlínea | Tracking | Uso |
+|---|---|---|---|
+| `text-display-hero` | clamp(44→72 px) / 1.02 | -0.05em | `h1` del hero (solo landing) |
+| `text-display-xl` | 48 / 56 | -2.4 px | `h1` de landing, títulos de sección grandes |
+| `text-display-lg` | 32 / 40 | -1.28 px | `h2` de sección, `h1` de página de dashboard si aplica |
+| `text-display-md` | 24 / 32 | -0.96 px | `h2` de dashboard, títulos de dialog grandes |
+| `text-display-sm` | 20 / 26 | -0.6 px | `h3`, títulos de card |
+| `text-copy` | 16 / 24 | 0 | Cuerpo de landing |
+| `text-copy-sm` | 14 / 20 | -0.28 px | Cuerpo de la herramienta, controles |
+| `font-mono text-label` | 12 / 16 | 0 | Eyebrows, etiquetas de dato (uppercase opcional con `tracking-wide`) |
 
-### Hierarchy
-- **Display** (700, clamp(2.5rem, 6vw, 4.5rem), tracking -0.02em): h1 del hero, solo en `(public)/`. `text-balance`.
-- **Headline** (600, clamp(1.875rem, 3.5vw, 2.75rem), tracking -0.015em): h2 de sección de landing, cara display.
-- **Title** (600, 1.125rem, tracking -0.01em): h3 de card/paso, siempre sans. La cara display nunca baja de h2.
-- **Body** (400, 1rem–1.0625rem, lh 1.6): medida de 60–75 caracteres, `text-pretty` en párrafos largos.
-- **Label** (500, 0.75rem, tracking 0.08em, uppercase, mono): eyebrows y etiquetas de dato.
-- **Metric** (600 mono, clamp(2rem, 4vw, 3rem), `tabular-nums`): cifras de métricas y precios; obligatorio `tabular-nums` en toda cifra que anime o cambie.
+Los `text-display-*` ya fijan peso 600 y tracking; no sumes `font-bold` ni
+`tracking-*`. `tabular-nums` en toda cifra que anime o cambie.
 
-### Named Rules
-**La Regla del Comprobante.** Todo número que represente dinero, métrica o paso verificable se compone en Geist Mono. Sans para prosa, serif para titulares de landing, mono para datos.
+**Acento en titulares de landing** (`*acento*` en los mensajes): mismo Geist,
+contraste por tinta — `font-normal text-mute` (`accentClass` en
+`(public)/_components/landing-styles.ts`). Sin serif, sin gradiente.
 
-**La Regla del Display Contenido.** `--font-display` solo en h1/h2 dentro de `(public)/`, aplicada con clase local del módulo. Nunca en dashboard, body, botones ni h3.
+## 4. Radii
 
-## 4. Elevation
+| Token | px | Uso |
+|---|---|---|
+| `rounded-xs` | 4 | Chips mínimos, `xs` buttons |
+| `rounded-sm` | 6 | Botones de app, inputs, selects, items de menú |
+| `rounded-md` | 8 | Cards (`Card`), popovers/menús |
+| `rounded-lg` | 12 | Dialogs, pricing, cards grandes, paneles glass |
+| `rounded-xl` | 16 | Superficies hero, consolas de landing |
+| `rounded-pill` | 100 | CTAs de marketing, docks glass |
+| `rounded-full` | — | Avatares, dots |
 
-Plano por defecto. Las superficies están planas en reposo; la profundidad de la landing la da la alternancia tonal cream → navy → cream, y en el dashboard la dan `card` blanco sobre `background` zinc con borde de 1 px. La sombra existe solo como respuesta a estado: hover de card (sombra + borde, nunca traslación), hover de CTA (elevación de sombra + escala ≤2 %), y superficies flotantes (Dialog, Sheet, Popover).
+`--radius` = 8 px (md). El mapeo shadcn es sm 6 · md 8 · lg 12 · xl 16.
 
-### Named Rules
-**La Regla del Reposo Plano.** Si un elemento tiene sombra sin que el usuario haya hecho nada, la sombra sobra. Sombras aparecen por hover, foco o flotación — no por decoración.
+## 5. Elevation
 
-## 5. Components
+Elevación = **sombras apiladas + hairline inset**, nunca una sombra pesada única.
 
-Carácter: **sobrios y firmes** — refinados, sin adorno, con feedback breve y decidido (≤150 ms).
+| Nivel | Utilidad | Receta |
+|---|---|---|
+| L1 | `shadow-hairline` | `0 0 0 1px #00000014` |
+| L2 | `shadow-subtle` | L1 + `0 1px 1px #00000005, 0 2px 2px #0000000a` |
+| L3 | `shadow-soft` | L1 + `0 2px 2px #0000000a, 0 8px 8px -8px #0000000a` |
+| L4 | `shadow-float` | L1 + `0 2px 2px #0000000a, 0 8px 16px -4px #0000000a` |
+| L5 | `shadow-modal` | L1 + `0 1px 1px #00000005, 0 8px 16px -4px #0000000a, 0 24px 32px -8px #0000000f` |
 
-### Buttons
-- **Shape:** esquinas moderadas (0.4–0.5rem); nunca pill salvo tags.
-- **Primary (landing):** gold sobre navy-texto (#c8a96e / #0d1b2a), `ShimmerButton` solo en el CTA primario del hero — una vez en todo el producto.
-- **Primary (dashboard):** zinc ink con texto casi blanco; shadcn `Button` estándar.
-- **Hover / Focus:** hover ≤150 ms (sombra + escala ≤2 %), `active:scale-[0.98]`, foco visible siempre; submit con estado pendiente y deshabilitado.
+Las utilidades nombradas **incluyen** la hairline: úsalas en superficies **sin**
+`border`. Los defaults de Tailwind se remapearon a las mismas pilas **sin** hairline
+para las primitivas shadcn que ya dibujan `border`: `shadow-xs` ≈ L1 suave, `shadow-sm`
+= L2, `shadow-md` = L4 (menús), `shadow-lg` = L5 (Dialog/Sheet). En `.dark` la hairline
+inset pasa a blanco 10 %.
 
-### Cards / Containers
-- **Corner Style:** 0.5rem (`--radius`); jamás 24 px+.
-- **Background:** zinc card blanco sobre background zinc; en landing, superficies sobre cream o navy según sección.
-- **Shadow Strategy:** plano en reposo; hover = sombra + borde (ver Elevation). `BorderBeam` solo en hover de feature card de landing.
-- **Border:** 1 px zinc-border.
-- **Internal Padding:** múltiplos de 4 px, típicamente 16–24 px.
+## 6. Components
 
-### Inputs / Fields
-- **Style:** shadcn Input — borde 1 px, fondo card, radio md.
-- **Focus:** anillo `--ring` visible; label siempre visible (el placeholder no es label).
-- **Error / Disabled:** error debajo del campo con `aria-describedby` + `aria-invalid`; `autocomplete` correcto en contraseñas.
+### Botones (`~/components/ui/button`)
 
-### Navigation
-- **Dashboard:** `app-sidebar` shadcn (sidebar zinc, item activo con acento primario); header sticky en landing con anclas (`scroll-margin-top` ≥5rem verificado).
-- **Mobile:** breakpoints reales 375/768/1024/1440, cero scroll horizontal a 375, áreas táctiles ≥44×44 px.
+| Variant | Aspecto |
+|---|---|
+| `default` | **Metal líquido estático**: core ink + aro de cromo 1 px (`metal-rim`) + brillo superior + `shadow-metal` |
+| `secondary` | Canvas blanco + hairline + `shadow-xs` |
+| `outline` | Transparente + `hairline-strong` |
+| `ghost` | Solo hover `accent` |
+| `destructive` | #ee0000, hover `error-deep` |
+| `link` | `link-deep`, subrayado en hover |
 
-### Estados de pantalla (signature del dashboard)
-Los cuatro estados son entregables: **loading** (skeleton con la forma y altura reales del contenido — cero layout shift, nunca spinner centrado), **empty** (`EmptyState` con CTA), **error** (`error.tsx` / `SectionError` con reintento), **éxito** (toast con verbo en pasado).
+Tamaños: `xs` 24 · `sm` 32 · `default` 40 · `lg` 48 · `icon*` equivalentes ·
+**`pill` 48 (CTA de marketing)** · **`pill-sm` 40 (nav/dock)**. Radio 6 px en app,
+pill en marketing. Press `active:scale-[0.97]`; foco `ring-2 ring-ring` con offset.
 
-### Motion (aplicado por componente)
-- Landing: easing `cubic-bezier(0.4, 0, 0.2, 1)`, duraciones 150/300/500 ms, entrada única `BlurFade` (16–20 px + opacidad, `once`), stagger 80 ms con presupuesto <500 ms/sección. Un solo loop en toda la app: los `AnimatedBeam` del hero.
-- Dashboard: easing `cubic-bezier(0.2, 0, 0, 1)`, 150/200/300 ms, **sin animaciones de entrada por scroll**; motion solo como feedback.
-- Nunca `transition: all`; solo `transform`/`opacity`. Reduced motion: contenido íntegro, mismo layout, cero animación.
+**Metal estático vs vivo.**
+- Estático (default, gratis): todo botón primario. CSS puro, SSR, sin WebGL.
+- Vivo: `metal="live"` envuelve el botón en `MetalAction` (anillo WebGL de
+  `metal-fx`); `metal="bend"` añade la abolladura líquida bajo el cursor. **Presupuesto:
+  ≤1–2 acciones vivas por pantalla** (la acción decisiva: guardar settings, resolver
+  disputa, retirar, CTA del hero). `bend` solo en **la** CTA clave. Un botón
+  `disabled` nunca lleva anillo vivo. `metalClassName` pasa layout al wrapper
+  (`w-full`, `flex-1`). Sin WebGL2, en el primer paint y con reduced motion se ve
+  solo el aro estático.
+- Reutiliza el cromo: `metal-rim` (aro sobre core `--metal-core`, por defecto
+  `--primary`), `bg-metal` (relleno plata claro para badges/pills/indicadores activos,
+  texto `text-ink` ≥8:1), tokens `--metal-1…5`, `--metal-rim`, `--metal-fill`,
+  `--metal-gloss`. Para cambiar el core en hover: `hover:[--metal-core:…]`. No pongas
+  `bg-*` sobre un `metal-rim` (pisa el `background`).
+- `MetalPill` (label corto vivo) y `MetalRing` (anillo sobre avatar/ícono) siguen en
+  `~/components/metal`; cuentan para el mismo presupuesto.
 
-## 6. Do's and Don'ts
+### Inputs
+Alto 40 (`sm` 32, `lg` 48), radio 6, hairline, fondo canvas, 14 px (16 en móvil para
+evitar zoom iOS). Hover `hairline-strong`, foco `border-ring` + anillo azul. Label
+siempre visible; error debajo con `aria-describedby` + `aria-invalid`.
 
-### Do:
-- **Do** componer toda cifra de dinero/métrica en Geist Mono con `tabular-nums`.
-- **Do** alternar cream → navy → cream en la landing; hero y CTA final en navy.
-- **Do** entregar los cuatro estados (loading/empty/error/éxito) en cada pantalla de dashboard.
-- **Do** verificar contraste AA con números, no a ojo (cream/navy ≈ 15.2:1 ✓, gold/navy ≈ 7.6:1 ✓).
-- **Do** usar cifras de mercado con fuente visible (35 M hogares, CONAPO 2025) — nunca tracción propia inventada.
-- **Do** respetar `prefers-reduced-motion` sin pérdida de contenido ni de layout.
+### Cards
+`Card`: canvas + hairline + `shadow-sm`, radio 8. Cards grandes/pricing: radio 12.
+Sin glass, nunca.
 
-### Don't:
-- **Don't** cruzar la frontera D7: `--brand-*` fuera de `(public)/` está prohibido, igual que reescribir zinc para la landing.
-- **Don't** reproducir "el default reconocible de diseño IA": titular Geist sobre cream con acento gold, hero-metric template, card grids idénticos.
-- **Don't** usar gold como texto sobre cream (≈1.9:1), como fondo amplio ni como icono decorativo.
-- **Don't** usar gradientes de color ajenos al sistema ni `background-clip: text`.
-- **Don't** animar con rebote o overshoot: "un producto que custodia dinero ajeno no rebota".
-- **Don't** usar `transition: all`, ni animar `width`/`height`/`top`/`left`.
-- **Don't** hardcodear strings: es/en al 100 %, el inglés como traducción real, no calco.
-- **Don't** usar color como único portador de información (estados, plan recomendado, errores).
+### Liquid Glass (`~/components/glass`)
+- `GlassSurface` — superficie Liquid Glass (`@samasante/liquid-glass`) con óptica
+  sutil propia (refracción baja, frost 10 px, sheen suave) sobre tinte canvas
+  translúcido y `shadow-float`. Props: `tone` (`light` | `dark`), `radius`
+  (`sm|md|lg|xl|pill`), `optics` (escape hatch), `className` (layout normal) y
+  atributos HTML. Chromium refracta el DOM vivo; Safari/Firefox esmerilan + tiñen +
+  iluminan el borde.
+- `GlassDock` — **la firma**: contenedor glass (`shape="pill"` para nav/toolbar,
+  `"panel"` para barra de guardado) con un slot `action` para **la** acción de metal.
+
+```tsx
+<GlassDock aria-label={t("toolbar")} action={
+  <Button size="pill-sm" metal="live">{t("save")}</Button>
+}>
+  {secondaryControls}
+</GlassDock>
+```
+
+**Dónde sí:** cromática flotante/sticky sobre contenido — nav de la landing, barras de
+guardado sticky, toolbars flotantes, opcionalmente popovers/dropdowns. **Dónde no:**
+tablas densas, cards, formularios, fondos de sección. **Glass + metal juntos = la
+firma, máximo una vez por pantalla.** Nunca glass sobre glass.
+
+**Fallbacks:** primer paint del servidor, `prefers-reduced-transparency: reduce` y
+`prefers-contrast: more` → la misma caja en canvas sólido + hairline (sin layout
+shift). Reduced motion → sin refracción (solo frost + tinte). La óptica nunca se anima.
+
+### Border beam y bot avatars
+- `LandingBeam` (`border-beam`, solo landing): la única fuente de color espectral en
+  movimiento. Presupuesto: consola del hero, plan recomendado y CTA final — no más.
+  Inactivo en el primer render y bajo reduced motion. Radios en `LANDING_BEAM_RADIUS`
+  (xl 16, 2xl 20, pill 24).
+- `UserBotAvatar` (`bot-avatars`): avatar determinista por seed para usuarios sin foto.
+  `interactive` solo fuera de listas densas; tamaños 24–40 px.
+
+### Estados de pantalla
+Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintento),
+éxito (toast con verbo en pasado). Obligatorios en toda pantalla de herramienta.
+
+## 7. Motion
+
+- **Ease-out normativo: `cubic-bezier(0.22, 1, 0.36, 1)`** (transitions.dev "smooth
+  out"). La utilidad `ease-out` de Tailwind ya es esta curva; en JS usa
+  `MOTION_EASE.smoothOut` (`~/components/motion/motion-tokens`).
+- Duraciones en `MOTION_DURATION_MS`: 150 (hover/press/cierre), 250 (apertura de
+  dropdown/modal), 350–400 (paneles), ≤500 (énfasis). UI ≤300 ms.
+- Overshoot solo en micro-éxitos (`MOTION_EASE.bounce`: check, badge), nunca en cierres.
+- Dashboard/admin/corporate: sin entradas por scroll; motion solo como feedback.
+- Nunca `transition: all`; anima `transform`/`opacity` (y color/sombra en hover).
+
+## 8. Budgets por pantalla
+
+| Recurso | Máximo |
+|---|---|
+| Metal vivo (`metal="live"`/`MetalAction`/`MetalRing`/`MetalPill`) | 1–2 |
+| `metal="bend"` | 1 |
+| Glass + metal (firma, `GlassDock`) | 1 |
+| Superficies glass en total | 2 (p. ej. nav + popover) |
+| `LandingBeam` | 3 en toda la landing |
+| Mesh gradient | 1, solo hero de landing |
+
+## 9. Accesibilidad y preferencias
+
+- AA verificado con números: ink/canvas-soft 17.2:1, body/canvas-soft 8.1:1,
+  link-deep/canvas-soft ≥5:1, blanco/#ee0000 4.53:1, deep/soft de estados ≥4.5:1.
+- Foco visible siempre: anillo `ring` azul 2 px con offset, también sobre metal y glass.
+- `prefers-reduced-motion`: sin metal vivo, sin refracción, sin beams, sin entradas;
+  mismo layout y contenido.
+- `prefers-reduced-transparency` / `prefers-contrast: more`: glass → sólido.
+- Color nunca es el único portador de información.
+
+## 10. Frontera D7 (actualizada)
+
+La frontera de **paletas** se cierra: por decisión del owner, `--brand-*`
+(navy/gold/cream/gray) y Fraunces quedan retirados y **la landing comparte el sistema
+ink/zinc**. Lo que sigue siendo exclusivo de `src/app/[locale]/(public)/**`: el mesh
+gradient (`bg-mesh-hero`), `text-display-hero`, `LandingBeam`, Magic UI y las entradas
+por scroll. Dashboard/admin/corporate/auth no los usan.
+
+## 11. Do's and Don'ts
+
+**Do:** usar tokens semánticos (`bg-canvas`, `text-body`, `shadow-float`) en vez de
+valores sueltos · componer cifras en Geist Mono con `tabular-nums` · dar a cada
+pantalla una sola acción de metal decisiva · respetar los fallbacks de glass.
+
+**Don't:** Fraunces o cualquier serif · peso 700 · `--brand-*` · mesh gradient fuera
+del hero · glass sobre tablas/cards o glass sobre glass · más de 2 metales vivos ·
+`bg-*` sobre `metal-rim` · `mute` para copy esencial de 14 px · `transition: all` ·
+strings hardcodeados.

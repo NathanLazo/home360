@@ -15,7 +15,7 @@ aparte (`spec/10-mobile-app.md`, tickets M0–M7 en `home360-app/spec`).
 | ORM | Prisma 6 + PostgreSQL (cliente generado en `generated/prisma`) |
 | Auth | NextAuth v5 (Credentials + Google, sesión JWT, roles) |
 | Pagos | Stripe: Connect (retiros), Billing (suscripciones), PaymentIntents + Transfers (escrow) |
-| UI | Tailwind 4 + shadcn/ui (Radix) + visx (charts) + lucide-react + Magic UI (solo landing) |
+| UI | Tailwind 4 + shadcn/ui (Radix) + visx (charts) + lucide-react + metal-fx (metal líquido) + @samasante/liquid-glass + Magic UI (solo landing) |
 | i18n | next-intl — `es` (default) / `en`, ambos al 100 % |
 | Validación | Zod en todo límite de entrada |
 | Paquetes | pnpm |
@@ -47,12 +47,12 @@ home360/
    ├─ app/
    │  ├─ api/              # Route handlers: auth, trpc, webhooks (Stripe), cron, mobile (API Bearer JWT)
    │  └─ [locale]/         # Todo lo visible vive bajo locale
-   │     ├─ (public)/      # W1 landing — ÚNICO lugar donde existen los tokens --brand-*
+   │     ├─ (public)/      # W1 landing — único lugar con mesh hero, beams y entradas por scroll
    │     ├─ dashboard/     # W3–W8: negocio (KPIs, catálogos, cobros, suscripción, sucursales)
    │     ├─ admin/         # W9–W13: plataforma (cuentas, disputas, finanzas, settings)
    │     ├─ corporate/     # F7: portal de cuentas corporativas
    │     └─ pay/           # Links de cobro para clientes finales
-   ├─ components/          # Compartidos: ui/ (shadcn), charts/ (visx), dashboard/, tablas, estados
+   ├─ components/          # Compartidos: ui/ (shadcn), metal/, glass/, charts/ (visx), dashboard/, estados
    ├─ hooks/               # Hooks compartidos
    ├─ i18n/                # Configuración next-intl (routing, request)
    ├─ messages/            # es/ y en/ — todo el copy visible sale de aquí
@@ -65,7 +65,7 @@ home360/
    │  └─ api/              # tRPC: root.ts, trpc.ts (procedures por rol), contract.ts,
    │                       #   routers/ (auth, dashboard, order, payment, subscription,
    │                       #   marketplace, team, branch, corporate, admin/, …)
-   ├─ styles/globals.css   # Tokens: zinc shadcn (oklch) + --brand-* + charts + reduced-motion
+   ├─ styles/globals.css   # Tokens: ink/zinc (oklch) + tipo + radios + sombras + metal + mesh + charts
    └─ trpc/                # Cliente tRPC para React
 ```
 
@@ -89,14 +89,18 @@ home360/
 7. **Procedures por rol**: `business`, `admin`, `corporate` — el acceso se decide en la
    capa tRPC, no en la UI.
 
-## Frontera de diseño D7 (inviolable)
+## Frontera de diseño D7 (inviolable, reinterpretada)
 
-- `src/app/[locale]/(public)/**` → paleta de marca `--brand-*` (navy/gold/cream/gray),
-  Fraunces como display, personalidad **Premium**.
-- `dashboard/**`, `admin/**`, `corporate/**`, auth → zinc shadcn, personalidad
-  **Corporate**, sin animaciones de entrada por scroll.
-- Los tokens `--brand-*` **no aparecen** fuera de `(public)/`; los tokens zinc no se
-  reescriben para la landing. Detalle completo en `spec/DESIGN-DIRECTIVE.md` y `DESIGN.md`.
+- **Un solo sistema** (Vercel-inspired, `DESIGN.md`): tokens ink/zinc, Geist (pesos
+  ≤600), elevación apilada, primary de **metal líquido** y **Liquid Glass**. Por decisión
+  del owner la paleta `--brand-*` (navy/gold/cream/gray) y Fraunces están **retiradas**:
+  no se reintroducen en ningún sitio.
+- `src/app/[locale]/(public)/**` → personalidad **Premium**: exclusivos `bg-mesh-hero`
+  (solo hero), `text-display-hero`, `LandingBeam`, Magic UI, entradas por scroll.
+- `dashboard/**`, `admin/**`, `corporate/**`, auth → personalidad **Corporate**, sin
+  animaciones de entrada por scroll, sin mesh ni beams.
+- Budgets por pantalla: ≤2 metales vivos, 1 firma glass + metal. Detalle completo en
+  `DESIGN.md` y `spec/DESIGN-DIRECTIVE.md`.
 
 ## Flujo de trabajo
 
@@ -130,4 +134,5 @@ pnpm build
 - Foco visible, navegación completa por teclado, contraste AA verificado.
 - `prefers-reduced-motion` respetado sin pérdida de contenido ni layout.
 - Loading (skeleton con forma real), empty (CTA), error (reintento) y éxito implementados.
-- Frontera D7 intacta; `pnpm typecheck`, `pnpm check` y `pnpm build` en verde.
+- Frontera D7 intacta (sin `--brand-*` ni Fraunces; budgets de metal/glass); `pnpm typecheck`,
+  `pnpm check` y `pnpm build` en verde.

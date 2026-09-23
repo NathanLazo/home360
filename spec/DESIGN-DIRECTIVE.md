@@ -3,8 +3,12 @@
 Documento **normativo de ejecución visual** para F6 y posteriores. No sustituye a los
 tickets: los tickets dicen *qué* se construye, este documento dice *cómo se ve y cómo se
 mueve*. Ante contradicción sobre alcance manda el ticket; sobre estética y motion manda
-este archivo. `spec/08-business-model-alignment.md` D7 (frontera marca/zinc) sigue siendo
-inviolable.
+este archivo. El sistema visual (tokens, primitivas, budgets) está en `DESIGN.md`.
+
+> **Actualización (sistema "Vercel-inspired" + metal líquido + Liquid Glass).** Por
+> decisión del product owner la paleta de marca navy/gold/cream/gray y Fraunces quedan
+> **retiradas**: toda la plataforma, landing incluida, usa el sistema ink/zinc de
+> `DESIGN.md`. D7 se reinterpreta en §1.
 
 Fuentes: `roger-arq` (arquitectura), `frontend-design` (dirección de arte), `motion-design`
 (movimiento), más los barridos de calidad F6-12…F6-16.
@@ -28,55 +32,45 @@ custodia, oficio o confianza, se elimina.
 
 ---
 
-## 1. Frontera D7 (no negociable)
+## 1. Frontera D7 (reinterpretada)
 
-| Superficie | Paleta | Personalidad |
+Ya no hay dos paletas. Todas las superficies comparten tokens ink/zinc, Geist, radios,
+elevación, metal líquido y Liquid Glass (`DESIGN.md`). Lo que D7 sigue separando es la
+**intensidad**:
+
+| Superficie | Exclusivo | Personalidad |
 |---|---|---|
-| `src/app/[locale]/(public)/**` (landing W1) | `--brand-*` | Premium |
-| `dashboard/**`, `admin/**`, auth | zinc shadcn | Corporate |
+| `src/app/[locale]/(public)/**` (landing W1) | `bg-mesh-hero` (solo hero), `text-display-hero`, `LandingBeam`, Magic UI, entradas por scroll, CTAs `size="pill"` | Premium |
+| `dashboard/**`, `admin/**`, `corporate/**`, auth | — (sin entradas por scroll, sin mesh, sin beams) | Corporate |
 
-Los tokens `--brand-navy/gold/cream/gray` **no aparecen** fuera de `(public)/`. Los tokens
-zinc no se reescriben para complacer a la landing. Cualquier agente que necesite cruzar esa
-frontera está mal encaminado: reporta y detente.
+Los tokens `--brand-*` **no existen** en ningún sitio: no se reintroducen. Los tokens
+compartidos no se reescriben para una sola superficie; si la landing necesita otra
+lectura, se usa una banda `.dark`.
 
 ---
 
-## 2. Tipografía: el único lugar donde tomamos un riesgo
+## 2. Tipografía
 
-Hoy el proyecto corre con Geist Sans + Geist Mono y `--font-heading: var(--font-sans)`. Un
-titular Geist sobre fondo cream con acento gold es exactamente el default reconocible de
-diseño generado por IA. La paleta está fijada por marca y no se toca; **el riesgo se gasta
-íntegro en la cara de display**, y en ningún otro lado.
+**Una sola familia: Geist.** Sans para todo, Geist Mono para etiquetas técnicas,
+eyebrows, código y cifras verificables. **Fraunces y cualquier serif están
+prohibidas.** Pesos 400/500/600; 600 es el techo (Tailwind remapea `font-bold` a 600).
+Sentence case.
 
-**Instrucción (la ejecuta el agente dueño de la ola 2 de landing):**
+Escala (utilidades de `globals.css`, tracking proporcional ya incluido):
 
-- Añadir **una** cara de display vía `next/font/google` en `src/app/[locale]/layout.tsx`,
-  expuesta como `--font-display`, y declarar `--font-display` en el bloque `@theme` de
-  `src/styles/globals.css`.
-- Cara elegida: **Fraunces** (variable, ejes `opsz` y `SOFT`), pesos 600–700, `opsz` alto.
-  Justificación: es una serif contemporánea con corte de herramienta —terminaciones
-  angulosas, contraste alto— que evoca oficio y permanencia sin caer en la serif editorial
-  neutra del default. Su eje óptico permite titulares apretados sin volverse decorativa.
-  Alternativa aceptable si Fraunces no carga: **Instrument Serif** (una sola cara, más
-  seca). No se usa una tercera opción sin justificarlo en el reporte.
-- **Alcance de uso**: `--font-display` se aplica **solo** a `h1` y `h2` dentro de
-  `(public)/`. Nunca en dashboard/admin, nunca en body, nunca en botones, nunca en `h3`.
-  Se aplica con una clase local del módulo, no cambiando `--font-heading` global.
-- Geist Sans sigue siendo el cuerpo. **Geist Mono** es la cara de utilidad y carga
-  significado: números de paso, cifras de métricas, precios y etiquetas de dato. Mono =
-  "esto es un dato verificable", coherente con un producto de custodia de dinero.
+| Rol | Utilidad | Tamaño | Tracking |
+|---|---|---|---|
+| `h1` hero (landing) | `text-display-hero` | clamp(2.75rem, 6.5vw, 4.5rem) | -0.05em |
+| `h1` / título grande | `text-display-xl` | 48/56 | -2.4 px |
+| `h2` sección | `text-display-lg` | 32/40 | -1.28 px |
+| `h2` herramienta | `text-display-md` | 24/32 | -0.96 px |
+| `h3` card/paso | `text-display-sm` | 20/26 | -0.6 px |
+| Cuerpo landing | `text-copy` | 16/24 | 0 |
+| Cuerpo herramienta | `text-copy-sm` | 14/20 | -0.28 px |
+| Eyebrow / dato | `font-mono text-label` | 12/16 | 0 (uppercase opcional) |
 
-**Escala de tipo de la landing** (base 16 px, `text-balance` en titulares,
-`text-pretty` en párrafos, medida de 60–75 caracteres en cuerpo):
-
-| Rol | Tamaño | Cara | Peso | Tracking |
-|---|---|---|---|---|
-| `h1` hero | `clamp(2.5rem, 6vw, 4.5rem)` | display | 700 | `-0.02em` |
-| `h2` sección | `clamp(1.875rem, 3.5vw, 2.75rem)` | display | 600 | `-0.015em` |
-| `h3` card/paso | `1.125rem` | sans | 600 | `-0.01em` |
-| Cuerpo | `1rem` / `1.0625rem` | sans | 400 | `0` |
-| Eyebrow / label | `0.75rem` | mono | 500 | `0.08em`, uppercase |
-| Cifra métrica | `clamp(2rem, 4vw, 3rem)` | mono | 600 | `-0.02em`, `tabular-nums` |
+El acento de titulares de landing (`*acento*` en el copy) es **mismo Geist**, contraste
+por tinta: `font-normal text-mute`. Nunca serif, nunca gradiente en texto.
 
 Reglas duras: jerarquía sin saltos (h1 → h2 → h3); `tabular-nums` en toda cifra que anime o
 cambie; comillas y guiones tipográficos correctos en el copy es/en (« » no aplica en
@@ -86,21 +80,22 @@ español mexicano: usa comillas dobles curvas “ ”; guion largo — para inci
 
 ## 3. Color: cómo se usa, no solo cuál es
 
-Los cuatro tokens no son un tema completo. Reglas de aplicación:
-
-- **Ritmo de secciones**: alterna cream → navy → cream. El hero y el CTA final son navy
-  (los dos momentos de mayor peso); features, how-it-works y pricing son cream. Métricas
-  puede ser navy si el ritmo lo pide, nunca dos navy consecutivos.
-- **Gold es escaso y significa acción o custodia.** Se permite en: el CTA primario, el
-  subrayado del wordmark, el borde del badge del hero, el BorderBeam en hover, el acento
-  del plan recomendado. Prohibido: fondos gold amplios, texto de párrafo gold, iconos gold
-  por decoración. Si en una pantalla hay más de ~4 apariciones de gold, sobra una.
-- **`--brand-gray` es texto secundario sobre navy**, no un quinto acento.
-- **Contraste (WCAG AA, verificado, no asumido)**: `#f5f0e8` sobre `#0d1b2a` ≈ 15.2:1 ✓.
-  `#c8a96e` sobre `#0d1b2a` ≈ 7.6:1 ✓. **`#c8a96e` sobre `#f5f0e8` ≈ 1.9:1 ✗** — gold sobre
-  cream **no se usa nunca para texto ni para iconografía portadora de significado**; solo
-  para bordes y filetes decorativos de ≥2 px acompañados de otro indicador. El texto del CTA
-  gold es navy, no blanco.
+- **Lienzo**: página `canvas-soft` (#fafafa), cards/dialogs/inputs `canvas` (#fff),
+  inset/hover `canvas-soft-2` (#f5f5f5), bordes `hairline` (#ebebeb).
+- **Texto**: `ink` (#171717) por defecto, `body` (#4d4d4d, = `muted-foreground`) para
+  secundario, `mute` (#888) solo terciario no esencial o ≥18 px.
+- **Primary = metal líquido** (ink + aro de cromo). Una pantalla pide **una** acción; el
+  metal vivo (WebGL) se reserva para 1–2 acciones decisivas.
+- **Color con significado**: azul `link-*` (link, foco, info), rojo `error-*`, ámbar
+  `warning-*` (texto en `warning-deep`), verde `success-*` (liberado/pagado). Nada
+  decora.
+- **Mesh gradient** (develop/preview/ship): solo como fondo atmosférico del hero de
+  landing (`bg-mesh-hero`), jamás miniaturizado.
+- **Ritmo de la landing**: secciones `canvas-soft`/`canvas` con bandas `.dark` (ink) para
+  hero o CTA final si el ritmo lo pide; nunca dos bandas oscuras consecutivas.
+- **Contraste (WCAG AA, verificado)**: ink/canvas-soft 17.2:1 ✓, body/canvas-soft 8.1:1 ✓,
+  link-deep/canvas-soft 5.5:1 ✓, `#0070f3`/canvas-soft 4.36:1 ✗ (por eso el texto link usa
+  `link-deep`), mute/canvas-soft 3.4:1 (solo ≥18 px o no esencial).
 - Nunca uses color como único portador de información (estado de invitación, plan
   recomendado, error): siempre color + texto o icono.
 
@@ -108,34 +103,35 @@ Los cuatro tokens no son un tema completo. Reglas de aplicación:
 
 ## 4. Movimiento
 
-**Personalidad: Premium** en la landing. Es un producto que custodia el dinero de otra
-persona; un rebote elástico comunica lo contrario de lo que vendemos.
+**Personalidad: Premium** en la landing, sobria. Un producto que custodia dinero ajeno no
+rebota.
 
-- Easing firma: `cubic-bezier(0.4, 0, 0.2, 1)`. Entradas decelerando (`ease-out`), salidas
-  acelerando (`ease-in`). **Overshoot 0 %** en toda la landing. Nada de `ease-out-back`.
-- Paleta de duraciones: **rápida 150 ms** (hover, foco, press), **estándar 300 ms**
-  (entrada de card, cambio de estado), **lenta 500 ms** (revelado de sección, hero).
-- Patrón de entrada único: `BlurFade` desde 16–20 px abajo + opacidad, `inView`, **una sola
-  vez** (`once`). Nada re-anima al volver a hacer scroll.
-- **Stagger**: 80 ms entre hermanos, presupuesto total **< 500 ms por sección**. Con 3+
-  elementos, no más de 1/3 en movimiento simultáneo.
-- **Un solo loop en toda la aplicación**: los `AnimatedBeam` del hero. El `ShimmerButton`
-  aparece **una vez** en todo el producto (CTA primario del hero). `BorderBeam` solo en
-  hover de feature card. Si aparece un segundo loop ambiental, está de más.
-- Coreografía del hero (secuencia, no efectos sueltos): badge (0 ms) → titular `TextAnimate`
-  por palabra (80 ms) → subtítulo (240 ms) → fila de CTAs (320 ms) → visual con beams
-  (400 ms). Total bajo 900 ms; el LCP no espera a la animación.
-- Micro-interacciones obligatorias, todas ≤150 ms: hover de CTA (elevación de sombra +
-  1–2 % de escala máximo), press (`active:scale-[0.98]`), foco visible en **todo** elemento
-  interactivo, hover de fila de tabla, hover de card (sombra + borde, no traslación).
+- **Easing normativo (ease-out): `cubic-bezier(0.22, 1, 0.36, 1)`** — transitions.dev
+  "smooth out". Es el valor de la utilidad `ease-out` de Tailwind en este repo y de
+  `MOTION_EASE.smoothOut` / `LANDING_EASE` en JS. Movimiento en pantalla: `ease-in-out`.
+  **Overshoot 0 %** salvo micro-éxitos (`MOTION_EASE.bounce`: check, badge), nunca en
+  cierres.
+- Paleta de duraciones (`MOTION_DURATION_MS`): **150 ms** (hover, foco, press, cierre),
+  **250 ms** (apertura de dropdown/modal), **350–400 ms** (paneles), **≤600 ms**
+  (revelado de sección en landing).
+- Patrón de entrada de landing: `BlurFade` desde 16–20 px abajo + opacidad, `inView`,
+  **una sola vez** (`once`). Nada re-anima al volver a hacer scroll.
+- **Stagger**: 40–80 ms entre hermanos, presupuesto total **< 500 ms por sección**.
+- **Loops ambientales**: el marquee de garantías y los `LandingBeam` (consola del hero,
+  plan recomendado, CTA final). Nada más en loop.
+- **Metal y glass no se animan por scroll**: el metal vivo reacciona al cursor (solo con
+  `bend`), la óptica glass es estática.
+- Micro-interacciones ≤150 ms: press (`active:scale-[0.97]`), foco visible en **todo**
+  interactivo, hover de fila, hover de card (sombra + borde, no traslación en herramienta).
 - Nunca `transition: all`. Anima `transform` y `opacity`; jamás `width`, `height`, `top` ni
-  `left`. Sin `linear` para movimiento espacial.
+  `left`. Sin `linear` para movimiento espacial (solo loops constantes).
 
 **Reduced motion es un requisito de entrega, no un extra.** Bajo
 `prefers-reduced-motion: reduce`: sin `BlurFade`, sin `TextAnimate`, sin beams, sin
-shimmer, sin `BorderBeam`, sin `scroll-behavior: smooth`, y `NumberTicker` muestra la cifra
-final directamente. El contenido queda **íntegro y en el mismo layout** — nunca se pierde
-información ni se mueve nada de sitio. Verificable con el emulador de DevTools.
+shimmer, sin metal vivo (queda el aro estático), sin refracción glass, sin
+`scroll-behavior: smooth`, y `NumberTicker` muestra la cifra final directamente. Bajo
+`prefers-reduced-transparency` / `prefers-contrast: more` el glass se vuelve sólido. El
+contenido queda **íntegro y en el mismo layout**. Verificable con el emulador de DevTools.
 
 ---
 
@@ -175,7 +171,9 @@ información ni se mueve nada de sitio. Verificable con el emulador de DevTools.
 
 La misma disciplina, otra personalidad. Aplica a F6-09 y F6-11:
 
-- Zinc shadcn, easing `cubic-bezier(0.2, 0, 0, 1)`, duraciones 150/200/300 ms, overshoot 0.
+- Sistema ink/zinc de `DESIGN.md`, easing normativo `cubic-bezier(0.22, 1, 0.36, 1)`,
+  duraciones 150/250/350 ms, overshoot 0. Glass solo en cromática flotante (barras de
+  guardado sticky, toolbars), nunca en tablas ni cards.
 - **Sin animaciones de entrada por scroll.** Una herramienta de trabajo no se revela: está.
   El movimiento se limita a feedback: hover de fila, apertura de Sheet/Dialog (300 ms),
   press de botón, y transiciones de estado de carga.
@@ -201,5 +199,6 @@ La misma disciplina, otra personalidad. Aplica a F6-09 y F6-11:
 - [ ] Sin `transition: all`; solo `transform`/`opacity` animados.
 - [ ] 375 / 768 / 1024 sin desbordes; áreas táctiles ≥44 px.
 - [ ] Loading, empty, error y éxito implementados.
-- [ ] Frontera D7 intacta.
+- [ ] Frontera D7 intacta (sin `--brand-*`, sin Fraunces; mesh/beams/entradas solo en landing).
+- [ ] Budgets de metal vivo (≤2) y glass + metal (1) respetados; fallbacks de glass verificados.
 - [ ] `pnpm typecheck`, `pnpm check` y `pnpm build` en verde.

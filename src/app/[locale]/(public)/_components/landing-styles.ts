@@ -9,13 +9,17 @@
  * tokens scoped under `.dark`, never a parallel palette.
  */
 
-/** Strong ease-out: entrances start fast and settle softly, overshoot 0. */
+/**
+ * Normative ease-out (transitions.dev "smooth out", DESIGN.md §7): entrances
+ * start fast and settle softly, overshoot 0. Same curve as Tailwind's
+ * `ease-out` token in `globals.css`.
+ */
 export const LANDING_EASE: [number, number, number, number] = [
-  0.23, 1, 0.32, 1,
+  0.22, 1, 0.36, 1,
 ];
 
 /** Same curve for CSS arbitrary values. */
-export const landingEaseCss = "ease-[cubic-bezier(0.23,1,0.32,1)]";
+export const landingEaseCss = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 /** Duration palette in milliseconds. UI ≤ 300 ms, reveals ≤ 700 ms. */
 export const LANDING_DURATION = {
@@ -37,7 +41,7 @@ export const sectionPaddingClass = "py-24 lg:py-32";
 /** Clears the sticky 4rem header with room to spare (minimum 5rem). */
 export const anchorOffsetClass = "scroll-mt-24";
 
-/** `h1`, hero only. Sans, tight, heavy; the accent phrase takes the serif. */
+/** `h1`, hero only. Sans, tight, 600 ceiling; the accent phrase goes muted. */
 export const displayTitleClass =
   "text-[clamp(2.625rem,7vw,5.25rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-balance";
 
@@ -46,12 +50,11 @@ export const displayHeadingClass =
   "text-[clamp(2rem,4.2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance";
 
 /**
- * Serif accent inside a display heading (editorial contrast): Fraunces at its
- * soft, high optical size, upright — the layout loads no italic cut, and a
- * synthesized slant would look cheap.
+ * Accent phrase inside a display heading: same family, contrast by ink —
+ * a lighter weight in the tertiary gray (≥ 3:1 at display sizes, and `.dark`
+ * bands flip it through `--mute`). No serif, no gradient text.
  */
-export const accentClass =
-  "font-display font-light tracking-[-0.03em] [font-variation-settings:'SOFT'_100,'opsz'_144]";
+export const accentClass = "font-normal text-mute";
 
 /** `h3`, body face. */
 export const subheadingClass =
@@ -86,16 +89,15 @@ export const focusRingClass =
  * callers never stack two `transition-*` utilities.
  */
 export const pressClass =
-  "transition-[scale,background-color,color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100";
+  "transition-[scale,background-color,color,border-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97] motion-reduce:active:scale-100";
 
 /**
  * Pixel radii for the border beam, which takes a number instead of a class.
- * They mirror the zinc scale in `globals.css` (`--radius: 0.5rem`):
- * `rounded-xl` = 1.4 × 8 px, `rounded-2xl` = 1.8 × 8 px, `rounded-full` on a
- * 48 px pill = 24 px.
+ * They mirror the radius scale in `globals.css`: `rounded-xl` = 16 px,
+ * `rounded-2xl` = 20 px, `rounded-full`/`rounded-pill` on a 48 px pill = 24 px.
  */
 export const LANDING_BEAM_RADIUS = {
-  xl: 11.2,
-  twoXl: 14.4,
+  xl: 16,
+  twoXl: 20,
   pill: 24,
 } as const;
