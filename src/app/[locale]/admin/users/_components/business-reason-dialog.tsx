@@ -1,9 +1,9 @@
 "use client";
 
-import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 
+import { ConfirmButtonContent } from "../../_components/confirm-button-content";
 import { moderationReasonSchema } from "./users.schema";
 import {
   AlertDialog,
@@ -24,7 +24,10 @@ export type BusinessReasonDialogProps = {
   title: string;
   description: string;
   confirmLabel: string;
+  /** Past-tense label shown with the check once the server confirms. */
+  successLabel: string;
   loading: boolean;
+  succeeded?: boolean;
   onConfirm: (reason: string) => void;
 };
 
@@ -38,7 +41,9 @@ export function BusinessReasonDialog({
   title,
   description,
   confirmLabel,
+  successLabel,
   loading,
+  succeeded = false,
   onConfirm,
 }: BusinessReasonDialogProps) {
   const t = useTranslations("admin.users.reasonDialog");
@@ -85,29 +90,28 @@ export function BusinessReasonDialog({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>
+          <AlertDialogCancel disabled={loading || succeeded}>
             {t("cancel")}
           </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             disabled={loading || !parsed.success}
+            aria-disabled={succeeded || undefined}
             onClick={(event) => {
               event.preventDefault();
               setTouched(true);
 
-              if (parsed.success) {
+              if (!succeeded && parsed.success) {
                 onConfirm(parsed.data);
               }
             }}
           >
-            {loading ? (
-              <LoaderCircleIcon
-                data-icon="inline-start"
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : null}
-            {confirmLabel}
+            <ConfirmButtonContent
+              loading={loading}
+              succeeded={succeeded}
+              label={confirmLabel}
+              successLabel={successLabel}
+            />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

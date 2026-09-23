@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
+import { useSuccessBeat } from "../../_components/use-success-beat";
 import { BusinessDetailActions } from "./business-detail-actions";
 import { BusinessDetailSheet } from "./business-detail-sheet";
 import {
@@ -57,8 +58,17 @@ export function UsersView() {
       }}
     />
   ) : undefined;
+  const successBeat = useSuccessBeat();
   const mutations = useUserMutations({
-    onSettledSuccess: () => setPendingModeration(null),
+    onSettledSuccess: () => {
+      // Reactivate uses the shared confirm dialog, which has no check slot.
+      if (pendingModeration?.action === "reactivate") {
+        setPendingModeration(null);
+        return;
+      }
+
+      successBeat.celebrate(() => setPendingModeration(null));
+    },
   });
 
   return (
@@ -182,6 +192,7 @@ export function UsersView() {
         pending={pendingModeration}
         onClose={() => setPendingModeration(null)}
         mutations={mutations}
+        succeeded={successBeat.succeeded}
       />
     </div>
   );

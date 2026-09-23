@@ -1,9 +1,9 @@
 "use client";
 
-import { LoaderCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { ConfirmButtonContent } from "../../_components/confirm-button-content";
 import { GuaranteeBadge } from "./guarantee-badge";
 import { SectionError } from "~/components/section-error";
 import { Badge } from "~/components/ui/badge";
@@ -35,6 +35,8 @@ export type ApproveBusinessDialogProps = {
   businessId: string | null;
   onOpenChange: (open: boolean) => void;
   loading: boolean;
+  /** The server confirmed; the dialog holds briefly on the check. */
+  succeeded?: boolean;
   onConfirm: (input: { businessId: string; planCode: PlanCode }) => void;
 };
 
@@ -46,6 +48,7 @@ export function ApproveBusinessDialog({
   businessId,
   onOpenChange,
   loading,
+  succeeded = false,
   onConfirm,
 }: ApproveBusinessDialogProps) {
   const open = businessId !== null;
@@ -56,6 +59,7 @@ export function ApproveBusinessDialog({
   const detail = unwrapEnvelope(detailQuery);
   const business = detail.status === "success" ? detail.data : null;
   const t = useTranslations("admin.users.approveDialog");
+  const doneT = useTranslations("admin.feedback.done");
   const documentTypeT = useTranslations("admin.documentTypes");
   const documentStatusT = useTranslations("admin.documentStatus");
   const formatter = useFormatter();
@@ -207,7 +211,7 @@ export function ApproveBusinessDialog({
             type="button"
             variant="outline"
             className="min-h-11 sm:min-h-10"
-            disabled={loading}
+            disabled={loading || succeeded}
             onClick={() => onOpenChange(false)}
           >
             {t("cancel")}
@@ -216,19 +220,19 @@ export function ApproveBusinessDialog({
             type="button"
             className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
             disabled={loading || !business || planCode === null}
+            aria-disabled={succeeded || undefined}
             onClick={() => {
-              if (business && planCode !== null) {
+              if (!succeeded && business && planCode !== null) {
                 onConfirm({ businessId: business.id, planCode });
               }
             }}
           >
-            {loading ? (
-              <LoaderCircleIcon
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : null}
-            {t("confirm")}
+            <ConfirmButtonContent
+              loading={loading}
+              succeeded={succeeded}
+              label={t("confirm")}
+              successLabel={doneT("approved")}
+            />
           </Button>
         </DialogFooter>
       </DialogContent>

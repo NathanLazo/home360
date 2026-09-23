@@ -46,7 +46,7 @@ export function SettingsSaveBar({
         <span
           aria-hidden="true"
           className={cn(
-            "size-2 shrink-0 rounded-full bg-amber-500 transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity",
+            "size-2 shrink-0 rounded-full bg-amber-500 transition-[opacity,scale] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-opacity",
             dirty ? "scale-100 opacity-100" : "scale-50 opacity-0",
           )}
         />

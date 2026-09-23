@@ -89,7 +89,7 @@ export function OpenDisputesList({
               </span>
               <ChevronRightIcon
                 aria-hidden="true"
-                className="text-muted-foreground size-4 transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
+                className="text-muted-foreground size-4 transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
               />
             </div>
           </Link>

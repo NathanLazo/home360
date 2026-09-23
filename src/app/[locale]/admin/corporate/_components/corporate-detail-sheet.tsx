@@ -4,9 +4,11 @@ import type { ReactNode } from "react";
 import { MapPinIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { isDormantCorporate } from "./corporate-dormancy";
 import { CorporateStatusBadge } from "./corporate-status-badge";
 import { CorporateTierBadge } from "./corporate-tier-badge";
 import type { CorporateAccountDetail } from "./corporate.types";
+import { CopyIdButton } from "../../_components/copy-id-button";
 import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
 import { useCurrencyFormatter } from "../../_components/use-currency-formatter";
 import { SectionError } from "~/components/section-error";
@@ -26,6 +28,7 @@ import {
 } from "~/components/ui/sheet";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
+import { UserAvatar } from "~/components/user-avatar";
 
 const membershipStatusVariants: Record<
   NonNullable<CorporateAccountDetail["membership"]>["status"],
@@ -273,10 +276,28 @@ export function CorporateDetailSheet({
     >
       <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>
-            {state.status === "success" ? state.data.name : t("title")}
-          </SheetTitle>
-          <SheetDescription>{t("subtitle")}</SheetDescription>
+          <div className="flex items-center gap-3 pr-8">
+            {state.status === "success" ? (
+              <UserAvatar
+                seed={state.data.id}
+                name={state.data.name}
+                size={48}
+                state={
+                  isDormantCorporate(state.data.status) ? "sleeping" : "default"
+                }
+                interactive
+              />
+            ) : null}
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <SheetTitle>
+                {state.status === "success" ? state.data.name : t("title")}
+              </SheetTitle>
+              <SheetDescription>{t("subtitle")}</SheetDescription>
+            </div>
+          </div>
+          {state.status === "success" ? (
+            <CopyIdButton value={state.data.id} className="-ml-2 self-start" />
+          ) : null}
         </SheetHeader>
 
         <div className="px-4 pb-6">

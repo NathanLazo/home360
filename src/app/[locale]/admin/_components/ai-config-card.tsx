@@ -75,7 +75,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
             {t("ai.openSettings")}
             <ArrowRightIcon
               aria-hidden="true"
-              className="transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
+              className="transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
             />
           </Link>
         </Button>

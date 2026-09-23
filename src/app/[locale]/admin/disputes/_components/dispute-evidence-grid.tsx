@@ -7,12 +7,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   ADMIN_DURATION,
   ADMIN_EASE_OUT,
+  ADMIN_STAGGER_S,
   PRESS_CONTROL_CLASS,
 } from "../../_components/admin-motion";
 import { cn } from "~/lib/utils";
 
 const VISIBLE_LIMIT = 4;
-const REVEAL_STAGGER_S = 0.03;
 
 export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
   const t = useTranslations("admin.disputes.evidence");
@@ -60,9 +60,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
               transition={{
                 duration: ADMIN_DURATION.standard,
                 ease: ADMIN_EASE_OUT,
-                delay: revealed
-                  ? (index - VISIBLE_LIMIT) * REVEAL_STAGGER_S
-                  : 0,
+                delay: revealed ? (index - VISIBLE_LIMIT) * ADMIN_STAGGER_S : 0,
               }}
             >
               <a
@@ -78,7 +76,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
                   src={url}
                   alt={t("itemAlt", { index: index + 1 })}
                   loading="lazy"
-                  className="aspect-square w-full object-cover transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
+                  className="aspect-square w-full object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
                 />
               </a>
             </motion.li>

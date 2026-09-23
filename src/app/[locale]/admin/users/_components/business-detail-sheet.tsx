@@ -5,6 +5,7 @@ import { ExternalLinkIcon, FileTextIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
+import { CopyIdButton } from "../../_components/copy-id-button";
 import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
 import { BusinessStatusBadge } from "./business-status-badge";
 import { GuaranteeBadge } from "./guarantee-badge";
@@ -28,6 +29,7 @@ import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
+import { UserAvatar } from "~/components/user-avatar";
 
 const documentStatusVariants: Record<
   BusinessDetail["documents"][number]["status"],
@@ -279,10 +281,30 @@ export function BusinessDetailSheet({
     >
       <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>
-            {state.status === "success" ? state.data.name : t("title")}
-          </SheetTitle>
-          <SheetDescription>{t("subtitle")}</SheetDescription>
+          <div className="flex items-center gap-3 pr-8">
+            {state.status === "success" ? (
+              <UserAvatar
+                seed={state.data.id}
+                name={state.data.name}
+                size={48}
+                state={
+                  state.data.derivedStatus === "suspended"
+                    ? "sleeping"
+                    : "default"
+                }
+                interactive
+              />
+            ) : null}
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <SheetTitle>
+                {state.status === "success" ? state.data.name : t("title")}
+              </SheetTitle>
+              <SheetDescription>{t("subtitle")}</SheetDescription>
+            </div>
+          </div>
+          {state.status === "success" ? (
+            <CopyIdButton value={state.data.id} className="-ml-2 self-start" />
+          ) : null}
         </SheetHeader>
 
         <div className="px-4 pb-6">

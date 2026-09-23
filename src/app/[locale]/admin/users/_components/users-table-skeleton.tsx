@@ -14,13 +14,13 @@ const COLUMNS: Record<UsersTab, TableSkeletonColumn[]> = {
     { width: "w-8", align: "end" },
   ],
   customers: [
-    { width: "w-32" },
+    { width: "w-32", withAvatar: true },
     { width: "w-44" },
     { width: "w-8", align: "end" },
     { width: "w-20" },
   ],
   workers: [
-    { width: "w-32" },
+    { width: "w-32", withAvatar: true },
     { width: "w-28" },
     { width: "w-24" },
     { width: "w-20" },

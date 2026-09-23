@@ -74,12 +74,19 @@ export default async function AdminLayout({
         mobileDescription={t("header.navigationDescription")}
         user={{
           name: userName,
-          initials: t("sidebar.placeholderInitials"),
+          seed: user.id,
+          image: user.image ?? null,
         }}
       />
       <SidebarInset className="min-w-0">
         <AdminHeader
-          user={{ name: userName, email: userEmail, role: user.role }}
+          user={{
+            id: user.id,
+            name: userName,
+            email: userEmail,
+            image: user.image ?? null,
+            role: user.role,
+          }}
           toggleSidebarLabel={t("header.toggleSidebar")}
           roleLabel={t("header.roleBadge")}
         />

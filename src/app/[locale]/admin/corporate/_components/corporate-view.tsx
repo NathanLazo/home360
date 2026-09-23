@@ -44,7 +44,7 @@ import { Tabs } from "~/components/ui/tabs";
 const SEARCH_DEBOUNCE_MS = 300;
 
 const TABLE_SKELETON_COLUMNS: TableSkeletonColumn[] = [
-  { width: "w-40" },
+  { width: "w-40", withAvatar: true },
   { width: "w-16" },
   { width: "w-16" },
   { width: "w-24", align: "end" },

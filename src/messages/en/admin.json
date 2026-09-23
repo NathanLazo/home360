@@ -9,7 +9,6 @@
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "AD",
     "brandLabel": "HOME360, go to admin overview"
   },
   "businessTypes": {
@@ -828,5 +827,15 @@
   },
   "filters": {
     "clear": "Clear filters"
+  },
+  "feedback": {
+    "copyId": "Copy ID",
+    "copied": "ID copied to clipboard",
+    "done": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "suspended": "Suspended",
+      "resolved": "Resolved"
+    }
   }
 }

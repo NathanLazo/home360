@@ -13,7 +13,7 @@ export default function AdminCorporateLoading() {
       </div>
       <TableSkeleton
         columns={[
-          { width: "w-40" },
+          { width: "w-40", withAvatar: true },
           { width: "w-16" },
           { width: "w-16" },
           { width: "w-24", align: "end" },

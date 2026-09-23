@@ -5,7 +5,13 @@ import { motion, useReducedMotion } from "motion/react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ADMIN_DURATION, ADMIN_EASE_OUT } from "../../_components/admin-motion";
+import {
+  ADMIN_DURATION,
+  ADMIN_EASE_OUT,
+  ADMIN_SETTLE_PX,
+} from "../../_components/admin-motion";
+import { CopyIdButton } from "../../_components/copy-id-button";
+import { useSuccessBeat } from "../../_components/use-success-beat";
 import { DisputeAiSummary } from "./dispute-ai-summary";
 import { DisputeArguments } from "./dispute-arguments";
 import { DisputeDetailSkeleton } from "./dispute-detail-skeleton";
@@ -83,8 +89,10 @@ export function DisputeDetail({
   const t = useTranslations("admin.disputes.detail");
   const reduceMotion = useReducedMotion();
   const [resolution, setResolution] = useState<DisputeResolution | null>(null);
+  const successBeat = useSuccessBeat();
   const mutations = useDisputeMutations({
-    onResolved: () => setResolution(null),
+    // The check lands on the confirm button before the dialog closes.
+    onResolved: () => successBeat.celebrate(() => setResolution(null)),
   });
 
   const query = api.admin.disputes.getById.useQuery(
@@ -128,7 +136,10 @@ export function DisputeDetail({
       initial={
         reduceMotion
           ? { opacity: 0 }
-          : { opacity: 0, transform: "translateY(4px)" }
+          : {
+              opacity: 0,
+              transform: `translateY(${ADMIN_SETTLE_PX}px)`,
+            }
       }
       animate={{ opacity: 1, transform: "translateY(0px)" }}
       transition={{ duration: ADMIN_DURATION.standard, ease: ADMIN_EASE_OUT }}
@@ -154,6 +165,7 @@ export function DisputeDetail({
               business: dispute.business.name,
             })}
           </p>
+          <CopyIdButton value={dispute.id} className="-ml-2" />
         </div>
       </div>
 
@@ -167,6 +179,8 @@ export function DisputeDetail({
       <PaymentSummary dispute={dispute} />
 
       <DisputeArguments
+        customer={dispute.customer}
+        business={dispute.business}
         customerArgument={dispute.customerArgument}
         businessArgument={dispute.businessArgument}
       />
@@ -190,6 +204,7 @@ export function DisputeDetail({
         dispute={dispute}
         resolution={resolution}
         loading={mutations.pending}
+        succeeded={successBeat.succeeded}
         onOpenChange={(open) => {
           if (!open) {
             setResolution(null);

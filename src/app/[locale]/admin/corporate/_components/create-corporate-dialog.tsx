@@ -2,7 +2,7 @@
 
 import { LoaderCircleIcon, MailIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import {
   corporateTierSchema,
@@ -15,6 +15,7 @@ import type {
   CorporateTierOption,
 } from "./corporate.types";
 import { useCurrencyFormatter } from "../../_components/use-currency-formatter";
+import { useErrorShake } from "~/components/motion";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";
 import {
@@ -96,6 +97,8 @@ function CreateFormBody({
   const [maxLocations, setMaxLocations] = useState("");
   const [managerId, setManagerId] = useState(NO_MANAGER);
   const [submitted, setSubmitted] = useState(false);
+  const fieldsRef = useRef<HTMLDivElement>(null);
+  const shakeInvalid = useErrorShake();
 
   const applyTier = (nextTier: CorporateTierValue) => {
     setTier(nextTier);
@@ -148,9 +151,7 @@ function CreateFormBody({
             : maxLocationsValue !== null
               ? { maxLocations: maxLocationsValue }
               : {}),
-          ...(managerId === NO_MANAGER
-            ? {}
-            : { accountManagerId: managerId }),
+          ...(managerId === NO_MANAGER ? {} : { accountManagerId: managerId }),
           locale: emailLocale,
         })
       : null;
@@ -163,7 +164,7 @@ function CreateFormBody({
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div ref={fieldsRef} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Label htmlFor={`${baseId}-name`}>{t("fields.name")}</Label>
@@ -479,7 +480,10 @@ function CreateFormBody({
 
             if (candidate?.success === true && canSubmit) {
               onSubmit(candidate.data);
+              return;
             }
+
+            shakeInvalid(fieldsRef.current);
           }}
         >
           {loading ? (

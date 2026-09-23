@@ -7,12 +7,14 @@ import {
   CorporateRowActions,
   type CorporateRowAction,
 } from "./corporate-row-actions";
+import { isDormantCorporate } from "./corporate-dormancy";
 import { CorporateStatusBadge } from "./corporate-status-badge";
 import { CorporateTierBadge } from "./corporate-tier-badge";
 import type { CorporateAccountRow } from "./corporate.types";
 import { useCurrencyFormatter } from "../../_components/use-currency-formatter";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
+import { UserAvatar } from "~/components/user-avatar";
 
 export type CorporateAccountsTableProps = {
   accounts: CorporateAccountRow[];
@@ -36,11 +38,19 @@ export function CorporateAccountsTable({
       header: t("columns.account"),
       className: "min-w-56",
       cell: (row) => (
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate font-medium">{row.name}</span>
-          <span className="text-muted-foreground truncate text-xs">
-            {row.ownerEmail ?? t("notAvailable")}
-          </span>
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            seed={row.id}
+            name={row.name}
+            size={36}
+            state={isDormantCorporate(row.status) ? "sleeping" : "default"}
+          />
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate font-medium">{row.name}</span>
+            <span className="text-muted-foreground truncate text-xs">
+              {row.ownerEmail ?? t("notAvailable")}
+            </span>
+          </div>
         </div>
       ),
     },
@@ -65,7 +75,9 @@ export function CorporateAccountsTable({
     },
     {
       key: "monthSpend",
-      header: <span className="block text-right">{t("columns.monthSpend")}</span>,
+      header: (
+        <span className="block text-right">{t("columns.monthSpend")}</span>
+      ),
       className: "text-right",
       cell: (row) => (
         <span className="font-mono text-sm font-medium tabular-nums">
