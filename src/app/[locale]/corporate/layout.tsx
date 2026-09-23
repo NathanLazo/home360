@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AppShellContent } from "~/components/app-shell-content";
+import { SessionGuard } from "~/components/session-guard";
 import { CorporateHeader } from "./_components/corporate-header";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
 import { CorporateStatusBanner } from "./_components/corporate-status-banner";
@@ -98,6 +99,7 @@ export default async function CorporateLayout({
           }}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
+        <SessionGuard />
         <AppShellContent id="corporate-content">
           <CorporateStatusBanner
             status={account.status}

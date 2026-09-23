@@ -2,8 +2,14 @@ import type { NextAuthConfig } from "next-auth";
 
 import "./types";
 
+/**
+ * Mirrors `WEB_SESSION_MAX_AGE_SECONDS` (idle timeout of the `Session` row);
+ * kept literal here because this file must stay edge-safe (no Prisma).
+ */
+const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
 export const edgeAuthConfig = {
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: SESSION_MAX_AGE_SECONDS },
   pages: { signIn: "/login", error: "/login" },
   providers: [],
   callbacks: {

@@ -289,12 +289,38 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+// Web session registry (single active session per user). The NextAuth cookie
+// is still an encrypted JWT; it carries a random `sid` whose SHA-256 is stored
+// in `sessionToken`, and every server-side `auth()` checks this row. Rows are
+// soft-revoked (`revokedAt`), never deleted, so the trail survives. Mobile
+// Bearer tokens are not tracked here (they revoke via `sessionsValidFrom`).
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String                   @id @default(cuid())
+  sessionToken     String                   @unique
+  userId           String
+  expires          DateTime
+  // Random per-browser id from the httpOnly device cookie; lets a re-login on
+  // the same computer replace its own session without the conflict prompt.
+  deviceId         String?
+  userAgent        String?
+  initialIp        String?
+  lastIp           String?
+  lastSeenAt       DateTime                 @default(now())
+  revokedAt        DateTime?
+  revocationReason SessionRevocationReason?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @default(now()) @updatedAt
+  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expires])
+}
+
+enum SessionRevocationReason {
+  SIGNED_OUT
+  REPLACED_BY_NEW_LOGIN
+  EXPIRED
+  CREDENTIALS_ROTATED
+  SUSPENDED
 }
 
 model User {
@@ -309,6 +335,9 @@ model User {
   locale                       String                       @default("es")
   passwordHash                 String?
   sessionsValidFrom            DateTime                     @default(now())
+  // Row lock only: bumped inside the session transaction to serialize
+  // concurrent logins of the same user (single active web session).
+  sessionLockVersion           Int                          @default(0)
   // Platform moderation (W10): a suspended CUSTOMER/WORKER user cannot sign
   // in and every live session is revoked through `sessionsValidFrom`.
   suspendedAt                  DateTime?
@@ -346,44 +375,44 @@ model VerificationToken {
 }
 
 model Business {
-  id               String             @id @default(cuid())
-  name             String
-  type             BusinessType
-  status           BusinessStatus     @default(PENDING)
-  guaranteeType    GuaranteeType
-  guaranteeNotes   String?
-  statusReason     String?
-  ownerId          String             @unique
-  owner            User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  stripeAccountId  String?            @unique
+  id                  String             @id @default(cuid())
+  name                String
+  type                BusinessType
+  status              BusinessStatus     @default(PENDING)
+  guaranteeType       GuaranteeType
+  guaranteeNotes      String?
+  statusReason        String?
+  ownerId             String             @unique
+  owner               User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  stripeAccountId     String?            @unique
   // Stripe Billing customer (F4). Connect account and Billing customer are
   // different Stripe objects and must never be confused.
-  stripeCustomerId String?            @unique
-  chargesEnabled   Boolean            @default(false)
-  payoutsEnabled   Boolean            @default(false)
+  stripeCustomerId    String?            @unique
+  chargesEnabled      Boolean            @default(false)
+  payoutsEnabled      Boolean            @default(false)
   // Rating denormalized from Review (via Review.order.businessId). Written
   // ONLY by recalculateBusinessRating() or the seed; null = no reviews yet.
-  ratingAvg        Float?
-  ratingCount      Int                @default(0)
+  ratingAvg           Float?
+  ratingCount         Int                @default(0)
   // Dashboard notifications bell: feed items newer than this are unread.
   // null = never opened (everything in the feed counts as unread).
   notificationsSeenAt DateTime?
-  branches         Branch[]
-  workers          Worker[]
-  services         Service[]
-  products         Product[]
-  orders           Order[]
-  payments         Payment[]
-  paymentLinks     PaymentLink[]
-  withdrawals      Withdrawal[]
-  subscription     Subscription?
-  disputes         Dispute[]
-  quotes           Quote[]
-  documents        BusinessDocument[]
-  loyaltyBonuses   LoyaltyBonus[]
-  conversations    Conversation[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  branches            Branch[]
+  workers             Worker[]
+  services            Service[]
+  products            Product[]
+  orders              Order[]
+  payments            Payment[]
+  paymentLinks        PaymentLink[]
+  withdrawals         Withdrawal[]
+  subscription        Subscription?
+  disputes            Dispute[]
+  quotes              Quote[]
+  documents           BusinessDocument[]
+  loyaltyBonuses      LoyaltyBonus[]
+  conversations       Conversation[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@index([status])
   @@index([status, ratingAvg])
@@ -414,34 +443,34 @@ model Branch {
 }
 
 model Worker {
-  id               String             @id @default(cuid())
-  userId           String?            @unique
-  user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  fullName         String
-  businessId       String
-  business         Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  branchId         String?
-  branch           Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  specialty        String?
-  availability     WorkerAvailability @default(AVAILABLE)
-  ratingAvg        Float?
-  invitedEmail     String?
-  invitationStatus InvitationStatus   @default(ACCEPTED)
+  id                  String             @id @default(cuid())
+  userId              String?            @unique
+  user                User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fullName            String
+  businessId          String
+  business            Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  branchId            String?
+  branch              Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  specialty           String?
+  availability        WorkerAvailability @default(AVAILABLE)
+  ratingAvg           Float?
+  invitedEmail        String?
+  invitationStatus    InvitationStatus   @default(ACCEPTED)
   // Invitation acceptance link (workstream D): only the SHA-256 of the
   // single-use token is stored; cleared once the worker accepts.
-  invitationTokenHash String?         @unique
+  invitationTokenHash String?            @unique
   invitationExpiresAt DateTime?
   // Last known position for C6 tracking (written by tracking.updateLocation,
   // M4-W2, throttled to 15 s).
-  lastLatitude      Float?
-  lastLongitude     Float?
-  locationUpdatedAt DateTime?
-  services         Service[]
-  quotes           Quote[]
+  lastLatitude        Float?
+  lastLongitude       Float?
+  locationUpdatedAt   DateTime?
+  services            Service[]
+  quotes              Quote[]
   // Orders assigned to the technician (MA-01).
-  assignedOrders   Order[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  assignedOrders      Order[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@index([businessId])
   @@index([branchId])
@@ -507,31 +536,31 @@ model ProductStock {
 // A service request is separate from an Order: accepting one Quote creates an Order,
 // so every Order continues to represent work with a defined business and price.
 model ServiceRequest {
-  id              String        @id @default(cuid())
-  customerId      String
-  customer        User          @relation(fields: [customerId], references: [id])
-  title           String
-  description     String?
-  category        String
-  photoUrls       String[]
-  aiConfidencePct Int?
-  aiDiagnosis     String?
-  aiMinPriceCents Int?
-  aiMaxPriceCents Int?
-  addressLine     String?
-  latitude        Float?
-  longitude       Float?
+  id                  String             @id @default(cuid())
+  customerId          String
+  customer            User               @relation(fields: [customerId], references: [id])
+  title               String
+  description         String?
+  category            String
+  photoUrls           String[]
+  aiConfidencePct     Int?
+  aiDiagnosis         String?
+  aiMinPriceCents     Int?
+  aiMaxPriceCents     Int?
+  addressLine         String?
+  latitude            Float?
+  longitude           Float?
   // AI diagnosis urgency (M2-W2 computed it and discarded it).
-  aiUrgency       AiUrgency?
+  aiUrgency           AiUrgency?
   // Set when the AI confidence falls below PlatformSettings.aiConfidenceThresholdPct
   // and aiHumanReviewBelowThreshold is on: the request waits for a human look.
-  needsHumanReview Boolean      @default(false)
+  needsHumanReview    Boolean            @default(false)
   // Colonia copied from Address.neighborhood at request creation (MA-13).
   // It is the ONLY textual piece of the address a business sees before its
   // quote is accepted (radar privacy gating, M5-W1).
-  neighborhood    String?
-  status          RequestStatus @default(OPEN)
-  expiresAt       DateTime?
+  neighborhood        String?
+  status              RequestStatus      @default(OPEN)
+  expiresAt           DateTime?
   // Suggestions frozen at diagnosis time (workstream D). Plain ids without FK:
   // a deleted catalog row simply stops being suggested.
   suggestedServiceId  String?
@@ -542,10 +571,10 @@ model ServiceRequest {
   corporateAccount    CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
   corporateLocationId String?
   corporateLocation   CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
-  quotes          Quote[]
-  conversations   Conversation[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  quotes              Quote[]
+  conversations       Conversation[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@index([customerId])
   @@index([status, createdAt])
@@ -558,9 +587,9 @@ model ServiceRequest {
 // result so `request.create` can reuse it by id instead of re-running the
 // model. Single use: `consumedAt` is set when a request is created from it.
 model RequestDiagnosis {
-  id                 String     @id @default(cuid())
+  id                 String    @id @default(cuid())
   userId             String
-  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   mediaPathnames     String[]
   description        String?
   diagnosis          String
@@ -573,8 +602,8 @@ model RequestDiagnosis {
   suggestedProductId String?
   consumedAt         DateTime?
   expiresAt          DateTime
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([userId, createdAt])
 }
@@ -605,65 +634,65 @@ model Quote {
 }
 
 model Order {
-  id                   String             @id @default(cuid())
-  folio                Int                @unique @default(autoincrement())
-  type                 OrderType
-  title                String
-  status               OrderStatus        @default(PENDING)
-  amountCents          Int
-  customerId           String
-  customer             User               @relation(fields: [customerId], references: [id])
-  businessId           String
-  business             Business           @relation(fields: [businessId], references: [id])
-  branchId             String?
-  branch               Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  serviceId            String?
-  service              Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  productId            String?
-  product              Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
-  quoteId              String?            @unique
-  quote                Quote?             @relation(fields: [quoteId], references: [id], onDelete: SetNull)
-  corporateAccountId   String?
-  corporateAccount     CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  id                     String             @id @default(cuid())
+  folio                  Int                @unique @default(autoincrement())
+  type                   OrderType
+  title                  String
+  status                 OrderStatus        @default(PENDING)
+  amountCents            Int
+  customerId             String
+  customer               User               @relation(fields: [customerId], references: [id])
+  businessId             String
+  business               Business           @relation(fields: [businessId], references: [id])
+  branchId               String?
+  branch                 Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  serviceId              String?
+  service                Service?           @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  productId              String?
+  product                Product?           @relation(fields: [productId], references: [id], onDelete: SetNull)
+  quoteId                String?            @unique
+  quote                  Quote?             @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  corporateAccountId     String?
+  corporateAccount       CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
   // Attention location within the corporate account. The order service must
   // validate that this location belongs to corporateAccountId: the database
   // cannot express equality between two optional FKs.
-  corporateLocationId  String?
-  corporateLocation    CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
+  corporateLocationId    String?
+  corporateLocation      CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
   // Assigned technician (MA-01). Written by quote.accept (M3-W1) copying it
   // from Quote.workerId in the same transaction. PRODUCT orders: null (no
   // worker mode). Nullable: historical and PRODUCT orders have no worker.
-  workerId             String?
-  worker               Worker?            @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  workerId               String?
+  worker                 Worker?            @relation(fields: [workerId], references: [id], onDelete: SetNull)
   // Delivery snapshot (MA-06). For PRODUCT it is copied by createProductIntent
   // (M3-W2) from the input Address (snapshot, not FK: the Address is editable
   // and deletable). For SERVICE it stays null: geo/address derive from
   // quote.request (ServiceRequest.addressLine/latitude/longitude).
-  deliveryAddressLine  String?
-  deliveryLatitude     Float?
-  deliveryLongitude    Float?
-  quantity             Int                @default(1)
-  recordingUrl         String?
-  recordingDurationSec Int?
-  recordingComplete    Boolean            @default(false)
+  deliveryAddressLine    String?
+  deliveryLatitude       Float?
+  deliveryLongitude      Float?
+  quantity               Int                @default(1)
+  recordingUrl           String?
+  recordingDurationSec   Int?
+  recordingComplete      Boolean            @default(false)
   // Idempotency for the rating-reminder cron: at most one reminder per order.
-  ratingReminderSentAt DateTime?
-  beforeUrls           String[]
-  afterUrls            String[]
-  workNotes            String?
+  ratingReminderSentAt   DateTime?
+  beforeUrls             String[]
+  afterUrls              String[]
+  workNotes              String?
   // Worker justification when the recording is missing or incomplete at
   // finish (RECORDING_JUSTIFICATION_REQUIRED, D6: disputes still favour the
   // customer when the recording is incomplete).
   recordingJustification String?
-  materials            OrderMaterial[]
-  recordingSegments    RecordingSegment[]
-  payment              Payment?
-  dispute              Dispute?
-  review               Review?
-  conversation         Conversation?
-  events               OrderEvent[]
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  materials              OrderMaterial[]
+  recordingSegments      RecordingSegment[]
+  payment                Payment?
+  dispute                Dispute?
+  review                 Review?
+  conversation           Conversation?
+  events                 OrderEvent[]
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
   @@index([workerId, status])
   @@index([businessId, status])
@@ -1134,19 +1163,19 @@ model CustomerProfile {
 }
 
 model Address {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label       String
-  addressLine String
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String
+  addressLine  String
   // Structured colonia (MA-13). Captured by the mobile address form (new
   // field on the M2 screen; lands with M5-M1, its first consumer). Null →
   // the radar shows only distance/zone.
   neighborhood String?
-  latitude    Float
-  longitude   Float
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  latitude     Float
+  longitude    Float
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
 
   @@index([userId])
 }

@@ -39,7 +39,6 @@ const EMPTY_VALUES: BranchFormValues = {
   longitude: "",
 };
 
-
 export function BranchFormSheet({
   open,
   branch,
@@ -215,19 +214,11 @@ export function BranchFormSheet({
           </div>
           <SheetFormDock>
             <SheetClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={submitting}
-              >
+              <Button type="button" variant="outline" disabled={submitting}>
                 {t("form.cancel")}
               </Button>
             </SheetClose>
-            <Button
-              type="submit"
-              metal="live"
-              disabled={submitting}
-            >
+            <Button type="submit" metal="live" disabled={submitting}>
               {submitting ? (
                 <LoaderCircleIcon
                   aria-hidden="true"

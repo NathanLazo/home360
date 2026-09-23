@@ -15,29 +15,41 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Link } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
+import {
+  ACTIVE_SESSION_EXISTS_CODE,
+  SESSION_ENDED_ERROR,
+} from "~/lib/auth/session-errors";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{
+    callbackUrl?: string;
+    error?: string;
+    code?: string;
+  }>;
 };
 
 export default async function LoginPage({
   params,
   searchParams,
 }: LoginPageProps) {
-  const [{ locale }, { callbackUrl, error }] = await Promise.all([
+  const [{ locale }, { callbackUrl, error, code }] = await Promise.all([
     params,
     searchParams,
   ]);
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "auth.login" });
+  const activeSessionConflict =
+    error === "CredentialsSignin" && code === ACTIVE_SESSION_EXISTS_CODE;
   const oauthError =
-    error === undefined
+    error === undefined || activeSessionConflict
       ? undefined
-      : error === "OAuthAccountNotLinked"
-        ? t("oauthAccountNotLinked")
-        : t("oauthFailed");
+      : error === SESSION_ENDED_ERROR
+        ? t("sessionEnded")
+        : error === "OAuthAccountNotLinked"
+          ? t("oauthAccountNotLinked")
+          : t("oauthFailed");
   const postLoginPath =
     locale === routing.defaultLocale ? "/post-login" : `/${locale}/post-login`;
 
@@ -73,6 +85,7 @@ export default async function LoginPage({
           <GoogleSignInButton
             callbackUrl={callbackUrl}
             postLoginPath={postLoginPath}
+            activeSessionConflict={activeSessionConflict}
           />
         </CardContent>
         <CardFooter className="text-muted-foreground text-copy-sm justify-center gap-1">

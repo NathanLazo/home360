@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AppShellContent } from "~/components/app-shell-content";
+import { SessionGuard } from "~/components/session-guard";
 import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
 import { AdminSidebar } from "./_components/admin-sidebar";
@@ -97,6 +98,7 @@ export default async function AdminLayout({
           toggleSidebarLabel={t("header.toggleSidebar")}
           roleLabel={t("header.roleBadge")}
         />
+        <SessionGuard />
         <AppShellContent id="admin-content">{children}</AppShellContent>
       </SidebarInset>
     </SidebarProvider>

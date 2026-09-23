@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { DashboardHeader } from "./_components/dashboard-header";
 import { SubscriptionStatusBanner } from "./_components/subscription-status-banner";
 import { AppShellContent } from "~/components/app-shell-content";
+import { SessionGuard } from "~/components/session-guard";
 import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
@@ -93,6 +94,7 @@ export default async function DashboardLayout({
           branches={shell.branches}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
+        <SessionGuard />
         <AppShellContent id="dashboard-content">
           <SubscriptionAccessProvider
             initialStatus={shell.subscription?.status ?? null}
