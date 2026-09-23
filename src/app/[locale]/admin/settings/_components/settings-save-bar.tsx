@@ -3,6 +3,7 @@
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -16,6 +17,23 @@ export function SettingsSaveBar({
   onReset: () => void;
 }) {
   const t = useTranslations("admin.settings.saveBar");
+
+  const saveButton = (
+    <Button
+      type="submit"
+      className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+      disabled={!dirty || saving}
+      aria-busy={saving}
+    >
+      {saving ? (
+        <LoaderCircleIcon
+          aria-hidden="true"
+          className="animate-spin motion-reduce:animate-none"
+        />
+      ) : null}
+      {saving ? t("saving") : t("save")}
+    </Button>
+  );
 
   return (
     <div className="bg-background/95 sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 border-t py-4 backdrop-blur">
@@ -44,20 +62,13 @@ export function SettingsSaveBar({
         >
           {t("discard")}
         </Button>
-        <Button
-          type="submit"
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
-          disabled={!dirty || saving}
-          aria-busy={saving}
-        >
-          {saving ? (
-            <LoaderCircleIcon
-              aria-hidden="true"
-              className="animate-spin motion-reduce:animate-none"
-            />
-          ) : null}
-          {saving ? t("saving") : t("save")}
-        </Button>
+        {/* Metal appears only once there is something to save; it stays on
+            while saving so the button is not remounted under the pointer. */}
+        {dirty ? (
+          <MetalRing strength={0.55}>{saveButton}</MetalRing>
+        ) : (
+          saveButton
+        )}
       </div>
     </div>
   );

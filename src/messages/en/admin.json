@@ -822,6 +822,7 @@
   },
   "header": {
     "toggleSidebar": "Show or hide navigation",
+    "roleBadge": "Admin",
     "navigationTitle": "Admin navigation",
     "navigationDescription": "Admin panel sections"
   },

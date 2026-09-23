@@ -36,6 +36,7 @@ import { useCorporateUrlState } from "./use-corporate-url-state";
 import { useDebouncedValue } from "./use-debounced-value";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tabs } from "~/components/ui/tabs";
@@ -136,7 +137,11 @@ export function CorporateView() {
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
-        actions={createButton}
+        actions={
+          // The page's one metal detail. The empty-state CTA below reuses the
+          // plain button so the screen never shows two rings.
+          <MetalRing strength={0.6}>{createButton}</MetalRing>
+        }
       />
 
       <Tabs

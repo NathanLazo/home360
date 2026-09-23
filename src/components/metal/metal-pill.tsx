@@ -1,13 +1,16 @@
 "use client";
 
-import { MetalBadge } from "metal-fx";
+import { MetalBadge, type MetalFxTheme } from "metal-fx";
 
 import { useMetalMotion } from "./use-metal-motion";
+import { cn } from "~/lib/utils";
 
 type MetalPillProps = {
   label: string;
   /** Size multiplier on the 45×25 base badge. */
   scale?: number;
+  /** Match the surface the pill sits on. */
+  theme?: MetalFxTheme;
 };
 
 /**
@@ -15,13 +18,20 @@ type MetalPillProps = {
  * without WebGL2 and on the server's first paint a static pill with the same
  * footprint stands in.
  */
-export function MetalPill({ label, scale = 1 }: MetalPillProps) {
+export function MetalPill({
+  label,
+  scale = 1,
+  theme = "light",
+}: MetalPillProps) {
   const live = useMetalMotion();
 
   if (!live) {
     return (
       <span
-        className="bg-card text-foreground inline-flex items-center justify-center rounded-full border px-2 font-medium shadow-xs"
+        className={cn(
+          "bg-card text-foreground inline-flex items-center justify-center rounded-full border px-2 font-medium shadow-xs",
+          theme === "dark" && "dark",
+        )}
         style={{
           height: 25 * scale,
           minWidth: 45 * scale,
@@ -34,7 +44,7 @@ export function MetalPill({ label, scale = 1 }: MetalPillProps) {
   }
 
   return (
-    <MetalBadge theme="light" scale={scale} strength={0.9}>
+    <MetalBadge theme={theme} scale={scale} strength={0.9}>
       {label}
     </MetalBadge>
   );

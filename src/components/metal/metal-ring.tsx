@@ -7,6 +7,7 @@ import {
   useMetalBend,
   type BendConfig,
   type MetalFxPreset,
+  type MetalFxTheme,
   type MetalFxVariant,
 } from "metal-fx";
 
@@ -21,6 +22,8 @@ type MetalRingProps = {
   /** Liquid dent that follows the cursor. Reserve for primary actions. */
   bend?: boolean;
   disableGlow?: boolean;
+  /** Match the surface the ring sits on. */
+  theme?: MetalFxTheme;
   className?: string;
 };
 
@@ -42,6 +45,7 @@ export function MetalRing({
   strength = 0.6,
   bend = false,
   disableGlow = false,
+  theme = "light",
   className,
 }: MetalRingProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -59,7 +63,7 @@ export function MetalRing({
       ref={ref}
       preset={preset}
       variant={variant}
-      theme="light"
+      theme={theme}
       strength={strength}
       paused={!live}
       disableGlow={disableGlow || !live}
