@@ -3,7 +3,11 @@
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import type { ProductCreateInput, ProductUpdateInput } from "./product.schema";
+import type {
+  ProductAdjustStockInput,
+  ProductCreateInput,
+  ProductUpdateInput,
+} from "./product.schema";
 import type { ProductListItem, ProductMutationResult } from "./product.types";
 import { api } from "~/trpc/react";
 
@@ -20,6 +24,7 @@ export function useProductMutations() {
   const updateMutation = api.product.update.useMutation();
   const statusMutation = api.product.setStatus.useMutation();
   const deleteMutation = api.product.delete.useMutation();
+  const adjustStockMutation = api.product.adjustStock.useMutation();
 
   async function finish(
     response: OperationResponse,
@@ -101,6 +106,20 @@ export function useProductMutations() {
     }
   }
 
+  async function adjustStock(
+    input: ProductAdjustStockInput,
+  ): Promise<ProductMutationResult> {
+    try {
+      return await finish(
+        await adjustStockMutation.mutateAsync(input),
+        t("stockAdjusted"),
+      );
+    } catch {
+      toast.error(t("transportError"));
+      return { ok: false, error: null };
+    }
+  }
+
   async function remove(id: string): Promise<ProductMutationResult> {
     try {
       return await finish(
@@ -118,10 +137,12 @@ export function useProductMutations() {
     create,
     update,
     setStatus,
+    adjustStock,
     remove,
     creating: createMutation.isPending,
     updating: updateMutation.isPending,
     changingStatus: statusMutation.isPending,
     deleting: deleteMutation.isPending,
+    adjustingStock: adjustStockMutation.isPending,
   };
 }

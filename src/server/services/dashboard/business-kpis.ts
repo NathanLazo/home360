@@ -1,10 +1,6 @@
 import "server-only";
 
-import type {
-  Prisma,
-  OrderStatus,
-  PrismaClient,
-} from "@generated/prisma";
+import type { Prisma, OrderStatus, PrismaClient } from "@generated/prisma";
 
 import {
   ESCROW_PAYMENT_STATUSES,
@@ -320,10 +316,18 @@ function toRecentOrder(payload: RecentOrderPayload): RecentOrderRow {
 export async function getRecentOrders(
   db: PrismaClient,
   businessId: string,
-  input: BranchScope & { limit: number },
+  input: BranchScope & { limit: number; days?: number },
 ): Promise<RecentOrderRow[]> {
+  // Optional date bound so the table can follow the header range selector.
+  const since =
+    input.days === undefined
+      ? undefined
+      : new Date(Date.now() - input.days * DAY_MS);
   const orders = await db.order.findMany({
-    where: orderScope(businessId, input.branchId),
+    where: {
+      ...orderScope(businessId, input.branchId),
+      ...(since ? { createdAt: { gte: since } } : {}),
+    },
     take: input.limit,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: recentOrderSelect,

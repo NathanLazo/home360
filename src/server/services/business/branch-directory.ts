@@ -24,6 +24,8 @@ const branchListSelect = {
   managerName: true,
   status: true,
   coverageRadiusKm: true,
+  latitude: true,
+  longitude: true,
 } satisfies Prisma.BranchSelect;
 
 const MAX_SERIALIZABLE_ATTEMPTS = 3;
@@ -136,6 +138,8 @@ export async function createBranch(
               address: input.address,
               managerName: input.managerName,
               coverageRadiusKm: input.coverageRadiusKm,
+              latitude: input.latitude ?? null,
+              longitude: input.longitude ?? null,
             },
             select: { id: true },
           });
@@ -170,6 +174,10 @@ export async function updateBranch(
           : {}),
         ...(input.coverageRadiusKm !== undefined
           ? { coverageRadiusKm: input.coverageRadiusKm }
+          : {}),
+        ...(input.latitude !== undefined ? { latitude: input.latitude } : {}),
+        ...(input.longitude !== undefined
+          ? { longitude: input.longitude }
           : {}),
       },
       select: { id: true },

@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  Prisma,
-  type PrismaClient,
-} from "@generated/prisma";
+import { Prisma, type PrismaClient } from "@generated/prisma";
 
 import type { CorporateTierChangeRequestInput } from "~/server/api/schemas/corporate";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
@@ -69,4 +66,33 @@ export async function requestCorporateTierChange(
     409,
     "Another tier change request is already pending",
   );
+}
+
+/**
+ * Withdraws the account's own PENDING tier-change request (workstream D).
+ * Pending requests carry no review yet, so withdrawing simply removes the
+ * row; the unique `pendingKey` frees up for a new request.
+ */
+export async function cancelCorporateTierChangeRequest(
+  db: PrismaClient,
+  corporateAccountId: string,
+): Promise<TrpcResponse<{ id: string }>> {
+  const pending = await db.corporateTierChangeRequest.findFirst({
+    where: { corporateAccountId, status: "PENDING" },
+    select: { id: true },
+  });
+
+  if (!pending) {
+    return fail("NOT_FOUND", 404, "No pending tier change request");
+  }
+
+  const removed = await db.corporateTierChangeRequest.deleteMany({
+    where: { id: pending.id, corporateAccountId, status: "PENDING" },
+  });
+
+  if (removed.count === 0) {
+    return fail("CONFLICT", 409, "Tier change request was already reviewed");
+  }
+
+  return ok({ id: pending.id }, "Tier change request withdrawn");
 }

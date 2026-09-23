@@ -11,7 +11,9 @@ export type PushDeepLink =
   | `home360app://request/${string}`
   | `home360app://orders/${string}`
   | `home360app://conversation/${string}`
-  | "home360app://team";
+  | "home360app://team"
+  // Generic landing for broadcast campaigns with no specific target.
+  | "home360app://home";
 
 export type PushNotification = {
   title: string;
@@ -121,6 +123,66 @@ export async function sendPushToUser(
     }
   } catch {
     console.error("[push] EXPO_DELIVERY_FAILED", { userId });
+  }
+
+  const removed = await removeTokens(db, deadTokens);
+
+  return { sent, removed };
+}
+
+/**
+ * Broadcast variant for admin campaigns: one notification to an arbitrary
+ * set of Expo tokens, sent in Expo-sized chunks. Same best-effort contract as
+ * `sendPushToUser`, including pruning of `DeviceNotRegistered` tokens. Receipts
+ * are not polled here: a campaign may target thousands of devices and the
+ * ticket errors already flag dead tokens.
+ */
+export async function sendPushToTokens(
+  db: PrismaClient,
+  tokens: readonly string[],
+  notification: PushNotification,
+): Promise<PushDeliveryResult> {
+  const validTokens = [...new Set(tokens)].filter((token) =>
+    Expo.isExpoPushToken(token),
+  );
+
+  if (validTokens.length === 0) {
+    return { sent: 0, removed: 0 };
+  }
+
+  const messages: ExpoPushMessage[] = validTokens.map((token) => ({
+    to: token,
+    title: notification.title,
+    body: notification.body,
+    data: { url: notification.url },
+  }));
+  const deadTokens = new Set<string>();
+  let sent = 0;
+
+  for (const chunk of expo.chunkPushNotifications(messages)) {
+    try {
+      const tickets = await expo.sendPushNotificationsAsync(chunk);
+
+      tickets.forEach((ticket, index) => {
+        const message = chunk[index];
+        const token = typeof message?.to === "string" ? message.to : undefined;
+
+        if (!token) {
+          return;
+        }
+
+        if (ticket.status === "ok") {
+          sent += 1;
+        } else if (deviceIsNotRegistered(ticket)) {
+          deadTokens.add(token);
+        }
+      });
+    } catch {
+      // One failed chunk never aborts the rest of the broadcast.
+      console.error("[push] EXPO_BROADCAST_CHUNK_FAILED", {
+        size: chunk.length,
+      });
+    }
   }
 
   const removed = await removeTokens(db, deadTokens);

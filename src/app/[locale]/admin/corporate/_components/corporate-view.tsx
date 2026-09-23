@@ -125,7 +125,6 @@ export function CorporateView() {
     <Button
       type="button"
       metal={metal}
-      className="min-h-11 sm:min-h-10"
       onClick={() => setCreateOpen(true)}
     >
       <PlusIcon aria-hidden="true" />
@@ -210,7 +209,6 @@ export function CorporateView() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 sm:min-h-10"
                 disabled={query.loadingMore}
                 onClick={query.loadMore}
               >

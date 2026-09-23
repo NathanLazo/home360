@@ -4,7 +4,9 @@
     "greeting": "Hi {workerName},",
     "intro": "{businessName} added you as a team member on Home360.",
     "instructions": "Download the Home360 mobile app and sign in with this email address to see the services assigned to you.",
-    "closing": "If you were not expecting this invitation, you can ignore this message."
+    "closing": "If you were not expecting this invitation, you can ignore this message.",
+    "cta": "Create your worker account",
+    "expires": "The link expires in 7 days and can only be used once."
   },
   "corporateInvitation": {
     "subject": "Your {companyName} corporate account on Home360",

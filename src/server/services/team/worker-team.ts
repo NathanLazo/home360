@@ -17,7 +17,9 @@ import {
   assertPlanLimit,
   type BusinessWithPlan,
 } from "~/server/services/subscription/plan-limits";
+import { env } from "~/env";
 import { sendWorkerInvitation } from "~/server/services/team/send-worker-invitation";
+import { issueWorkerInvitationUrl } from "~/server/services/team/worker-invitation-token";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 
 /**
@@ -32,13 +34,19 @@ const workerListSelect = {
   specialty: true,
   invitedEmail: true,
   invitationStatus: true,
+  availability: true,
   branch: { select: { id: true, name: true } },
   services: { select: { id: true, name: true, status: true } },
 } satisfies Prisma.WorkerSelect;
 
-export type WorkerListItem = Prisma.WorkerGetPayload<{
+type WorkerListRow = Prisma.WorkerGetPayload<{
   select: typeof workerListSelect;
 }>;
+
+export type WorkerListItem = WorkerListRow & {
+  /** Orders assigned to the worker that are scheduled (or were created) today. */
+  todayOrdersCount: number;
+};
 
 export type WorkerListResult = {
   items: WorkerListItem[];
@@ -52,15 +60,66 @@ function isRecordNotFound(error: unknown): boolean {
   );
 }
 
+function todayBounds(now: Date): { start: Date; end: Date } {
+  // Server-calendar day, same convention as the branch monthly counters.
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+async function countTodayOrdersByWorker(
+  db: PrismaClient,
+  businessId: string,
+  workerIds: string[],
+  now = new Date(),
+): Promise<Map<string, number>> {
+  if (workerIds.length === 0) {
+    return new Map();
+  }
+
+  const { start, end } = todayBounds(now);
+  const today = { gte: start, lt: end };
+  const groups = await db.order.groupBy({
+    by: ["workerId"],
+    where: {
+      businessId,
+      workerId: { in: workerIds },
+      status: { not: "CANCELLED" },
+      OR: [
+        { quote: { is: { scheduledFor: today } } },
+        { quote: { is: { scheduledFor: null } }, createdAt: today },
+        { quoteId: null, createdAt: today },
+      ],
+    },
+    _count: { _all: true },
+  });
+
+  return new Map(
+    groups.flatMap((group) =>
+      group.workerId ? [[group.workerId, group._count._all] as const] : [],
+    ),
+  );
+}
+
 export async function listWorkers(
   db: PrismaClient,
   business: TeamBusiness,
 ): Promise<TrpcResponse<WorkerListResult>> {
-  const items = await db.worker.findMany({
+  const rows = await db.worker.findMany({
     where: { businessId: business.id },
     select: workerListSelect,
     orderBy: [{ fullName: "asc" }, { id: "asc" }],
   });
+  const todayCounts = await countTodayOrdersByWorker(
+    db,
+    business.id,
+    rows.map(({ id }) => id),
+  );
+  const items = rows.map((row): WorkerListItem => ({
+    ...row,
+    todayOrdersCount: todayCounts.get(row.id) ?? 0,
+  }));
   const used = items.length;
   const max = business.plan?.maxWorkers ?? null;
   // `max === null` is unlimited only when a subscription exists; a business
@@ -127,6 +186,7 @@ export async function createWorker(
   if (invitedEmail !== null) {
     const delivered = await deliverInvitation(db, emailClient, {
       businessId: business.id,
+      workerId: worker.id,
       to: invitedEmail,
       workerName: input.fullName,
       locale: input.locale,
@@ -230,6 +290,7 @@ export async function resendWorkerInvitation(
 
   const delivered = await deliverInvitation(db, emailClient, {
     businessId,
+    workerId: worker.id,
     to: worker.invitedEmail,
     workerName: worker.fullName,
     locale: input.locale,
@@ -251,6 +312,7 @@ async function deliverInvitation(
   emailClient: EmailClient | null,
   input: {
     businessId: string;
+    workerId: string;
     to: string;
     workerName: string;
     locale: WorkerCreateInput["locale"];
@@ -283,11 +345,19 @@ async function deliverInvitation(
       select: { name: true },
     });
 
+    // Workstream D: single-use acceptance link (re-issued on every resend).
+    const invitationUrl = await issueWorkerInvitationUrl(db, {
+      workerId: input.workerId,
+      appUrl: env.APP_URL,
+      locale: input.locale,
+    });
+
     await sendWorkerInvitation(emailClient, {
       to: input.to,
       workerName: input.workerName,
       businessName: business.name,
       locale: input.locale,
+      ...(invitationUrl ? { invitationUrl } : {}),
     });
 
     return true;

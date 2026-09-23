@@ -32,7 +32,6 @@ export function BusinessDetailActions({
           key={action}
           type="button"
           variant={destructiveActions.has(action) ? "outline" : "default"}
-          className="min-h-11 sm:min-h-10"
           onClick={() => onAction(action)}
         >
           {t(action)}

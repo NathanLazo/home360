@@ -118,8 +118,8 @@
     "title": "Inicio",
     "subtitle": "Indicadores y actividad reciente de tu negocio.",
     "kpisLabel": "Indicadores principales",
-    "revenue": "Ingresos últimos 30 días",
-    "orders": "Órdenes",
+    "revenue": "Ingresos últimos {days} días",
+    "orders": "Órdenes últimos {days} días",
     "escrow": "En escrow",
     "rating": "Calificación",
     "revenueComparison": "{delta} vs. periodo anterior",
@@ -174,7 +174,7 @@
   },
   "orders": {
     "title": "Órdenes",
-    "subtitle": "Consulta el trabajo, los pagos y la evidencia de cada orden.",
+    "subtitle": "Gestiona órdenes, responde solicitudes cercanas y da seguimiento a tus ofertas.",
     "loading": "Cargando órdenes",
     "loadMore": "Cargar más",
     "retry": "Reintentar",
@@ -192,7 +192,8 @@
       "branch": "Sucursal",
       "amount": "Monto",
       "status": "Estado",
-      "date": "Fecha"
+      "date": "Fecha",
+      "worker": "Técnico"
     },
     "types": {
       "service": "Servicio",
@@ -205,13 +206,21 @@
       "allStatuses": "Todos los estados",
       "allTypes": "Todos los tipos",
       "service": "Servicio",
-      "product": "Producto"
+      "product": "Producto",
+      "workerLabel": "Filtrar por técnico",
+      "allWorkers": "Todos los técnicos",
+      "dateRangeLabel": "Rango de fechas de creación",
+      "fromLabel": "Desde",
+      "toLabel": "Hasta",
+      "clearDates": "Quitar fechas",
+      "invalidRange": "La fecha final debe ser igual o posterior a la inicial."
     },
     "empty": {
       "title": "Aún no hay órdenes",
       "description": "Las nuevas órdenes aparecerán aquí cuando tus clientes compren o soliciten un servicio.",
       "filteredTitle": "No encontramos órdenes",
-      "filteredDescription": "Cambia la búsqueda, los filtros o la sucursal seleccionada."
+      "filteredDescription": "Cambia la búsqueda, los filtros o la sucursal seleccionada.",
+      "clearFilters": "Limpiar filtros"
     },
     "detail": {
       "title": "Detalle de la orden",
@@ -247,7 +256,9 @@
         "IN_ESCROW": "En garantía",
         "RELEASED": "Liberado",
         "REFUNDED": "Reembolsado",
-        "PARTIALLY_REFUNDED": "Reembolso parcial"
+        "PARTIALLY_REFUNDED": "Reembolso parcial",
+        "REFUNDING": "Reembolsando",
+        "RELEASING": "Liberando"
       },
       "evidenceTitle": "Evidencia de trabajo",
       "recordingComplete": "Grabación completa",
@@ -271,7 +282,13 @@
       "ratingLabel": "Calificación: {rating} de 5",
       "noReviewComment": "Sin comentario.",
       "noReview": "Esta orden aún no tiene reseña.",
-      "timelineTitle": "Bitácora"
+      "timelineTitle": "Bitácora",
+      "workerLabel": "Técnico",
+      "noWorker": "Sin asignar",
+      "scheduledLabel": "Visita programada",
+      "deliveryAddressLabel": "Dirección de entrega",
+      "serviceAddressLabel": "Dirección del servicio",
+      "offerMessageTitle": "Mensaje de tu oferta"
     },
     "timeline": {
       "label": "Bitácora de la orden",
@@ -280,7 +297,119 @@
       "released": "Fondos liberados",
       "completed": "Orden completada",
       "cancelled": "Orden cancelada",
-      "disputed": "Orden en disputa"
+      "disputed": "Orden en disputa",
+      "byActor": " · por {name}",
+      "note": "Motivo: {note}",
+      "events": {
+        "ACCEPTED": "Orden aceptada",
+        "ESCROW_HELD": "Pago protegido",
+        "EN_ROUTE": "Técnico en camino",
+        "ARRIVED": "Técnico en el lugar",
+        "RECORDING_STARTED": "Grabación iniciada",
+        "RECORDING_STOPPED": "Grabación detenida",
+        "WORK_DONE": "Trabajo terminado",
+        "CONFIRMATION_REQUESTED": "Confirmación solicitada al cliente",
+        "CONFIRMED": "Entrega confirmada",
+        "AUTO_RELEASED": "Pago liberado automáticamente",
+        "CANCELLED": "Orden cancelada",
+        "WORKER_ASSIGNED": "Técnico asignado",
+        "REWORK_REQUESTED": "El cliente pidió un ajuste",
+        "DISPUTE_OPENED": "Disputa abierta"
+      }
+    },
+    "tabs": {
+      "label": "Secciones de órdenes",
+      "orders": "Órdenes",
+      "requests": "Solicitudes",
+      "offers": "Mis ofertas"
+    },
+    "actions": {
+      "title": "Acciones de la orden",
+      "accept": "Aceptar pedido",
+      "assignWorker": "Asignar técnico",
+      "reassignWorker": "Reasignar técnico",
+      "messageCustomer": "Escribir al cliente",
+      "hideConversation": "Ocultar conversación",
+      "cancel": "Cancelar orden",
+      "nextStep": {
+        "awaitingPayment": {
+          "title": "Esperando el pago del cliente",
+          "description": "La orden se activará cuando el cliente pague. Puedes cancelarla si ya no podrás atenderla."
+        },
+        "acceptProduct": {
+          "title": "Pedido pagado: acéptalo para enviarlo",
+          "description": "El pago está protegido. Al aceptarlo la orden pasa a envío; el cliente confirmará la entrega para liberar el dinero."
+        },
+        "assignWorker": {
+          "title": "Asigna un técnico",
+          "description": "El pago está protegido. Asigna a quien atenderá el servicio para que reciba la orden en su app."
+        },
+        "serviceScheduled": {
+          "title": "Servicio listo para realizarse",
+          "description": "El técnico asignado verá la orden en su app. El trabajo se graba como evidencia al realizarse."
+        },
+        "inProgress": {
+          "title": "Trabajo en curso",
+          "description": "El técnico está atendiendo la orden. Al terminar, el cliente confirma y el pago se libera."
+        },
+        "shipping": {
+          "title": "En envío",
+          "description": "El cliente confirmará la recepción desde su app; entonces se libera el pago protegido."
+        },
+        "completed": {
+          "title": "Orden completada",
+          "description": "El cliente confirmó la entrega. Consulta el estado del pago en Cobros."
+        },
+        "cancelled": {
+          "title": "Orden cancelada",
+          "description": "Esta orden ya no admite cambios. Si hubo pago, se reembolsó al cliente."
+        },
+        "disputed": {
+          "title": "Orden en disputa",
+          "description": "El pago queda retenido mientras el equipo de HOME360 revisa la evidencia."
+        }
+      },
+      "cancelDialog": {
+        "title": "¿Cancelar la orden #{folio}?",
+        "description": "La orden aún no está pagada. El cliente recibirá una notificación con el motivo.",
+        "descriptionRefund": "Se reembolsará el total pagado al cliente y se le notificará. Esta acción no se puede deshacer.",
+        "reasonLabel": "Motivo de la cancelación",
+        "reasonPlaceholder": "Explica brevemente por qué cancelas…",
+        "reasonInvalid": "Escribe un motivo de entre 3 y 500 caracteres.",
+        "keep": "Conservar orden",
+        "confirm": "Cancelar orden"
+      },
+      "assignDialog": {
+        "title": "Asignar técnico a la orden #{folio}",
+        "reassignTitle": "Reasignar técnico de la orden #{folio}",
+        "description": "El técnico recibirá una notificación y verá la orden en su app.",
+        "workerLabel": "Técnico",
+        "workerPlaceholder": "Selecciona un técnico",
+        "noWorkers": "Aún no tienes técnicos. Agrégalos en Equipo.",
+        "cancel": "Cancelar",
+        "confirm": "Asignar"
+      },
+      "feedback": {
+        "accepted": "Pedido aceptado. Ya está en envío.",
+        "cancelled": "Orden cancelada.",
+        "workerAssigned": "Técnico asignado.",
+        "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+      }
+    },
+    "conversation": {
+      "title": "Conversación con {name}",
+      "pollingHint": "Los mensajes nuevos se cargan cada pocos segundos.",
+      "loading": "Cargando mensajes",
+      "empty": "Aún no hay mensajes. Escribe el primero.",
+      "threadLabel": "Mensajes de la orden",
+      "fromCustomer": "Cliente:",
+      "fromBusiness": "Tu equipo:",
+      "imageMessage": "Imagen enviada desde la app",
+      "locationMessage": "Ubicación compartida desde la app",
+      "composerLabel": "Mensaje para el cliente",
+      "composerPlaceholder": "Escribe un mensaje… (Enter para enviar)",
+      "send": "Enviar mensaje",
+      "retry": "Reintentar"
     }
   },
   "payments": {
@@ -306,7 +435,9 @@
       "escrowOrders": "{count, plural, =0 {Sin órdenes activas} one {# orden activa} other {# órdenes activas}}",
       "commission": "Comisión del mes",
       "commissionHint": "Acumulado del mes en curso",
-      "commissionHintWithRate": "Acumulado del mes en curso · {percent}% de tu plan"
+      "commissionHintWithRate": "Acumulado del mes en curso · {percent}% de tu plan",
+      "loyalty": "Bonos de lealtad",
+      "loyaltyHint": "Pendientes de liquidar · no suman a tu saldo"
     },
     "columns": {
       "customer": "Cliente",
@@ -314,7 +445,8 @@
       "amount": "Monto",
       "method": "Método",
       "status": "Estado",
-      "date": "Fecha"
+      "date": "Fecha",
+      "actions": "Acciones"
     },
     "methods": {
       "CARD": "Tarjeta",
@@ -385,6 +517,144 @@
       "start": "Conectar cuenta",
       "resume": "Completar información",
       "completed": "Tu cuenta ya puede cobrar y recibir depósitos."
+    },
+    "tabs": {
+      "label": "Secciones de pagos",
+      "transactions": "Transacciones",
+      "links": "Links de cobro",
+      "withdrawals": "Retiros",
+      "bonuses": "Bonos"
+    },
+    "filters": {
+      "statusLabel": "Filtrar por estado",
+      "allStatuses": "Todos los estados",
+      "methodLabel": "Filtrar por método",
+      "allMethods": "Todos los métodos",
+      "clear": "Limpiar filtros",
+      "branchScoped": "Mostrando solo cobros de órdenes de la sucursal seleccionada."
+    },
+    "emptyFiltered": {
+      "title": "Sin transacciones con estos filtros",
+      "description": "Prueba con otro estado o método, o cambia de sucursal."
+    },
+    "rowActions": {
+      "open": "Acciones de {concept}",
+      "viewDetail": "Ver detalle",
+      "goToOrder": "Ver orden",
+      "copyLink": "Copiar link de cobro"
+    },
+    "detail": {
+      "title": "Detalle del cobro",
+      "description": "Montos congelados al momento del cobro.",
+      "close": "Cerrar detalle",
+      "status": "Estado",
+      "customer": "Cliente",
+      "method": "Método",
+      "order": "Orden",
+      "orderFolio": "#{folio}",
+      "branch": "Sucursal",
+      "noBranch": "Sin sucursal",
+      "total": "Total cobrado al cliente",
+      "providerAmount": "Monto del servicio",
+      "serviceFee": "Tarifa de servicio",
+      "commission": "Comisión ({percent}%)",
+      "refunded": "Reembolsado",
+      "net": "Neto para ti",
+      "createdAt": "Cobrado",
+      "escrowReleaseAt": "Liberación programada",
+      "releasedAt": "Liberado",
+      "notScheduled": "Sin programar",
+      "viewOrder": "Ver orden",
+      "copyLink": "Copiar link de cobro"
+    },
+    "paymentLinks": {
+      "loading": "Cargando links de cobro",
+      "errorTitle": "No pudimos cargar tus links de cobro",
+      "columns": {
+        "concept": "Concepto",
+        "amount": "Monto",
+        "status": "Estado",
+        "created": "Creado",
+        "paid": "Pagado",
+        "actions": "Acciones"
+      },
+      "customerPays": "Cliente paga {amount}",
+      "unpaid": "Sin pagar",
+      "status": {
+        "CREATING": "Creando",
+        "ACTIVE": "Activo",
+        "INACTIVE": "Inactivo"
+      },
+      "empty": {
+        "title": "Aún no tienes links de cobro",
+        "description": "Crea un link de un solo uso y compártelo con tu cliente para cobrarle con pago protegido.",
+        "action": "Crear link de cobro"
+      },
+      "actions": {
+        "open": "Acciones de {concept}",
+        "copy": "Copiar link",
+        "openLink": "Abrir link",
+        "deactivate": "Desactivar"
+      },
+      "deactivate": {
+        "title": "Desactivar link de cobro",
+        "description": "El link «{concept}» dejará de aceptar pagos. Esta acción no se puede deshacer.",
+        "confirm": "Desactivar link",
+        "cancel": "Cancelar",
+        "success": "Link de cobro desactivado"
+      }
+    },
+    "withdrawals": {
+      "loading": "Cargando retiros",
+      "errorTitle": "No pudimos cargar tus retiros",
+      "columns": {
+        "amount": "Monto",
+        "destination": "Destino",
+        "status": "Estado",
+        "requested": "Solicitado",
+        "processed": "Procesado"
+      },
+      "destination": "{bank} ****{last4}",
+      "rejectionReason": "Motivo: {reason}",
+      "status": {
+        "REQUESTED": "Solicitado",
+        "PROCESSING": "En proceso",
+        "APPROVED": "Aprobado",
+        "REJECTED": "Rechazado",
+        "FAILED": "Fallido",
+        "CANCELED": "Cancelado"
+      },
+      "empty": {
+        "title": "Aún no has solicitado retiros",
+        "description": "Cuando retires tu saldo disponible verás aquí el estado de cada solicitud."
+      }
+    },
+    "bonuses": {
+      "loading": "Cargando bonos",
+      "errorTitle": "No pudimos cargar tus bonos de lealtad",
+      "intro": "Los bonos de lealtad se liquidan fuera de la plataforma, con vales o transferencia. No forman parte de tu saldo retirable.",
+      "columns": {
+        "concept": "Cobro",
+        "amount": "Bono",
+        "status": "Estado",
+        "earned": "Generado",
+        "paid": "Liquidado"
+      },
+      "paymentAmount": "Cobro de {amount}",
+      "pct": "{percent}% del cobro",
+      "status": {
+        "PENDING": "Pendiente",
+        "PAID": "Liquidado",
+        "CANCELLED": "Cancelado"
+      },
+      "methods": {
+        "VOUCHER": "Vales",
+        "TRANSFER": "Transferencia"
+      },
+      "empty": {
+        "title": "Aún no tienes bonos de lealtad",
+        "description": "Cuando un cobro califique para bono de lealtad aparecerá aquí con su estado de liquidación."
+      }
     }
   },
   "services": {
@@ -438,7 +708,9 @@
     },
     "empty": {
       "title": "No hay servicios para mostrar",
-      "description": "Crea tu primer servicio o cambia los filtros de búsqueda."
+      "description": "Crea tu primer servicio para empezar a recibir solicitudes.",
+      "filteredTitle": "No encontramos servicios",
+      "filteredDescription": "Cambia la búsqueda o los filtros para ver otros resultados."
     },
     "form": {
       "createTitle": "Nuevo servicio",
@@ -498,14 +770,18 @@
       "unassigned": "Sin asignar",
       "monthlyOrders": "Órdenes del mes",
       "coverage": "Cobertura",
-      "kilometers": "{count} km"
+      "kilometers": "{count} km",
+      "noLocation": "Sin ubicación",
+      "noLocationHint": "No recibirá solicitudes",
+      "location": "Ubicación"
     },
     "actions": {
       "open": "Abrir acciones de {name}",
       "edit": "Editar",
       "activate": "Activar",
       "pause": "Pausar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "assignManager": "Asignar encargado"
     },
     "delete": {
       "title": "Eliminar sucursal",
@@ -528,7 +804,18 @@
       "close": "Cerrar formulario",
       "cancel": "Cancelar",
       "save": "Guardar cambios",
-      "create": "Crear sucursal"
+      "create": "Crear sucursal",
+      "location": {
+        "title": "Ubicación",
+        "help": "Las solicitudes llegan a las sucursales cuyo radio cubre la dirección del cliente.",
+        "useCurrent": "Usar mi ubicación",
+        "locating": "Ubicando…",
+        "latitude": "Latitud",
+        "longitude": "Longitud",
+        "permissionDenied": "Permiso de ubicación denegado. Captura las coordenadas manualmente.",
+        "unavailable": "No pudimos obtener tu ubicación. Captura las coordenadas manualmente.",
+        "invalid": "Captura latitud (−90 a 90) y longitud (−180 a 180), o deja ambas vacías."
+      }
     },
     "feedback": {
       "planLimit": "Alcanzaste el límite de sucursales de tu plan.",
@@ -542,6 +829,29 @@
       "deleteConflict": "No puedes eliminar una sucursal con órdenes activas.",
       "deleteError": "No pudimos eliminar la sucursal.",
       "deleted": "Sucursal eliminada."
+    },
+    "map": {
+      "title": "Mapa de cobertura",
+      "summary": "{located} de {total} con ubicación",
+      "ariaLabel": "Mapa de cobertura: {branches}",
+      "ariaBranch": "{name}, radio de {radius} km",
+      "emptyTitle": "Ninguna sucursal tiene ubicación",
+      "emptyDescription": "Agrega latitud y longitud a tus sucursales para ver su cobertura y empezar a recibir solicitudes cercanas.",
+      "missing": "{count, plural, one {# sucursal sin ubicación} other {# sucursales sin ubicación}}"
+    },
+    "managerDialog": {
+      "title": "Asignar encargado",
+      "description": "Elige a la persona de tu equipo responsable de {name}.",
+      "label": "Encargado",
+      "none": "Sin encargado",
+      "thisBranch": "En esta sucursal",
+      "otherBranches": "Otras sucursales",
+      "loading": "Cargando equipo…",
+      "loadError": "No pudimos cargar tu equipo.",
+      "retry": "Reintentar",
+      "emptyTeam": "Aún no tienes trabajadores. Agrégalos en Equipo para asignar un encargado.",
+      "cancel": "Cancelar",
+      "save": "Guardar"
     }
   },
   "products": {
@@ -630,7 +940,8 @@
       "edit": "Editar",
       "publish": "Publicar",
       "unpublish": "Retirar publicación",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "adjustStock": "Ajustar stock"
     },
     "delete": {
       "title": "Eliminar producto",
@@ -679,6 +990,12 @@
         "invalidRow": "Usa números enteros iguales o mayores que cero.",
         "loadErrorTitle": "No pudimos cargar el inventario",
         "loadErrorDescription": "Revisa tu conexión e inténtalo de nuevo."
+      },
+      "image": {
+        "label": "Imagen (URL)",
+        "placeholder": "https://…/producto.jpg",
+        "help": "Opcional. Usa un enlace https público; se muestra en tu catálogo.",
+        "previewError": "No pudimos cargar la vista previa; revisa que el enlace sea una imagen pública."
       }
     },
     "feedback": {
@@ -688,7 +1005,13 @@
       "unpublished": "Producto retirado de publicación.",
       "deleted": "Producto eliminado.",
       "deleteConflict": "No puedes eliminar este producto porque tiene órdenes activas.",
-      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo.",
+      "stockAdjusted": "Stock actualizado."
+    },
+    "stockDialog": {
+      "title": "Ajustar stock",
+      "description": "Existencias y alertas de {name} por sucursal.",
+      "save": "Guardar stock"
     }
   },
   "placeholder": {
@@ -719,7 +1042,8 @@
       "services": "Servicios asignados",
       "branch": "Sucursal",
       "invitation": "Invitación",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "status": "Estado"
     },
     "invitationStatus": {
       "PENDING": "Pendiente",
@@ -777,6 +1101,13 @@
       "EMAIL_SEND_FAILED": "No pudimos enviar la invitación. Reenvíala desde el menú del trabajador.",
       "CONFLICT": "Es el único trabajador asignado a un servicio activo; reasigna el servicio primero.",
       "RESEND_CONFLICT": "Este trabajador no tiene una invitación pendiente."
+    },
+    "availability": {
+      "AVAILABLE": "Disponible",
+      "ON_SERVICE": "En servicio",
+      "OFF": "Fuera de turno",
+      "notConnected": "Sin conectar",
+      "todayOrders": "{count, plural, =0 {Sin órdenes hoy} one {# orden hoy} other {# órdenes hoy}}"
     }
   },
   "settings": {
@@ -845,6 +1176,227 @@
       "profileUpdated": "Perfil del negocio actualizado.",
       "ownerUpdated": "Nombre del dueño actualizado.",
       "passwordUpdated": "Contraseña actualizada.",
+      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+    }
+  },
+  "rangeSelector": {
+    "label": "Periodo de los indicadores",
+    "option": "Últimos {days} días"
+  },
+  "notifications": {
+    "trigger": "Notificaciones",
+    "triggerUnread": "Notificaciones, {count} sin leer",
+    "title": "Notificaciones",
+    "unreadSummary": "{count, plural, one {# nueva} other {# nuevas}}",
+    "unread": "Sin leer",
+    "loading": "Cargando notificaciones…",
+    "errorTitle": "No pudimos cargar tus notificaciones",
+    "errorDescription": "Revisa tu conexión e inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "emptyTitle": "Todo al día",
+    "emptyDescription": "Aquí verás pagos, confirmaciones, disputas y retiros.",
+    "kinds": {
+      "orderPaid": {
+        "title": "Pago en escrow · #{folio}",
+        "description": "{order} · {amount} retenidos hasta la entrega."
+      },
+      "quoteAccepted": {
+        "title": "Cotización aceptada · #{folio}",
+        "description": "{order} · el cliente aceptó tu cotización."
+      },
+      "orderConfirmed": {
+        "title": "Trabajo confirmado · #{folio}",
+        "description": "{order} · el cliente confirmó la entrega."
+      },
+      "autoReleased": {
+        "title": "Liberación automática · #{folio}",
+        "description": "{order} · el pago se liberó al vencer el plazo."
+      },
+      "disputeOpened": {
+        "title": "Disputa abierta · #{folio}",
+        "description": "{order} · responde con tu evidencia."
+      },
+      "disputeResolved": {
+        "title": "Disputa resuelta · #{folio}",
+        "description": "{order} · revisa la resolución."
+      },
+      "withdrawalProcessing": {
+        "title": "Retiro en proceso",
+        "description": "{amount} en camino a tu cuenta."
+      },
+      "withdrawalApproved": {
+        "title": "Retiro aprobado",
+        "description": "{amount} enviados a tu cuenta."
+      },
+      "withdrawalRejected": {
+        "title": "Retiro rechazado",
+        "description": "{amount} · revisa el motivo en Cobros."
+      },
+      "withdrawalFailed": {
+        "title": "Retiro fallido",
+        "description": "{amount} · el banco rechazó la transferencia."
+      }
+    }
+  },
+  "requests": {
+    "loading": "Cargando solicitudes",
+    "loadMore": "Cargar más",
+    "notAvailable": "—",
+    "noDiagnosis": "Sin diagnóstico",
+    "noZone": "Zona no indicada",
+    "queryErrorTitle": "No pudimos cargar las solicitudes",
+    "distanceValue": "{km} km",
+    "priceRangeValue": "{min} – {max}",
+    "columns": {
+      "request": "Solicitud",
+      "category": "Categoría",
+      "zone": "Zona",
+      "distance": "Distancia",
+      "priceRange": "Rango estimado",
+      "urgency": "Urgencia",
+      "date": "Publicada"
+    },
+    "urgency": {
+      "LOW": "Baja",
+      "MEDIUM": "Media",
+      "HIGH": "Alta"
+    },
+    "empty": {
+      "title": "No hay solicitudes cerca por ahora",
+      "description": "Aquí verás los servicios que piden clientes dentro del radio de tu sucursal y de tus categorías activas."
+    },
+    "radar": {
+      "intro": "Solicitudes de clientes cerca de tus sucursales.",
+      "origin": "Radar desde {branch} · radio de {km} km",
+      "branchLabel": "Sucursal de origen del radar",
+      "branchPlaceholder": "Elige una sucursal",
+      "noLocationTitle": "Tus sucursales aún no tienen ubicación",
+      "branchNoLocationTitle": "{branch} no tiene ubicación registrada",
+      "noLocationDescription": "Para recibir solicitudes cercanas, registra la ubicación de una sucursal activa.",
+      "goToBranches": "Ir a Sucursales"
+    },
+    "offerStatus": {
+      "PENDING": "Enviada",
+      "ACCEPTED": "Aceptada",
+      "REJECTED": "Rechazada",
+      "EXPIRED": "Vencida",
+      "WITHDRAWN": "Retirada"
+    },
+    "detail": {
+      "title": "Detalle de la solicitud",
+      "description": "Información de la solicitud del cliente",
+      "close": "Cerrar detalle",
+      "postedAt": "Publicada {date}",
+      "loadErrorTitle": "No pudimos cargar la solicitud",
+      "notAvailableAnymore": "Esta solicitud ya no está disponible o salió de tu radio.",
+      "retry": "Reintentar",
+      "notAvailable": "No disponible",
+      "summaryTitle": "Resumen",
+      "customerLabel": "Cliente",
+      "zoneLabel": "Zona",
+      "distanceLabel": "Distancia",
+      "distanceValue": "{km} km",
+      "privacyHint": "La dirección exacta se comparte cuando el cliente acepta tu oferta.",
+      "customerNoteTitle": "Nota del cliente",
+      "aiTitle": "Diagnóstico con IA",
+      "noDiagnosis": "Sin diagnóstico disponible.",
+      "priceRangeLabel": "Rango estimado",
+      "priceRangeValue": "{min} – {max}",
+      "confidenceLabel": "Confianza",
+      "confidenceValue": "{pct} %",
+      "urgencyLabel": "Urgencia",
+      "urgency": {
+        "LOW": "Baja",
+        "MEDIUM": "Media",
+        "HIGH": "Alta"
+      },
+      "evidenceTitle": "Fotos y videos",
+      "noEvidence": "El cliente no adjuntó evidencia.",
+      "photoLabel": "Foto {number}",
+      "videoLabel": "Video {number}",
+      "openMedia": "Abrir {label} en una pestaña nueva",
+      "offerTitle": "Tu oferta",
+      "sendOffer": "Enviar oferta",
+      "updateOffer": "Actualizar oferta",
+      "resendOffer": "Reenviar oferta",
+      "notQuotable": "Esta solicitud ya no admite ofertas."
+    },
+    "ownOffer": {
+      "title": "Oferta enviada",
+      "priceLabel": "Precio",
+      "scheduledLabel": "Visita",
+      "workerLabel": "Técnico",
+      "notAvailable": "—",
+      "withdraw": "Retirar oferta",
+      "hint": {
+        "PENDING": "El cliente puede aceptarla en cualquier momento. Puedes actualizarla o retirarla.",
+        "ACCEPTED": "El cliente aceptó tu oferta; la orden ya está en Órdenes.",
+        "REJECTED": "El cliente eligió otra oferta.",
+        "EXPIRED": "La solicitud se cerró antes de que el cliente eligiera.",
+        "WITHDRAWN": "Retiraste esta oferta. Puedes reenviarla mientras la solicitud siga abierta."
+      },
+      "withdrawDialog": {
+        "title": "¿Retirar tu oferta?",
+        "description": "El cliente dejará de verla. Podrás reenviarla mientras la solicitud siga abierta.",
+        "confirm": "Retirar oferta",
+        "cancel": "Conservar"
+      }
+    },
+    "offerForm": {
+      "workerLabel": "Técnico que atenderá",
+      "workerPlaceholder": "Selecciona un técnico",
+      "workerError": "Elige un técnico de tu equipo.",
+      "noWorkers": "Agrega técnicos en Equipo para poder ofertar.",
+      "priceLabel": "Precio total (MXN)",
+      "pricePlaceholder": "0.00",
+      "priceError": "Escribe un precio mayor a cero.",
+      "scheduledAtLabel": "Fecha y hora de la visita",
+      "scheduledAtError": "Elige una fecha y hora futuras.",
+      "messageLabel": "Mensaje para el cliente (opcional)",
+      "messagePlaceholder": "Incluye qué cubre el precio, materiales o garantía…",
+      "messageCount": "{count}/{max}"
+    },
+    "offers": {
+      "loading": "Cargando ofertas",
+      "loadMore": "Cargar más",
+      "notAvailable": "—",
+      "queryErrorTitle": "No pudimos cargar tus ofertas",
+      "statusLabel": "Filtrar por estado",
+      "allStatuses": "Todos los estados",
+      "columns": {
+        "request": "Solicitud",
+        "amount": "Precio",
+        "scheduled": "Visita",
+        "worker": "Técnico",
+        "status": "Estado",
+        "updated": "Actualizada",
+        "actions": "Acciones"
+      },
+      "empty": {
+        "title": "Aún no has enviado ofertas",
+        "description": "Responde solicitudes desde la pestaña Solicitudes; tus ofertas aparecerán aquí.",
+        "filteredTitle": "No hay ofertas con ese estado",
+        "filteredDescription": "Elige otro estado para ver más ofertas."
+      },
+      "actions": {
+        "open": "Acciones de la oferta para {title}",
+        "view": "Ver solicitud",
+        "edit": "Editar oferta",
+        "resend": "Reenviar oferta",
+        "viewOrder": "Ver orden #{folio}",
+        "withdraw": "Retirar oferta",
+        "withdrawDialog": {
+          "title": "¿Retirar tu oferta?",
+          "description": "El cliente dejará de ver tu oferta para «{title}». Podrás reenviarla mientras la solicitud siga abierta.",
+          "confirm": "Retirar oferta",
+          "cancel": "Conservar"
+        }
+      }
+    },
+    "feedback": {
+      "offerSent": "Oferta enviada. Te avisaremos si el cliente la acepta.",
+      "offerUpdated": "Oferta actualizada.",
+      "offerWithdrawn": "Oferta retirada.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
     }
   }

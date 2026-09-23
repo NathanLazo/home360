@@ -9,3 +9,6 @@ export type DisputeListItem = DisputeListResult["items"][number];
 export type DisputeDetail = NonNullable<DisputesOutput["getById"]["result"]>;
 
 export type DisputePayment = NonNullable<DisputeDetail["payment"]>;
+
+export type DisputeRecordingSegment =
+  DisputeDetail["recordingSegments"][number];

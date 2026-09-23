@@ -8,6 +8,21 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import { verifyCredentials } from "~/server/services/auth/verify-credentials";
 
+async function isSuspendedEmail(
+  email: string | null | undefined,
+): Promise<boolean> {
+  if (!email) {
+    return false;
+  }
+
+  const storedUser = await db.user.findUnique({
+    where: { email },
+    select: { suspendedAt: true },
+  });
+
+  return storedUser?.suspendedAt != null;
+}
+
 function hasVerifiedGoogleEmail(profile: unknown): boolean {
   return (
     typeof profile === "object" &&
@@ -49,19 +64,26 @@ export const authConfig = {
 
       const storedUser = await db.user.findUnique({
         where: { id: token.sub },
-        select: { sessionsValidFrom: true },
+        select: { sessionsValidFrom: true, suspendedAt: true },
       });
       token.authInvalidated =
-        !storedUser ||
+        // A missing user also fails the suspension check (undefined !== null).
+        storedUser?.suspendedAt !== null ||
         storedUser.sessionsValidFrom.getTime() > token.authIssuedAtMs;
       return token;
     },
-    signIn: ({ account, profile }) => {
+    signIn: async ({ account, profile, user }) => {
       if (account?.provider !== "google") {
         return true;
       }
 
-      return hasVerifiedGoogleEmail(profile);
+      if (!hasVerifiedGoogleEmail(profile)) {
+        return false;
+      }
+
+      // A suspended account (W10 moderation) is denied like any other
+      // rejected Google sign-in (AccessDenied → /login).
+      return !(await isSuspendedEmail(user.email));
     },
   },
 } satisfies NextAuthConfig;

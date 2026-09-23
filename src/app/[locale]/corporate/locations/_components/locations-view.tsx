@@ -103,7 +103,7 @@ export function LocationsView() {
         metal={createDisabled ? "static" : "live"}
         metalActive={!sheetOpen}
         type="button"
-        className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
         aria-disabled={createDisabled}
         aria-describedby={atLimit ? "location-limit-help" : undefined}
         onClick={create}
@@ -153,10 +153,11 @@ export function LocationsView() {
         locations={data.items}
         canMutate={canMutate}
         deactivating={mutations.deactivating}
+        reactivating={mutations.reactivating}
         notActiveTooltip={t("notActiveTooltip")}
         emptyAction={
           canMutate && !atLimit ? (
-            <Button type="button" className="min-h-11" onClick={create}>
+            <Button type="button" onClick={create}>
               <PlusIcon aria-hidden="true" />
               {t("emptyAction")}
             </Button>
@@ -164,6 +165,7 @@ export function LocationsView() {
         }
         onEdit={edit}
         onDeactivate={(location) => setDeactivating(location)}
+        onReactivate={(location) => void mutations.reactivate(location.id)}
       />
 
       <LocationFormSheet

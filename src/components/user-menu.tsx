@@ -77,6 +77,7 @@ export async function UserMenu({
         trigger
       )}
       <DropdownMenuContent
+        glass
         align="end"
         className={cn("w-64", variant === "dark" && "dark")}
       >

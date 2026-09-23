@@ -8,6 +8,8 @@ import { api } from "~/trpc/react";
 
 export type WithdrawalMutations = {
   approve: (input: { withdrawalId: string }) => void;
+  /** Re-drives a PROCESSING payout through the same idempotent approval. */
+  retry: (input: { withdrawalId: string }) => void;
   reject: (input: { withdrawalId: string; reason: string }) => void;
   pending: boolean;
 };
@@ -27,7 +29,7 @@ export function useWithdrawalMutations(options?: {
     ]);
   };
 
-  const lifecycle = (key: "approved" | "rejected") => ({
+  const lifecycle = (key: "approved" | "rejected" | "retried") => ({
     onMutate: () => feedback.start(key, t(`pending.${key}`)),
     onSuccess: (response: { error: Parameters<typeof errorsT>[0] | null }) => {
       if (response.error !== null) {
@@ -46,14 +48,18 @@ export function useWithdrawalMutations(options?: {
   const approve = api.admin.finance.approveWithdrawal.useMutation(
     lifecycle("approved"),
   );
+  const retry = api.admin.finance.approveWithdrawal.useMutation(
+    lifecycle("retried"),
+  );
   const reject = api.admin.finance.rejectWithdrawal.useMutation(
     lifecycle("rejected"),
   );
 
   return {
     approve: (input) => approve.mutate(input),
+    retry: (input) => retry.mutate(input),
     reject: (input) => reject.mutate(input),
-    pending: approve.isPending || reject.isPending,
+    pending: approve.isPending || retry.isPending || reject.isPending,
   };
 }
 

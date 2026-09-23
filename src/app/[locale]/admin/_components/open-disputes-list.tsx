@@ -3,6 +3,7 @@
 import { ChevronRightIcon, ScaleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { OpenDisputeEvidenceLink } from "./open-dispute-evidence-link";
 import type { OpenDisputeItem } from "./overview.types";
 import { PRESS_SURFACE_CLASS } from "./admin-motion";
 import { ADMIN_LINK_CARD_CLASS, ADMIN_TONE_CLASS } from "./admin-surface";
@@ -35,7 +36,7 @@ export function OpenDisputesList({
         title={t("disputes.emptyTitle")}
         description={t("disputes.emptyDescription")}
         action={
-          <Button asChild variant="outline" className="min-h-11 sm:min-h-10">
+          <Button asChild variant="outline">
             <Link href="/admin/disputes?status=resolved">
               {t("disputes.emptyCta")}
             </Link>
@@ -48,13 +49,15 @@ export function OpenDisputesList({
   return (
     <ul className="flex flex-col gap-3">
       {disputes.map((dispute) => (
-        <li key={dispute.id}>
+        <li
+          key={dispute.id}
+          className={cn("flex flex-col", ADMIN_LINK_CARD_CLASS)}
+        >
           <Link
             href={`/admin/disputes?dispute=${dispute.id}`}
             className={cn(
-              "focus-visible:ring-ring group focus-visible:ring-offset-background flex items-center gap-4 p-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+              "focus-visible:ring-ring group focus-visible:ring-offset-background flex items-center gap-4 rounded-md p-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
               PRESS_SURFACE_CLASS,
-              ADMIN_LINK_CARD_CLASS,
             )}
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -91,6 +94,11 @@ export function OpenDisputesList({
               />
             </div>
           </Link>
+          {dispute.hasRecording || dispute.evidenceCount > 0 ? (
+            <div className="flex justify-start px-4 pb-4">
+              <OpenDisputeEvidenceLink dispute={dispute} />
+            </div>
+          ) : null}
         </li>
       ))}
     </ul>

@@ -248,7 +248,7 @@ export function ProductImportDialog({
               variant="ghost"
               size="icon"
               disabled={importBusy}
-              className="absolute top-3 right-3 min-h-11 min-w-11"
+              className="absolute top-3 right-3"
               aria-label={t("close")}
             >
               <XIcon aria-hidden="true" />
@@ -350,7 +350,6 @@ export function ProductImportDialog({
                 variant="outline"
                 disabled={!canChooseFile}
                 aria-describedby="product-import-file-hint"
-                className="min-h-11"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {processingFile ? (
@@ -539,7 +538,6 @@ export function ProductImportDialog({
               type="button"
               variant="outline"
               disabled={importBusy}
-              className="min-h-11"
               onClick={chooseAnotherFile}
             >
               {t("back")}
@@ -547,7 +545,6 @@ export function ProductImportDialog({
             <Button
               type="button"
               disabled={importBusy || validRows.length === 0}
-              className="min-h-11"
               onClick={() => void importRows()}
             >
               {importBusy ? (
@@ -567,13 +564,12 @@ export function ProductImportDialog({
               type="button"
               variant="outline"
               disabled={importBusy}
-              className="min-h-11"
               onClick={chooseAnotherFile}
             >
               {t("importAnother")}
             </Button>
             <DialogClose asChild>
-              <Button type="button" disabled={importBusy} className="min-h-11">
+              <Button type="button" disabled={importBusy}>
                 {t("done")}
               </Button>
             </DialogClose>

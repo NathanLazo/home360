@@ -19,7 +19,10 @@ export default async function AdminSettingsPage({ params }: SettingsPageProps) {
 
   setRequestLocale(locale);
 
-  await api.admin.settings.get.prefetch();
+  await Promise.all([
+    api.admin.settings.get.prefetch(),
+    api.admin.settings.listCampaigns.prefetchInfinite({}),
+  ]);
 
   return (
     <HydrateClient>

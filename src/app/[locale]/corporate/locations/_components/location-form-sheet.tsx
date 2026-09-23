@@ -226,7 +226,7 @@ export function LocationFormSheet({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 min-h-11 min-w-11"
+              className="absolute top-3 right-3"
               aria-label={t("close")}
               disabled={submitting}
             >
@@ -247,21 +247,11 @@ export function LocationFormSheet({
           </div>
           <SheetFormDock>
             <SheetClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={submitting}
-                className="min-h-11"
-              >
+              <Button type="button" variant="outline" disabled={submitting}>
                 {t("cancel")}
               </Button>
             </SheetClose>
-            <Button
-              type="submit"
-              metal="live"
-              disabled={submitting}
-              className="min-h-11"
-            >
+            <Button type="submit" metal="live" disabled={submitting}>
               {submitting ? (
                 <LoaderCircleIcon
                   aria-hidden="true"

@@ -1,5 +1,6 @@
 import {
   DisputeStatus,
+  type DisputeUrgency,
   type Prisma,
   type PrismaClient,
 } from "@generated/prisma";
@@ -19,11 +20,15 @@ export const OPEN_DISPUTE_STATUSES = [
   DisputeStatus.IN_REVIEW,
 ] as const;
 
-export function disputeFilterWhere(
+function statusWhere(
   filter: DisputeFilter | undefined,
 ): Prisma.DisputeWhereInput {
   if (filter === "open") {
     return { status: { in: [...OPEN_DISPUTE_STATUSES] } };
+  }
+
+  if (filter === "in_review") {
+    return { status: DisputeStatus.IN_REVIEW };
   }
 
   if (filter === "resolved") {
@@ -31,6 +36,44 @@ export function disputeFilterWhere(
   }
 
   return {};
+}
+
+/**
+ * Free-text search: a numeric term (optionally "#123") matches the order
+ * folio exactly; any term also matches the title and both parties' names.
+ */
+function searchWhere(search: string | undefined): Prisma.DisputeWhereInput {
+  const term = search?.trim() ?? "";
+
+  if (term.length === 0) {
+    return {};
+  }
+
+  const contains = { contains: term, mode: "insensitive" as const };
+  const digits = term.replace(/^#/u, "");
+  const folio = /^\d{1,9}$/u.test(digits) ? Number(digits) : null;
+
+  return {
+    OR: [
+      ...(folio === null ? [] : [{ order: { is: { folio } } }]),
+      { title: contains },
+      { business: { is: { name: contains } } },
+      { order: { is: { customer: { is: { name: contains } } } } },
+    ],
+  };
+}
+
+export function disputeFilterWhere(
+  filter: DisputeFilter | undefined,
+  options: { urgency?: DisputeUrgency; search?: string } = {},
+): Prisma.DisputeWhereInput {
+  return {
+    AND: [
+      statusWhere(filter),
+      options.urgency ? { urgency: options.urgency } : {},
+      searchWhere(options.search),
+    ],
+  };
 }
 
 const listSelect = {
@@ -53,21 +96,26 @@ const listSelect = {
 
 export async function listDisputes(
   deps: { db: DisputeDb },
-  input: { status?: DisputeFilter; cursor?: string; now?: Date },
+  input: {
+    status?: DisputeFilter;
+    urgency?: DisputeUrgency;
+    search?: string;
+    cursor?: string;
+    now?: Date;
+  },
 ) {
   const now = input.now ?? new Date();
   const month = getFinancialMonthBounds(now);
 
   const [rows, openCount, resolvedThisMonth] = await Promise.all([
     deps.db.dispute.findMany({
-      where: disputeFilterWhere(input.status),
+      where: disputeFilterWhere(input.status, {
+        urgency: input.urgency,
+        search: input.search,
+      }),
       take: DISPUTES_PAGE_SIZE + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      orderBy: [
-        { urgency: "desc" },
-        { createdAt: "desc" },
-        { id: "desc" },
-      ],
+      orderBy: [{ urgency: "desc" }, { createdAt: "desc" }, { id: "desc" }],
       select: listSelect,
     }),
     deps.db.dispute.count({
@@ -125,6 +173,9 @@ export async function getDisputeById(
       businessArgument: true,
       evidenceUrls: true,
       aiSummary: true,
+      aiSummaryGeneratedAt: true,
+      evidenceRequestNote: true,
+      evidenceRequestedAt: true,
       business: { select: { id: true, name: true } },
       order: {
         select: {
@@ -136,6 +187,17 @@ export async function getDisputeById(
           createdAt: true,
           recordingUrl: true,
           recordingComplete: true,
+          recordingDurationSec: true,
+          recordingSegments: {
+            orderBy: { startedAt: "asc" },
+            select: {
+              id: true,
+              startedAt: true,
+              endedAt: true,
+              interrupted: true,
+              uploadedAt: true,
+            },
+          },
           customer: { select: { id: true, name: true } },
           payment: {
             select: {
@@ -165,6 +227,8 @@ export async function getDisputeById(
     ...rest,
     recordingUrl: order.recordingUrl,
     recordingComplete: order.recordingComplete,
+    recordingDurationSec: order.recordingDurationSec,
+    recordingSegments: order.recordingSegments,
     business,
     customer: order.customer,
     order: {
@@ -179,8 +243,10 @@ export async function getDisputeById(
   });
 }
 
-export type ListDisputesResult = Awaited<
-  ReturnType<typeof listDisputes>
-> extends ServiceResult<infer TData, string>
-  ? TData
-  : never;
+export type ListDisputesResult =
+  Awaited<ReturnType<typeof listDisputes>> extends ServiceResult<
+    infer TData,
+    string
+  >
+    ? TData
+    : never;

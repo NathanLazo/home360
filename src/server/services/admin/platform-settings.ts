@@ -145,21 +145,6 @@ export async function updatePlatformSettings(
   return getPlatformSettings(deps);
 }
 
-export async function updatePlanCommissions(
-  deps: { db: SettingsDb },
-  input: { expected: PlanCommissionValues; commissions: PlanCommissionValues },
-): Promise<ServiceResult<PlatformSettingsResult, SettingsErrorCode>> {
-  const applied = await deps.db.$transaction(async (tx) =>
-    applyCommissions(tx, input.expected, input.commissions),
-  );
-
-  if (!applied) {
-    return svcFail("SETTINGS_STALE", "Plan commissions changed meanwhile");
-  }
-
-  return getPlatformSettings(deps);
-}
-
 /**
  * Single-submit path for W13: either every group lands or none does. Changing
  * a commission never touches `Payment`: the percentage and amount are frozen

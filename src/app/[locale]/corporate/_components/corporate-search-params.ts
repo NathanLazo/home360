@@ -39,3 +39,10 @@ export function parseMonthParam(searchParams: {
 
   return month !== undefined && MONTH_PATTERN.test(month) ? month : undefined;
 }
+
+/** `?order=<id>` opens that order's detail sheet in /corporate/orders. */
+export function parseOrderParam(searchParams: {
+  order?: SearchParamValue;
+}): string | undefined {
+  return singleValue(searchParams.order);
+}

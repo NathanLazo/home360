@@ -12,7 +12,9 @@ import { PendingBusinessesTable } from "./pending-businesses-table";
 import { SectionHeading } from "./section-heading";
 import { SectionLink } from "./section-link";
 import { TableSkeleton, type TableSkeletonColumn } from "./table-skeleton";
+import { OverviewMonthSelect } from "./overview-month-select";
 import { OverviewPrimaryAction } from "./overview-primary-action";
+import { useOverviewMonth } from "./use-overview-month";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
@@ -28,7 +30,10 @@ const PENDING_SKELETON_COLUMNS: TableSkeletonColumn[] = [
 export function OverviewView() {
   const t = useTranslations("admin.overview");
 
-  const kpisQuery = api.admin.overview.getKpis.useQuery();
+  const { month, setMonth } = useOverviewMonth();
+  const kpisQuery = api.admin.overview.getKpis.useQuery(
+    month === undefined ? {} : { month },
+  );
   const pendingQuery = api.admin.overview.getPendingBusinesses.useQuery();
   const disputesQuery = api.admin.overview.getOpenDisputes.useQuery();
   const aiQuery = api.admin.overview.getAiConfigSummary.useQuery();
@@ -46,7 +51,18 @@ export function OverviewView() {
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
-        actions={<OverviewPrimaryAction urgent={hasDisputes} />}
+        actions={
+          <>
+            {kpis.status === "success" ? (
+              <OverviewMonthSelect
+                value={kpis.data.month}
+                currentMonth={kpis.data.currentMonth}
+                onChange={setMonth}
+              />
+            ) : null}
+            <OverviewPrimaryAction urgent={hasDisputes} />
+          </>
+        }
       />
 
       {kpis.status === "pending" ? (
@@ -71,7 +87,10 @@ export function OverviewView() {
             title={t("pending.title")}
             action={
               hasPending ? (
-                <SectionLink href="/admin/users" label={t("pending.viewAll")} />
+                <SectionLink
+                  href="/admin/users?tab=businesses&status=pending"
+                  label={t("pending.viewAll")}
+                />
               ) : null
             }
           />

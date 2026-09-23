@@ -80,7 +80,6 @@ export function ConnectOnboardingBanner() {
         <span>{status.hasAccount ? t("pending") : t("missing")}</span>
         <Button
           type="button"
-          className="min-h-11"
           disabled={busy || isReadOnly}
           title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
           onClick={() => void startOnboarding()}

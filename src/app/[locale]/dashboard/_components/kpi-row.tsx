@@ -12,11 +12,13 @@ import { useFormatter, useTranslations } from "next-intl";
 import { KpiCard } from "~/components/kpi-card";
 import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
 import { SectionError } from "~/components/section-error";
+import type { DashboardRangeDays } from "~/lib/search-params";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
 export type KpiRowProps = {
   branchId?: string;
+  days: DashboardRangeDays;
 };
 
 const CURRENCY_FORMAT = {
@@ -30,10 +32,10 @@ const RATING_FORMAT = {
   maximumFractionDigits: 1,
 } as const;
 
-export function KpiRow({ branchId }: KpiRowProps) {
+export function KpiRow({ branchId, days }: KpiRowProps) {
   const t = useTranslations("dashboard.home");
   const formatter = useFormatter();
-  const input = branchId ? { branchId } : {};
+  const input = branchId ? { branchId, days } : { days };
   // Keep the previous figures on screen while a branch switch refetches, so
   // the numbers roll to their new values instead of flashing a skeleton.
   const query = api.dashboard.getKpis.useQuery(input, {
@@ -76,7 +78,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
       aria-busy={query.isPlaceholderData}
     >
       <KpiCard
-        label={t("revenue")}
+        label={t("revenue", { days })}
         value={currency(data.revenueCents)}
         numeric={{ value: data.revenueCents / 100, format: CURRENCY_FORMAT }}
         icon={BanknoteIcon}
@@ -91,7 +93,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
         }}
       />
       <KpiCard
-        label={t("orders")}
+        label={t("orders", { days })}
         value={formatter.number(data.ordersCount)}
         numeric={{ value: data.ordersCount }}
         icon={InboxIcon}

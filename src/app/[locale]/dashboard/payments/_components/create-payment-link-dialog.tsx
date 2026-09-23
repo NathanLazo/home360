@@ -144,7 +144,7 @@ export function CreatePaymentLinkDialog({
                 type="button"
                 variant="outline"
                 size="icon"
-                className="min-h-11 min-w-11 shrink-0"
+                className="shrink-0"
                 aria-label={t("copy")}
                 onClick={() => void handleCopy(created.url)}
               >
@@ -161,7 +161,6 @@ export function CreatePaymentLinkDialog({
             <DialogFooter>
               <Button
                 type="button"
-                className="min-h-11"
                 onClick={() => onOpenChange(false)}
               >
                 {t("done")}
@@ -228,7 +227,6 @@ export function CreatePaymentLinkDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11"
                 disabled={creatingPaymentLink}
                 onClick={() => onOpenChange(false)}
               >
@@ -236,7 +234,6 @@ export function CreatePaymentLinkDialog({
               </Button>
               <Button
                 type="submit"
-                className="min-h-11"
                 disabled={creatingPaymentLink}
               >
                 {creatingPaymentLink ? (

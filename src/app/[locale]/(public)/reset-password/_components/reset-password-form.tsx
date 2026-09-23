@@ -117,7 +117,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <p role="alert" className="text-foreground text-sm leading-6">
           {t("invalidToken")}
         </p>
-        <Button asChild className="h-11 w-full">
+        <Button asChild className="w-full">
           <Link href="/forgot-password">{t("requestAgain")}</Link>
         </Button>
       </div>
@@ -190,7 +190,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         metal="bend"
         metalClassName="w-full"
         type="submit"
-        className="h-11 w-full"
+        className="w-full"
         disabled={resetPassword.isPending}
       >
         {resetPassword.isPending ? (

@@ -4,14 +4,16 @@ import {
   OrderEventType,
   OrderStatus,
   OrderType,
+  PaymentStatus,
   Prisma,
+  WorkerAvailability,
   type PrismaClient,
-  type WorkerAvailability,
 } from "@generated/prisma";
 import {
   createDownloadUrl,
   isOwnedMediaPathname,
 } from "~/server/services/media/blob";
+import { currentCycleEvents } from "~/server/services/orders/work-cycle";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -170,17 +172,159 @@ function isSerializationConflict(error: unknown): boolean {
   );
 }
 
+export const ASSIGNED_ORDER_SCOPES = ["today", "upcoming", "history"] as const;
+
+export type AssignedOrderScope = (typeof ASSIGNED_ORDER_SCOPES)[number];
+
+export type AssignedOrderPage = {
+  items: AssignedOrder[];
+  nextCursor: string | null;
+};
+
+const ASSIGNED_PAGE_SIZE = 20;
+
+/**
+ * Chihuahua has no DST since 2022 (fixed UTC-6), so "today" for the T1 list
+ * ends at the next local midnight, i.e. 06:00 UTC of the following day.
+ */
+const BUSINESS_UTC_OFFSET_HOURS = -6;
+
+function endOfBusinessDay(now: Date): Date {
+  const local = new Date(now.getTime() + BUSINESS_UTC_OFFSET_HOURS * 3_600_000);
+
+  return new Date(
+    Date.UTC(
+      local.getUTCFullYear(),
+      local.getUTCMonth(),
+      local.getUTCDate() + 1,
+      -BUSINESS_UTC_OFFSET_HOURS,
+    ),
+  );
+}
+
+const HISTORY_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.COMPLETED,
+  OrderStatus.CANCELLED,
+  OrderStatus.DISPUTED,
+];
+
+/**
+ * Scope filter of the worker's T1/T4 lists. Unpaid (`PENDING`) orders never
+ * reach the technician: there is no escrow yet, so no visit may happen.
+ * - today: in progress, unscheduled or scheduled before the end of today
+ *   (overdue visits stay visible);
+ * - upcoming: paid and scheduled after today;
+ * - history: completed, cancelled or disputed.
+ */
+function scopeWhere(
+  scope: AssignedOrderScope,
+  now: Date,
+): Prisma.OrderWhereInput {
+  const endOfToday = endOfBusinessDay(now);
+
+  if (scope === "history") {
+    return { status: { in: HISTORY_ORDER_STATUSES } };
+  }
+
+  if (scope === "upcoming") {
+    return {
+      status: OrderStatus.PAID,
+      quote: { is: { scheduledFor: { gte: endOfToday } } },
+    };
+  }
+
+  return {
+    OR: [
+      { status: OrderStatus.IN_PROGRESS },
+      {
+        status: OrderStatus.PAID,
+        OR: [
+          { quote: { is: null } },
+          { quote: { is: { scheduledFor: null } } },
+          { quote: { is: { scheduledFor: { lt: endOfToday } } } },
+        ],
+      },
+    ],
+  };
+}
+
 export async function listAssignedOrders(
   db: PrismaClient,
-  workerId: string,
-): Promise<ServiceResult<AssignedOrder[]>> {
-  const orders = await db.order.findMany({
-    where: { workerId, type: OrderType.SERVICE },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  input: {
+    workerId: string;
+    scope: AssignedOrderScope;
+    cursor?: string;
+    now?: Date;
+  },
+): Promise<ServiceResult<AssignedOrderPage>> {
+  const where: Prisma.OrderWhereInput = {
+    workerId: input.workerId,
+    type: OrderType.SERVICE,
+    status: { not: OrderStatus.PENDING },
+    AND: [scopeWhere(input.scope, input.now ?? new Date())],
+  };
+
+  if (input.cursor) {
+    const cursorRow = await db.order.findFirst({
+      where: { ...where, id: input.cursor },
+      select: { id: true },
+    });
+
+    if (!cursorRow) {
+      return svcFail("NOT_FOUND", "Order cursor not found");
+    }
+  }
+
+  const orderBy: Prisma.OrderOrderByWithRelationInput[] =
+    input.scope === "history"
+      ? [{ createdAt: "desc" }, { id: "desc" }]
+      : [
+          { quote: { scheduledFor: { sort: "asc", nulls: "first" } } },
+          { createdAt: "asc" },
+          { id: "asc" },
+        ];
+  const rows = await db.order.findMany({
+    where,
+    orderBy,
+    take: ASSIGNED_PAGE_SIZE + 1,
+    ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     select: assignedOrderSelect,
   });
+  const items = rows.slice(0, ASSIGNED_PAGE_SIZE).map(toAssignedOrder);
 
-  return svcOk(orders.map(toAssignedOrder));
+  return svcOk({
+    items,
+    nextCursor:
+      rows.length > ASSIGNED_PAGE_SIZE ? (items.at(-1)?.id ?? null) : null,
+  });
+}
+
+/**
+ * Availability follows the work automatically (workstream D): the technician
+ * is ON_SERVICE from EN_ROUTE until finish, and AVAILABLE afterwards unless
+ * they switched themselves OFF.
+ */
+async function markWorkerOnService(
+  tx: Prisma.TransactionClient,
+  workerId: string,
+): Promise<void> {
+  await tx.worker.updateMany({
+    where: {
+      id: workerId,
+      availability: { not: WorkerAvailability.ON_SERVICE },
+    },
+    data: { availability: WorkerAvailability.ON_SERVICE },
+  });
+}
+
+async function releaseWorkerAvailability(
+  tx: Prisma.TransactionClient,
+  workerId: string,
+): Promise<void> {
+  await tx.worker.updateMany({
+    where: { id: workerId, availability: WorkerAvailability.ON_SERVICE },
+    data: { availability: WorkerAvailability.AVAILABLE },
+  });
 }
 
 export async function getAssignedOrderById(
@@ -289,6 +433,7 @@ export async function transitionAssignedOrder(
             actorUserId: input.actorUserId,
           },
         });
+        await markWorkerOnService(tx, input.workerId);
 
         return svcOk({
           orderId: order.id,
@@ -344,7 +489,10 @@ export async function startOrderRecording(
           select: {
             id: true,
             status: true,
-            events: { select: { type: true } },
+            events: {
+              orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+              select: { type: true },
+            },
             recordingSegments: {
               where: { endedAt: null },
               select: { id: true },
@@ -362,7 +510,9 @@ export async function startOrderRecording(
           !order.events.some(
             (event) => event.type === OrderEventType.ARRIVED,
           ) ||
-          order.events.some(
+          // A rework (REWORK_REQUESTED) opens a new cycle that may be
+          // recorded again; only WORK_DONE of the current cycle blocks it.
+          currentCycleEvents(order.events).some(
             (event) => event.type === OrderEventType.WORK_DONE,
           ) ||
           order.recordingSegments.length > 0
@@ -388,6 +538,7 @@ export async function startOrderRecording(
             actorUserId: input.actorUserId,
           },
         });
+        await markWorkerOnService(tx, input.workerId);
 
         return svcOk({ segmentId: segment.id, startedAt });
       },
@@ -548,6 +699,8 @@ export async function finishAssignedOrder(
     afterPathnames: string[];
     workNotes: string;
     materials: FinishMaterial[];
+    /** Required when the recording is missing or incomplete (D6). */
+    recordingJustification?: string;
   },
 ): Promise<
   ServiceResult<
@@ -580,7 +733,14 @@ export async function finishAssignedOrder(
             status: true,
             businessId: true,
             customerId: true,
-            events: { select: { type: true } },
+            recordingComplete: true,
+            payment: {
+              select: { id: true, status: true, escrowReleaseAt: true },
+            },
+            events: {
+              orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+              select: { type: true },
+            },
             recordingSegments: {
               select: { endedAt: true, pathname: true, uploadedAt: true },
             },
@@ -593,7 +753,9 @@ export async function finishAssignedOrder(
 
         if (
           order.status !== OrderStatus.IN_PROGRESS ||
-          order.events.some((event) => event.type === OrderEventType.WORK_DONE)
+          currentCycleEvents(order.events).some(
+            (event) => event.type === OrderEventType.WORK_DONE,
+          )
         ) {
           return svcFail("CONFLICT", "Order cannot be finished");
         }
@@ -601,17 +763,27 @@ export async function finishAssignedOrder(
         const hasOpenSegment = order.recordingSegments.some(
           (segment) => segment.endedAt === null,
         );
+
+        if (hasOpenSegment) {
+          return svcFail("CONFLICT", "Stop the recording before finishing");
+        }
+
         const hasUploadedSegment = order.recordingSegments.some(
           (segment) =>
             segment.endedAt !== null &&
             segment.pathname !== null &&
             segment.uploadedAt !== null,
         );
+        // Missing or interrupted recording: the worker must justify it
+        // (spec/10 M6). The order keeps `recordingComplete = false`, which
+        // resolves disputes in favour of the customer (D6).
+        const recordingIsComplete =
+          hasUploadedSegment && order.recordingComplete;
 
-        if (hasOpenSegment || !hasUploadedSegment) {
+        if (!recordingIsComplete && !input.recordingJustification) {
           return svcFail(
             "RECORDING_JUSTIFICATION_REQUIRED",
-            "A closed uploaded recording is required",
+            "A complete recording or a justification is required",
           );
         }
 
@@ -639,6 +811,9 @@ export async function finishAssignedOrder(
             beforeUrls: input.beforePathnames,
             afterUrls: input.afterPathnames,
             workNotes: input.workNotes,
+            recordingJustification: recordingIsComplete
+              ? null
+              : (input.recordingJustification ?? null),
             materials: {
               deleteMany: {},
               create: input.materials.map((material) => ({
@@ -667,6 +842,35 @@ export async function finishAssignedOrder(
             },
           ],
         });
+
+        // After a rework the auto-release was paused; the new confirmation
+        // window restarts from this finish.
+        if (
+          order.payment?.status === PaymentStatus.IN_ESCROW &&
+          order.payment.escrowReleaseAt === null
+        ) {
+          const settings = await tx.platformSettings.findUnique({
+            where: { id: 1 },
+            select: { escrowAutoReleaseHours: true },
+          });
+
+          if (settings) {
+            await tx.payment.updateMany({
+              where: {
+                id: order.payment.id,
+                status: PaymentStatus.IN_ESCROW,
+                escrowReleaseAt: null,
+              },
+              data: {
+                escrowReleaseAt: new Date(
+                  Date.now() + settings.escrowAutoReleaseHours * 3_600_000,
+                ),
+              },
+            });
+          }
+        }
+
+        await releaseWorkerAvailability(tx, input.workerId);
 
         return svcOk({ orderId: order.id, customerId: order.customerId });
       },

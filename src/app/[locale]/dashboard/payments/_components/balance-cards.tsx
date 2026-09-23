@@ -1,6 +1,11 @@
 "use client";
 
-import { LockKeyholeIcon, PercentIcon, WalletIcon } from "lucide-react";
+import {
+  GiftIcon,
+  LockKeyholeIcon,
+  PercentIcon,
+  WalletIcon,
+} from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { BusinessBalances } from "./payment.types";
@@ -35,7 +40,7 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
 
   return (
     <section
-      className="grid gap-4 md:grid-cols-3"
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       aria-label={t("balancesLabel")}
     >
       <KpiCard
@@ -56,6 +61,15 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
           }),
           trend: "neutral",
         }}
+      />
+      {/* Design N4: loyalty bonuses are settled outside the platform, so they
+          sit beside the balance without ever adding to what can be withdrawn. */}
+      <KpiCard
+        label={t("balances.loyalty")}
+        value={currency(balances.loyaltyPendingCents)}
+        numeric={numeric(balances.loyaltyPendingCents)}
+        icon={GiftIcon}
+        delta={{ text: t("balances.loyaltyHint"), trend: "neutral" }}
       />
       <KpiCard
         label={t("balances.commission")}

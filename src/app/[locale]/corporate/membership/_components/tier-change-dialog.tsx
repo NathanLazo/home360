@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { CorporateTier } from "@generated/prisma";
 import type { CorporateMembershipSummary } from "../../_components/corporate.types";
+import { PendingTierRequestNotice } from "./pending-tier-request-notice";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -57,14 +58,10 @@ export function TierChangeDialog({
 
   if (membership.pendingRequest) {
     return (
-      <p
-        role="status"
-        className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border px-4 py-3"
-      >
-        {t("pendingNotice", {
-          tier: tierT(membership.pendingRequest.requestedTier),
-        })}
-      </p>
+      <PendingTierRequestNotice
+        pendingRequest={membership.pendingRequest}
+        canMutate={canMutate}
+      />
     );
   }
 
@@ -110,7 +107,7 @@ export function TierChangeDialog({
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" metal="bend" className="min-h-11">
+        <Button type="button" metal="bend">
           {t("button")}
         </Button>
       </DialogTrigger>
@@ -163,7 +160,6 @@ export function TierChangeDialog({
             <Button
               type="button"
               variant="outline"
-              className="min-h-11"
               disabled={mutation.isPending}
             >
               {t("cancel")}
@@ -171,7 +167,6 @@ export function TierChangeDialog({
           </DialogClose>
           <Button
             type="button"
-            className="min-h-11"
             disabled={mutation.isPending}
             onClick={() => void submit()}
           >

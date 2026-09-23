@@ -13,6 +13,7 @@ import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
+import type { DashboardRangeDays } from "~/lib/search-params";
 import { api } from "~/trpc/react";
 
 /** Slices beyond this count collapse into a single "others" slice. */
@@ -20,13 +21,17 @@ const MAX_DONUT_SLICES = 5;
 
 export type OrdersByBranchListProps = {
   branchId?: string;
+  days: DashboardRangeDays;
 };
 
-export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
+export function OrdersByBranchList({
+  branchId,
+  days,
+}: OrdersByBranchListProps) {
   const t = useTranslations("dashboard.home");
   const errors = useTranslations("errors");
   const formatter = useFormatter();
-  const input = branchId ? { branchId } : {};
+  const input = branchId ? { branchId, days } : { days };
   const query = api.dashboard.getOrdersByBranch.useQuery(input, {
     placeholderData: keepPreviousData,
   });
@@ -77,7 +82,6 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />

@@ -57,7 +57,7 @@ export function PlanCard({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 w-full sm:min-h-10"
+          className="w-full"
           onClick={onManagePlan}
           disabled={managing}
         >
@@ -74,7 +74,7 @@ export function PlanCard({
         metalClassName="w-full"
         type="button"
         variant={isUpgrade ? "default" : "outline"}
-        className="min-h-11 w-full sm:min-h-10"
+        className="w-full"
         onClick={() => onSelectPlan(plan.code)}
         disabled={!canChangePlan || !plan.isAvailable}
         title={

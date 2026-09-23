@@ -38,11 +38,12 @@ export async function resolveBearerSession(
 
   const storedUser = await db.user.findUnique({
     where: { id: payload.sub },
-    select: { sessionsValidFrom: true },
+    select: { sessionsValidFrom: true, suspendedAt: true },
   });
 
   const authInvalidated =
-    !storedUser ||
+    // A missing user also fails the suspension check (undefined !== null).
+    storedUser?.suspendedAt !== null ||
     storedUser.sessionsValidFrom.getTime() > payload.authIssuedAtMs;
 
   return {
@@ -63,7 +64,9 @@ export async function resolveBearerSession(
  * requests pay zero extra latency. Shared by the tRPC context and the Pusher
  * channel auth endpoint (M4-W1). An invalidated session resolves to `null`.
  */
-export async function resolveSession(headers: Headers): Promise<Session | null> {
+export async function resolveSession(
+  headers: Headers,
+): Promise<Session | null> {
   const session = (await auth()) ?? (await resolveBearerSession(headers));
 
   if (!session?.user || session.user.authInvalidated) {

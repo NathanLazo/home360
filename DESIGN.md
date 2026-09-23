@@ -157,12 +157,12 @@ contraste por tinta — `font-normal text-mute` (`accentClass` en
 
 | Token | px | Uso |
 |---|---|---|
-| `rounded-xs` | 4 | Chips mínimos, `xs` buttons |
-| `rounded-sm` | 6 | Botones de app, inputs, selects, items de menú |
+| `rounded-xs` | 4 | Chips mínimos |
+| `rounded-sm` | 6 | Inputs, selects, items de menú |
 | `rounded-md` | 8 | Cards (`Card`), popovers/menús |
 | `rounded-lg` | 12 | Dialogs, pricing, cards grandes, paneles glass |
 | `rounded-xl` | 16 | Superficies hero, consolas de landing |
-| `rounded-pill` | 100 | CTAs de marketing, docks glass |
+| `rounded-pill` | 100 | Todos los botones, docks glass |
 | `rounded-full` | — | Avatares, dots |
 
 `--radius` = 8 px (md). El mapeo shadcn es sm 6 · md 8 · lg 12 · xl 16.
@@ -198,9 +198,11 @@ inset pasa a blanco 10 %.
 | `destructive` | #ee0000, hover `error-deep` |
 | `link` | `link-deep`, subrayado en hover |
 
-Tamaños: `xs` 24 · `sm` 32 · `default` 40 · `lg` 48 · `icon*` equivalentes ·
-**`pill` 48 (CTA de marketing)** · **`pill-sm` 40 (nav/dock)**. Radio 6 px en app,
-pill en marketing. Press `active:scale-[0.97]`; foco `ring-2 ring-ring` con offset.
+Tamaños (finos, decisión del owner): `xs` 24 · `sm` 28 · `default` 32 · `lg` 36 ·
+`icon*` equivalentes · **`pill` 40 (CTA de marketing)** · **`pill-sm` 32 (nav/dock)**.
+Texto 13 px (12 en `xs`/`sm`), íconos 14 px. **Todos los botones son pill**. No
+fuerces alto con `min-h-*`/`h-*`/`size-*` en call-sites: en punteros táctiles un
+`::after` invisible extiende el área de toque a ≥44 px sin agrandar el botón. Press `active:scale-[0.97]`; foco `ring-2 ring-ring` con offset.
 
 **Metal estático vs vivo.**
 - Estático (default, gratis): todo botón primario. CSS puro, SSR, sin WebGL.
@@ -251,8 +253,14 @@ Sin glass, nunca.
   `AppShellContent` (`max-w-7xl`, `p-4 sm:p-6 lg:p-8`, destino del skip link).
 - Sidebar: notch activo de metal **estático** (`SidebarActiveIndicator`, `bg-metal`)
   que se desliza entre ítems (250 ms smooth-out, instantáneo con reduced motion);
-  marca "H" con `metal-rim`. Chips de identidad (rol, plan actual) = `bg-metal`
+  sobre el ítem activo viaja además un **lente de selección** (`SidebarActiveLens`
+  → `GlassLens`): gota Liquid Glass transparente con filo `metal-hairline`, que
+  dobla el propio icono/label en el borde (Chromium); marca "H" con `metal-rim`. Chips de identidad (rol, plan actual) = `bg-metal`
   estático, nunca `MetalPill` vivo en cromática persistente.
+- Menús del header (usuario, idioma, sucursal): `DropdownMenuContent glass` /
+  `SelectContent glass` → `MenuGlassHighlight`: tinte accent bajo la opción
+  resaltada + `GlassLens` encima, deslizándose con el foco (150 ms). Punto de radio
+  = `metal-rim` (núcleo ink, aro plateado).
 - Sheets con formulario: `SheetFormDock` (GlassDock `panel` sticky; los campos
   scrollean debajo) con submit `metal="live"`. El CTA de la página que abre el
   sheet cede su anillo con `metalActive={!sheetOpen}` (mismo patrón en diálogos:
@@ -262,6 +270,10 @@ Sin glass, nunca.
 guardado sticky, toolbars flotantes, opcionalmente popovers/dropdowns. **Dónde no:**
 tablas densas, cards, formularios, fondos de sección. **Glass + metal juntos = la
 firma, máximo una vez por pantalla.** Nunca glass sobre glass.
+
+**Lente de selección (`GlassLens`):** sin frost ni velo (el texto debajo queda
+nítido en todos los navegadores), click-through, `aria-hidden`; el estado real lo
+portan `aria-current` / foco. Sin material → solo el filo de metal.
 
 **Fallbacks:** primer paint del servidor, `prefers-reduced-transparency: reduce` y
 `prefers-contrast: more` → la misma caja en canvas sólido + hairline (sin layout
@@ -302,6 +314,7 @@ Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintent
 | `metal="bend"` | 1 |
 | Glass + metal (firma, `GlassDock`) | 1 |
 | Superficies glass en total | 2 (p. ej. nav + popover) |
+| Lentes de selección (`GlassLens`) | 1 por lista (sidebar, menú abierto); no cuentan como superficie |
 | `LandingBeam` | 3 en toda la landing |
 | Mesh gradient | 1, solo hero de landing |
 

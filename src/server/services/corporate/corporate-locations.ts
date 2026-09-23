@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  Prisma,
-  type PrismaClient,
-} from "@generated/prisma";
+import { Prisma, type PrismaClient } from "@generated/prisma";
 
 import type {
   CorporateLocationCreateInput,
@@ -251,4 +248,69 @@ export async function deactivateCorporateLocation(
       throw error;
     }
   });
+}
+
+/**
+ * Reactivates an inactive location (workstream D). Same serializable limit
+ * check as `createCorporateLocation`: a reactivation occupies a paid slot, so
+ * it answers `PLAN_LIMIT_REACHED` when the tier is full.
+ */
+export async function reactivateCorporateLocation(
+  db: PrismaClient,
+  account: CorporateAccountContext,
+  locationId: string,
+): Promise<TrpcResponse<{ id: string }>> {
+  for (
+    let transactionAttempt = 0;
+    transactionAttempt < MAX_SERIALIZABLE_ATTEMPTS;
+    transactionAttempt += 1
+  ) {
+    try {
+      return await db.$transaction(
+        async (tx) => {
+          const location = await tx.corporateLocation.findFirst({
+            where: { id: locationId, corporateAccountId: account.id },
+            select: { id: true, isActive: true },
+          });
+
+          if (!location) {
+            return fail("NOT_FOUND", 404, "Corporate location not found");
+          }
+
+          if (location.isActive) {
+            return ok({ id: location.id }, "Corporate location already active");
+          }
+
+          if (account.maxLocations !== null) {
+            const used = await tx.corporateLocation.count({
+              where: { corporateAccountId: account.id, isActive: true },
+            });
+
+            if (used >= account.maxLocations) {
+              return fail(
+                "PLAN_LIMIT_REACHED",
+                409,
+                "Corporate tier limit reached for locations",
+              );
+            }
+          }
+
+          await tx.corporateLocation.update({
+            where: { id: location.id, corporateAccountId: account.id },
+            data: { isActive: true },
+            select: { id: true },
+          });
+
+          return ok({ id: location.id }, "Corporate location reactivated");
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+    } catch (error) {
+      if (!isSerializableConflict(error)) {
+        throw error;
+      }
+    }
+  }
+
+  return fail("CONFLICT", 409, "Location reactivation conflicted; try again");
 }

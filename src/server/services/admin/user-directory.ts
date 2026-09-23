@@ -4,6 +4,7 @@ import {
   type DisputeStatus,
   DisputeStatus as DisputeStatusEnum,
   type DocumentStatus,
+  DocumentStatus as DocumentStatusEnum,
   type DocumentType,
   type GuaranteeType,
   type OrderStatus,
@@ -18,7 +19,8 @@ import {
   USERS_PAGE_SIZE,
   type BusinessDerivedStatus,
   type ListUsersInput,
-  type UsersTab,
+  type UserAccessStatus,
+  type UsersFiltersInput,
 } from "~/app/[locale]/admin/users/_components/users.schema";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -41,6 +43,9 @@ export interface BusinessRow {
   ownerEmail: string | null;
   ordersCount: number;
   openDisputesCount: number;
+  /** Oldest unresolved dispute, the one "view dispute" jumps to. */
+  firstOpenDisputeId: string | null;
+  pendingDocumentsCount: number;
   createdAt: Date;
 }
 
@@ -48,6 +53,7 @@ export interface CustomerRow {
   id: string;
   name: string | null;
   email: string | null;
+  accessStatus: UserAccessStatus;
   ordersCount: number;
   createdAt: Date;
 }
@@ -55,7 +61,11 @@ export interface CustomerRow {
 export interface WorkerRow {
   id: string;
   fullName: string;
+  businessId: string;
   businessName: string;
+  /** Null while the worker never claimed an app account. */
+  userId: string | null;
+  accessStatus: UserAccessStatus | null;
   branchName: string | null;
   specialty: string | null;
   availability: WorkerAvailability;
@@ -63,9 +73,24 @@ export interface WorkerRow {
 }
 
 export type ListUsersResult =
-  | { tab: "businesses"; counts: UserCounts; nextCursor: string | null; items: BusinessRow[] }
-  | { tab: "customers"; counts: UserCounts; nextCursor: string | null; items: CustomerRow[] }
-  | { tab: "workers"; counts: UserCounts; nextCursor: string | null; items: WorkerRow[] };
+  | {
+      tab: "businesses";
+      counts: UserCounts;
+      nextCursor: string | null;
+      items: BusinessRow[];
+    }
+  | {
+      tab: "customers";
+      counts: UserCounts;
+      nextCursor: string | null;
+      items: CustomerRow[];
+    }
+  | {
+      tab: "workers";
+      counts: UserCounts;
+      nextCursor: string | null;
+      items: WorkerRow[];
+    };
 
 export interface BusinessDetail {
   id: string;
@@ -112,7 +137,9 @@ export interface BusinessDetail {
     status: DocumentStatus;
     fileUrl: string;
     reviewedAt: Date | null;
+    reviewedByName: string | null;
     notes: string | null;
+    createdAt: Date;
   }>;
 }
 
@@ -128,10 +155,17 @@ const businessListSelect = {
   guaranteeType: true,
   createdAt: true,
   owner: { select: { name: true, email: true } },
+  disputes: {
+    where: UNRESOLVED_DISPUTE_FILTER,
+    orderBy: { createdAt: "asc" },
+    take: 1,
+    select: { id: true },
+  },
   _count: {
     select: {
       orders: true,
       disputes: { where: UNRESOLVED_DISPUTE_FILTER },
+      documents: { where: { status: DocumentStatusEnum.PENDING } },
     },
   },
 } satisfies Prisma.BusinessSelect;
@@ -140,6 +174,7 @@ const customerListSelect = {
   id: true,
   name: true,
   email: true,
+  suspendedAt: true,
   createdAt: true,
   _count: { select: { orders: true } },
 } satisfies Prisma.UserSelect;
@@ -150,7 +185,9 @@ const workerListSelect = {
   specialty: true,
   availability: true,
   createdAt: true,
-  business: { select: { name: true } },
+  userId: true,
+  user: { select: { suspendedAt: true } },
+  business: { select: { id: true, name: true } },
   branch: { select: { name: true } },
 } satisfies Prisma.WorkerSelect;
 
@@ -227,6 +264,19 @@ function workerSearchFilter(search: string): Prisma.WorkerWhereInput {
   };
 }
 
+function accessStatusFilter(
+  status: UserAccessStatus | undefined,
+): Prisma.UserWhereInput {
+  switch (status) {
+    case undefined:
+      return {};
+    case "active":
+      return { suspendedAt: null };
+    case "suspended":
+      return { suspendedAt: { not: null } };
+  }
+}
+
 export function buildBusinessWhere(
   input: Pick<ListUsersInput, "search" | "status">,
 ): Prisma.BusinessWhereInput {
@@ -237,18 +287,22 @@ export function buildBusinessWhere(
 }
 
 export function buildCustomerWhere(
-  input: Pick<ListUsersInput, "search">,
+  input: Pick<ListUsersInput, "search" | "accessStatus">,
 ): Prisma.UserWhereInput {
   return {
     role: UserRole.CUSTOMER,
+    ...accessStatusFilter(input.accessStatus),
     ...(input.search ? customerSearchFilter(input.search) : {}),
   };
 }
 
 export function buildWorkerWhere(
-  input: Pick<ListUsersInput, "search">,
+  input: Pick<ListUsersInput, "search" | "availability">,
 ): Prisma.WorkerWhereInput {
-  return input.search ? workerSearchFilter(input.search) : {};
+  return {
+    ...(input.availability ? { availability: input.availability } : {}),
+    ...(input.search ? workerSearchFilter(input.search) : {}),
+  };
 }
 
 async function getCounts(db: DirectoryDb): Promise<UserCounts> {
@@ -289,6 +343,8 @@ export function toBusinessRow(
     ownerEmail: row.owner.email,
     ordersCount: row._count.orders,
     openDisputesCount: row._count.disputes,
+    firstOpenDisputeId: row.disputes[0]?.id ?? null,
+    pendingDocumentsCount: row._count.documents,
     createdAt: row.createdAt,
   };
 }
@@ -300,6 +356,7 @@ export function toCustomerRow(
     id: row.id,
     name: row.name,
     email: row.email,
+    accessStatus: row.suspendedAt === null ? "active" : "suspended",
     ordersCount: row._count.orders,
     createdAt: row.createdAt,
   };
@@ -311,7 +368,14 @@ export function toWorkerRow(
   return {
     id: row.id,
     fullName: row.fullName,
+    businessId: row.business.id,
     businessName: row.business.name,
+    userId: row.userId,
+    accessStatus: row.user
+      ? row.user.suspendedAt === null
+        ? "active"
+        : "suspended"
+      : null,
     branchName: row.branch?.name ?? null,
     specialty: row.specialty,
     availability: row.availability,
@@ -444,7 +508,9 @@ export async function getBusinessDetail(
           status: true,
           fileUrl: true,
           reviewedAt: true,
+          reviewedBy: { select: { name: true } },
           notes: true,
+          createdAt: true,
         },
       },
     },
@@ -482,7 +548,10 @@ export async function getBusinessDetail(
       openCount: business._count.disputes,
       items: business.disputes,
     },
-    documents: business.documents,
+    documents: business.documents.map(({ reviewedBy, ...document }) => ({
+      ...document,
+      reviewedByName: reviewedBy?.name ?? null,
+    })),
   });
 }
 
@@ -493,14 +562,16 @@ export type CsvExportRows =
 
 export async function readCsvRows(
   deps: { db: DirectoryDb },
-  input: { tab: UsersTab; cap: number },
+  input: { filters: UsersFiltersInput; cap: number },
 ): Promise<{ export: CsvExportRows; truncated: boolean }> {
   // Reading cap + 1 rows reports truncation without materializing the whole
   // dataset in memory.
   const take = input.cap + 1;
+  const { filters } = input;
 
-  if (input.tab === "businesses") {
+  if (filters.tab === "businesses") {
     const rows = await deps.db.business.findMany({
+      where: buildBusinessWhere(filters),
       take,
       orderBy: listOrderBy,
       select: businessListSelect,
@@ -515,9 +586,9 @@ export async function readCsvRows(
     };
   }
 
-  if (input.tab === "customers") {
+  if (filters.tab === "customers") {
     const rows = await deps.db.user.findMany({
-      where: { role: UserRole.CUSTOMER },
+      where: buildCustomerWhere(filters),
       take,
       orderBy: listOrderBy,
       select: customerListSelect,
@@ -533,6 +604,7 @@ export async function readCsvRows(
   }
 
   const rows = await deps.db.worker.findMany({
+    where: buildWorkerWhere(filters),
     take,
     orderBy: listOrderBy,
     select: workerListSelect,

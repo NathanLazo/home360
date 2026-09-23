@@ -1,3 +1,4 @@
+import type { WITHDRAWAL_HISTORY_STATUSES } from "./finance.schema";
 import type { RouterOutputs } from "~/trpc/react";
 
 type FinanceOutput = RouterOutputs["admin"]["finance"];
@@ -21,3 +22,16 @@ export type LoyaltyBonusesResult = NonNullable<
 >;
 
 export type LoyaltyBonusRow = LoyaltyBonusesResult["items"][number];
+
+export type WithdrawalHistoryStatus =
+  (typeof WITHDRAWAL_HISTORY_STATUSES)[number];
+
+/** Client-side state of the history filters ("" = no bound). */
+export type WithdrawalHistoryFilters = {
+  status: WithdrawalHistoryStatus | null;
+  business: string;
+  from: string;
+  to: string;
+};
+
+export type LoyaltyBonusStatusFilter = LoyaltyBonusRow["status"] | null;

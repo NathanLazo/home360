@@ -8,6 +8,7 @@ import { ProductStatusBadge } from "./product-status-badge";
 import { ProductStockCell } from "./product-stock-cell";
 import type { ProductListItem } from "./product.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -22,6 +23,7 @@ export function ProductsTable({
   onLoadMore,
   onCreate,
   onEdit,
+  onAdjustStock,
   onStatusChange,
   onDelete,
 }: {
@@ -34,10 +36,13 @@ export function ProductsTable({
   onLoadMore: () => void;
   onCreate: () => void;
   onEdit: (product: ProductListItem) => void;
+  onAdjustStock: (product: ProductListItem) => void;
   onStatusChange: (product: ProductListItem) => Promise<boolean>;
   onDelete: (product: ProductListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.products");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const { isReadOnly } = useSubscriptionAccess();
   const formatter = useFormatter();
   const columns: Array<DataTableColumn<ProductListItem>> = [
     {
@@ -46,8 +51,18 @@ export function ProductsTable({
       className: "min-w-56",
       cell: (product) => (
         <span className="flex items-center gap-3 font-medium">
-          <span className="bg-canvas-soft shadow-hairline flex size-9 shrink-0 items-center justify-center rounded-sm">
-            <BoxIcon aria-hidden="true" className="size-4" />
+          <span className="bg-canvas-soft shadow-hairline flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-sm">
+            {product.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- business-provided catalog URL on an arbitrary host.
+              <img
+                src={product.imageUrl}
+                alt=""
+                loading="lazy"
+                className="size-full object-cover"
+              />
+            ) : (
+              <BoxIcon aria-hidden="true" className="size-4" />
+            )}
           </span>
           {product.name}
         </span>
@@ -111,6 +126,7 @@ export function ProductsTable({
           product={product}
           busy={mutationBusy}
           onEdit={onEdit}
+          onAdjustStock={onAdjustStock}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
         />
@@ -137,7 +153,10 @@ export function ProductsTable({
                     <Button
                       type="button"
                       onClick={onCreate}
-                      className="min-h-11"
+                      disabled={isReadOnly}
+                      title={
+                        isReadOnly ? readOnlyT("actionDisabled") : undefined
+                      }
                     >
                       {t("newProduct")}
                     </Button>
@@ -153,7 +172,6 @@ export function ProductsTable({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={loadingMore}
             onClick={onLoadMore}
           >

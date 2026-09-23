@@ -2,10 +2,15 @@ import {
   approveBusinessSchema,
   exportUsersCsvSchema,
   getBusinessDetailSchema,
+  getCustomerDetailSchema,
   listUsersSchema,
   reactivateBusinessSchema,
+  reactivateUserSchema,
   rejectBusinessSchema,
+  reopenBusinessReviewSchema,
+  reviewDocumentSchema,
   suspendBusinessSchema,
+  suspendUserSchema,
   USERS_CSV_ROW_CAP,
 } from "~/app/[locale]/admin/users/_components/users.schema";
 import { PLAN_CODES, planCodeSchema } from "~/lib/subscription/plan-codes";
@@ -16,9 +21,16 @@ import {
   buildCsvFilename,
   buildUsersCsv,
 } from "~/server/services/admin/build-users-csv";
+import { getCustomerDetail } from "~/server/services/admin/customer-detail";
 import { reactivateBusiness } from "~/server/services/admin/reactivate-business";
 import { rejectBusiness } from "~/server/services/admin/reject-business";
+import { reopenBusinessReview } from "~/server/services/admin/reopen-business-review";
+import { reviewBusinessDocument } from "~/server/services/admin/review-business-document";
 import { suspendBusiness } from "~/server/services/admin/suspend-business";
+import {
+  reactivateUser,
+  suspendUser,
+} from "~/server/services/admin/user-moderation";
 import {
   getBusinessDetail,
   listUsers,
@@ -69,7 +81,7 @@ export const adminUsersRouter = createTRPCRouter({
       try {
         const { export: rows, truncated } = await readCsvRows(
           { db: ctx.db },
-          { tab: input.tab, cap: USERS_CSV_ROW_CAP },
+          { filters: input, cap: USERS_CSV_ROW_CAP },
         );
 
         return ok(
@@ -216,6 +228,118 @@ export const adminUsersRouter = createTRPCRouter({
         return ok(result.data, "Business reactivated");
       } catch (error) {
         return normalizedFailure(error, "Business reactivation failed");
+      }
+    }),
+  reopenBusinessReview: adminProcedure
+    .input(reopenBusinessReviewSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await reopenBusinessReview(
+          { db: ctx.db },
+          { ...input, adminId: ctx.session.user.id },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            409,
+            "Business review could not be reopened",
+          );
+        }
+
+        return ok(result.data, "Business review reopened");
+      } catch (error) {
+        return normalizedFailure(error, "Business review reopen failed");
+      }
+    }),
+
+  reviewDocument: adminProcedure
+    .input(reviewDocumentSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await reviewBusinessDocument(
+          { db: ctx.db },
+          {
+            documentId: input.documentId,
+            status: input.status,
+            ...(input.notes === undefined ? {} : { notes: input.notes }),
+            adminId: ctx.session.user.id,
+          },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "NOT_FOUND" ? 404 : 409,
+            "Document could not be reviewed",
+          );
+        }
+
+        return ok(result.data, "Document reviewed");
+      } catch (error) {
+        return normalizedFailure(error, "Document review failed");
+      }
+    }),
+
+  getCustomerDetail: adminProcedure
+    .input(getCustomerDetailSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await getCustomerDetail({ db: ctx.db }, input);
+
+        if (!result.ok) {
+          return fail(result.code, 404, "Customer not found");
+        }
+
+        return ok(result.data, "Customer detail loaded");
+      } catch (error) {
+        return normalizedFailure(error, "Customer detail query failed");
+      }
+    }),
+
+  suspendUser: adminProcedure
+    .input(suspendUserSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await suspendUser(
+          { db: ctx.db },
+          { ...input, adminId: ctx.session.user.id },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "NOT_FOUND" ? 404 : 409,
+            "User could not be suspended",
+          );
+        }
+
+        return ok(result.data, "User suspended");
+      } catch (error) {
+        return normalizedFailure(error, "User suspension failed");
+      }
+    }),
+
+  reactivateUser: adminProcedure
+    .input(reactivateUserSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await reactivateUser(
+          { db: ctx.db },
+          { ...input, adminId: ctx.session.user.id },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "NOT_FOUND" ? 404 : 409,
+            "User could not be reactivated",
+          );
+        }
+
+        return ok(result.data, "User reactivated");
+      } catch (error) {
+        return normalizedFailure(error, "User reactivation failed");
       }
     }),
 });

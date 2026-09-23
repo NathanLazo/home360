@@ -12,18 +12,21 @@ import {
 } from "~/components/ui/card";
 
 export function SettingsSectionCard({
+  id,
   title,
   description,
   icon: Icon,
   children,
 }: {
+  /** Anchor so other screens can deep-link, e.g. `/admin/settings#ai`. */
+  id?: string;
   title: string;
   description: string;
   icon: LucideIcon;
   children: ReactNode;
 }) {
   return (
-    <Card>
+    <Card id={id} className="scroll-mt-24">
       <CardHeader>
         <CardTitle>
           <h2 className="text-display-sm">{title}</h2>

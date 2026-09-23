@@ -78,7 +78,7 @@ export function CorporateInvoicesSection() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="min-h-11 self-start sm:min-h-10"
+                  className="self-start"
                   onClick={() => void invoicesQuery.fetchNextPage()}
                   disabled={invoicesQuery.isFetchingNextPage}
                 >

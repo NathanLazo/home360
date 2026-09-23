@@ -42,7 +42,6 @@ export function SettingsView() {
         action={
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void settingsQuery.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />

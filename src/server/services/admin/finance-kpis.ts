@@ -9,8 +9,9 @@ import {
 
 import {
   WITHDRAWALS_PAGE_SIZE,
+  type WithdrawalView,
 } from "~/app/[locale]/admin/finance/_components/finance.schema";
-import { getFinancialMonthBounds } from "../payments/balances";
+import { boundsForMonth, previousMonthBounds } from "./month-bounds";
 import {
   ESCROW_PAYMENT_STATUSES,
   PLATFORM_EARNING_PAYMENT_STATUSES,
@@ -54,32 +55,6 @@ export interface RevenueBreakdown {
 
 function monthKey(bounds: { start: Date }): string {
   return bounds.start.toISOString().slice(0, 7);
-}
-
-/** Resolves "YYYY-MM" against the platform's financial calendar. */
-function boundsForMonth(month: string | undefined, now: Date) {
-  if (month === undefined) {
-    return getFinancialMonthBounds(now);
-  }
-
-  const [year, monthNumber] = month.split("-").map(Number);
-
-  if (
-    year === undefined ||
-    monthNumber === undefined ||
-    Number.isNaN(year) ||
-    Number.isNaN(monthNumber)
-  ) {
-    return null;
-  }
-
-  // Midday avoids landing outside the month through any UTC offset.
-  const anchor = new Date(Date.UTC(year, monthNumber - 1, 15, 12));
-  return getFinancialMonthBounds(anchor);
-}
-
-function previousMonthBounds(currentStart: Date) {
-  return getFinancialMonthBounds(new Date(currentStart.getTime() - 1));
 }
 
 function deltaPct(current: number, previous: number): number | null {
@@ -195,16 +170,72 @@ export async function getFinanceKpis(
   });
 }
 
+/** "YYYY-MM-DD" as a UTC calendar day; the upper bound is exclusive. */
+function dayStart(day: string): Date | null {
+  const parsed = new Date(`${day}T00:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function withdrawalsWhere(input: {
+  view?: WithdrawalView;
+  status?: WithdrawalStatus;
+  business?: string;
+  from?: string;
+  to?: string;
+}): Prisma.WithdrawalWhereInput {
+  const view = input.view ?? "pending";
+  const from = input.from ? dayStart(input.from) : null;
+  const toStart = input.to ? dayStart(input.to) : null;
+  const to =
+    toStart === null ? null : new Date(toStart.getTime() + 24 * 60 * 60 * 1000);
+  const business = input.business?.trim() ?? "";
+
+  return {
+    AND: [
+      view === "pending"
+        ? { status: WithdrawalStatus.REQUESTED }
+        : input.status
+          ? { status: input.status }
+          : { status: { not: WithdrawalStatus.REQUESTED } },
+      business.length > 0
+        ? {
+            business: {
+              is: { name: { contains: business, mode: "insensitive" } },
+            },
+          }
+        : {},
+      from || to
+        ? {
+            createdAt: {
+              ...(from ? { gte: from } : {}),
+              ...(to ? { lt: to } : {}),
+            },
+          }
+        : {},
+    ],
+  };
+}
+
 export async function listWithdrawals(
   deps: { db: FinanceDb },
-  input: { status?: WithdrawalStatus; cursor?: string },
+  input: {
+    view?: WithdrawalView;
+    status?: WithdrawalStatus;
+    business?: string;
+    from?: string;
+    to?: string;
+    cursor?: string;
+  },
 ) {
   const rows = await deps.db.withdrawal.findMany({
-    where: input.status ? { status: input.status } : {},
+    where: withdrawalsWhere(input),
     take: WITHDRAWALS_PAGE_SIZE + 1,
     ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-    // REQUESTED sorts first because the enum declares it first.
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }, { id: "desc" }],
+    // The queue reads oldest-first (FIFO); history reads newest-first.
+    orderBy:
+      (input.view ?? "pending") === "pending"
+        ? [{ createdAt: "asc" }, { id: "asc" }]
+        : [{ createdAt: "desc" }, { id: "desc" }],
     select: {
       id: true,
       amountCents: true,
@@ -232,10 +263,15 @@ export async function listWithdrawals(
 
 export async function getRevenueBreakdown(
   deps: { db: FinanceDb },
-  input: { months: number; now?: Date },
+  input: { months: number; month?: string; now?: Date },
 ): Promise<ServiceResult<RevenueBreakdown>> {
   const now = input.now ?? new Date();
-  const current = getFinancialMonthBounds(now);
+  // The window ends on the month picked in the W12 selector.
+  const current = boundsForMonth(input.month, now);
+
+  if (!current) {
+    return svcFail("CONFLICT", "Invalid month");
+  }
 
   // Walk backwards one month at a time so every bucket uses the same calendar
   // helper as the rest of the financial reads.

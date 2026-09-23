@@ -16,7 +16,6 @@ export function ClearFiltersButton({ onClear }: { onClear: () => void }) {
     <Button
       type="button"
       variant="outline"
-      className="min-h-11 sm:min-h-10"
       onClick={onClear}
     >
       <FilterXIcon aria-hidden="true" />

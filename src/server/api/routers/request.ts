@@ -6,26 +6,69 @@ import {
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
-import { createTRPCRouter, userProcedure } from "~/server/api/trpc";
+import {
+  consumerProcedure,
+  type ConsumerContext,
+} from "~/server/api/consumer-procedure";
+import { createTRPCRouter } from "~/server/api/trpc";
+import { REQUEST_CATEGORIES } from "~/server/services/ai/diagnose";
+import { diagnoseRequestMedia } from "~/server/services/marketplace/diagnose-request";
+import type { RequestLocationInput } from "~/server/services/marketplace/request-location";
 import {
   cancelMyRequest,
   createServiceRequest,
   getMyRequest,
   listMyRequests,
+  type RequestDiagnosisSource,
 } from "~/server/services/marketplace/request";
 
 const MAX_MEDIA_PER_REQUEST = 5;
 
-const createRequestSchema = z.object({
-  // Blob pathnames issued by media.createUploadUrl (M0-W3); ownership and
-  // kind are enforced by the service against the session user.
-  mediaPathnames: z
-    .array(z.string().trim().min(1).max(500))
-    .min(1)
-    .max(MAX_MEDIA_PER_REQUEST),
+// Blob pathnames issued by media.createUploadUrl (M0-W3); ownership and kind
+// are enforced by the service against the session user.
+const mediaPathnamesSchema = z
+  .array(z.string().trim().min(1).max(500))
+  .max(MAX_MEDIA_PER_REQUEST);
+
+const diagnoseSchema = z.object({
+  mediaPathnames: mediaPathnamesSchema.min(1),
   description: z.string().trim().max(1_000).optional(),
-  addressId: z.string().cuid(),
 });
+
+/**
+ * Exactly one location source is required: CUSTOMER sends `addressId`, an
+ * active corporate consumer sends `corporateLocationId` (validated by role in
+ * the procedure). `diagnosisId` reuses a `request.diagnose` result and
+ * `category` is the manual fallback after `AI_UNAVAILABLE`.
+ */
+const createRequestSchema = z
+  .object({
+    mediaPathnames: mediaPathnamesSchema.default([]),
+    description: z.string().trim().max(1_000).optional(),
+    addressId: z.string().cuid().optional(),
+    corporateLocationId: z.string().cuid().optional(),
+    diagnosisId: z.string().cuid().optional(),
+    category: z.enum(REQUEST_CATEGORIES).optional(),
+  })
+  .refine(
+    (input) =>
+      (input.addressId === undefined) !==
+      (input.corporateLocationId === undefined),
+    { message: "Exactly one location is required", path: ["addressId"] },
+  )
+  .refine(
+    (input) => input.diagnosisId === undefined || input.category === undefined,
+    { message: "Use a diagnosis or a manual category", path: ["category"] },
+  )
+  .refine(
+    (input) =>
+      input.diagnosisId !== undefined ||
+      input.category !== undefined ||
+      input.mediaPathnames.length > 0,
+    { message: "Media is required to diagnose", path: ["mediaPathnames"] },
+  );
+
+type CreateRequestSchemaInput = z.infer<typeof createRequestSchema>;
 
 const requestIdSchema = z.object({ id: z.string().cuid() });
 
@@ -35,7 +78,8 @@ const listMineSchema = z
 
 /**
  * HTTP status per service code. `AI_UNAVAILABLE` is a 503: the request is
- * valid, the diagnosis backend is not reachable right now.
+ * valid, the diagnosis backend is not reachable right now (the app offers the
+ * manual category picker).
  */
 const serviceErrorStatuses = {
   VALIDATION_ERROR: 422,
@@ -63,22 +107,90 @@ function unexpectedFailure(
   return fail(normalized.code, normalized.status, message);
 }
 
+/** Maps the consumer role to the only location source it may use. */
+function toLocationInput(
+  consumer: ConsumerContext,
+  input: CreateRequestSchemaInput,
+): RequestLocationInput | null {
+  if (consumer.kind === "CUSTOMER") {
+    return input.addressId
+      ? {
+          kind: "ADDRESS",
+          customerId: consumer.userId,
+          addressId: input.addressId,
+        }
+      : null;
+  }
+
+  return input.corporateLocationId
+    ? {
+        kind: "CORPORATE_LOCATION",
+        corporateAccountId: consumer.corporateAccountId,
+        corporateLocationId: input.corporateLocationId,
+      }
+    : null;
+}
+
+function toDiagnosisSource(
+  input: CreateRequestSchemaInput,
+): RequestDiagnosisSource {
+  if (input.diagnosisId !== undefined) {
+    return { kind: "STORED", diagnosisId: input.diagnosisId };
+  }
+
+  if (input.category !== undefined) {
+    return { kind: "MANUAL", category: input.category };
+  }
+
+  return { kind: "AI" };
+}
+
 /**
- * Customer service requests (M2-W2): media uploaded in C2 is diagnosed by the
- * AI service and persisted as an OPEN request the app renders in C3. Tenant
- * always comes from the session; a foreign request answers a generic
- * NOT_FOUND.
+ * Consumer service requests (M2-W2 + workstream D): media uploaded in C2 is
+ * diagnosed (standalone `diagnose` or inline) and persisted as an OPEN
+ * request. CUSTOMER and ACTIVE corporate consumers share the flow; tenant
+ * always comes from the session and a foreign request answers NOT_FOUND.
  */
 export const requestRouter = createTRPCRouter({
-  create: userProcedure
+  diagnose: consumerProcedure
+    .input(diagnoseSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const diagnosed = await diagnoseRequestMedia(ctx.db, {
+          userId: ctx.consumer.userId,
+          mediaPathnames: input.mediaPathnames,
+          description: input.description,
+        });
+
+        if (!diagnosed.ok) {
+          return serviceFailure(diagnosed.code, "Diagnosis failed");
+        }
+
+        return ok(diagnosed.data, "Diagnosis ready", 201);
+      } catch (error) {
+        return unexpectedFailure(error, "Diagnosis failed");
+      }
+    }),
+
+  create: consumerProcedure
     .input(createRequestSchema)
     .mutation(async ({ ctx, input }) => {
       try {
+        const location = toLocationInput(ctx.consumer, input);
+
+        if (!location) {
+          return serviceFailure(
+            "VALIDATION_ERROR",
+            "Location does not match the consumer role",
+          );
+        }
+
         const created = await createServiceRequest(ctx.db, {
-          customerId: ctx.customer.id,
+          customerId: ctx.consumer.userId,
           mediaPathnames: input.mediaPathnames,
           description: input.description,
-          addressId: input.addressId,
+          location,
+          diagnosis: toDiagnosisSource(input),
         });
 
         if (!created.ok) {
@@ -91,12 +203,12 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  getById: userProcedure
+  getById: consumerProcedure
     .input(requestIdSchema)
     .query(async ({ ctx, input }) => {
       try {
         const request = await getMyRequest(ctx.db, {
-          customerId: ctx.customer.id,
+          customerId: ctx.consumer.userId,
           id: input.id,
         });
 
@@ -110,12 +222,12 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  listMine: userProcedure
+  listMine: consumerProcedure
     .input(listMineSchema)
     .query(async ({ ctx, input }) => {
       try {
         const list = await listMyRequests(ctx.db, {
-          customerId: ctx.customer.id,
+          customerId: ctx.consumer.userId,
           cursor: input?.cursor,
         });
 
@@ -129,12 +241,12 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  cancel: userProcedure
+  cancel: consumerProcedure
     .input(requestIdSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const cancelled = await cancelMyRequest(ctx.db, {
-          customerId: ctx.customer.id,
+          customerId: ctx.consumer.userId,
           id: input.id,
         });
 

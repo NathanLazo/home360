@@ -32,12 +32,13 @@ export type ProductFormValues = {
   sku: string;
   category: string;
   price: string;
+  imageUrl: string;
   published: boolean;
   stocks: ProductStockFormValue[];
 };
 
 export type ProductFormErrors = Partial<
-  Record<"name" | "sku" | "category" | "price" | "stocks", string>
+  Record<"name" | "sku" | "category" | "price" | "imageUrl" | "stocks", string>
 > & { stockRows?: Record<string, string> };
 
 export type ProductMutationResult = {

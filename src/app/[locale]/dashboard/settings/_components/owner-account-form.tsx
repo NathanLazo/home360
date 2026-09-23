@@ -96,7 +96,6 @@ export function OwnerAccountForm({
         <Button
           type="submit"
           disabled={saving || !isDirty}
-          className="min-h-11 sm:min-h-10"
         >
           <SubmitStatusIcon pending={saving} succeeded={saved} />
           {t("save")}

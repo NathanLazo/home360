@@ -29,3 +29,7 @@ export type BusinessOrderItem = BusinessDetail["recentOrders"][number];
 export type BusinessDisputeItem = BusinessDetail["disputes"]["items"][number];
 
 export type CsvExport = NonNullable<UsersOutput["exportCsv"]["result"]>;
+
+export type CustomerDetail = NonNullable<
+  UsersOutput["getCustomerDetail"]["result"]
+>;

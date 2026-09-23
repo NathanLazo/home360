@@ -1,9 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 
+import {
+  MENU_GLASS_CONTAINER_CLASS,
+  MenuGlassHighlight,
+} from "~/components/glass/menu-glass-highlight";
 import { cn } from "~/lib/utils";
 
 function DropdownMenu({
@@ -34,8 +38,13 @@ function DropdownMenuTrigger({
 function DropdownMenuContent({
   className,
   sideOffset = 4,
+  glass = false,
+  children,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
+  /** Sliding Liquid Glass + metal-hairline selection on the highlighted item. */
+  glass?: boolean;
+}) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -43,10 +52,14 @@ function DropdownMenuContent({
         sideOffset={sideOffset}
         className={cn(
           "bg-popover text-popover-foreground data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-99 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-97 shadow-float z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-sm p-1 duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-[state=closed]:duration-150 motion-reduce:animate-none",
+          glass && MENU_GLASS_CONTAINER_CLASS,
           className,
         )}
         {...props}
-      />
+      >
+        {children}
+        {glass ? <MenuGlassHighlight /> : null}
+      </DropdownMenuPrimitive.Content>
     </DropdownMenuPrimitive.Portal>
   );
 }
@@ -135,7 +148,7 @@ function DropdownMenuRadioItem({
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
-          <CircleIcon className="size-2 fill-current" />
+          <span className="metal-rim shadow-metal block size-2.5 rounded-full" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
       {children}

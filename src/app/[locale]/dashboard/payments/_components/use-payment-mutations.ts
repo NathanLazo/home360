@@ -38,6 +38,7 @@ export function usePaymentMutations() {
     await Promise.all([
       utils.payment.getBalances.invalidate(),
       utils.payment.listTransactions.invalidate(),
+      utils.payment.listWithdrawals.invalidate(),
     ]);
   }
 
@@ -46,6 +47,8 @@ export function usePaymentMutations() {
     api.payment.refreshConnectStatus.useMutation();
   const createPaymentLinkMutation = api.payment.createPaymentLink.useMutation();
   const requestWithdrawalMutation = api.payment.requestWithdrawal.useMutation();
+  const deactivatePaymentLinkMutation =
+    api.payment.deactivatePaymentLink.useMutation();
 
   async function startOnboarding(): Promise<void> {
     try {
@@ -96,7 +99,10 @@ export function usePaymentMutations() {
         return null;
       }
 
-      await invalidateMoney();
+      await Promise.all([
+        invalidateMoney(),
+        utils.payment.listPaymentLinks.invalidate(),
+      ]);
 
       return created;
     } catch {
@@ -126,6 +132,25 @@ export function usePaymentMutations() {
     }
   }
 
+  async function deactivatePaymentLink(id: string): Promise<boolean> {
+    try {
+      const response = await deactivatePaymentLinkMutation.mutateAsync({ id });
+
+      if (!unwrap(response)) {
+        reportFailure(response.error);
+        return false;
+      }
+
+      await utils.payment.listPaymentLinks.invalidate();
+      toast.success(t("paymentLinks.deactivate.success"));
+
+      return true;
+    } catch {
+      reportFailure(null);
+      return false;
+    }
+  }
+
   return {
     startOnboarding,
     startingOnboarding: startOnboardingMutation.isPending,
@@ -135,5 +160,7 @@ export function usePaymentMutations() {
     creatingPaymentLink: createPaymentLinkMutation.isPending,
     requestWithdrawal,
     requestingWithdrawal: requestWithdrawalMutation.isPending,
+    deactivatePaymentLink,
+    deactivatingPaymentLink: deactivatePaymentLinkMutation.isPending,
   };
 }

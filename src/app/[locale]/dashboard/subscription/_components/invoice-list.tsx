@@ -47,7 +47,6 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
               asChild
               variant="ghost"
               size="sm"
-              className="min-h-11 sm:min-h-9"
             >
               <a
                 href={invoice.pdfUrl}
@@ -63,7 +62,6 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
               type="button"
               variant="ghost"
               size="sm"
-              className="min-h-11 sm:min-h-9"
               disabled
               title={t("downloadUnavailable")}
             >

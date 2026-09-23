@@ -39,7 +39,6 @@ export function SectionError({ title, code, onRetry }: SectionErrorProps) {
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 sm:min-h-10"
           onClick={onRetry}
         >
           <RotateCcwIcon aria-hidden="true" />

@@ -14,10 +14,12 @@ import {
   type CurrencyBarSeries,
 } from "~/components/stacked-currency-bar-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { rangeToWeeks, type DashboardRangeDays } from "~/lib/search-params";
 import { api } from "~/trpc/react";
 
 export type WeeklyRevenueChartProps = {
   branchId?: string;
+  days: DashboardRangeDays;
   className?: string;
 };
 
@@ -29,12 +31,14 @@ type ChartPoint = WeeklyRevenuePoint & {
 
 export function WeeklyRevenueChart({
   branchId,
+  days,
   className,
 }: WeeklyRevenueChartProps) {
   const t = useTranslations("dashboard.home");
   const errors = useTranslations("errors");
   const formatter = useFormatter();
-  const input = branchId ? { branchId } : {};
+  const weeks = rangeToWeeks(days);
+  const input = branchId ? { branchId, weeks } : { weeks };
   const query = api.dashboard.getWeeklyRevenue.useQuery(input, {
     placeholderData: keepPreviousData,
   });
@@ -75,7 +79,6 @@ export function WeeklyRevenueChart({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />

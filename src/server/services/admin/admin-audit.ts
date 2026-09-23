@@ -4,10 +4,13 @@ import {
   AdminAuditAction,
   AdminAuditTarget,
   type BusinessStatus,
+  type CampaignAudience,
   type DisputeResolution,
   type DisputeStatus,
+  type DocumentStatus,
   type LoyaltyPayoutMethod,
   type Prisma,
+  type UserRole,
   type WithdrawalStatus,
 } from "@generated/prisma";
 
@@ -72,6 +75,42 @@ export type AdminAuditEvent =
         method: LoyaltyPayoutMethod | null;
         reasonPresent: boolean;
       };
+    }
+  | {
+      action: typeof AdminAuditAction.BUSINESS_REVIEW_REOPENED;
+      businessId: string;
+      before: { status: BusinessStatus };
+      after: { status: BusinessStatus };
+    }
+  | {
+      action:
+        | typeof AdminAuditAction.DOCUMENT_APPROVED
+        | typeof AdminAuditAction.DOCUMENT_REJECTED;
+      documentId: string;
+      before: { status: DocumentStatus };
+      after: { status: DocumentStatus };
+      metadata: { businessId: string; notesPresent: boolean };
+    }
+  | {
+      action:
+        | typeof AdminAuditAction.USER_SUSPENDED
+        | typeof AdminAuditAction.USER_REACTIVATED;
+      userId: string;
+      before: { suspended: boolean };
+      after: { suspended: boolean };
+      metadata: { role: UserRole; reasonPresent: boolean };
+    }
+  | {
+      action: typeof AdminAuditAction.DISPUTE_EVIDENCE_REQUESTED;
+      disputeId: string;
+      before: { status: DisputeStatus };
+      after: { status: DisputeStatus };
+      metadata: { notePresent: boolean; notifiedUsers: number };
+    }
+  | {
+      action: typeof AdminAuditAction.CAMPAIGN_SENT;
+      campaignId: string;
+      metadata: { audience: CampaignAudience; recipientCount: number };
     };
 
 type AuditRow = {
@@ -131,6 +170,48 @@ function toRow(event: AdminAuditEvent): AuditRow {
         before: undefined,
         after: undefined,
         metadata: { ...event.metadata, method: event.metadata.method ?? null },
+      };
+    case AdminAuditAction.BUSINESS_REVIEW_REOPENED:
+      return {
+        targetType: AdminAuditTarget.BUSINESS,
+        targetId: event.businessId,
+        before: event.before,
+        after: event.after,
+        metadata: undefined,
+      };
+    case AdminAuditAction.DOCUMENT_APPROVED:
+    case AdminAuditAction.DOCUMENT_REJECTED:
+      return {
+        targetType: AdminAuditTarget.BUSINESS_DOCUMENT,
+        targetId: event.documentId,
+        before: event.before,
+        after: event.after,
+        metadata: event.metadata,
+      };
+    case AdminAuditAction.USER_SUSPENDED:
+    case AdminAuditAction.USER_REACTIVATED:
+      return {
+        targetType: AdminAuditTarget.USER,
+        targetId: event.userId,
+        before: event.before,
+        after: event.after,
+        metadata: event.metadata,
+      };
+    case AdminAuditAction.DISPUTE_EVIDENCE_REQUESTED:
+      return {
+        targetType: AdminAuditTarget.DISPUTE,
+        targetId: event.disputeId,
+        before: event.before,
+        after: event.after,
+        metadata: event.metadata,
+      };
+    case AdminAuditAction.CAMPAIGN_SENT:
+      return {
+        targetType: AdminAuditTarget.CAMPAIGN,
+        targetId: event.campaignId,
+        before: undefined,
+        after: undefined,
+        metadata: event.metadata,
       };
   }
 }

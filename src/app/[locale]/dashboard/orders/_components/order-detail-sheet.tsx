@@ -11,10 +11,13 @@ import {
   XIcon,
 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
+import { OrderConversationPanel } from "./order-conversation-panel";
+import { OrderDetailActions } from "./order-detail-actions";
 import { OrderStatusBadge } from "./order-status-badge";
 import { OrderTimeline } from "./order-timeline";
-import type { OrderDetail } from "./order.types";
+import type { OrderDetail, WorkerOption } from "./order.types";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -58,6 +61,7 @@ function DetailSkeleton() {
 export function OrderDetailSheet({
   open,
   order,
+  workers,
   loading,
   responseError,
   transportError,
@@ -66,6 +70,7 @@ export function OrderDetailSheet({
 }: {
   open: boolean;
   order: OrderDetail | null;
+  workers: WorkerOption[];
   loading: boolean;
   responseError: string | null;
   transportError: boolean;
@@ -77,6 +82,13 @@ export function OrderDetailSheet({
   const errorsT = useTranslations("errors");
   const formatter = useFormatter();
   const locale = useLocale();
+  const [conversationOpen, setConversationOpen] = useState(false);
+  const orderId = order?.id ?? null;
+
+  // A different order (deep link, next row) starts with the chat collapsed.
+  useEffect(() => {
+    setConversationOpen(false);
+  }, [orderId]);
   const exactCurrencyFormatter = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "MXN",
@@ -136,7 +148,7 @@ export function OrderDetailSheet({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-2.5 right-3 min-h-11 min-w-11"
+              className="absolute top-2.5 right-3"
               aria-label={t("close")}
             >
               <XIcon aria-hidden="true" />
@@ -164,12 +176,7 @@ export function OrderDetailSheet({
                     : t("loadErrorDescription")}
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11"
-                onClick={onRetry}
-              >
+              <Button type="button" variant="outline" onClick={onRetry}>
                 <RotateCcwIcon aria-hidden="true" />
                 {t("retry")}
               </Button>
@@ -178,6 +185,29 @@ export function OrderDetailSheet({
 
           {!loading && order ? (
             <div className="space-y-7 p-5">
+              <OrderDetailActions
+                order={order}
+                workers={workers}
+                conversationOpen={conversationOpen}
+                onToggleConversation={() =>
+                  setConversationOpen((current) => !current)
+                }
+              />
+
+              {conversationOpen ? (
+                <OrderConversationPanel
+                  orderId={order.id}
+                  customerId={order.customer.id}
+                  customerName={
+                    order.customer.name ??
+                    order.customer.email ??
+                    t("notAvailable")
+                  }
+                />
+              ) : null}
+
+              <Separator />
+
               <section aria-labelledby="order-overview-heading">
                 <h3
                   id="order-overview-heading"
@@ -221,7 +251,41 @@ export function OrderDetailSheet({
                       {order.quantity}
                     </span>
                   </DetailRow>
+                  {order.type === "SERVICE" ? (
+                    <DetailRow label={t("workerLabel")}>
+                      {order.worker?.fullName ?? t("noWorker")}
+                    </DetailRow>
+                  ) : null}
+                  {order.quote?.scheduledFor ? (
+                    <DetailRow label={t("scheduledLabel")}>
+                      <time dateTime={order.quote.scheduledFor.toISOString()}>
+                        {formatter.dateTime(order.quote.scheduledFor, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </time>
+                    </DetailRow>
+                  ) : null}
+                  <DetailRow
+                    label={t(
+                      order.type === "PRODUCT"
+                        ? "deliveryAddressLabel"
+                        : "serviceAddressLabel",
+                    )}
+                  >
+                    {order.addressLine ?? t("notAvailable")}
+                  </DetailRow>
                 </dl>
+                {order.quote?.message ? (
+                  <div className="bg-canvas-soft mt-4 rounded-md border p-4">
+                    <h4 className="text-copy-sm mb-1 font-medium">
+                      {t("offerMessageTitle")}
+                    </h4>
+                    <p className="text-muted-foreground text-copy-sm leading-relaxed whitespace-pre-wrap">
+                      {order.quote.message}
+                    </p>
+                  </div>
+                ) : null}
               </section>
 
               <Separator />

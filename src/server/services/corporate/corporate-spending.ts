@@ -47,7 +47,9 @@ export type CorporateOrderListResult = {
   nextCursor: string | null;
 };
 
-function toCorporateOrderItem(order: CorporateOrderPayload): CorporateOrderItem {
+function toCorporateOrderItem(
+  order: CorporateOrderPayload,
+): CorporateOrderItem {
   return {
     id: order.id,
     folio: order.folio,
@@ -176,7 +178,7 @@ function monthBoundsFor(month: string | undefined, now: Date) {
 export async function getCorporateOverview(
   db: PrismaClient,
   corporateAccountId: string,
-  input: { month?: string; now?: Date },
+  input: { month?: string; locationId?: string; now?: Date },
 ): Promise<TrpcResponse<CorporateOverview>> {
   const bounds = monthBoundsFor(input.month, input.now ?? new Date());
 
@@ -184,8 +186,24 @@ export async function getCorporateOverview(
     return fail("VALIDATION_ERROR", 400, "Invalid overview month");
   }
 
+  if (input.locationId) {
+    const location = await db.corporateLocation.findFirst({
+      where: { id: input.locationId, corporateAccountId },
+      select: { id: true },
+    });
+
+    if (!location) {
+      return fail("NOT_FOUND", 404, "Corporate location not found");
+    }
+  }
+
+  // Location filter (workstream D): every order-derived KPI narrows to the
+  // location; the active-locations count stays account-wide.
+  const locationFilter = input.locationId
+    ? { corporateLocationId: input.locationId }
+    : {};
   const chargedPaymentWhere = {
-    order: { is: { corporateAccountId } },
+    order: { is: { corporateAccountId, ...locationFilter } },
     status: { in: [...CHARGED_PAYMENT_STATUSES] },
     createdAt: { gte: bounds.start, lt: bounds.end },
   } satisfies Prisma.PaymentWhereInput;
@@ -206,12 +224,14 @@ export async function getCorporateOverview(
       db.order.count({
         where: {
           corporateAccountId,
+          ...locationFilter,
           status: { in: [...ACTIVE_ORDER_STATUSES] },
         },
       }),
       db.order.count({
         where: {
           corporateAccountId,
+          ...locationFilter,
           createdAt: { gte: bounds.start, lt: bounds.end },
         },
       }),

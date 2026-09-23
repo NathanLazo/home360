@@ -337,7 +337,7 @@ export function RegisterForm() {
           <Button
             type="button"
             variant="outline"
-            className="h-11 flex-1"
+            className="flex-1"
             onClick={handleBack}
             disabled={registerBusiness.isPending}
           >
@@ -348,7 +348,7 @@ export function RegisterForm() {
           metal="bend"
           metalClassName="flex-1"
           type="submit"
-          className="h-11 w-full"
+          className="w-full"
           disabled={registerBusiness.isPending}
         >
           {registerBusiness.isPending ? (

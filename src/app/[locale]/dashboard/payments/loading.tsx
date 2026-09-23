@@ -10,8 +10,8 @@ export default function PaymentsLoading() {
         <Skeleton className="h-8 w-36" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-      <KpiRowSkeleton count={3} className="xl:grid-cols-3" />
-      <Skeleton className="h-6 w-40" />
+      <KpiRowSkeleton count={4} />
+      <Skeleton className="h-9 w-80 max-w-full" />
       <Card className="overflow-hidden py-0">
         <CardContent className="px-0">
           <TableSkeleton columns={6} rows={8} />

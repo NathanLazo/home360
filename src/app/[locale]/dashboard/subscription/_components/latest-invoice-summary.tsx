@@ -43,7 +43,7 @@ export function LatestInvoiceSummary({
         />
       </p>
       {invoice.pdfUrl ? (
-        <Button asChild className="min-h-11 sm:min-h-10">
+        <Button asChild>
           <a href={invoice.pdfUrl} target="_blank" rel="noopener noreferrer">
             <DownloadIcon aria-hidden="true" />
             {t("download")}
@@ -52,7 +52,6 @@ export function LatestInvoiceSummary({
       ) : (
         <Button
           type="button"
-          className="min-h-11 sm:min-h-10"
           disabled
           title={t("downloadUnavailable")}
         >

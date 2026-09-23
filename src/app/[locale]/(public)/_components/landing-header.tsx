@@ -72,7 +72,7 @@ export function LandingHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-10 rounded-full lg:hidden"
+                  className="rounded-full lg:hidden"
                 >
                   <MenuIcon aria-hidden="true" className="size-5" />
                   <span className="sr-only">{t("menuLabel")}</span>

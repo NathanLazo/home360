@@ -34,7 +34,15 @@ const EMPTY_VALUES: BranchFormValues = {
   address: "",
   managerName: "",
   coverageRadiusKm: "10",
+  latitude: "",
+  longitude: "",
 };
+
+/** Empty → no coordinate; anything else must parse as a finite number. */
+function parseCoordinate(value: string): number | null {
+  const trimmed = value.trim().replace(",", ".");
+  return trimmed.length === 0 ? null : Number(trimmed);
+}
 
 export function BranchFormSheet({
   open,
@@ -68,6 +76,9 @@ export function BranchFormSheet({
             address: branch.address,
             managerName: branch.managerName ?? "",
             coverageRadiusKm: String(branch.coverageRadiusKm),
+            latitude: branch.latitude === null ? "" : String(branch.latitude),
+            longitude:
+              branch.longitude === null ? "" : String(branch.longitude),
           }
         : EMPTY_VALUES,
     );
@@ -83,9 +94,14 @@ export function BranchFormSheet({
         key === "name" ||
         key === "address" ||
         key === "managerName" ||
-        key === "coverageRadiusKm"
+        key === "coverageRadiusKm" ||
+        key === "latitude" ||
+        key === "longitude"
       ) {
-        next[key] = t("form.invalidField");
+        next[key] =
+          key === "latitude" || key === "longitude"
+            ? t("form.location.invalid")
+            : t("form.invalidField");
       }
     }
     setErrors(next);
@@ -95,6 +111,8 @@ export function BranchFormSheet({
       address: "branch-address",
       managerName: "branch-manager",
       coverageRadiusKm: "branch-coverage",
+      latitude: "branch-latitude",
+      longitude: "branch-longitude",
     };
     const target = first === undefined ? undefined : ids[first];
     if (target)
@@ -113,12 +131,16 @@ export function BranchFormSheet({
       address: values.address,
       coverageRadiusKm: Number(values.coverageRadiusKm),
     };
+    const latitude = parseCoordinate(values.latitude);
+    const longitude = parseCoordinate(values.longitude);
 
     if (branch) {
       const parsed = branchUpdateSchema.safeParse({
         id: branch.id,
         ...common,
         managerName: values.managerName.trim() ? values.managerName : null,
+        latitude,
+        longitude,
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
@@ -133,6 +155,8 @@ export function BranchFormSheet({
     const parsed = branchCreateSchema.safeParse({
       ...common,
       ...(values.managerName.trim() ? { managerName: values.managerName } : {}),
+      ...(latitude !== null ? { latitude } : {}),
+      ...(longitude !== null ? { longitude } : {}),
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
@@ -172,7 +196,7 @@ export function BranchFormSheet({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 min-h-11 min-w-11"
+              className="absolute top-3 right-3"
               aria-label={t("form.close")}
               disabled={submitting}
             >
@@ -198,7 +222,6 @@ export function BranchFormSheet({
                 type="button"
                 variant="outline"
                 disabled={submitting}
-                className="min-h-11"
               >
                 {t("form.cancel")}
               </Button>
@@ -207,7 +230,6 @@ export function BranchFormSheet({
               type="submit"
               metal="live"
               disabled={submitting}
-              className="min-h-11"
             >
               {submitting ? (
                 <LoaderCircleIcon

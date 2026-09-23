@@ -62,7 +62,7 @@ function expandableId(
   return typeof value === "string" ? value : (value?.id ?? null);
 }
 
-async function ensureCustomerStripeCustomer(
+export async function ensureCustomerStripeCustomer(
   deps: Pick<CustomerCheckoutDeps, "db" | "stripe">,
   customerId: string,
 ): Promise<ServiceResult<{ stripeCustomerId: string }>> {

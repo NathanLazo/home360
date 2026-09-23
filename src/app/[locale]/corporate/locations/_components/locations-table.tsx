@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinIcon, PencilIcon, PowerOffIcon } from "lucide-react";
+import { MapPinIcon, PencilIcon, PowerIcon, PowerOffIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { CorporateLocationItem } from "../../_components/corporate.types";
@@ -12,6 +12,7 @@ import {
 } from "~/components/status-badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { Link } from "~/i18n/navigation";
 
 const ACTIVITY_VARIANTS: Record<"active" | "inactive", StatusBadgeVariant> = {
   active: "success",
@@ -22,20 +23,24 @@ export type LocationsTableProps = {
   locations: CorporateLocationItem[];
   canMutate: boolean;
   deactivating: boolean;
+  reactivating: boolean;
   notActiveTooltip: string;
   emptyAction: React.ReactNode;
   onEdit: (location: CorporateLocationItem) => void;
   onDeactivate: (location: CorporateLocationItem) => void;
+  onReactivate: (location: CorporateLocationItem) => void;
 };
 
 export function LocationsTable({
   locations,
   canMutate,
   deactivating,
+  reactivating,
   notActiveTooltip,
   emptyAction,
   onEdit,
   onDeactivate,
+  onReactivate,
 }: LocationsTableProps) {
   const t = useTranslations("corporate.locations");
   const formatter = useFormatter();
@@ -77,11 +82,26 @@ export function LocationsTable({
       key: "orders",
       header: t("table.orders"),
       className: "text-right",
-      cell: (location) => (
-        <span className="font-mono tabular-nums">
-          {formatter.number(location.ordersCount)}
-        </span>
-      ),
+      cell: (location) =>
+        location.ordersCount > 0 ? (
+          <Link
+            href={{
+              pathname: "/corporate/orders",
+              query: { location: location.id },
+            }}
+            className="text-link-deep focus-visible:ring-ring rounded-xs font-mono tabular-nums underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            aria-label={t("ordersLink", {
+              count: location.ordersCount,
+              name: location.name,
+            })}
+          >
+            {formatter.number(location.ordersCount)}
+          </Link>
+        ) : (
+          <span className="text-muted-foreground font-mono tabular-nums">
+            {formatter.number(location.ordersCount)}
+          </span>
+        ),
     },
     {
       key: "status",
@@ -104,7 +124,6 @@ export function LocationsTable({
             type="button"
             variant="ghost"
             size="sm"
-            className="min-h-11 sm:min-h-9"
             disabled={!canMutate}
             title={canMutate ? undefined : notActiveTooltip}
             onClick={() => onEdit(location)}
@@ -117,7 +136,7 @@ export function LocationsTable({
               type="button"
               variant="ghost"
               size="sm"
-              className="text-error-deep hover:text-error-deep min-h-11 sm:min-h-9"
+              className="text-error-deep hover:text-error-deep"
               disabled={!canMutate || deactivating}
               title={canMutate ? undefined : notActiveTooltip}
               onClick={() => onDeactivate(location)}
@@ -125,7 +144,19 @@ export function LocationsTable({
               <PowerOffIcon aria-hidden="true" />
               {t("deactivate")}
             </Button>
-          ) : null}
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!canMutate || reactivating}
+              title={canMutate ? undefined : notActiveTooltip}
+              onClick={() => onReactivate(location)}
+            >
+              <PowerIcon aria-hidden="true" />
+              {t("reactivate")}
+            </Button>
+          )}
         </div>
       ),
     },

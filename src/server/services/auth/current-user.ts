@@ -33,9 +33,13 @@ export type MeResult =
   | (MeBase & {
       role: "WORKER";
       workerId: string;
+      businessId: string;
       businessName: string;
       fullName: string;
+      specialty: string | null;
       availability: WorkerAvailability;
+      /** Minimal branch (P-WEB-02, T4); null when unassigned. */
+      branch: { id: string; name: string } | null;
     })
   | (MeBase & { role: "ADMIN" | "CORPORATE" });
 
@@ -64,8 +68,11 @@ export const getCurrentUser = async (
           select: {
             id: true,
             fullName: true,
+            specialty: true,
             availability: true,
+            businessId: true,
             business: { select: { name: true } },
+            branch: { select: { id: true, name: true } },
           },
         },
       },
@@ -118,9 +125,12 @@ export const getCurrentUser = async (
             ...base,
             role: "WORKER",
             workerId: user.workerProfile.id,
+            businessId: user.workerProfile.businessId,
             businessName: user.workerProfile.business.name,
             fullName: user.workerProfile.fullName,
+            specialty: user.workerProfile.specialty,
             availability: user.workerProfile.availability,
+            branch: user.workerProfile.branch,
           },
           "Current user",
         );

@@ -38,5 +38,33 @@
   "workerInvitation": {
     "title": "Invitación a un equipo",
     "body": "Un negocio te invitó a formar parte de su equipo en HOME360."
+  },
+  "orderCancelled": {
+    "title": "Orden cancelada",
+    "body": "El negocio canceló tu orden. Si ya pagaste, el reembolso va en camino."
+  },
+  "orderWorkerAssigned": {
+    "title": "Nueva orden asignada",
+    "body": "Te asignaron una orden. Revisa los detalles y el horario."
+  },
+  "disputeOpened": {
+    "title": "Disputa abierta",
+    "body": "El cliente abrió una disputa sobre una orden. El pago queda retenido hasta su resolución."
+  },
+  "reworkRequested": {
+    "title": "Se pidió un ajuste",
+    "body": "El cliente pidió corregir el trabajo antes de confirmar. Revisa la nota en la orden."
+  },
+  "orderCancelledByCustomer": {
+    "title": "Orden cancelada por el cliente",
+    "body": "El cliente canceló una orden que aún no estaba pagada."
+  },
+  "disputeEvidenceRequested": {
+    "title": "Se necesita más evidencia",
+    "body": "El equipo de HOME360 pidió evidencia adicional sobre una disputa. Revisa la orden para enviarla."
+  },
+  "ratingReminder": {
+    "title": "¿Cómo te fue?",
+    "body": "Califica el servicio que recibiste; tu opinión ayuda a otros clientes."
   }
 }

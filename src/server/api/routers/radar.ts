@@ -50,7 +50,7 @@ function unexpectedFailure(
 }
 
 /**
- * Business radar (M5-W1 / N1–N2): OPEN service requests near an ACTIVE branch,
+ * Business radar (M5-W1 / N1–N2): OPEN/QUOTED requests near an ACTIVE branch,
  * filtered by the business catalog and excluding requests already quoted by
  * this business. Privacy gating never exposes addressLine — only neighborhood
  * + coordinates rounded to 3 decimals (MA-13).

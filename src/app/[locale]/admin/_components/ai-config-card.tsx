@@ -70,9 +70,9 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
         <Button
           asChild
           variant="outline"
-          className="group min-h-11 justify-between sm:min-h-10"
+          className="group justify-between"
         >
-          <Link href="/admin/settings">
+          <Link href="/admin/settings#ai">
             {t("ai.openSettings")}
             <ArrowRightIcon
               aria-hidden="true"

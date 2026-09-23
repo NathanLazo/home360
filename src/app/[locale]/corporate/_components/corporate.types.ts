@@ -13,7 +13,8 @@ export type CorporateOrderStatus = CorporateOrderItem["status"];
 export type CorporateLocationListResult = NonNullable<
   CorporateOutput["listLocations"]["result"]
 >;
-export type CorporateLocationItem = CorporateLocationListResult["items"][number];
+export type CorporateLocationItem =
+  CorporateLocationListResult["items"][number];
 export type CorporateMembershipSummary = NonNullable<
   CorporateOutput["getMembership"]["result"]
 >;

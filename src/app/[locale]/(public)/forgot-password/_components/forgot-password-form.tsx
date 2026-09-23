@@ -103,7 +103,7 @@ export function ForgotPasswordForm() {
         metal="bend"
         metalClassName="w-full"
         type="submit"
-        className="h-11 w-full"
+        className="w-full"
         disabled={requestPasswordReset.isPending}
       >
         {requestPasswordReset.isPending ? (

@@ -1,123 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { OrderDetailSheet } from "./order-detail-sheet";
-import { OrderFilters } from "./order-filters";
-import type { OrderFiltersState } from "./order.types";
-import { OrdersTable } from "./orders-table";
+import { OffersPanel } from "./offers-panel";
+import { ordersTabSchema } from "./orders.schema";
+import { OrdersPanel } from "./orders-panel";
+import { RequestsPanel } from "./requests-panel";
+import { useOrdersUrlState } from "./use-orders-url-state";
 import { PageHeader } from "~/components/page-header";
-import { SectionError } from "~/components/section-error";
-import { TableSkeleton } from "~/components/table-skeleton";
-import { Card, CardContent } from "~/components/ui/card";
-import { toErrorCode } from "~/lib/trpc-errors";
-import { api } from "~/trpc/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-const INITIAL_FILTERS: OrderFiltersState = {
-  search: "",
-  status: "",
-  type: "",
-};
-
-function OrdersLoadingState({ label }: { label: string }) {
-  return (
-    <Card className="overflow-hidden py-0">
-      <CardContent className="px-0">
-        <TableSkeleton columns={8} rows={8} label={label} />
-      </CardContent>
-    </Card>
-  );
-}
-
+/**
+ * Orders workspace (web mirror of mobile N1/N2): the order book, the radar of
+ * incoming service requests and the business's own offers, one tab each.
+ */
 export function OrdersView({ branchId }: { branchId?: string }) {
   const t = useTranslations("dashboard.orders");
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [searchDraft, setSearchDraft] = useState("");
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const search = searchDraft.trim();
-      setFilters((current) =>
-        current.search === search ? current : { ...current, search },
-      );
-    }, 300);
-
-    return () => window.clearTimeout(timeout);
-  }, [searchDraft]);
-
-  const listInput = {
-    ...(branchId ? { branchId } : {}),
-    ...(filters.search ? { search: filters.search } : {}),
-    ...(filters.status ? { status: filters.status } : {}),
-    ...(filters.type ? { type: filters.type } : {}),
-  };
-  const listQuery = api.order.list.useInfiniteQuery(listInput, {
-    getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
-  });
-  const detailQuery = api.order.getById.useQuery(
-    { id: selectedOrderId ?? "" },
-    { enabled: selectedOrderId !== null },
-  );
-  const pages = listQuery.data?.pages;
-  const responseError =
-    pages?.find((page) => page.error !== null)?.error ?? null;
-  const errorCode =
-    responseError ?? (listQuery.error ? toErrorCode(listQuery.error) : null);
-  const orders = pages?.flatMap((page) => page.result?.items ?? []) ?? [];
-  const filtered = [
-    branchId !== undefined,
-    filters.search.length > 0,
-    filters.status.length > 0,
-    filters.type.length > 0,
-  ].some(Boolean);
-  const detailResponse = detailQuery.data;
-  const detailOrder = detailResponse?.result ?? null;
+  const urlState = useOrdersUrlState();
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
-      <OrderFilters
-        filters={filters}
-        searchDraft={searchDraft}
-        onSearchChange={(value) => setSearchDraft(value.slice(0, 100))}
-        onChange={setFilters}
-      />
-
-      {listQuery.isPending ? <OrdersLoadingState label={t("loading")} /> : null}
-
-      {!listQuery.isPending && errorCode !== null ? (
-        <SectionError
-          title={t("queryErrorTitle")}
-          code={errorCode}
-          onRetry={() => void listQuery.refetch()}
-        />
-      ) : null}
-
-      {!listQuery.isPending && errorCode === null ? (
-        <OrdersTable
-          orders={orders}
-          filtered={filtered}
-          hasMore={Boolean(listQuery.hasNextPage)}
-          loadingMore={listQuery.isFetchingNextPage}
-          onLoadMore={() => void listQuery.fetchNextPage()}
-          onSelect={(order) => setSelectedOrderId(order.id)}
-        />
-      ) : null}
-
-      <OrderDetailSheet
-        open={selectedOrderId !== null}
-        order={detailOrder}
-        loading={detailQuery.isPending && selectedOrderId !== null}
-        responseError={detailResponse?.error ?? null}
-        transportError={detailQuery.error !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) setSelectedOrderId(null);
+      <Tabs
+        value={urlState.tab}
+        onValueChange={(value) => {
+          const parsed = ordersTabSchema.safeParse(value);
+          if (parsed.success) urlState.setTab(parsed.data);
         }}
-        onRetry={() => void detailQuery.refetch()}
-      />
+        className="gap-6"
+      >
+        <TabsList
+          animatedIndicator
+          className="max-w-full justify-start overflow-x-auto"
+          aria-label={t("tabs.label")}
+        >
+          {ordersTabSchema.options.map((tab) => (
+            <TabsTrigger key={tab} value={tab} className="min-h-9 px-3">
+              {t(`tabs.${tab}`)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="orders" className="flex flex-col gap-6">
+          <OrdersPanel
+            branchId={branchId}
+            selectedOrderId={urlState.orderId}
+            onOpenOrder={urlState.openOrder}
+            onCloseOrder={urlState.closeOrder}
+          />
+        </TabsContent>
+        <TabsContent value="requests" className="flex flex-col gap-6">
+          <RequestsPanel
+            branchId={branchId}
+            selectedRequestId={urlState.requestId}
+            onOpenRequest={urlState.openRequest}
+            onCloseRequest={urlState.closeRequest}
+          />
+        </TabsContent>
+        <TabsContent value="offers" className="flex flex-col gap-6">
+          <OffersPanel
+            selectedRequestId={urlState.requestId}
+            onOpenRequest={urlState.openRequest}
+            onCloseRequest={urlState.closeRequest}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

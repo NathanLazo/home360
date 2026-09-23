@@ -1,5 +1,7 @@
 import type { UserRole } from "@generated/prisma";
 
+import { DashboardRangeSelect } from "./dashboard-range-select";
+import { NotificationsBell } from "./notifications-bell";
 import { BranchSelector } from "~/components/branch-selector";
 import { GlassSurface } from "~/components/glass";
 import { LocaleSwitcher } from "~/components/locale-switcher";
@@ -37,9 +39,11 @@ export function DashboardHeader({
           orientation="vertical"
           className="mr-1 data-[orientation=vertical]:h-4"
         />
-        <div className="order-last w-full sm:order-none sm:ml-auto sm:w-auto">
-          <BranchSelector branches={branches} />
+        <div className="order-last flex w-full gap-2 sm:order-none sm:ml-auto sm:w-auto">
+          <DashboardRangeSelect />
+          <BranchSelector branches={branches} className="flex-1 sm:flex-none" />
         </div>
+        <NotificationsBell />
         <LocaleSwitcher />
         <UserMenu {...user} variant="light" />
       </GlassSurface>

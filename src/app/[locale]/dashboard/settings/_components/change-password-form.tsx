@@ -163,7 +163,6 @@ export function ChangePasswordForm({
         <Button
           type="submit"
           disabled={pending}
-          className="min-h-11 sm:min-h-10"
         >
           {pending ? (
             <LoaderCircleIcon

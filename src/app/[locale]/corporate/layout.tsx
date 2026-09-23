@@ -60,6 +60,7 @@ export default async function CorporateLayout({
     orders: t("nav.orders"),
     locations: t("nav.locations"),
     membership: t("nav.membership"),
+    settings: t("nav.settings"),
   };
 
   return (

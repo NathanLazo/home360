@@ -21,7 +21,7 @@ export default function CorporateError({ reset }: CorporateErrorProps) {
       title={t("errorTitle")}
       description={t("errorDescription")}
       action={
-        <Button type="button" onClick={reset} className="min-h-11">
+        <Button type="button" onClick={reset}>
           <RotateCcwIcon aria-hidden="true" />
           {commonT("retry")}
         </Button>

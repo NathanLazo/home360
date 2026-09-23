@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import type { BusinessDerivedStatus, UsersTab } from "./users.schema";
+import type { UsersFiltersInput } from "./users.schema";
 import type {
   BusinessRow,
   CustomerRow,
@@ -63,27 +63,16 @@ function flattenPages(results: ListUsersResult[]): UsersPageItems | null {
 
   return {
     tab: "workers",
-    items: results.flatMap((page) => (page.tab === "workers" ? page.items : [])),
+    items: results.flatMap((page) =>
+      page.tab === "workers" ? page.items : [],
+    ),
   };
 }
 
-export function useUsersQuery(input: {
-  tab: UsersTab;
-  search: string;
-  status: BusinessDerivedStatus | undefined;
-}): UsersQuery {
-  const query = api.admin.users.list.useInfiniteQuery(
-    {
-      tab: input.tab,
-      ...(input.search.length > 0 ? { search: input.search } : {}),
-      ...(input.tab === "businesses" && input.status
-        ? { status: input.status }
-        : {}),
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
-    },
-  );
+export function useUsersQuery(filters: UsersFiltersInput): UsersQuery {
+  const query = api.admin.users.list.useInfiniteQuery(filters, {
+    getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
+  });
 
   const state = ((): UsersQueryState => {
     if (query.isPending) {
@@ -132,7 +121,7 @@ export type CsvExporter = {
  * The CSV is generated server-side and downloaded from memory: the object URL
  * is always revoked so the blob is not retained after the click.
  */
-export function useCsvExport(tab: UsersTab): CsvExporter {
+export function useCsvExport(filters: UsersFiltersInput): CsvExporter {
   const [truncated, setTruncated] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -144,7 +133,7 @@ export function useCsvExport(tab: UsersTab): CsvExporter {
     setTruncated(false);
 
     void utils.admin.users.exportCsv
-      .fetch({ tab })
+      .fetch(filters)
       .then((response) => {
         if (response.error !== null || response.result === null) {
           setErrorCode(response.error ?? "UNKNOWN_ERROR");
@@ -163,7 +152,7 @@ export function useCsvExport(tab: UsersTab): CsvExporter {
       })
       .catch((error: unknown) => setErrorCode(toErrorCode(error)))
       .finally(() => setExporting(false));
-  }, [tab, utils]);
+  }, [filters, utils]);
 
   return { exportCsv, exporting, truncated, errorCode };
 }

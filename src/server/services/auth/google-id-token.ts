@@ -30,6 +30,7 @@ const payloadSchema = z.object({
   exp: z.number(),
   email: z.string().trim().toLowerCase().email(),
   email_verified: z.boolean(),
+  name: z.string().trim().min(1).max(200).optional(),
 });
 
 type GoogleJwk = z.infer<typeof jwkSchema>;
@@ -79,6 +80,8 @@ function parseJwtSegment(segment: string): unknown {
 
 export type VerifiedGoogleIdToken = {
   email: string;
+  /** Display name claim, used only to seed a new CUSTOMER account. */
+  name: string | null;
 };
 
 /**
@@ -147,6 +150,7 @@ export async function verifyGoogleIdToken(
       exp,
       email,
       email_verified: emailVerified,
+      name,
     } = payload.data;
 
     if (!GOOGLE_ISSUERS.includes(iss)) {
@@ -165,7 +169,7 @@ export async function verifyGoogleIdToken(
       return null;
     }
 
-    return { email };
+    return { email, name: name ?? null };
   } catch {
     return null;
   }

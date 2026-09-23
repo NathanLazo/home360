@@ -12,3 +12,7 @@ export type OrdersByBranchRow = NonNullable<
 export type RecentOrder = NonNullable<
   DashboardOutput["getRecentOrders"]["result"]
 >[number];
+export type NotificationFeed = NonNullable<
+  DashboardOutput["getNotifications"]["result"]
+>;
+export type NotificationItem = NotificationFeed["items"][number];

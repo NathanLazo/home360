@@ -1,6 +1,8 @@
 import {
+  generateDisputeSummarySchema,
   getDisputeSchema,
   listDisputesSchema,
+  requestDisputeEvidenceSchema,
   resolveDisputeSchema,
 } from "~/app/[locale]/admin/disputes/_components/disputes.schema";
 import { fail, normalizeError, ok } from "~/server/api/contract";
@@ -9,6 +11,8 @@ import {
   getDisputeById,
   listDisputes,
 } from "~/server/services/admin/dispute-directory";
+import { generateDisputeSummary } from "~/server/services/ai/dispute-summary";
+import { requestDisputeEvidence } from "~/server/services/disputes/request-dispute-evidence";
 import { resolveDispute } from "~/server/services/disputes/resolve-dispute";
 import { getStripe } from "~/server/services/stripe/client";
 
@@ -23,7 +27,10 @@ function statusForResolveError(code: string): number {
     return 404;
   }
 
-  if (code === "VALIDATION_ERROR" || code === "RECORDING_JUSTIFICATION_REQUIRED") {
+  if (
+    code === "VALIDATION_ERROR" ||
+    code === "RECORDING_JUSTIFICATION_REQUIRED"
+  ) {
     return 400;
   }
 
@@ -92,6 +99,62 @@ export const adminDisputesRouter = createTRPCRouter({
         return ok(result.data, "Dispute resolved");
       } catch (error) {
         return normalizedFailure(error, "Dispute resolution failed");
+      }
+    }),
+
+  /**
+   * "Pedir más evidencia": non-monetary, moves the file to IN_REVIEW, stores
+   * the admin's note and pushes both parties.
+   */
+  requestEvidence: adminProcedure
+    .input(requestDisputeEvidenceSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await requestDisputeEvidence(
+          { db: ctx.db },
+          { ...input, adminId: ctx.session.user.id },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "NOT_FOUND"
+              ? 404
+              : result.code === "VALIDATION_ERROR"
+                ? 400
+                : 409,
+            "Evidence could not be requested",
+          );
+        }
+
+        return ok(result.data, "Evidence requested");
+      } catch (error) {
+        return normalizedFailure(error, "Evidence request failed");
+      }
+    }),
+
+  /** Generates or regenerates `Dispute.aiSummary` through the AI Gateway. */
+  generateSummary: adminProcedure
+    .input(generateDisputeSummarySchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await generateDisputeSummary({ db: ctx.db }, input);
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "NOT_FOUND"
+              ? 404
+              : result.code === "AI_UNAVAILABLE"
+                ? 503
+                : 409,
+            "Dispute summary unavailable",
+          );
+        }
+
+        return ok(result.data, "Dispute summary generated");
+      } catch (error) {
+        return normalizedFailure(error, "Dispute summary generation failed");
       }
     }),
 });

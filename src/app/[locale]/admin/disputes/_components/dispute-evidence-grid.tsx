@@ -10,6 +10,7 @@ import {
   ADMIN_STAGGER_S,
   PRESS_CONTROL_CLASS,
 } from "../../_components/admin-motion";
+import { DisputeEvidenceTile } from "./dispute-evidence-tile";
 import { cn } from "~/lib/utils";
 
 const VISIBLE_LIMIT = 4;
@@ -29,7 +30,16 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
   }, [expanded]);
 
   if (urls.length === 0) {
-    return null;
+    return (
+      <section className="flex flex-col gap-2">
+        <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+          {t("title")}
+        </h3>
+        <p className="text-muted-foreground text-copy-sm bg-canvas-soft rounded-md border border-dashed p-4">
+          {t("empty")}
+        </p>
+      </section>
+    );
   }
 
   const visible = expanded ? urls : urls.slice(0, VISIBLE_LIMIT);
@@ -63,22 +73,11 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
                 delay: revealed ? (index - VISIBLE_LIMIT) * ADMIN_STAGGER_S : 0,
               }}
             >
-              <a
-                ref={index === VISIBLE_LIMIT ? firstRevealedRef : undefined}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="focus-visible:ring-ring group block overflow-hidden rounded-md outline outline-black/10 focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- evidence
-                    lives on arbitrary external hosts, outside the image loader. */}
-                <img
-                  src={url}
-                  alt={t("itemAlt", { index: index + 1 })}
-                  loading="lazy"
-                  className="aspect-square w-full object-cover transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
-                />
-              </a>
+              <DisputeEvidenceTile
+                url={url}
+                index={index}
+                linkRef={index === VISIBLE_LIMIT ? firstRevealedRef : undefined}
+              />
             </motion.li>
           );
         })}

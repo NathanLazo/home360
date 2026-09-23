@@ -25,11 +25,18 @@ export type WorkerInvitationInput = {
   workerName: string;
   businessName: string;
   locale: EmailLocale;
+  /**
+   * Single-use acceptance link `/{locale}/invite/worker?token=…` (workstream
+   * D) where the worker sets name and password. Never logged. When absent the
+   * email only announces the assignment (legacy behaviour).
+   */
+  invitationUrl?: string;
 };
 
 /**
- * Sends the worker invitation. It carries no token or credential: onboarding
- * happens in the mobile app, this message only announces the assignment.
+ * Sends the worker invitation. It never carries a credential: the optional
+ * link lets the worker create their own password, and onboarding continues
+ * in the mobile app with that account.
  */
 export async function sendWorkerInvitation(
   emailClient: EmailClient,
@@ -46,19 +53,31 @@ export async function sendWorkerInvitation(
     instructions: t("instructions"),
     closing: t("closing"),
   };
-  const paragraphs = [
-    messages.greeting,
-    messages.intro,
-    messages.instructions,
-    messages.closing,
+  const leading = [messages.greeting, messages.intro];
+  const trailing = [messages.instructions, messages.closing];
+  const cta = input.invitationUrl
+    ? { label: t("cta"), expires: t("expires"), url: input.invitationUrl }
+    : null;
+  const textParagraphs = [
+    ...leading,
+    ...(cta ? [`${cta.label}: ${cta.url}`, cta.expires] : []),
+    ...trailing,
+  ];
+  const htmlParagraphs = [
+    ...leading.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+    ...(cta
+      ? [
+          `<p><a href="${escapeHtml(cta.url)}">${escapeHtml(cta.label)}</a></p>`,
+          `<p>${escapeHtml(cta.expires)}</p>`,
+        ]
+      : []),
+    ...trailing.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
   ];
   const message: EmailMessage = {
     to: input.to,
     subject: messages.subject,
-    text: paragraphs.join("\n\n"),
-    html: paragraphs
-      .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-      .join(""),
+    text: textParagraphs.join("\n\n"),
+    html: htmlParagraphs.join(""),
   };
 
   return emailClient.send(message);

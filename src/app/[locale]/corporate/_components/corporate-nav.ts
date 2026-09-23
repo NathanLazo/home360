@@ -3,6 +3,7 @@ import {
   ClipboardListIcon,
   HomeIcon,
   MapPinIcon,
+  SettingsIcon,
 } from "lucide-react";
 
 export const CORPORATE_NAV = [
@@ -25,6 +26,11 @@ export const CORPORATE_NAV = [
     key: "membership",
     href: "/corporate/membership",
     icon: BadgeCheckIcon,
+  },
+  {
+    key: "settings",
+    href: "/corporate/settings",
+    icon: SettingsIcon,
   },
 ] as const;
 

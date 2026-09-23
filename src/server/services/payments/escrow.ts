@@ -15,6 +15,7 @@ import {
 } from "~/server/services/payments/commission-resolution";
 import { providerTransferCents } from "~/server/services/payments/payment-ledger";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
+import { isPaymentReleaseNotificationEnabled } from "~/server/services/settings/platform-policies";
 import {
   svcFail,
   svcOk,
@@ -1079,6 +1080,8 @@ export async function releaseDuePayments(
   });
   let released = 0;
   let failed = 0;
+  // W13 "Avisar liberación de pago": read once per batch.
+  const notifyRelease = await isPaymentReleaseNotificationEnabled(deps.db);
 
   for (const payment of duePayments) {
     try {
@@ -1089,7 +1092,7 @@ export async function releaseDuePayments(
 
       if (result.ok) {
         released += 1;
-        if (payment.order) {
+        if (payment.order && notifyRelease) {
           await sendLocalizedPushToUser(
             deps.db,
             payment.order.business.ownerId,

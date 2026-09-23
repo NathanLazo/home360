@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   Prisma,
+  OrderEventType,
   OrderStatus,
   OrderType,
   PaymentMethod,
@@ -11,6 +12,10 @@ import type {
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { assertBranchInBusiness } from "~/server/services/business/branch-access";
 import type { OrderListInput } from "~/server/services/orders/order.schema";
+import {
+  resolveOrderMediaUrl,
+  resolveOrderMediaUrls,
+} from "~/server/services/orders/order-media";
 
 const PAGE_SIZE = 20;
 const MAX_PRISMA_INT = 2_147_483_647;
@@ -25,6 +30,7 @@ const orderListSelect = {
   createdAt: true,
   customer: { select: { name: true } },
   branch: { select: { name: true } },
+  worker: { select: { fullName: true } },
 } satisfies Prisma.OrderSelect;
 
 const orderDetailSelect = {
@@ -41,12 +47,23 @@ const orderDetailSelect = {
   beforeUrls: true,
   afterUrls: true,
   workNotes: true,
+  deliveryAddressLine: true,
   createdAt: true,
   updatedAt: true,
-  customer: { select: { name: true, email: true } },
+  customer: { select: { id: true, name: true, email: true } },
   branch: { select: { id: true, name: true } },
+  worker: { select: { id: true, fullName: true } },
   service: { select: { id: true, name: true, category: true } },
   product: { select: { id: true, name: true, sku: true } },
+  quote: {
+    select: {
+      id: true,
+      amountCents: true,
+      scheduledFor: true,
+      message: true,
+      request: { select: { id: true, addressLine: true } },
+    },
+  },
   payment: {
     select: {
       status: true,
@@ -69,6 +86,16 @@ const orderDetailSelect = {
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   },
+  events: {
+    select: {
+      id: true,
+      type: true,
+      note: true,
+      createdAt: true,
+      actor: { select: { name: true } },
+    },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  },
 } satisfies Prisma.OrderSelect;
 
 type OrderListPayload = Prisma.OrderGetPayload<{
@@ -86,6 +113,7 @@ export type OrderListItem = {
   type: OrderType;
   customerName: string | null;
   branchName: string | null;
+  workerName: string | null;
   amountCents: number;
   status: OrderStatus;
   createdAt: Date;
@@ -104,6 +132,7 @@ export type OrderDetail = {
   status: OrderStatus;
   amountCents: number;
   quantity: number;
+  /** Signed, short-lived read URL (MA-02) or `null` when unavailable. */
   recordingUrl: string | null;
   recordingComplete: boolean;
   recordingDurationSec: number | null;
@@ -112,10 +141,20 @@ export type OrderDetail = {
   workNotes: string | null;
   createdAt: Date;
   updatedAt: Date;
-  customer: { name: string | null; email: string | null };
+  /** PRODUCT delivery snapshot or, for SERVICE, the accepted request address. */
+  addressLine: string | null;
+  customer: { id: string; name: string | null; email: string | null };
   branch: { id: string; name: string } | null;
+  worker: { id: string; fullName: string } | null;
   service: { id: string; name: string; category: string } | null;
   product: { id: string; name: string; sku: string } | null;
+  quote: {
+    id: string;
+    requestId: string;
+    amountCents: number;
+    scheduledFor: Date | null;
+    message: string | null;
+  } | null;
   payment: {
     status: PaymentStatus;
     method: PaymentMethod;
@@ -133,6 +172,19 @@ export type OrderDetail = {
     unitPriceCents: number;
     product: { id: string; name: string; sku: string } | null;
   }>;
+  events: Array<{
+    id: string;
+    type: OrderEventType;
+    note: string | null;
+    createdAt: Date;
+    actorName: string | null;
+  }>;
+};
+
+type SignedOrderMedia = {
+  recordingUrl: string | null;
+  beforeUrls: string[];
+  afterUrls: string[];
 };
 
 function toOrderListItem(order: OrderListPayload): OrderListItem {
@@ -143,13 +195,17 @@ function toOrderListItem(order: OrderListPayload): OrderListItem {
     type: order.type,
     customerName: order.customer.name,
     branchName: order.branch?.name ?? null,
+    workerName: order.worker?.fullName ?? null,
     amountCents: order.amountCents,
     status: order.status,
     createdAt: order.createdAt,
   };
 }
 
-function toOrderDetail(order: OrderDetailPayload): OrderDetail {
+function toOrderDetail(
+  order: OrderDetailPayload,
+  media: SignedOrderMedia,
+): OrderDetail {
   return {
     id: order.id,
     folio: order.folio,
@@ -158,18 +214,30 @@ function toOrderDetail(order: OrderDetailPayload): OrderDetail {
     status: order.status,
     amountCents: order.amountCents,
     quantity: order.quantity,
-    recordingUrl: order.recordingUrl,
+    recordingUrl: media.recordingUrl,
     recordingComplete: order.recordingComplete,
     recordingDurationSec: order.recordingDurationSec,
-    beforeUrls: order.beforeUrls,
-    afterUrls: order.afterUrls,
+    beforeUrls: media.beforeUrls,
+    afterUrls: media.afterUrls,
     workNotes: order.workNotes,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
+    addressLine:
+      order.deliveryAddressLine ?? order.quote?.request.addressLine ?? null,
     customer: order.customer,
     branch: order.branch,
+    worker: order.worker,
     service: order.service,
     product: order.product,
+    quote: order.quote
+      ? {
+          id: order.quote.id,
+          requestId: order.quote.request.id,
+          amountCents: order.quote.amountCents,
+          scheduledFor: order.quote.scheduledFor,
+          message: order.quote.message,
+        }
+      : null,
     payment: order.payment,
     review: order.review,
     materials: order.materials.map((material) => ({
@@ -178,6 +246,13 @@ function toOrderDetail(order: OrderDetailPayload): OrderDetail {
       quantity: material.quantity,
       unitPriceCents: material.unitPriceCents,
       product: material.product,
+    })),
+    events: order.events.map((event) => ({
+      id: event.id,
+      type: event.type,
+      note: event.note,
+      createdAt: event.createdAt,
+      actorName: event.actor?.name ?? null,
     })),
   };
 }
@@ -207,6 +282,19 @@ function searchWhere(search: string): Prisma.OrderWhereInput {
   };
 }
 
+function createdAtWhere(input: OrderListInput): Prisma.OrderWhereInput {
+  if (!input.from && !input.to) {
+    return {};
+  }
+
+  return {
+    createdAt: {
+      ...(input.from ? { gte: input.from } : {}),
+      ...(input.to ? { lt: input.to } : {}),
+    },
+  };
+}
+
 export async function listOrders(
   db: PrismaClient,
   businessId: string,
@@ -217,6 +305,17 @@ export async function listOrders(
     !(await assertBranchInBusiness(db, businessId, input.branchId))
   ) {
     return fail("NOT_FOUND", 404, "Branch not found");
+  }
+
+  // P-WEB-02: the worker filter is tenant-checked, never trusted.
+  if (input.workerId) {
+    const workers = await db.worker.count({
+      where: { id: input.workerId, businessId },
+    });
+
+    if (workers === 0) {
+      return fail("NOT_FOUND", 404, "Worker not found");
+    }
   }
 
   if (input.cursor) {
@@ -236,6 +335,8 @@ export async function listOrders(
       ...(input.branchId ? { branchId: input.branchId } : {}),
       ...(input.status ? { status: input.status } : {}),
       ...(input.type ? { type: input.type } : {}),
+      ...(input.workerId ? { workerId: input.workerId } : {}),
+      ...createdAtWhere(input),
       ...(input.search ? searchWhere(input.search) : {}),
     },
     take: PAGE_SIZE + 1,
@@ -258,11 +359,10 @@ export async function listOrders(
 
 export async function getOrderById(
   db: PrismaClient,
-  businessId: string,
-  id: string,
+  input: { businessId: string; userId: string; id: string },
 ): Promise<TrpcResponse<OrderDetail>> {
   const order = await db.order.findFirst({
-    where: { id, businessId },
+    where: { id: input.id, businessId: input.businessId },
     select: orderDetailSelect,
   });
 
@@ -270,5 +370,23 @@ export async function getOrderById(
     return fail("NOT_FOUND", 404, "Order not found");
   }
 
-  return ok(toOrderDetail(order), "Order loaded");
+  const [recordingUrl, beforeUrls, afterUrls] = await Promise.all([
+    resolveOrderMediaUrl(db, {
+      userId: input.userId,
+      reference: order.recordingUrl,
+    }),
+    resolveOrderMediaUrls(db, {
+      userId: input.userId,
+      references: order.beforeUrls,
+    }),
+    resolveOrderMediaUrls(db, {
+      userId: input.userId,
+      references: order.afterUrls,
+    }),
+  ]);
+
+  return ok(
+    toOrderDetail(order, { recordingUrl, beforeUrls, afterUrls }),
+    "Order loaded",
+  );
 }

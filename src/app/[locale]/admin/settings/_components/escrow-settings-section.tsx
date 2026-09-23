@@ -18,6 +18,7 @@ export function EscrowSettingsSection({
 
   return (
     <SettingsSectionCard
+      id="escrow"
       title={t("title")}
       description={t("description")}
       icon={LockKeyholeIcon}

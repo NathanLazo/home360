@@ -7,6 +7,7 @@ import {
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
+import { consumerProcedure } from "~/server/api/consumer-procedure";
 import { createTRPCRouter, userProcedure } from "~/server/api/trpc";
 import {
   createProductCheckoutIntent,
@@ -59,7 +60,7 @@ function checkoutDeps(
 
 /** Customer PaymentSheet endpoints for service and direct-product checkout. */
 export const checkoutRouter = createTRPCRouter({
-  createIntent: userProcedure
+  createIntent: consumerProcedure
     .input(createIntentSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -102,7 +103,7 @@ export const checkoutRouter = createTRPCRouter({
       }
     }),
 
-  listPaymentMethods: userProcedure.query(async ({ ctx }) => {
+  listPaymentMethods: consumerProcedure.query(async ({ ctx }) => {
     try {
       const methods = await listCustomerPaymentMethods(
         { db: ctx.db, stripe: getStripe() },

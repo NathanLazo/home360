@@ -27,12 +27,18 @@ export function PaymentsHeaderActions({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Deep link from the home's key action: open the create dialog once, then
-  // drop the param so a refresh or back navigation doesn't reopen it.
+  // Deep link from the home's key action (and the links tab empty state):
+  // open the create dialog once, then drop only that param so a refresh or
+  // back navigation doesn't reopen it while `?tab=` / `?branch=` survive.
   useEffect(() => {
     if (searchParams.get("create") !== "link") return;
     if (!isReadOnly) setLinkDialogOpen(true);
-    router.replace(pathname);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("create");
+    const query = params.toString();
+    router.replace(query.length > 0 ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   }, [searchParams, isReadOnly, router, pathname]);
 
   const connectQuery = api.payment.getConnectStatus.useQuery();
@@ -61,7 +67,6 @@ export function PaymentsHeaderActions({
       <Button
         type="button"
         variant="outline"
-        className="min-h-11 sm:min-h-10"
         onClick={() => setLinkDialogOpen(true)}
         disabled={isReadOnly}
         title={isReadOnly ? readOnlyT("actionDisabled") : undefined}

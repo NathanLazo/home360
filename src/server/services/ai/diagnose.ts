@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
+import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 /**
@@ -14,23 +15,10 @@ import { svcFail, svcOk, type ServiceResult } from "../service-result";
  */
 export const DIAGNOSIS_MODEL = "anthropic/claude-sonnet-5";
 
-/**
- * Marketplace categories a diagnosis may resolve to. They match the design's
- * C1 category chips and the seeded service catalog (`category` is a free
- * string column, so this list is the single source of truth for requests).
- */
-export const REQUEST_CATEGORIES = [
-  "Plomería",
-  "Eléctrico",
-  "Pintura",
-  "Carpintería",
-  "Limpieza",
-  "Jardinería",
-  "Clima",
-  "Otro",
-] as const;
-
-export type RequestCategory = (typeof REQUEST_CATEGORIES)[number];
+export {
+  REQUEST_CATEGORIES,
+  type RequestCategory,
+} from "~/schemas/marketplace/request-categories";
 
 export const URGENCY_LEVELS = ["LOW", "MEDIUM", "HIGH"] as const;
 
@@ -117,8 +105,21 @@ function buildInstructions(settings: DiagnosisSettings): string {
 
 function buildUserMessage(input: {
   imageUrls: string[];
+  videoUrls?: string[];
   description?: string;
 }): ModelMessage {
+  const videoCount = input.videoUrls?.length ?? 0;
+  // The model only receives images: a video is surfaced as context so the
+  // diagnosis honestly lowers its confidence instead of pretending to see it.
+  const videoContext =
+    videoCount > 0
+      ? `The customer also recorded ${videoCount} short video(s) that you cannot see; lower confidencePct accordingly.`
+      : null;
+  const note =
+    input.description && input.description.trim().length > 0
+      ? `Customer note: ${input.description.trim()}`
+      : "The customer did not add a note. Diagnose from the images.";
+
   return {
     role: "user",
     content: [
@@ -128,10 +129,7 @@ function buildUserMessage(input: {
       })),
       {
         type: "text" as const,
-        text:
-          input.description && input.description.trim().length > 0
-            ? `Customer note: ${input.description.trim()}`
-            : "The customer did not add a note. Diagnose from the images.",
+        text: videoContext === null ? note : `${note}\n${videoContext}`,
       },
     ],
   };
@@ -145,14 +143,14 @@ function buildUserMessage(input: {
  */
 export async function diagnoseProblem(
   db: PrismaClient,
-  input: { imageUrls: string[]; description?: string },
+  input: { imageUrls: string[]; videoUrls?: string[]; description?: string },
 ): Promise<ServiceResult<ProblemDiagnosis, DiagnoseErrorCode>> {
   if (!env.AI_GATEWAY_API_KEY) {
     return svcFail("AI_UNAVAILABLE", "AI gateway key is not configured");
   }
 
-  if (input.imageUrls.length === 0) {
-    return svcFail("INTERNAL_ERROR", "Diagnosis requires at least one image");
+  if (input.imageUrls.length === 0 && (input.videoUrls?.length ?? 0) === 0) {
+    return svcFail("INTERNAL_ERROR", "Diagnosis requires at least one media");
   }
 
   const settings = await db.platformSettings.findUnique({

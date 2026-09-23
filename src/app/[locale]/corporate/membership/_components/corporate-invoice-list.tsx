@@ -50,12 +50,7 @@ export function CorporateInvoiceList({
             label={t(`status.${invoice.status}`)}
           />
           {invoice.pdfUrl ? (
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="min-h-11 sm:min-h-9"
-            >
+            <Button asChild variant="ghost" size="sm">
               <a
                 href={invoice.pdfUrl}
                 target="_blank"
@@ -67,13 +62,7 @@ export function CorporateInvoiceList({
             </Button>
           ) : (
             <span title={t("downloadUnavailable")}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="min-h-11 sm:min-h-9"
-                disabled
-              >
+              <Button type="button" variant="ghost" size="sm" disabled>
                 <DownloadIcon aria-hidden="true" />
                 {t("download")}
                 <span className="sr-only">{t("downloadUnavailable")}</span>

@@ -15,7 +15,7 @@ import { TableSkeleton } from "~/components/table-skeleton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Link } from "~/i18n/navigation";
+import { Link, useRouter } from "~/i18n/navigation";
 import { api } from "~/trpc/react";
 
 export type RecentOrdersTableProps = {
@@ -37,6 +37,7 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
   const status = useTranslations("dashboard.orderStatus");
   const errors = useTranslations("errors");
   const formatter = useFormatter();
+  const router = useRouter();
   const input = branchId ? { branchId } : {};
   const query = api.dashboard.getRecentOrders.useQuery(input, {
     placeholderData: keepPreviousData,
@@ -45,6 +46,10 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
   const ordersHref = branchId
     ? `/dashboard/orders?branch=${encodeURIComponent(branchId)}`
     : "/dashboard/orders";
+  // Rows deep-link into the order detail sheet (`?order=`), keeping the
+  // header branch filter.
+  const orderHref = (orderId: string) =>
+    `${ordersHref}${branchId ? "&" : "?"}order=${encodeURIComponent(orderId)}`;
 
   if (query.isPending) {
     return (
@@ -80,7 +85,6 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={() => void query.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -105,9 +109,13 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
       header: t("folioColumn"),
       className: "w-24",
       cell: (row) => (
-        <span className="font-mono font-semibold tabular-nums">
+        <Link
+          href={orderHref(row.id)}
+          className="font-mono font-semibold tabular-nums underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+          onClick={(event) => event.stopPropagation()}
+        >
           #{row.folio}
-        </span>
+        </Link>
       ),
     },
     {
@@ -165,12 +173,7 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
         <CardTitle>
           <h2>{t("recentOrdersTitle")}</h2>
         </CardTitle>
-        <Button
-          variant="link"
-          size="sm"
-          asChild
-          className="min-h-11 px-0 sm:min-h-10"
-        >
+        <Button variant="link" size="sm" asChild className="px-0">
           <Link href={ordersHref}>{t("viewAll")}</Link>
         </Button>
       </CardHeader>
@@ -179,6 +182,7 @@ export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
           columns={columns}
           data={data}
           getRowId={(row) => row.id}
+          onRowClick={(row) => router.push(orderHref(row.id))}
           emptyState={
             <div className="p-6">
               <EmptyState

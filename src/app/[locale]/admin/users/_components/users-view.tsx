@@ -2,7 +2,7 @@
 
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
 import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
@@ -15,12 +15,19 @@ import {
   type PendingModeration,
 } from "./business-moderation-dialogs";
 import { BusinessesTable } from "./businesses-table";
+import { CustomerDetailSheet } from "./customer-detail-sheet";
 import { CustomersTable } from "./customers-table";
+import {
+  UserAccessDialogs,
+  type PendingUserAccess,
+} from "./user-access-dialogs";
 import { useCsvExport, useUsersQuery } from "./use-users-query";
+import { useUserAccessMutations } from "./use-user-access-mutations";
 import { useUserMutations } from "./use-user-mutations";
 import { useDebouncedValue } from "./use-debounced-value";
 import { useUsersUrlState } from "./use-users-url-state";
 import { UsersFilters } from "./users-filters";
+import { toUsersFilters } from "./users-query-filters";
 import { UsersTableSkeleton } from "./users-table-skeleton";
 import { USERS_CSV_ROW_CAP, usersTabSchema } from "./users.schema";
 import { WorkersTable } from "./workers-table";
@@ -37,38 +44,94 @@ export function UsersView() {
   const t = useTranslations("admin.users");
   const errorsT = useTranslations("errors");
   const urlState = useUsersUrlState();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(urlState.search);
   const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
-  const query = useUsersQuery({
-    tab: urlState.tab,
-    search: debouncedSearch,
-    status: urlState.status,
-  });
-  const csv = useCsvExport(urlState.tab);
+  // The URL mirrors the debounced search so a refresh or shared link keeps
+  // it; only the settled value is written to avoid history spam.
+  useEffect(() => {
+    if (debouncedSearch !== urlState.search) {
+      urlState.setSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- react to the typed value only
+  }, [debouncedSearch]);
+
+  // A tab change clears `q` in the URL; the local field follows it.
+  useEffect(() => {
+    setSearch(urlState.search);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset on tab switch only
+  }, [urlState.tab]);
+
+  const filters = useMemo(
+    () =>
+      toUsersFilters({
+        tab: urlState.tab,
+        search: debouncedSearch,
+        status: urlState.status,
+        accessStatus: urlState.accessStatus,
+        availability: urlState.availability,
+      }),
+    [
+      urlState.tab,
+      debouncedSearch,
+      urlState.status,
+      urlState.accessStatus,
+      urlState.availability,
+    ],
+  );
+
+  const query = useUsersQuery(filters);
+  const csv = useCsvExport(filters);
   const counts = query.state.status === "success" ? query.state.counts : null;
   const [pendingModeration, setPendingModeration] =
     useState<PendingModeration | null>(null);
-  const filtersActive =
-    debouncedSearch.trim().length > 0 || urlState.status !== undefined;
+  const [pendingAccess, setPendingAccess] = useState<PendingUserAccess | null>(
+    null,
+  );
+  const filtersActive = Object.keys(filters).length > 1;
   const emptyAction = filtersActive ? (
     <ClearFiltersButton
       onClear={() => {
         setSearch("");
-        urlState.setStatus(undefined);
+        urlState.clearFilters();
       }}
     />
   ) : undefined;
+
+  // W9 "approve" deep link: open the approval dialog once, then drop the
+  // request from the URL so a refresh does not reopen it.
+  const { approveRequested, businessId, clearApproveRequest } = urlState;
+  useEffect(() => {
+    if (approveRequested && businessId) {
+      setPendingModeration({ businessId, action: "approve" });
+      clearApproveRequest();
+    }
+  }, [approveRequested, businessId, clearApproveRequest]);
+
   const successBeat = useSuccessBeat();
   const mutations = useUserMutations({
     onSettledSuccess: () => {
-      // Reactivate uses the shared confirm dialog, which has no check slot.
-      if (pendingModeration?.action === "reactivate") {
+      // Confirm-dialog actions have no check slot: close immediately.
+      if (
+        pendingModeration?.action === "reactivate" ||
+        pendingModeration?.action === "reopen"
+      ) {
         setPendingModeration(null);
         return;
       }
 
       successBeat.celebrate(() => setPendingModeration(null));
+    },
+  });
+  const accessBeat = useSuccessBeat();
+  const accessMutations = useUserAccessMutations({
+    onSettledSuccess: () => {
+      if (pendingAccess?.action === "reactivate") {
+        setPendingAccess(null);
+        return;
+      }
+
+      accessBeat.celebrate(() => setPendingAccess(null));
     },
   });
 
@@ -98,6 +161,10 @@ export function UsersView() {
         onSearchChange={setSearch}
         status={urlState.status}
         onStatusChange={urlState.setStatus}
+        accessStatus={urlState.accessStatus}
+        onAccessStatusChange={urlState.setAccessStatus}
+        availability={urlState.availability}
+        onAvailabilityChange={urlState.setAvailability}
         onExport={csv.exportCsv}
         exporting={csv.exporting}
       />
@@ -134,9 +201,12 @@ export function UsersView() {
             {query.state.page.tab === "businesses" ? (
               <BusinessesTable
                 businesses={query.state.page.items}
-                onOpenBusiness={urlState.openBusiness}
-                onAction={(businessId, action) =>
-                  setPendingModeration({ businessId, action })
+                onOpenBusiness={(id) => urlState.openBusiness(id)}
+                onReviewDocuments={(id) =>
+                  urlState.openBusiness(id, "documents")
+                }
+                onAction={(id, action) =>
+                  setPendingModeration({ businessId: id, action })
                 }
                 emptyAction={emptyAction}
               />
@@ -144,12 +214,20 @@ export function UsersView() {
             {query.state.page.tab === "customers" ? (
               <CustomersTable
                 customers={query.state.page.items}
+                onOpenCustomer={urlState.openCustomer}
+                onAccessAction={(userId, action) =>
+                  setPendingAccess({ userId, action })
+                }
                 emptyAction={emptyAction}
               />
             ) : null}
             {query.state.page.tab === "workers" ? (
               <WorkersTable
                 workers={query.state.page.items}
+                onOpenBusiness={(id) => urlState.openBusiness(id)}
+                onAccessAction={(userId, action) =>
+                  setPendingAccess({ userId, action })
+                }
                 emptyAction={emptyAction}
               />
             ) : null}
@@ -159,7 +237,6 @@ export function UsersView() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 sm:min-h-10"
                 disabled={query.loadingMore}
                 onClick={query.loadMore}
               >
@@ -178,6 +255,7 @@ export function UsersView() {
 
       <BusinessDetailSheet
         businessId={urlState.businessId}
+        focusSection={urlState.businessSection}
         onClose={urlState.closeBusiness}
         actionsSlot={(detail) => (
           <BusinessDetailActions
@@ -189,11 +267,26 @@ export function UsersView() {
         )}
       />
 
+      <CustomerDetailSheet
+        customerId={urlState.customerId}
+        onClose={urlState.closeCustomer}
+        onAccessAction={(userId, action) =>
+          setPendingAccess({ userId, action })
+        }
+      />
+
       <BusinessModerationDialogs
         pending={pendingModeration}
         onClose={() => setPendingModeration(null)}
         mutations={mutations}
         succeeded={successBeat.succeeded}
+      />
+
+      <UserAccessDialogs
+        pending={pendingAccess}
+        onClose={() => setPendingAccess(null)}
+        mutations={accessMutations}
+        succeeded={accessBeat.succeeded}
       />
     </div>
   );

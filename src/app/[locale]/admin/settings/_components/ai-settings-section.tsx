@@ -27,6 +27,7 @@ export function AiSettingsSection({
 
   return (
     <SettingsSectionCard
+      id="ai"
       title={t("title")}
       description={t("description")}
       icon={SparklesIcon}

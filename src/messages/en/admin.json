@@ -104,7 +104,8 @@
       "registeredAt": "Registered",
       "orders": "Orders",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "account": "Account"
     },
     "actions": {
       "open": "Open actions",
@@ -112,7 +113,14 @@
       "approve": "Approve",
       "reject": "Reject",
       "suspend": "Suspend",
-      "reactivate": "Reactivate"
+      "reactivate": "Reactivate",
+      "reviewDocuments": "Review documents",
+      "viewDispute": "View dispute",
+      "reopen": "Reopen review",
+      "viewBusiness": "View business",
+      "suspendAccount": "Suspend account",
+      "reactivateAccount": "Reactivate account",
+      "noAppAccount": "No app account"
     },
     "empty": {
       "businesses": {
@@ -137,8 +145,10 @@
         "approved": "Approving business…",
         "rejected": "Rejecting business…",
         "suspended": "Suspending business…",
-        "reactivated": "Reactivating business…"
-      }
+        "reactivated": "Reactivating business…",
+        "reopened": "Reopening review…"
+      },
+      "reopened": "Business sent back to review."
     },
     "reasonDialog": {
       "label": "Reason",
@@ -162,6 +172,11 @@
         "title": "Reactivate business",
         "description": "The business will operate normally again. Reactivation is not possible while disputes are open.",
         "confirm": "Reactivate"
+      },
+      "reopen": {
+        "title": "Reopen review",
+        "description": "The business returns to the approval queue as pending and the rejection reason is cleared.",
+        "confirm": "Reopen review"
       }
     },
     "approveDialog": {
@@ -201,6 +216,87 @@
       "disputes": "Disputes ({count} open)",
       "noDisputes": "This business has no disputes.",
       "loading": "Loading business file…"
+    },
+    "allAvailabilities": "Any availability",
+    "availabilityFilterLabel": "Filter by availability",
+    "noAppAccount": "No app account",
+    "openBusinessOf": "View business {business}",
+    "accessStatus": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "documents": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveLabel": "Approve {name}",
+      "rejectLabel": "Reject {name}",
+      "open": "Open {name}",
+      "uploadedAt": "Uploaded on {date}",
+      "reviewedAt": "Reviewed on {date} by {reviewer}",
+      "unknownReviewer": "an admin",
+      "notes": "Note: {notes}",
+      "pendingCount": "{count, plural, one {# to review} other {# to review}}",
+      "kind": {
+        "pdf": "PDF",
+        "file": "File"
+      },
+      "rejectDialog": {
+        "title": "Reject document",
+        "description": "The business will see this note and must upload the document again.",
+        "confirm": "Reject document"
+      },
+      "toasts": {
+        "APPROVED": "Document approved.",
+        "REJECTED": "Document rejected.",
+        "pending": {
+          "APPROVED": "Approving document…",
+          "REJECTED": "Rejecting document…"
+        }
+      }
+    },
+    "access": {
+      "cancel": "Cancel",
+      "suspend": {
+        "title": "Suspend account",
+        "description": "The person will not be able to sign in and every active session ends immediately.",
+        "confirm": "Suspend"
+      },
+      "reactivate": {
+        "title": "Reactivate account",
+        "description": "The person will be able to sign in again as usual.",
+        "confirm": "Reactivate"
+      },
+      "toasts": {
+        "suspended": "Account suspended.",
+        "reactivated": "Account reactivated.",
+        "pending": {
+          "suspended": "Suspending account…",
+          "reactivated": "Reactivating account…"
+        }
+      }
+    },
+    "customerDetail": {
+      "title": "Customer detail",
+      "subtitle": "Profile, activity, reviews and disputes.",
+      "loading": "Loading customer record…",
+      "errorTitle": "We couldn't load the detail",
+      "suspendedReason": "Account suspended. Reason: {reason}",
+      "suspendedNoReason": "Account suspended.",
+      "profile": "Profile",
+      "email": "Email",
+      "registeredAt": "Joined",
+      "language": "Language",
+      "addresses": "Addresses",
+      "notAvailable": "—",
+      "recentOrders": "Recent orders ({count} total)",
+      "noOrders": "This customer has no orders yet.",
+      "orderMeta": "#{folio} · {status} · {business}",
+      "reviews": "Reviews ({count})",
+      "averageRating": "Average rating {rating} out of 5",
+      "rating": "{rating}/5",
+      "noReviews": "This customer hasn't left reviews yet.",
+      "disputes": "Disputes ({count})",
+      "noDisputes": "This customer has no disputes."
     }
   },
   "overview": {
@@ -236,7 +332,7 @@
         "guarantee": "Guarantee",
         "actions": "Actions"
       },
-      "viewAll": "View all businesses",
+      "viewAll": "View all pending",
       "emptyCta": "Go to businesses"
     },
     "disputes": {
@@ -248,7 +344,9 @@
       "parties": "{business} · {customer}",
       "unknownParty": "Unnamed customer",
       "viewAll": "View all disputes",
-      "emptyCta": "View resolved disputes"
+      "emptyCta": "View resolved disputes",
+      "viewRecording": "View service recording",
+      "viewEvidence": "{count, plural, one {View evidence} other {View evidence (#)}}"
     },
     "ai": {
       "sectionTitle": "Artificial intelligence",
@@ -260,10 +358,14 @@
       "humanReviewOn": "On below threshold",
       "humanReviewOff": "Off",
       "updatedAt": "Configuration updated {when}",
-      "openSettings": "Go to settings",
+      "openSettings": "Adjust variables",
       "loading": "Loading AI settings…"
     },
-    "primaryAction": "Review disputes"
+    "primaryAction": "Review disputes",
+    "month": {
+      "label": "Report month",
+      "option": "{month} {year}"
+    }
   },
   "paymentStatus": {
     "PENDING": "Pending",
@@ -308,20 +410,49 @@
       "noSelectionDescription": "Pick a dispute from the list to open its full file.",
       "errorTitle": "We could not load the file",
       "resolutionNotes": "Recorded justification",
-      "loading": "Loading dispute file…"
+      "loading": "Loading dispute file…",
+      "evidenceRequested": "Evidence requested",
+      "evidenceRequestedAt": "Requested on {date}"
     },
     "recording": {
       "title": "Service recording",
       "missingTitle": "No service recording",
       "incompleteTitle": "Incomplete recording",
       "ruleDescription": "The recording is mandatory and uninterrupted. If it is missing or incomplete, the dispute resolves in the customer's favour; any other resolution requires a written justification.",
-      "duration": "Duration: {minutes} min {seconds} s"
+      "duration": "Duration: {minutes} min {seconds} s",
+      "partialDescription": "Showing whatever was captured.",
+      "segments": {
+        "title": "Recording segments",
+        "empty": "No recording segments were registered.",
+        "label": "Segment {index}",
+        "range": "{start} – {end} · {minutes} min {seconds} s",
+        "rangeOpen": "Started {start} · never closed",
+        "state": {
+          "interrupted": "Interrupted",
+          "open": "Not closed",
+          "notUploaded": "Not uploaded",
+          "ok": "Complete"
+        }
+      }
     },
     "evidence": {
       "title": "Evidence",
       "itemAlt": "Evidence {index}",
       "more": "+{count}",
-      "showAll": "Show all {count} pieces of evidence"
+      "showAll": "Show all {count} pieces of evidence",
+      "empty": "Neither party attached evidence.",
+      "itemLabel": {
+        "image": "Evidence image {index}",
+        "video": "Evidence video {index}",
+        "pdf": "Evidence PDF {index}",
+        "other": "Evidence file {index}"
+      },
+      "kind": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "other": "File"
+      }
     },
     "arguments": {
       "title": "Arguments",
@@ -332,7 +463,13 @@
       "collapse": "Show less"
     },
     "aiSummary": {
-      "title": "AI summary"
+      "title": "AI summary",
+      "generate": "Generate AI summary",
+      "regenerate": "Regenerate",
+      "generating": "Generating…",
+      "notGenerated": "There is no AI summary for this file yet.",
+      "generatedAt": "Generated on {date}",
+      "disclaimer": "AI-generated guidance. The decision is always yours."
     },
     "payment": {
       "escrow": "In escrow",
@@ -372,9 +509,35 @@
     },
     "toasts": {
       "resolved": "Dispute resolved.",
-      "resolving": "Resolving dispute…"
+      "resolving": "Resolving dispute…",
+      "requestingEvidence": "Sending request…",
+      "evidenceRequested": "Request sent.",
+      "generatingSummary": "Generating AI summary…",
+      "summaryGenerated": "AI summary ready."
     },
-    "loading": "Loading disputes…"
+    "loading": "Loading disputes…",
+    "filters": {
+      "searchPlaceholder": "Search by folio, business, customer or title",
+      "statusLabel": "Filter by status",
+      "urgencyLabel": "Filter by urgency",
+      "allUrgencies": "All urgencies",
+      "status": {
+        "open": "Open",
+        "in_review": "In review",
+        "resolved": "Resolved",
+        "all": "All"
+      }
+    },
+    "evidenceDialog": {
+      "title": "Request more evidence",
+      "description": "“{dispute}” will move to review and we will notify the customer and the business.",
+      "noteLabel": "What evidence do you need?",
+      "notePlaceholder": "E.g. photos of the finished work and the materials receipt.",
+      "noteHint": "At least {min} characters. Both parties will see the request.",
+      "notice": "No money moves: the payment stays held while the evidence arrives.",
+      "cancel": "Cancel",
+      "confirm": "Request evidence"
+    }
   },
   "withdrawalStatus": {
     "REQUESTED": "Pending",
@@ -437,10 +600,25 @@
         "actions": "Actions"
       },
       "empty": {
-        "title": "No withdrawals",
-        "description": "No withdrawal requests match the selected filter."
+        "title": "Nothing to approve",
+        "description": "There are no pending withdrawal requests.",
+        "historyTitle": "No withdrawals",
+        "historyDescription": "No withdrawals match the selected filters."
       },
-      "loading": "Loading withdrawals…"
+      "loading": "Loading withdrawals…",
+      "pendingTitle": "Withdrawals to approve",
+      "pendingDescription": "Waiting requests, oldest first.",
+      "historyTitle": "Withdrawal history",
+      "historyDescription": "Approved, rejected, failed or in-flight withdrawals.",
+      "showHistory": "View history",
+      "showPending": "View pending",
+      "history": {
+        "businessPlaceholder": "Search business",
+        "statusLabel": "Filter by status",
+        "allStatuses": "All statuses",
+        "from": "From",
+        "to": "To"
+      }
     },
     "actions": {
       "approve": "Approve",
@@ -451,21 +629,25 @@
       "rejectTitle": "Reject withdrawal",
       "rejectDescription": "You are about to reject the {amount} withdrawal to {destination}. The amount returns to the business's available balance.",
       "reasonLabel": "Reason",
-      "reasonPlaceholder": "Briefly explain the rejection (at least 5 characters)."
+      "reasonPlaceholder": "Briefly explain the rejection (at least 5 characters).",
+      "retry": "Retry",
+      "retryTitle": "Retry withdrawal",
+      "retryDescription": "The payout of {amount} to {destination} is still processing. Retrying never sends it twice."
     },
     "toasts": {
       "approved": "Withdrawal approved.",
       "rejected": "Withdrawal rejected.",
       "pending": {
         "approved": "Approving withdrawal…",
-        "rejected": "Rejecting withdrawal…"
-      }
+        "rejected": "Rejecting withdrawal…",
+        "retried": "Retrying withdrawal…"
+      },
+      "retried": "Withdrawal retried."
     },
     "loyalty": {
       "title": "Loyalty bonuses",
       "description": "Settlement queue for accrued bonuses. Payment happens outside the platform; this only records it.",
       "errorTitle": "We could not load the bonuses",
-      "cancelReason": "Cancelled by the administrator from the finance panel.",
       "columns": {
         "business": "Business",
         "amount": "Amount",
@@ -506,8 +688,18 @@
         "title": "Cancel this bonus?",
         "description": "The bonus for {business} will be cancelled and can no longer be recorded as paid. This can’t be undone.",
         "confirm": "Cancel bonus",
-        "dismiss": "Keep bonus"
-      }
+        "dismiss": "Keep bonus",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Explain why the bonus is cancelled.",
+        "reasonHint": "At least 5 characters."
+      },
+      "statusFilterLabel": "Filter by status",
+      "allStatuses": "All statuses",
+      "loadMore": "Load more"
+    },
+    "month": {
+      "label": "Period",
+      "current": "{month} (current)"
     }
   },
   "corporate": {
@@ -746,7 +938,7 @@
   },
   "settings": {
     "title": "Platform settings",
-    "subtitle": "AI, fees, escrow and notification parameters.",
+    "subtitle": "AI, fees, escrow, notification and campaign parameters.",
     "formLabel": "Platform settings form",
     "errorTitle": "We could not load the settings",
     "errorDescription": "Something went wrong preparing this screen. Please try again.",
@@ -788,15 +980,14 @@
     },
     "notifications": {
       "title": "Notifications",
-      "description": "New-request notification radius and rating reminders.",
+      "description": "New-request radius, rating reminders and payment-release alerts in the mobile app.",
       "radius": "New request radius",
       "radiusHint": "Between {min} and {max} km.",
       "ratingReminder": "Rating reminder",
-      "ratingReminderHint": "Between {min} and {max} hours.",
+      "ratingReminderHint": "Between {min} and {max} hours after the order is completed, if the customer has not rated it.",
       "hoursSuffix": "h",
       "paymentRelease": "Notify payment release",
-      "paymentReleaseHint": "Notifies the business when a payment is released.",
-      "consumerNote": "These values will be consumed by the mobile app; the web product does not send notifications."
+      "paymentReleaseHint": "Notifies the business when a payment is released."
     },
     "saveBar": {
       "unsaved": "You have unsaved changes.",
@@ -809,7 +1000,39 @@
       "saved": "Settings saved.",
       "saving": "Saving settings…"
     },
-    "loading": "Loading settings…"
+    "loading": "Loading settings…",
+    "campaigns": {
+      "title": "Campaigns and announcements",
+      "description": "Manual sending from this panel: one push notification to every user in the audience who has the app installed.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "E.g. New services in your area",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Write the text they will see in the notification.",
+      "bodyCount": "{count}/{max} characters",
+      "audienceLabel": "Audience",
+      "audience": {
+        "ALL": "Everyone",
+        "CUSTOMERS": "Customers",
+        "BUSINESSES": "Businesses",
+        "WORKERS": "Technicians"
+      },
+      "send": "Send campaign",
+      "cancel": "Cancel",
+      "confirmTitle": "Send this campaign?",
+      "confirmDescription": "“{title}” will arrive as a notification to: {audience}. A sent notification cannot be recalled.",
+      "historyTitle": "Sent",
+      "historyLoading": "Loading campaigns…",
+      "historyErrorTitle": "We could not load the campaigns",
+      "historyEmptyTitle": "No campaigns",
+      "historyEmptyDescription": "Campaigns you send will show up here.",
+      "historyMeta": "{audience} · {count, plural, =0 {no recipients} one {# recipient} other {# recipients}} · {sender}",
+      "unknownSender": "Administrator",
+      "loadMore": "Load more",
+      "toasts": {
+        "sending": "Sending campaign…",
+        "sent": "{count, plural, =0 {Campaign recorded; nobody had the app installed.} one {Campaign sent to # user.} other {Campaign sent to # users.}}"
+      }
+    }
   },
   "loyaltyBonusStatus": {
     "PENDING": "Pending",

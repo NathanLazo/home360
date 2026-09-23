@@ -27,13 +27,19 @@ export function WithdrawalsTable({
   withdrawals,
   pending,
   onApprove,
+  onRetry,
   onReject,
+  emptyTitle,
+  emptyDescription,
   emptyAction,
 }: {
   withdrawals: WithdrawalRow[];
   pending: boolean;
   onApprove: (withdrawalId: string) => void;
+  onRetry: (withdrawalId: string) => void;
   onReject: (input: { withdrawalId: string; reason: string }) => void;
+  emptyTitle: string;
+  emptyDescription: string;
   emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.finance.withdrawals");
@@ -124,6 +130,7 @@ export function WithdrawalsTable({
           withdrawal={row}
           pending={pending}
           onApprove={onApprove}
+          onRetry={onRetry}
           onReject={onReject}
         />
       ),
@@ -138,8 +145,8 @@ export function WithdrawalsTable({
         <div className="p-4 sm:p-6">
           <EmptyState
             icon={BanknoteIcon}
-            title={t("empty.title")}
-            description={t("empty.description")}
+            title={emptyTitle}
+            description={emptyDescription}
             action={emptyAction}
           />
         </div>

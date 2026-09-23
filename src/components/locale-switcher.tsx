@@ -49,7 +49,7 @@ export function LocaleSwitcher({ tone = "light" }: LocaleSwitcherProps) {
           <LanguagesIcon className="size-4" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent glass align="end">
         <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
         <DropdownMenuGroup>
           <DropdownMenuRadioGroup value={locale} onValueChange={changeLocale}>

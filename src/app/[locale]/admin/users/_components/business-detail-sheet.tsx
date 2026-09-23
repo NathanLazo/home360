@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ExternalLinkIcon, FileTextIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
 import { CopyIdButton } from "../../_components/copy-id-button";
 import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
+import { BusinessDocumentsSection } from "./business-documents-section";
 import { BusinessStatusBadge } from "./business-status-badge";
 import { GuaranteeBadge } from "./guarantee-badge";
+import type { BusinessSheetSection } from "./users.schema";
 import type { BusinessDetail } from "./users.types";
 import { SectionError } from "~/components/section-error";
 import {
@@ -30,15 +31,6 @@ import { cn } from "~/lib/utils";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 import { UserAvatar } from "~/components/user-avatar";
-
-const documentStatusVariants: Record<
-  BusinessDetail["documents"][number]["status"],
-  StatusBadgeVariant
-> = {
-  PENDING: "warning",
-  APPROVED: "success",
-  REJECTED: "destructive",
-};
 
 const subscriptionStatusVariants: Record<string, StatusBadgeVariant> = {
   ACTIVE: "success",
@@ -63,13 +55,17 @@ function DetailSection({
   );
 }
 
-function DetailBody({ detail }: { detail: BusinessDetail }) {
+function DetailBody({
+  detail,
+  focusSection,
+}: {
+  detail: BusinessDetail;
+  focusSection: BusinessSheetSection | null;
+}) {
   const t = useTranslations("admin.users.detail");
   const typesT = useTranslations("admin.businessTypes");
   const orderStatusT = useTranslations("admin.orderStatus");
   const disputeStatusT = useTranslations("admin.disputeStatus");
-  const documentTypeT = useTranslations("admin.documentTypes");
-  const documentStatusT = useTranslations("admin.documentStatus");
   const formatter = useFormatter();
 
   const currency = (cents: number) =>
@@ -123,51 +119,10 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
       <Separator />
 
-      <DetailSection title={t("documents")}>
-        {detail.documents.length === 0 ? (
-          <p className="text-muted-foreground text-copy-sm">
-            {t("noDocuments")}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {detail.documents.map((document) => (
-              <li
-                key={document.id}
-                className="flex items-center gap-3 rounded-md border p-3"
-              >
-                <FileTextIcon
-                  aria-hidden="true"
-                  className="text-muted-foreground size-4 shrink-0"
-                />
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-copy-sm truncate font-medium">
-                    {documentTypeT(document.type)}
-                  </span>
-                  {document.notes ? (
-                    <span className="text-muted-foreground truncate text-xs">
-                      {document.notes}
-                    </span>
-                  ) : null}
-                </div>
-                <StatusBadge
-                  status={document.status}
-                  variantMap={documentStatusVariants}
-                  label={documentStatusT(document.status)}
-                />
-                <a
-                  href={document.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none"
-                  aria-label={t("openDocument")}
-                >
-                  <ExternalLinkIcon aria-hidden="true" className="size-4" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </DetailSection>
+      <BusinessDocumentsSection
+        documents={detail.documents}
+        focused={focusSection === "documents"}
+      />
 
       <Separator />
 
@@ -260,12 +215,15 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
 export type BusinessDetailSheetProps = {
   businessId: string | null;
+  /** Section a deep link asked to focus ("review documents"). */
+  focusSection?: BusinessSheetSection | null;
   onClose: () => void;
   actionsSlot?: (detail: BusinessDetail) => ReactNode;
 };
 
 export function BusinessDetailSheet({
   businessId,
+  focusSection = null,
   onClose,
   actionsSlot,
 }: BusinessDetailSheetProps) {
@@ -327,7 +285,7 @@ export function BusinessDetailSheet({
           ) : null}
 
           {state.status === "success" ? (
-            <DetailBody detail={state.data} />
+            <DetailBody detail={state.data} focusSection={focusSection} />
           ) : null}
         </div>
 

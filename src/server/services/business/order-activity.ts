@@ -13,10 +13,12 @@ export const ACTIVE_ORDER_STATUSES = [
 export function countActiveOrders(
   db: PrismaClient,
   businessId: string,
+  branchId?: string,
 ): Promise<number> {
   return db.order.count({
     where: {
       businessId,
+      ...(branchId ? { branchId } : {}),
       status: { in: [...ACTIVE_ORDER_STATUSES] },
     },
   });

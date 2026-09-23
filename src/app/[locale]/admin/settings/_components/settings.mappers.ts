@@ -10,9 +10,7 @@ import type { PlatformSettingsResult } from "./settings.types";
  * Pure mappers so the pesos ↔ cents conversion lives in exactly one place and
  * never leaks into components. The server revalidates every value anyway.
  */
-export function toFormValues(
-  data: PlatformSettingsResult,
-): SettingsFormValues {
+export function toFormValues(data: PlatformSettingsResult): SettingsFormValues {
   const { settings, commissionsByPlan } = data;
 
   return {
@@ -32,9 +30,7 @@ export function toFormValues(
   };
 }
 
-function toSettingsValues(
-  values: SettingsFormValues,
-): PlatformSettingsValues {
+function toSettingsValues(values: SettingsFormValues): PlatformSettingsValues {
   return {
     aiConfidenceThresholdPct: values.aiConfidenceThresholdPct,
     aiPriceMarginPct: values.aiPriceMarginPct,
@@ -49,9 +45,7 @@ function toSettingsValues(
   };
 }
 
-function toCommissionValues(
-  values: SettingsFormValues,
-): PlanCommissionValues {
+function toCommissionValues(values: SettingsFormValues): PlanCommissionValues {
   return {
     basic: values.commissionBasic,
     standard: values.commissionStandard,
@@ -67,7 +61,7 @@ function shallowEqual<T extends Record<string, unknown>>(
 }
 
 /**
- * `updatePlanCommissions` needs all three values, so any dirty commission
+ * The commission update needs all three values, so any dirty commission
  * sends the whole trio together with what the form believed they were.
  */
 export function toSaveInput(

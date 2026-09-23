@@ -103,14 +103,12 @@ export function ChangePlanDialog({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={() => onOpenChange(false)}
           >
             {t("cancel")}
           </Button>
           <Button
             type="button"
-            className="min-h-11 sm:min-h-10"
             onClick={() => void handleConfirm()}
             disabled={!canConfirm}
           >

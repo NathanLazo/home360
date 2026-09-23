@@ -210,7 +210,6 @@ export function ApproveBusinessDialog({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={loading || succeeded}
             onClick={() => onOpenChange(false)}
           >
@@ -220,7 +219,6 @@ export function ApproveBusinessDialog({
             type="button"
             metal="live"
             metalActive={!succeeded}
-            className="min-h-11 sm:min-h-10"
             disabled={loading || !business || planCode === null}
             aria-disabled={succeeded || undefined}
             onClick={() => {

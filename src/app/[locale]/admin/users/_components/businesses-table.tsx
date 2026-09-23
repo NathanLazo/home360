@@ -16,6 +16,7 @@ import { UserAvatar } from "~/components/user-avatar";
 export type BusinessesTableProps = {
   businesses: BusinessRow[];
   onOpenBusiness: (businessId: string) => void;
+  onReviewDocuments: (businessId: string) => void;
   onAction?: (businessId: string, action: BusinessRowAction) => void;
   emptyAction?: ReactNode;
 };
@@ -23,6 +24,7 @@ export type BusinessesTableProps = {
 export function BusinessesTable({
   businesses,
   onOpenBusiness,
+  onReviewDocuments,
   onAction,
   emptyAction,
 }: BusinessesTableProps) {
@@ -94,7 +96,9 @@ export function BusinessesTable({
       cell: (row) => (
         <UserRowActions
           derivedStatus={row.derivedStatus}
+          firstOpenDisputeId={row.firstOpenDisputeId}
           onViewDetail={() => onOpenBusiness(row.id)}
+          onReviewDocuments={() => onReviewDocuments(row.id)}
           onAction={onAction ? (action) => onAction(row.id, action) : undefined}
         />
       ),

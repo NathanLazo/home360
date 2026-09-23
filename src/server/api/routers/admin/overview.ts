@@ -1,3 +1,4 @@
+import { overviewKpisSchema } from "~/app/[locale]/admin/_components/overview.schema";
 import { fail, normalizeError, ok } from "~/server/api/contract";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { OPEN_DISPUTE_STATUSES } from "~/server/services/admin/dispute-directory";
@@ -30,19 +31,24 @@ export const adminOverviewRouter = createTRPCRouter({
     }
   }),
 
-  getKpis: adminProcedure.query(async ({ ctx }) => {
-    try {
-      const result = await getPlatformKpis({ db: ctx.db });
+  getKpis: adminProcedure
+    .input(overviewKpisSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await getPlatformKpis(
+          { db: ctx.db },
+          input.month === undefined ? {} : { month: input.month },
+        );
 
-      if (!result.ok) {
-        return fail(result.code, 409, "Platform KPIs unavailable");
+        if (!result.ok) {
+          return fail(result.code, 409, "Platform KPIs unavailable");
+        }
+
+        return ok(result.data, "Platform KPIs loaded");
+      } catch (error) {
+        return normalizedFailure(error, "Platform KPIs query failed");
       }
-
-      return ok(result.data, "Platform KPIs loaded");
-    } catch (error) {
-      return normalizedFailure(error, "Platform KPIs query failed");
-    }
-  }),
+    }),
 
   getPendingBusinesses: adminProcedure.query(async ({ ctx }) => {
     try {

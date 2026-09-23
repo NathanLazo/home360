@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import {
-  AI_PRICING_MODELS,
-  SETTINGS_RANGES,
-} from "./settings.schema";
+import { AI_PRICING_MODELS, SETTINGS_RANGES } from "./settings.schema";
 
 /**
  * The form schema is complete from the start — AI, escrow, fees and
@@ -23,12 +20,17 @@ const feeRangeInPesos = {
 
 export const settingsFormSchema = z.object({
   // AI
-  aiConfidenceThresholdPct: intInRange(SETTINGS_RANGES.aiConfidenceThresholdPct),
+  aiConfidenceThresholdPct: intInRange(
+    SETTINGS_RANGES.aiConfidenceThresholdPct,
+  ),
   aiPriceMarginPct: intInRange(SETTINGS_RANGES.aiPriceMarginPct),
   aiPricingModel: z.enum(AI_PRICING_MODELS),
   aiHumanReviewBelowThreshold: z.boolean(),
   // Fees (captured in pesos, sent in cents)
-  customerServiceFee: z.number().min(feeRangeInPesos.min).max(feeRangeInPesos.max),
+  customerServiceFee: z
+    .number()
+    .min(feeRangeInPesos.min)
+    .max(feeRangeInPesos.max),
   loyaltyBonusPct: intInRange(SETTINGS_RANGES.loyaltyBonusPct),
   commissionBasic: intInRange(SETTINGS_RANGES.commissionPct),
   commissionStandard: intInRange(SETTINGS_RANGES.commissionPct),
@@ -36,7 +38,9 @@ export const settingsFormSchema = z.object({
   // Escrow
   escrowAutoReleaseHours: intInRange(SETTINGS_RANGES.escrowAutoReleaseHours),
   // Notifications
-  notifyNewRequestRadiusKm: intInRange(SETTINGS_RANGES.notifyNewRequestRadiusKm),
+  notifyNewRequestRadiusKm: intInRange(
+    SETTINGS_RANGES.notifyNewRequestRadiusKm,
+  ),
   notifyPaymentRelease: z.boolean(),
   notifyRatingReminderHours: intInRange(
     SETTINGS_RANGES.notifyRatingReminderHours,

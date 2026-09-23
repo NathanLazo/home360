@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { BranchLocationFields } from "./branch-location-fields";
 import type { BranchFormErrors, BranchFormValues } from "./branch.types";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -150,6 +151,13 @@ export function BranchFormFields({
           </p>
         ) : null}
       </div>
+
+      <BranchLocationFields
+        values={values}
+        errors={errors}
+        disabled={disabled}
+        onChange={(location) => onChange({ ...values, ...location })}
+      />
     </div>
   );
 }

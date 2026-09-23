@@ -65,6 +65,7 @@ export async function verifyCredentials(
       image: true,
       role: true,
       passwordHash: true,
+      suspendedAt: true,
     },
   });
 
@@ -73,7 +74,9 @@ export async function verifyCredentials(
     user?.passwordHash,
   );
 
-  if (!user || !isValid) {
+  // A suspended account (W10 moderation) fails exactly like wrong
+  // credentials, after the constant-time password check.
+  if (!user || !isValid || user.suspendedAt !== null) {
     return null;
   }
 

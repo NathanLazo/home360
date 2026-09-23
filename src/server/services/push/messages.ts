@@ -10,6 +10,8 @@ import {
 } from "./expo-push";
 
 export type PushMessageKey =
+  | "disputeEvidenceRequested"
+  | "ratingReminder"
   | "requestNearby"
   | "quoteReceived"
   | "escrowHeld"
@@ -19,7 +21,12 @@ export type PushMessageKey =
   | "confirmationRequested"
   | "deliveryConfirmed"
   | "escrowAutoReleased"
-  | "workerInvitation";
+  | "workerInvitation"
+  | "orderCancelled"
+  | "orderWorkerAssigned"
+  | "disputeOpened"
+  | "reworkRequested"
+  | "orderCancelledByCustomer";
 
 export type LocalizedPushInput = {
   message: PushMessageKey;

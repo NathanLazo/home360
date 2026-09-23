@@ -30,8 +30,7 @@ export const resolveDisputeErrorCodes = [
   "STRIPE_ERROR",
 ] as const;
 
-export type ResolveDisputeErrorCode =
-  (typeof resolveDisputeErrorCodes)[number];
+export type ResolveDisputeErrorCode = (typeof resolveDisputeErrorCodes)[number];
 
 export type ResolveDisputeInput = {
   adminId: string;
@@ -64,9 +63,7 @@ type LoadedDispute = {
 };
 
 function isNonNegativeInteger(value: number | undefined): value is number {
-  return (
-    value !== undefined && Number.isInteger(value) && value >= 0
-  );
+  return value !== undefined && Number.isInteger(value) && value >= 0;
 }
 
 /**

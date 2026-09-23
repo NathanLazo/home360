@@ -1,8 +1,3 @@
-import {
-  OrderEventType,
-  OrderStatus,
-  type Prisma,
-} from "@generated/prisma";
 import { env } from "~/env";
 import { splitLocaleFromPathname, type Locale } from "~/i18n/locale-pathname";
 import { routing } from "~/i18n/routing";
@@ -15,45 +10,41 @@ import {
 import {
   confirmDeliverySchema,
   createPaymentLinkSchema,
+  deactivatePaymentLinkSchema,
+  listLoyaltyBonusesSchema,
+  listPaymentLinksSchema,
   listTransactionsSchema,
+  listWithdrawalsSchema,
   requestWithdrawalSchema,
   type PaymentErrorCode,
 } from "~/server/api/routers/payment.schema";
+import { consumerProcedure } from "~/server/api/consumer-procedure";
 import {
   activeBusinessProcedure,
   businessProcedure,
   createTRPCRouter,
-  userProcedure,
 } from "~/server/api/trpc";
+import { confirmOrderDelivery } from "~/server/services/orders/confirm-delivery";
 import { getBusinessBalances } from "~/server/services/payments/balances";
-import { releasePayment } from "~/server/services/payments/escrow";
+import { listBusinessLoyaltyBonuses } from "~/server/services/payments/loyalty-bonus-history";
+import { listBusinessPaymentLinks } from "~/server/services/payments/payment-link-directory";
 import {
   createPaymentLink,
+  deactivatePaymentLink,
   reconcilePaymentLink,
 } from "~/server/services/payments/payment-links";
+import { listBusinessTransactions } from "~/server/services/payments/transaction-history";
+import { listBusinessWithdrawals } from "~/server/services/payments/withdrawal-history";
 import { requestWithdrawal } from "~/server/services/payments/withdrawals";
 import { getStripe } from "~/server/services/stripe/client";
-import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import {
   createConnectAccount,
   createOnboardingLink,
   getAccountStatus,
 } from "~/server/services/stripe/connect";
 
-const PAGE_SIZE = 20;
 const CONNECT_REFRESH_MAX_ATTEMPTS = 5;
 const CONNECT_REFRESH_WINDOW_MS = 60_000;
-
-/**
- * Order states a customer may confirm as delivered. `PENDING` is excluded
- * because the escrow does not exist yet, and terminal or disputed states are
- * never re-completed.
- */
-const DELIVERABLE_ORDER_STATUSES = [
-  OrderStatus.PAID,
-  OrderStatus.IN_PROGRESS,
-  OrderStatus.SHIPPING,
-] as const;
 
 /**
  * HTTP status for every service code the router can receive. Validation and
@@ -141,46 +132,6 @@ function allowConnectRefresh(key: string, now: number): boolean {
   return true;
 }
 
-const transactionSelect = {
-  id: true,
-  amountCents: true,
-  method: true,
-  status: true,
-  createdAt: true,
-  order: {
-    select: { title: true, customer: { select: { name: true } } },
-  },
-  paymentLink: { select: { concept: true } },
-} satisfies Prisma.PaymentSelect;
-
-type TransactionPayload = Prisma.PaymentGetPayload<{
-  select: typeof transactionSelect;
-}>;
-
-export type TransactionListItem = {
-  id: string;
-  customerName: string | null;
-  concept: string;
-  amountCents: number;
-  method: TransactionPayload["method"];
-  status: TransactionPayload["status"];
-  createdAt: Date;
-};
-
-function toTransactionListItem(
-  payment: TransactionPayload,
-): TransactionListItem {
-  return {
-    id: payment.id,
-    customerName: payment.order?.customer.name ?? null,
-    concept: payment.order?.title ?? payment.paymentLink?.concept ?? "",
-    amountCents: payment.amountCents,
-    method: payment.method,
-    status: payment.status,
-    createdAt: payment.createdAt,
-  };
-}
-
 export type ConnectStatus = {
   hasAccount: boolean;
   chargesEnabled: boolean;
@@ -213,40 +164,103 @@ export const paymentRouter = createTRPCRouter({
     .input(listTransactionsSchema)
     .query(async ({ ctx, input }) => {
       try {
-        if (input.cursor) {
-          const cursor = await ctx.db.payment.findFirst({
-            where: { id: input.cursor, businessId: ctx.business.id },
-            select: { id: true },
-          });
+        const transactions = await listBusinessTransactions(
+          { db: ctx.db },
+          { businessId: ctx.business.id, ...input },
+        );
 
-          if (!cursor) {
-            return serviceFailure("NOT_FOUND", "Transaction cursor not found");
-          }
+        if (!transactions.ok) {
+          return serviceFailure(
+            transactions.code,
+            "Transaction listing failed",
+          );
         }
 
-        const payments = await ctx.db.payment.findMany({
-          where: {
-            businessId: ctx.business.id,
-            ...(input.status ? { status: input.status } : {}),
-            ...(input.method ? { method: input.method } : {}),
-          },
-          take: PAGE_SIZE + 1,
-          ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-          select: transactionSelect,
-        });
-        const hasNextPage = payments.length > PAGE_SIZE;
-        const items = payments.slice(0, PAGE_SIZE).map(toTransactionListItem);
-
-        return ok(
-          {
-            items,
-            nextCursor: hasNextPage ? (items.at(-1)?.id ?? null) : null,
-          },
-          "Transactions loaded",
-        );
+        return ok(transactions.data, "Transactions loaded");
       } catch (error) {
         return unexpectedFailure(error, "Transaction listing failed");
+      }
+    }),
+
+  listPaymentLinks: businessProcedure
+    .input(listPaymentLinksSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const links = await listBusinessPaymentLinks(
+          { db: ctx.db },
+          { businessId: ctx.business.id, ...input },
+        );
+
+        if (!links.ok) {
+          return serviceFailure(links.code, "Payment link listing failed");
+        }
+
+        return ok(links.data, "Payment links loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Payment link listing failed");
+      }
+    }),
+
+  deactivatePaymentLink: activeBusinessProcedure
+    .input(deactivatePaymentLinkSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const deactivated = await deactivatePaymentLink(
+          { db: ctx.db, stripe: getStripe() },
+          { businessId: ctx.business.id, paymentLinkId: input.id },
+        );
+
+        if (!deactivated.ok) {
+          return serviceFailure(
+            deactivated.code,
+            "Payment link deactivation failed",
+          );
+        }
+
+        return ok(
+          { id: deactivated.data.paymentLinkId },
+          "Payment link deactivated",
+        );
+      } catch (error) {
+        return unexpectedFailure(error, "Payment link deactivation failed");
+      }
+    }),
+
+  listWithdrawals: businessProcedure
+    .input(listWithdrawalsSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const withdrawals = await listBusinessWithdrawals(
+          { db: ctx.db },
+          { businessId: ctx.business.id, ...input },
+        );
+
+        if (!withdrawals.ok) {
+          return serviceFailure(withdrawals.code, "Withdrawal listing failed");
+        }
+
+        return ok(withdrawals.data, "Withdrawals loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Withdrawal listing failed");
+      }
+    }),
+
+  listLoyaltyBonuses: businessProcedure
+    .input(listLoyaltyBonusesSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const bonuses = await listBusinessLoyaltyBonuses(
+          { db: ctx.db },
+          { businessId: ctx.business.id, ...input },
+        );
+
+        if (!bonuses.ok) {
+          return serviceFailure(bonuses.code, "Loyalty bonus listing failed");
+        }
+
+        return ok(bonuses.data, "Loyalty bonuses loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Loyalty bonus listing failed");
       }
     }),
 
@@ -408,66 +422,23 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  confirmDelivery: userProcedure
+  confirmDelivery: consumerProcedure
     .input(confirmDeliverySchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        const order = await ctx.db.order.findFirst({
-          where: { id: input.orderId, customerId: ctx.customer.id },
-          select: {
-            id: true,
-            payment: { select: { id: true, status: true } },
-            business: { select: { ownerId: true } },
-          },
-        });
-
-        if (!order) {
-          return serviceFailure("ORDER_NOT_FOUND", "Order not found");
-        }
-
-        if (!order.payment) {
-          return serviceFailure(
-            "PAYMENT_NOT_RELEASABLE",
-            "Order has no escrowed payment",
-          );
-        }
-
-        const completeOrder = async () => {
-          await ctx.db.order.updateMany({
-            where: {
-              id: order.id,
-              customerId: ctx.customer.id,
-              status: { in: [...DELIVERABLE_ORDER_STATUSES] },
-            },
-            data: { status: OrderStatus.COMPLETED },
-          });
-        };
-
-        const released = await releasePayment(
+        const confirmed = await confirmOrderDelivery(
           { db: ctx.db, stripe: getStripe() },
           {
-            paymentId: order.payment.id,
-            event: {
-              type: OrderEventType.CONFIRMED,
-              actorUserId: ctx.customer.id,
-            },
+            scope: { kind: "CUSTOMER", customerId: ctx.consumer.userId },
+            orderId: input.orderId,
           },
         );
 
-        if (!released.ok) {
-          return serviceFailure(released.code, "Payment release failed");
+        if (!confirmed.ok) {
+          return serviceFailure(confirmed.code, "Delivery confirmation failed");
         }
 
-        await completeOrder();
-        await sendLocalizedPushToUser(ctx.db, order.business.ownerId, {
-          message: "deliveryConfirmed",
-          url: `home360app://orders/${order.id}`,
-        });
-
-        return ok(
-          { orderId: order.id, paymentId: released.data.paymentId },
-          "Delivery confirmed",
-        );
+        return ok(confirmed.data, "Delivery confirmed");
       } catch (error) {
         return unexpectedFailure(error, "Delivery confirmation failed");
       }

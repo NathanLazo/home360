@@ -61,7 +61,6 @@ export function SubscriptionView() {
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={() => void openBillingPortal()}
             disabled={openingBillingPortal}
           >
@@ -83,7 +82,6 @@ export function SubscriptionView() {
           action={
             <Button
               type="button"
-              className="min-h-11"
               onClick={() => void currentQuery.refetch()}
             >
               <RotateCcwIcon aria-hidden="true" />
@@ -121,7 +119,6 @@ export function SubscriptionView() {
           action={
             <Button
               type="button"
-              className="min-h-11"
               onClick={() => void plansQuery.refetch()}
             >
               <RotateCcwIcon aria-hidden="true" />

@@ -34,7 +34,6 @@ export function SettingsSaveBar({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={!dirty || saving}
             onClick={onReset}
           >
@@ -43,7 +42,7 @@ export function SettingsSaveBar({
           <Button
             type="submit"
             metal={dirty ? "live" : "static"}
-            className="min-h-11 aria-disabled:cursor-progress sm:min-h-10"
+            className="aria-disabled:cursor-progress"
             // While saving the button stays enabled-but-inert instead of
             // `disabled`, which would drop the live ring and remount it.
             disabled={!dirty}

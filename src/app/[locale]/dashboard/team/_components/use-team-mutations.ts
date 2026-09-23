@@ -46,7 +46,12 @@ export function useTeamMutations() {
     }
 
     toast.success(successMessage);
-    await utils.team.list.invalidate();
+    await Promise.all([
+      utils.team.list.invalidate(),
+      // The services screen shows each service's assigned workers.
+      utils.service.list.invalidate(),
+      utils.service.listWorkers.invalidate(),
+    ]);
     return true;
   }
 

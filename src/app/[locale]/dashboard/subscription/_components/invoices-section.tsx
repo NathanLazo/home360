@@ -62,7 +62,6 @@ export function InvoicesSection() {
             action={
               <Button
                 type="button"
-                className="min-h-11"
                 onClick={() => void invoicesQuery.refetch()}
               >
                 <RotateCcwIcon aria-hidden="true" />
@@ -88,7 +87,7 @@ export function InvoicesSection() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 self-start sm:min-h-10"
+                className="self-start"
                 onClick={() => void invoicesQuery.fetchNextPage()}
                 disabled={invoicesQuery.isFetchingNextPage}
               >

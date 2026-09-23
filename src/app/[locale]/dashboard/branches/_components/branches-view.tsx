@@ -10,6 +10,8 @@ import {
 import { useTranslations } from "next-intl";
 
 import { BranchCard } from "./branch-card";
+import { BranchCoverageMap } from "./branch-coverage-map";
+import { BranchManagerDialog } from "./branch-manager-dialog";
 import { BranchesSkeleton } from "./branches-skeleton";
 import { BranchFormSheet } from "./branch-form-sheet";
 import type { BranchListItem } from "./branch.types";
@@ -29,6 +31,7 @@ export function BranchesView() {
   const mutations = useBranchMutations();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<BranchListItem | null>(null);
+  const [assigning, setAssigning] = useState<BranchListItem | null>(null);
 
   const data = query.data?.result ?? null;
   const responseError = query.data?.error ?? null;
@@ -49,7 +52,6 @@ export function BranchesView() {
         action={
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void query.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -100,7 +102,7 @@ export function BranchesView() {
                 metal={atLimit ? "static" : "live"}
                 metalActive={!sheetOpen}
                 type="button"
-                className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
                 aria-disabled={atLimit}
                 aria-describedby={atLimit ? "branch-limit-help" : undefined}
                 onClick={create}
@@ -119,6 +121,10 @@ export function BranchesView() {
         }
       />
 
+      {data.items.length > 0 ? (
+        <BranchCoverageMap branches={data.items} />
+      ) : null}
+
       {data.items.length === 0 ? (
         <EmptyState
           icon={Building2Icon}
@@ -127,7 +133,6 @@ export function BranchesView() {
           action={
             <Button
               type="button"
-              className="min-h-11"
               onClick={create}
               disabled={isReadOnly}
               title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
@@ -149,6 +154,7 @@ export function BranchesView() {
                 statusPending={mutations.statusPending}
                 deletePending={mutations.deletePending}
                 onEdit={() => edit(branch)}
+                onAssignManager={() => setAssigning(branch)}
                 onStatus={(status) => mutations.setStatus(branch.id, status)}
                 onDelete={() => mutations.remove(branch.id)}
               />
@@ -164,6 +170,15 @@ export function BranchesView() {
         onOpenChange={setSheetOpen}
         onCreate={mutations.create}
         onUpdate={mutations.update}
+      />
+
+      <BranchManagerDialog
+        branch={assigning}
+        submitting={mutations.submitting}
+        onOpenChange={(open) => {
+          if (!open) setAssigning(null);
+        }}
+        onSubmit={mutations.update}
       />
     </div>
   );

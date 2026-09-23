@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { ProductImageField } from "./product-image-field";
 import { ProductStockFields } from "./product-stock-fields";
 import type { ProductFormErrors, ProductFormValues } from "./product.types";
 import { Input } from "~/components/ui/input";
@@ -113,6 +114,13 @@ export function ProductFormFields({
           </div>
         </Field>
       </div>
+
+      <ProductImageField
+        value={values.imageUrl}
+        error={errors.imageUrl}
+        disabled={disabled}
+        onChange={(imageUrl) => set("imageUrl", imageUrl)}
+      />
 
       <div className="bg-canvas-soft mx-4 flex items-center justify-between gap-4 rounded-md border p-4">
         <div>

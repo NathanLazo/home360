@@ -191,6 +191,8 @@ enum DocumentStatus {
 }
 
 enum AdminAuditAction {
+  DISPUTE_EVIDENCE_REQUESTED
+  CAMPAIGN_SENT
   BUSINESS_APPROVED
   BUSINESS_REJECTED
   BUSINESS_SUSPENDED
@@ -202,14 +204,30 @@ enum AdminAuditAction {
   SETTINGS_UPDATED
   LOYALTY_BONUS_PAID
   LOYALTY_BONUS_CANCELLED
+  BUSINESS_REVIEW_REOPENED
+  DOCUMENT_APPROVED
+  DOCUMENT_REJECTED
+  USER_SUSPENDED
+  USER_REACTIVATED
 }
 
 enum AdminAuditTarget {
+  CAMPAIGN
   BUSINESS
   DISPUTE
   WITHDRAWAL
   PLATFORM_SETTINGS
   LOYALTY_BONUS
+  BUSINESS_DOCUMENT
+  USER
+}
+
+// W13 manual broadcast audience ("Campañas y anuncios").
+enum CampaignAudience {
+  ALL
+  CUSTOMERS
+  BUSINESSES
+  WORKERS
 }
 
 enum PushPlatform {
@@ -234,6 +252,14 @@ enum OrderEventType {
   CONFIRMATION_REQUESTED
   CONFIRMED
   AUTO_RELEASED
+  // Business-side lifecycle actions from the web dashboard (order.cancel /
+  // order.assignWorker). The cancel reason lives in OrderEvent.note.
+  CANCELLED
+  WORKER_ASSIGNED
+  // Customer-side lifecycle (workstream D): rework sends a WORK_DONE order
+  // back to the technician; DISPUTE_OPENED freezes the escrow.
+  REWORK_REQUESTED
+  DISPUTE_OPENED
 }
 
 enum AiUrgency {
@@ -282,6 +308,10 @@ model User {
   locale                       String                       @default("es")
   passwordHash                 String?
   sessionsValidFrom            DateTime                     @default(now())
+  // Platform moderation (W10): a suspended CUSTOMER/WORKER user cannot sign
+  // in and every live session is revoked through `sessionsValidFrom`.
+  suspendedAt                  DateTime?
+  suspensionReason             String?
   accounts                     Account[]
   sessions                     Session[]
   business                     Business?
@@ -296,10 +326,12 @@ model User {
   managedCorporateAccounts     CorporateAccount[]           @relation("CorporateAccountManager")
   reviewedCorporateTierChanges CorporateTierChangeRequest[] @relation("CorporateTierReviewer")
   pushTokens                   PushToken[]
+  campaignsSent                Campaign[]                   @relation("CampaignSender")
   customerProfile              CustomerProfile?
   addresses                    Address[]
   messages                     Message[]
   orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
+  requestDiagnoses             RequestDiagnosis[]
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -332,6 +364,9 @@ model Business {
   // ONLY by recalculateBusinessRating() or the seed; null = no reviews yet.
   ratingAvg        Float?
   ratingCount      Int                @default(0)
+  // Dashboard notifications bell: feed items newer than this are unread.
+  // null = never opened (everything in the feed counts as unread).
+  notificationsSeenAt DateTime?
   branches         Branch[]
   workers          Worker[]
   services         Service[]
@@ -391,6 +426,10 @@ model Worker {
   ratingAvg        Float?
   invitedEmail     String?
   invitationStatus InvitationStatus   @default(ACCEPTED)
+  // Invitation acceptance link (workstream D): only the SHA-256 of the
+  // single-use token is stored; cleared once the worker accepts.
+  invitationTokenHash String?         @unique
+  invitationExpiresAt DateTime?
   // Last known position for C6 tracking (written by tracking.updateLocation,
   // M4-W2, throttled to 15 s).
   lastLatitude      Float?
@@ -483,12 +522,25 @@ model ServiceRequest {
   longitude       Float?
   // AI diagnosis urgency (M2-W2 computed it and discarded it).
   aiUrgency       AiUrgency?
+  // Set when the AI confidence falls below PlatformSettings.aiConfidenceThresholdPct
+  // and aiHumanReviewBelowThreshold is on: the request waits for a human look.
+  needsHumanReview Boolean      @default(false)
   // Colonia copied from Address.neighborhood at request creation (MA-13).
   // It is the ONLY textual piece of the address a business sees before its
   // quote is accepted (radar privacy gating, M5-W1).
   neighborhood    String?
   status          RequestStatus @default(OPEN)
   expiresAt       DateTime?
+  // Suggestions frozen at diagnosis time (workstream D). Plain ids without FK:
+  // a deleted catalog row simply stops being suggested.
+  suggestedServiceId  String?
+  suggestedProductId  String?
+  // Corporate consumer (F7): requests created from a corporate location carry
+  // the account/location so the accepted quote's Order inherits them.
+  corporateAccountId  String?
+  corporateAccount    CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
+  corporateLocationId String?
+  corporateLocation   CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
   quotes          Quote[]
   conversations   Conversation[]
   createdAt       DateTime      @default(now())
@@ -497,6 +549,33 @@ model ServiceRequest {
   @@index([customerId])
   @@index([status, createdAt])
   @@index([category])
+  @@index([corporateAccountId, createdAt])
+  @@index([corporateLocationId])
+}
+
+// Standalone AI diagnosis (workstream D, C2→C3): `request.diagnose` stores the
+// result so `request.create` can reuse it by id instead of re-running the
+// model. Single use: `consumedAt` is set when a request is created from it.
+model RequestDiagnosis {
+  id                 String     @id @default(cuid())
+  userId             String
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaPathnames     String[]
+  description        String?
+  diagnosis          String
+  confidencePct      Int
+  category           String
+  urgency            AiUrgency
+  minPriceCents      Int
+  maxPriceCents      Int
+  suggestedServiceId String?
+  suggestedProductId String?
+  consumedAt         DateTime?
+  expiresAt          DateTime
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([userId, createdAt])
 }
 
 model Quote {
@@ -566,9 +645,15 @@ model Order {
   recordingUrl         String?
   recordingDurationSec Int?
   recordingComplete    Boolean            @default(false)
+  // Idempotency for the rating-reminder cron: at most one reminder per order.
+  ratingReminderSentAt DateTime?
   beforeUrls           String[]
   afterUrls            String[]
   workNotes            String?
+  // Worker justification when the recording is missing or incomplete at
+  // finish (RECORDING_JUSTIFICATION_REQUIRED, D6: disputes still favour the
+  // customer when the recording is incomplete).
+  recordingJustification String?
   materials            OrderMaterial[]
   recordingSegments    RecordingSegment[]
   payment              Payment?
@@ -667,6 +752,7 @@ model CorporateAccount {
   stripeCustomerId   String?                      @unique
   statusReason       String?
   locations          CorporateLocation[]
+  serviceRequests    ServiceRequest[]
   membership         CorporateMembership?
   tierChangeRequests CorporateTierChangeRequest[]
   invoices           CorporateInvoice[]
@@ -689,6 +775,7 @@ model CorporateLocation {
   contactPhone       String?
   isActive           Boolean          @default(true)
   orders             Order[]
+  serviceRequests    ServiceRequest[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
@@ -930,6 +1017,10 @@ model Dispute {
   businessArgument              String?
   evidenceUrls                  String[]
   aiSummary                     String?
+  aiSummaryGeneratedAt          DateTime?
+  // Last "request more evidence" note written by an admin (W11).
+  evidenceRequestNote           String?
+  evidenceRequestedAt           DateTime?
   resolution                    DisputeResolution?
   resolutionAmountCents         Int?
   // D6 traceability: an incomplete recording resolves in favour of the
@@ -1103,6 +1194,8 @@ model OrderEvent {
   type        OrderEventType
   actorUserId String?
   actor       User?          @relation("OrderEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  // Free-text context of the event (e.g. the business cancel reason).
+  note        String?
   createdAt   DateTime       @default(now())
 
   @@index([orderId, createdAt])
@@ -1133,4 +1226,20 @@ model PlatformSettings {
   notifyRatingReminderHours   Int      @default(24)
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
+}
+
+model Campaign {
+  id             String           @id @default(cuid())
+  title          String
+  body           String
+  audience       CampaignAudience
+  sentById       String
+  sentBy         User             @relation("CampaignSender", fields: [sentById], references: [id])
+  sentAt         DateTime         @default(now())
+  recipientCount Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([sentAt])
+  @@index([sentById])
 }

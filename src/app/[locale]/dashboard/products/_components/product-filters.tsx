@@ -89,7 +89,6 @@ export function ProductFilters({
         type="button"
         variant={filters.lowStockOnly ? "secondary" : "outline"}
         aria-pressed={filters.lowStockOnly}
-        className="min-h-11 sm:min-h-10"
         onClick={() =>
           onChange({ ...filters, lowStockOnly: !filters.lowStockOnly })
         }

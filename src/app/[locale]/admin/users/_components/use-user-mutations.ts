@@ -18,6 +18,7 @@ export type UserMutations = {
   reject: MutationRunner<{ businessId: string; reason: string }>;
   suspend: MutationRunner<{ businessId: string; reason: string }>;
   reactivate: MutationRunner<{ businessId: string }>;
+  reopen: MutationRunner<{ businessId: string }>;
 };
 
 /**
@@ -40,7 +41,8 @@ export function useUserMutations(options?: {
     ]);
   };
 
-  type ToastKey = "approved" | "rejected" | "suspended" | "reactivated";
+  type ToastKey =
+    "approved" | "rejected" | "suspended" | "reactivated" | "reopened";
 
   // Each mutation opens a loading toast on click and morphs it into the
   // outcome, so the admin never wonders whether the request was sent.
@@ -72,6 +74,9 @@ export function useUserMutations(options?: {
   const reactivate = api.admin.users.reactivateBusiness.useMutation(
     lifecycle("reactivated"),
   );
+  const reopen = api.admin.users.reopenBusinessReview.useMutation(
+    lifecycle("reopened"),
+  );
 
   return {
     approve: {
@@ -89,6 +94,10 @@ export function useUserMutations(options?: {
     reactivate: {
       run: (input) => reactivate.mutate(input),
       pending: reactivate.isPending,
+    },
+    reopen: {
+      run: (input) => reopen.mutate(input),
+      pending: reopen.isPending,
     },
   };
 }

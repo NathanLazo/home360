@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import { AiSettingsSection } from "./ai-settings-section";
+import { CampaignsSection } from "./campaigns-section";
 import { EscrowSettingsSection } from "./escrow-settings-section";
 import { FeesSettingsSection } from "./fees-settings-section";
 import { NotificationsSettingsSection } from "./notifications-settings-section";
@@ -91,6 +92,9 @@ export function SettingsView() {
       ) : null}
 
       {state.status === "success" ? <SettingsForm data={state.data} /> : null}
+
+      {/* Independent of the form: broadcasting never waits on "Guardar". */}
+      <CampaignsSection />
     </div>
   );
 }

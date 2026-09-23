@@ -64,9 +64,13 @@ export async function resolveRadarBranch(
         },
       })
     : await db.branch.findFirst({
+        // Without an explicit branch, the first ACTIVE branch that can
+        // actually act as a radar origin wins.
         where: {
           businessId: input.businessId,
           status: BranchStatus.ACTIVE,
+          latitude: { not: null },
+          longitude: { not: null },
         },
         select: {
           id: true,
@@ -105,8 +109,8 @@ export async function listBusinessCategories(
 
 /**
  * True when the business may see the request under radar privacy rules:
- * OPEN, category in the catalog, within the effective radius of some ACTIVE
- * branch with coordinates. Used by authorizeMediaRead (MA-02) and quote.submit.
+ * OPEN or QUOTED (no accepted offer yet), category in the catalog, within the
+ * effective radius of some ACTIVE branch with coordinates. Used by authorizeMediaRead (MA-02) and quote.submit.
  */
 export async function isRequestVisibleOnRadar(
   db: PrismaClient,
@@ -115,7 +119,7 @@ export async function isRequestVisibleOnRadar(
   const request = await db.serviceRequest.findFirst({
     where: {
       id: input.requestId,
-      status: RequestStatus.OPEN,
+      status: { in: [RequestStatus.OPEN, RequestStatus.QUOTED] },
       latitude: { not: null },
       longitude: { not: null },
     },

@@ -20,7 +20,10 @@ export function useBranchMutations() {
       utils.dashboard.getWeeklyRevenue.invalidate(),
       utils.dashboard.getOrdersByBranch.invalidate(),
       utils.dashboard.getRecentOrders.invalidate(),
+      utils.dashboard.getActiveOrdersCount.invalidate(),
     ]);
+    // The header branch selector and sidebar read server-rendered shell data.
+    router.refresh();
   }
 
   function failed(response: { error: string | null }) {

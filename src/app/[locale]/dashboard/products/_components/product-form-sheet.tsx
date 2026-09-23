@@ -10,6 +10,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { ProductFormFields } from "./product-form-fields";
+import { parseStockRows, toStockFormValues } from "./product-stock.utils";
 import {
   productCreateSchema,
   productUpdateSchema,
@@ -45,18 +46,13 @@ function pesosToCents(value: string) {
   return Number.isSafeInteger(cents) && cents > 0 ? cents : null;
 }
 
-function nonNegativeInteger(value: string) {
-  if (!/^\d+$/.test(value.trim())) return null;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) ? parsed : null;
-}
-
 function emptyValues(branches: ProductStockBranch[]): ProductFormValues {
   return {
     name: "",
     sku: "",
     category: "",
     price: "",
+    imageUrl: "",
     published: false,
     stocks: branches.map((branch) => ({
       branchId: branch.id,
@@ -130,15 +126,9 @@ export function ProductFormSheet({
       sku: product.sku,
       category: product.category,
       price: `${Math.floor(product.priceCents / 100)}.${String(product.priceCents % 100).padStart(2, "0")}`,
+      imageUrl: product.imageUrl ?? "",
       published: product.status === "PUBLISHED",
-      stocks: stockQuery.data.result.map((stock) => ({
-        branchId: stock.branchId,
-        branchName: stock.branchName,
-        branchStatus: stock.branchStatus,
-        isCarried: stock.isCarried,
-        stock: String(stock.stock),
-        lowStockThreshold: String(stock.lowStockThreshold),
-      })),
+      stocks: toStockFormValues(stockQuery.data.result),
     });
     initializedFor.current = key;
     window.requestAnimationFrame(() =>
@@ -158,7 +148,12 @@ export function ProductFormSheet({
       if (field === "priceCents") {
         next.price = t("invalidField");
         firstId ??= "product-price";
-      } else if (field === "name" || field === "sku" || field === "category") {
+      } else if (
+        field === "name" ||
+        field === "sku" ||
+        field === "category" ||
+        field === "imageUrl"
+      ) {
         next[field] = t("invalidField");
         firstId ??= `product-${field}`;
       } else if (field === "stocks") {
@@ -183,19 +178,9 @@ export function ProductFormSheet({
     const priceCents = pesosToCents(values.price);
     if (priceCents === null) nextErrors.price = t("invalidField");
 
-    const stocks: ProductCreateInput["stocks"] = [];
-    for (const row of values.stocks.filter((stock) => stock.isCarried)) {
-      const stock = nonNegativeInteger(row.stock);
-      const threshold = nonNegativeInteger(row.lowStockThreshold);
-      if (stock === null || threshold === null) {
-        nextErrors.stockRows![row.branchId] = t("stock.invalidRow");
-      } else {
-        stocks.push({
-          branchId: row.branchId,
-          stock,
-          lowStockThreshold: threshold,
-        });
-      }
+    const { stocks, invalidBranchIds } = parseStockRows(values.stocks);
+    for (const branchId of invalidBranchIds) {
+      nextErrors.stockRows![branchId] = t("stock.invalidRow");
     }
     if (nextErrors.price || Object.keys(nextErrors.stockRows!).length > 0) {
       setErrors(nextErrors);
@@ -214,10 +199,16 @@ export function ProductFormSheet({
       priceCents: priceCents!,
       stocks,
     };
+    const imageUrl = values.imageUrl.trim();
     const parsed = product
-      ? productUpdateSchema.safeParse({ id: product.id, ...common })
+      ? productUpdateSchema.safeParse({
+          id: product.id,
+          ...common,
+          imageUrl: imageUrl.length > 0 ? imageUrl : null,
+        })
       : productCreateSchema.safeParse({
           ...common,
+          ...(imageUrl.length > 0 ? { imageUrl } : {}),
           status: values.published ? "PUBLISHED" : "DRAFT",
         });
     if (!parsed.success) {
@@ -281,7 +272,7 @@ export function ProductFormSheet({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 min-h-11 min-w-11"
+              className="absolute top-3 right-3"
               aria-label={t("close")}
               disabled={busy}
             >
@@ -343,7 +334,6 @@ export function ProductFormSheet({
                   type="button"
                   variant="outline"
                   disabled={busy}
-                  className="min-h-11"
                 >
                   {t("cancel")}
                 </Button>
@@ -352,7 +342,6 @@ export function ProductFormSheet({
                 type="submit"
                 metal="live"
                 disabled={busy || detailLoading}
-                className="min-h-11"
               >
                 {busy ? (
                   <LoaderCircleIcon

@@ -118,8 +118,8 @@
     "title": "Home",
     "subtitle": "Key metrics and recent activity for your business.",
     "kpisLabel": "Key metrics",
-    "revenue": "Revenue, last 30 days",
-    "orders": "Orders",
+    "revenue": "Revenue, last {days} days",
+    "orders": "Orders, last {days} days",
     "escrow": "In escrow",
     "rating": "Rating",
     "revenueComparison": "{delta} vs. previous period",
@@ -174,7 +174,7 @@
   },
   "orders": {
     "title": "Orders",
-    "subtitle": "Review the work, payments, and evidence for every order.",
+    "subtitle": "Manage orders, answer nearby requests and follow up on your offers.",
     "loading": "Loading orders",
     "loadMore": "Load more",
     "retry": "Try again",
@@ -192,7 +192,8 @@
       "branch": "Branch",
       "amount": "Amount",
       "status": "Status",
-      "date": "Date"
+      "date": "Date",
+      "worker": "Technician"
     },
     "types": {
       "service": "Service",
@@ -205,13 +206,21 @@
       "allStatuses": "All statuses",
       "allTypes": "All types",
       "service": "Service",
-      "product": "Product"
+      "product": "Product",
+      "workerLabel": "Filter by technician",
+      "allWorkers": "All technicians",
+      "dateRangeLabel": "Creation date range",
+      "fromLabel": "From",
+      "toLabel": "To",
+      "clearDates": "Clear dates",
+      "invalidRange": "The end date must be on or after the start date."
     },
     "empty": {
       "title": "No orders yet",
       "description": "New orders will appear here when customers purchase a product or request a service.",
       "filteredTitle": "No orders found",
-      "filteredDescription": "Adjust the search, filters, or selected branch."
+      "filteredDescription": "Adjust the search, filters, or selected branch.",
+      "clearFilters": "Clear filters"
     },
     "detail": {
       "title": "Order details",
@@ -247,7 +256,9 @@
         "IN_ESCROW": "In escrow",
         "RELEASED": "Released",
         "REFUNDED": "Refunded",
-        "PARTIALLY_REFUNDED": "Partially refunded"
+        "PARTIALLY_REFUNDED": "Partially refunded",
+        "REFUNDING": "Refunding",
+        "RELEASING": "Releasing"
       },
       "evidenceTitle": "Work evidence",
       "recordingComplete": "Recording complete",
@@ -271,7 +282,13 @@
       "ratingLabel": "Rating: {rating} out of 5",
       "noReviewComment": "No comment.",
       "noReview": "This order does not have a review yet.",
-      "timelineTitle": "Timeline"
+      "timelineTitle": "Timeline",
+      "workerLabel": "Technician",
+      "noWorker": "Unassigned",
+      "scheduledLabel": "Scheduled visit",
+      "deliveryAddressLabel": "Delivery address",
+      "serviceAddressLabel": "Service address",
+      "offerMessageTitle": "Your offer message"
     },
     "timeline": {
       "label": "Order timeline",
@@ -280,7 +297,119 @@
       "released": "Funds released",
       "completed": "Order completed",
       "cancelled": "Order cancelled",
-      "disputed": "Order disputed"
+      "disputed": "Order disputed",
+      "byActor": " · by {name}",
+      "note": "Reason: {note}",
+      "events": {
+        "ACCEPTED": "Order accepted",
+        "ESCROW_HELD": "Payment protected",
+        "EN_ROUTE": "Technician on the way",
+        "ARRIVED": "Technician on site",
+        "RECORDING_STARTED": "Recording started",
+        "RECORDING_STOPPED": "Recording stopped",
+        "WORK_DONE": "Work finished",
+        "CONFIRMATION_REQUESTED": "Confirmation requested from the customer",
+        "CONFIRMED": "Delivery confirmed",
+        "AUTO_RELEASED": "Payment released automatically",
+        "CANCELLED": "Order cancelled",
+        "WORKER_ASSIGNED": "Technician assigned",
+        "REWORK_REQUESTED": "Customer requested a fix",
+        "DISPUTE_OPENED": "Dispute opened"
+      }
+    },
+    "tabs": {
+      "label": "Order sections",
+      "orders": "Orders",
+      "requests": "Requests",
+      "offers": "My offers"
+    },
+    "actions": {
+      "title": "Order actions",
+      "accept": "Accept order",
+      "assignWorker": "Assign technician",
+      "reassignWorker": "Reassign technician",
+      "messageCustomer": "Message customer",
+      "hideConversation": "Hide conversation",
+      "cancel": "Cancel order",
+      "nextStep": {
+        "awaitingPayment": {
+          "title": "Waiting for the customer's payment",
+          "description": "The order activates once the customer pays. You can cancel it if you can no longer take it."
+        },
+        "acceptProduct": {
+          "title": "Paid order: accept it to ship",
+          "description": "The payment is protected. Accepting moves the order to shipping; the customer confirms delivery to release the money."
+        },
+        "assignWorker": {
+          "title": "Assign a technician",
+          "description": "The payment is protected. Assign who will do the job so they get the order in their app."
+        },
+        "serviceScheduled": {
+          "title": "Service ready to be done",
+          "description": "The assigned technician sees the order in their app. The work is recorded as evidence while it is done."
+        },
+        "inProgress": {
+          "title": "Work in progress",
+          "description": "The technician is on the job. When done, the customer confirms and the payment is released."
+        },
+        "shipping": {
+          "title": "Shipping",
+          "description": "The customer confirms receipt from their app; then the protected payment is released."
+        },
+        "completed": {
+          "title": "Order completed",
+          "description": "The customer confirmed delivery. Check the payment status in Payments."
+        },
+        "cancelled": {
+          "title": "Order cancelled",
+          "description": "This order no longer accepts changes. If it was paid, the customer was refunded."
+        },
+        "disputed": {
+          "title": "Order in dispute",
+          "description": "The payment stays on hold while the HOME360 team reviews the evidence."
+        }
+      },
+      "cancelDialog": {
+        "title": "Cancel order #{folio}?",
+        "description": "The order is not paid yet. The customer will be notified with the reason.",
+        "descriptionRefund": "The full amount paid will be refunded to the customer, who will be notified. This cannot be undone.",
+        "reasonLabel": "Cancellation reason",
+        "reasonPlaceholder": "Briefly explain why you are cancelling…",
+        "reasonInvalid": "Write a reason between 3 and 500 characters.",
+        "keep": "Keep order",
+        "confirm": "Cancel order"
+      },
+      "assignDialog": {
+        "title": "Assign a technician to order #{folio}",
+        "reassignTitle": "Reassign the technician of order #{folio}",
+        "description": "The technician gets a notification and sees the order in their app.",
+        "workerLabel": "Technician",
+        "workerPlaceholder": "Select a technician",
+        "noWorkers": "You have no technicians yet. Add them in Team.",
+        "cancel": "Cancel",
+        "confirm": "Assign"
+      },
+      "feedback": {
+        "accepted": "Order accepted. It is now shipping.",
+        "cancelled": "Order cancelled.",
+        "workerAssigned": "Technician assigned.",
+        "transportError": "We couldn't complete the action. Check your connection and try again."
+      }
+    },
+    "conversation": {
+      "title": "Conversation with {name}",
+      "pollingHint": "New messages load every few seconds.",
+      "loading": "Loading messages",
+      "empty": "No messages yet. Write the first one.",
+      "threadLabel": "Order messages",
+      "fromCustomer": "Customer:",
+      "fromBusiness": "Your team:",
+      "imageMessage": "Image sent from the app",
+      "locationMessage": "Location shared from the app",
+      "composerLabel": "Message to the customer",
+      "composerPlaceholder": "Write a message… (Enter to send)",
+      "send": "Send message",
+      "retry": "Retry"
     }
   },
   "payments": {
@@ -306,7 +435,9 @@
       "escrowOrders": "{count, plural, =0 {No active orders} one {# active order} other {# active orders}}",
       "commission": "Monthly commission",
       "commissionHint": "Accrued in the current month",
-      "commissionHintWithRate": "Accrued in the current month · {percent}% on your plan"
+      "commissionHintWithRate": "Accrued in the current month · {percent}% on your plan",
+      "loyalty": "Loyalty bonuses",
+      "loyaltyHint": "Pending settlement · not part of your balance"
     },
     "columns": {
       "customer": "Customer",
@@ -314,7 +445,8 @@
       "amount": "Amount",
       "method": "Method",
       "status": "Status",
-      "date": "Date"
+      "date": "Date",
+      "actions": "Actions"
     },
     "methods": {
       "CARD": "Card",
@@ -385,6 +517,144 @@
       "start": "Connect account",
       "resume": "Complete information",
       "completed": "Your account can now charge and receive deposits."
+    },
+    "tabs": {
+      "label": "Payment sections",
+      "transactions": "Transactions",
+      "links": "Payment links",
+      "withdrawals": "Withdrawals",
+      "bonuses": "Bonuses"
+    },
+    "filters": {
+      "statusLabel": "Filter by status",
+      "allStatuses": "All statuses",
+      "methodLabel": "Filter by method",
+      "allMethods": "All methods",
+      "clear": "Clear filters",
+      "branchScoped": "Showing only payments for orders of the selected branch."
+    },
+    "emptyFiltered": {
+      "title": "No transactions match these filters",
+      "description": "Try another status or method, or switch branches."
+    },
+    "rowActions": {
+      "open": "Actions for {concept}",
+      "viewDetail": "View details",
+      "goToOrder": "View order",
+      "copyLink": "Copy payment link"
+    },
+    "detail": {
+      "title": "Payment details",
+      "description": "Amounts frozen at the time of the charge.",
+      "close": "Close details",
+      "status": "Status",
+      "customer": "Customer",
+      "method": "Method",
+      "order": "Order",
+      "orderFolio": "#{folio}",
+      "branch": "Branch",
+      "noBranch": "No branch",
+      "total": "Total charged to customer",
+      "providerAmount": "Service amount",
+      "serviceFee": "Service fee",
+      "commission": "Commission ({percent}%)",
+      "refunded": "Refunded",
+      "net": "Your net",
+      "createdAt": "Charged",
+      "escrowReleaseAt": "Scheduled release",
+      "releasedAt": "Released",
+      "notScheduled": "Not scheduled",
+      "viewOrder": "View order",
+      "copyLink": "Copy payment link"
+    },
+    "paymentLinks": {
+      "loading": "Loading payment links",
+      "errorTitle": "We couldn’t load your payment links",
+      "columns": {
+        "concept": "Concept",
+        "amount": "Amount",
+        "status": "Status",
+        "created": "Created",
+        "paid": "Paid",
+        "actions": "Actions"
+      },
+      "customerPays": "Customer pays {amount}",
+      "unpaid": "Unpaid",
+      "status": {
+        "CREATING": "Creating",
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      },
+      "empty": {
+        "title": "You have no payment links yet",
+        "description": "Create a single-use link and share it with your customer to charge with protected payment.",
+        "action": "Create payment link"
+      },
+      "actions": {
+        "open": "Actions for {concept}",
+        "copy": "Copy link",
+        "openLink": "Open link",
+        "deactivate": "Deactivate"
+      },
+      "deactivate": {
+        "title": "Deactivate payment link",
+        "description": "The link “{concept}” will stop accepting payments. This can’t be undone.",
+        "confirm": "Deactivate link",
+        "cancel": "Cancel",
+        "success": "Payment link deactivated"
+      }
+    },
+    "withdrawals": {
+      "loading": "Loading withdrawals",
+      "errorTitle": "We couldn’t load your withdrawals",
+      "columns": {
+        "amount": "Amount",
+        "destination": "Destination",
+        "status": "Status",
+        "requested": "Requested",
+        "processed": "Processed"
+      },
+      "destination": "{bank} ****{last4}",
+      "rejectionReason": "Reason: {reason}",
+      "status": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "FAILED": "Failed",
+        "CANCELED": "Canceled"
+      },
+      "empty": {
+        "title": "You haven’t requested any withdrawals",
+        "description": "When you withdraw your available balance, each request and its status will show up here."
+      }
+    },
+    "bonuses": {
+      "loading": "Loading bonuses",
+      "errorTitle": "We couldn’t load your loyalty bonuses",
+      "intro": "Loyalty bonuses are settled outside the platform, with vouchers or a transfer. They are not part of your withdrawable balance.",
+      "columns": {
+        "concept": "Payment",
+        "amount": "Bonus",
+        "status": "Status",
+        "earned": "Earned",
+        "paid": "Settled"
+      },
+      "paymentAmount": "{amount} payment",
+      "pct": "{percent}% of the payment",
+      "status": {
+        "PENDING": "Pending",
+        "PAID": "Settled",
+        "CANCELLED": "Cancelled"
+      },
+      "methods": {
+        "VOUCHER": "Vouchers",
+        "TRANSFER": "Transfer"
+      },
+      "empty": {
+        "title": "You have no loyalty bonuses yet",
+        "description": "When a payment qualifies for a loyalty bonus it will show up here with its settlement status."
+      }
     }
   },
   "services": {
@@ -438,7 +708,9 @@
     },
     "empty": {
       "title": "No services to show",
-      "description": "Create your first service or adjust your search filters."
+      "description": "Create your first service to start receiving requests.",
+      "filteredTitle": "No services found",
+      "filteredDescription": "Change your search or filters to see other results."
     },
     "form": {
       "createTitle": "New service",
@@ -498,14 +770,18 @@
       "unassigned": "Unassigned",
       "monthlyOrders": "Orders this month",
       "coverage": "Coverage",
-      "kilometers": "{count} km"
+      "kilometers": "{count} km",
+      "noLocation": "No location",
+      "noLocationHint": "Won’t receive requests",
+      "location": "Location"
     },
     "actions": {
       "open": "Open actions for {name}",
       "edit": "Edit",
       "activate": "Activate",
       "pause": "Pause",
-      "delete": "Delete"
+      "delete": "Delete",
+      "assignManager": "Assign manager"
     },
     "delete": {
       "title": "Delete branch",
@@ -528,7 +804,18 @@
       "close": "Close form",
       "cancel": "Cancel",
       "save": "Save changes",
-      "create": "Create branch"
+      "create": "Create branch",
+      "location": {
+        "title": "Location",
+        "help": "Requests reach branches whose radius covers the customer’s address.",
+        "useCurrent": "Use my location",
+        "locating": "Locating…",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "permissionDenied": "Location permission denied. Enter the coordinates manually.",
+        "unavailable": "We couldn’t get your location. Enter the coordinates manually.",
+        "invalid": "Enter latitude (−90 to 90) and longitude (−180 to 180), or leave both empty."
+      }
     },
     "feedback": {
       "planLimit": "You've reached your plan's branch limit.",
@@ -542,6 +829,29 @@
       "deleteConflict": "You can't delete a branch with active orders.",
       "deleteError": "We couldn't delete the branch.",
       "deleted": "Branch deleted."
+    },
+    "map": {
+      "title": "Coverage map",
+      "summary": "{located} of {total} located",
+      "ariaLabel": "Coverage map: {branches}",
+      "ariaBranch": "{name}, {radius} km radius",
+      "emptyTitle": "No branch has a location yet",
+      "emptyDescription": "Add latitude and longitude to your branches to see their coverage and start receiving nearby requests.",
+      "missing": "{count, plural, one {# branch without location} other {# branches without location}}"
+    },
+    "managerDialog": {
+      "title": "Assign manager",
+      "description": "Choose the team member responsible for {name}.",
+      "label": "Manager",
+      "none": "No manager",
+      "thisBranch": "At this branch",
+      "otherBranches": "Other branches",
+      "loading": "Loading team…",
+      "loadError": "We couldn’t load your team.",
+      "retry": "Retry",
+      "emptyTeam": "You have no workers yet. Add them in Team to assign a manager.",
+      "cancel": "Cancel",
+      "save": "Save"
     }
   },
   "products": {
@@ -630,7 +940,8 @@
       "edit": "Edit",
       "publish": "Publish",
       "unpublish": "Unpublish",
-      "delete": "Delete"
+      "delete": "Delete",
+      "adjustStock": "Adjust stock"
     },
     "delete": {
       "title": "Delete product",
@@ -679,6 +990,12 @@
         "invalidRow": "Use whole numbers greater than or equal to zero.",
         "loadErrorTitle": "We couldn't load inventory",
         "loadErrorDescription": "Check your connection and try again."
+      },
+      "image": {
+        "label": "Image (URL)",
+        "placeholder": "https://…/product.jpg",
+        "help": "Optional. Use a public https link; it is shown in your catalog.",
+        "previewError": "We couldn’t load the preview; make sure the link is a public image."
       }
     },
     "feedback": {
@@ -688,7 +1005,13 @@
       "unpublished": "Product unpublished.",
       "deleted": "Product deleted.",
       "deleteConflict": "You can't delete this product because it has active orders.",
-      "transportError": "We couldn't complete the action. Check your connection and try again."
+      "transportError": "We couldn't complete the action. Check your connection and try again.",
+      "stockAdjusted": "Stock updated."
+    },
+    "stockDialog": {
+      "title": "Adjust stock",
+      "description": "Stock and alerts for {name} by branch.",
+      "save": "Save stock"
     }
   },
   "placeholder": {
@@ -719,7 +1042,8 @@
       "services": "Assigned services",
       "branch": "Branch",
       "invitation": "Invitation",
-      "actions": "Actions"
+      "actions": "Actions",
+      "status": "Status"
     },
     "invitationStatus": {
       "PENDING": "Pending",
@@ -777,6 +1101,13 @@
       "EMAIL_SEND_FAILED": "We couldn't send the invitation. Resend it from the worker's menu.",
       "CONFLICT": "This is the only worker assigned to an active service; reassign the service first.",
       "RESEND_CONFLICT": "This worker has no pending invitation."
+    },
+    "availability": {
+      "AVAILABLE": "Available",
+      "ON_SERVICE": "On a job",
+      "OFF": "Off shift",
+      "notConnected": "Not connected",
+      "todayOrders": "{count, plural, =0 {No orders today} one {# order today} other {# orders today}}"
     }
   },
   "settings": {
@@ -845,6 +1176,227 @@
       "profileUpdated": "Business profile updated.",
       "ownerUpdated": "Owner name updated.",
       "passwordUpdated": "Password updated.",
+      "transportError": "We couldn't complete the action. Check your connection and try again."
+    }
+  },
+  "rangeSelector": {
+    "label": "Indicators period",
+    "option": "Last {days} days"
+  },
+  "notifications": {
+    "trigger": "Notifications",
+    "triggerUnread": "Notifications, {count} unread",
+    "title": "Notifications",
+    "unreadSummary": "{count} new",
+    "unread": "Unread",
+    "loading": "Loading notifications…",
+    "errorTitle": "We couldn’t load your notifications",
+    "errorDescription": "Check your connection and try again.",
+    "retry": "Retry",
+    "emptyTitle": "All caught up",
+    "emptyDescription": "Payments, confirmations, disputes and withdrawals show up here.",
+    "kinds": {
+      "orderPaid": {
+        "title": "Payment in escrow · #{folio}",
+        "description": "{order} · {amount} held until delivery."
+      },
+      "quoteAccepted": {
+        "title": "Quote accepted · #{folio}",
+        "description": "{order} · the customer accepted your quote."
+      },
+      "orderConfirmed": {
+        "title": "Work confirmed · #{folio}",
+        "description": "{order} · the customer confirmed delivery."
+      },
+      "autoReleased": {
+        "title": "Automatic release · #{folio}",
+        "description": "{order} · payment released when the window closed."
+      },
+      "disputeOpened": {
+        "title": "Dispute opened · #{folio}",
+        "description": "{order} · respond with your evidence."
+      },
+      "disputeResolved": {
+        "title": "Dispute resolved · #{folio}",
+        "description": "{order} · review the resolution."
+      },
+      "withdrawalProcessing": {
+        "title": "Withdrawal processing",
+        "description": "{amount} on its way to your account."
+      },
+      "withdrawalApproved": {
+        "title": "Withdrawal approved",
+        "description": "{amount} sent to your account."
+      },
+      "withdrawalRejected": {
+        "title": "Withdrawal rejected",
+        "description": "{amount} · see the reason in Payments."
+      },
+      "withdrawalFailed": {
+        "title": "Withdrawal failed",
+        "description": "{amount} · the bank rejected the transfer."
+      }
+    }
+  },
+  "requests": {
+    "loading": "Loading requests",
+    "loadMore": "Load more",
+    "notAvailable": "—",
+    "noDiagnosis": "No diagnosis",
+    "noZone": "Area not provided",
+    "queryErrorTitle": "We couldn't load the requests",
+    "distanceValue": "{km} km",
+    "priceRangeValue": "{min} – {max}",
+    "columns": {
+      "request": "Request",
+      "category": "Category",
+      "zone": "Area",
+      "distance": "Distance",
+      "priceRange": "Estimated range",
+      "urgency": "Urgency",
+      "date": "Posted"
+    },
+    "urgency": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High"
+    },
+    "empty": {
+      "title": "No nearby requests right now",
+      "description": "Here you'll see services customers request within your branch radius and your active categories."
+    },
+    "radar": {
+      "intro": "Customer requests near your branches.",
+      "origin": "Radar from {branch} · {km} km radius",
+      "branchLabel": "Radar origin branch",
+      "branchPlaceholder": "Choose a branch",
+      "noLocationTitle": "Your branches have no location yet",
+      "branchNoLocationTitle": "{branch} has no location on file",
+      "noLocationDescription": "To receive nearby requests, set the location of an active branch.",
+      "goToBranches": "Go to Branches"
+    },
+    "offerStatus": {
+      "PENDING": "Sent",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Declined",
+      "EXPIRED": "Expired",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "detail": {
+      "title": "Request detail",
+      "description": "Customer request information",
+      "close": "Close detail",
+      "postedAt": "Posted {date}",
+      "loadErrorTitle": "We couldn't load the request",
+      "notAvailableAnymore": "This request is no longer available or left your radius.",
+      "retry": "Retry",
+      "notAvailable": "Not available",
+      "summaryTitle": "Summary",
+      "customerLabel": "Customer",
+      "zoneLabel": "Area",
+      "distanceLabel": "Distance",
+      "distanceValue": "{km} km",
+      "privacyHint": "The exact address is shared once the customer accepts your offer.",
+      "customerNoteTitle": "Customer note",
+      "aiTitle": "AI diagnosis",
+      "noDiagnosis": "No diagnosis available.",
+      "priceRangeLabel": "Estimated range",
+      "priceRangeValue": "{min} – {max}",
+      "confidenceLabel": "Confidence",
+      "confidenceValue": "{pct}%",
+      "urgencyLabel": "Urgency",
+      "urgency": {
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High"
+      },
+      "evidenceTitle": "Photos and videos",
+      "noEvidence": "The customer attached no evidence.",
+      "photoLabel": "Photo {number}",
+      "videoLabel": "Video {number}",
+      "openMedia": "Open {label} in a new tab",
+      "offerTitle": "Your offer",
+      "sendOffer": "Send offer",
+      "updateOffer": "Update offer",
+      "resendOffer": "Resend offer",
+      "notQuotable": "This request no longer accepts offers."
+    },
+    "ownOffer": {
+      "title": "Offer sent",
+      "priceLabel": "Price",
+      "scheduledLabel": "Visit",
+      "workerLabel": "Technician",
+      "notAvailable": "—",
+      "withdraw": "Withdraw offer",
+      "hint": {
+        "PENDING": "The customer can accept it at any time. You can update or withdraw it.",
+        "ACCEPTED": "The customer accepted your offer; the order is now in Orders.",
+        "REJECTED": "The customer chose another offer.",
+        "EXPIRED": "The request closed before the customer chose.",
+        "WITHDRAWN": "You withdrew this offer. You can resend it while the request is still open."
+      },
+      "withdrawDialog": {
+        "title": "Withdraw your offer?",
+        "description": "The customer will stop seeing it. You can resend it while the request is still open.",
+        "confirm": "Withdraw offer",
+        "cancel": "Keep it"
+      }
+    },
+    "offerForm": {
+      "workerLabel": "Technician who will do the job",
+      "workerPlaceholder": "Select a technician",
+      "workerError": "Choose a technician from your team.",
+      "noWorkers": "Add technicians in Team to send offers.",
+      "priceLabel": "Total price (MXN)",
+      "pricePlaceholder": "0.00",
+      "priceError": "Enter a price greater than zero.",
+      "scheduledAtLabel": "Visit date and time",
+      "scheduledAtError": "Choose a future date and time.",
+      "messageLabel": "Message to the customer (optional)",
+      "messagePlaceholder": "Include what the price covers, materials or warranty…",
+      "messageCount": "{count}/{max}"
+    },
+    "offers": {
+      "loading": "Loading offers",
+      "loadMore": "Load more",
+      "notAvailable": "—",
+      "queryErrorTitle": "We couldn't load your offers",
+      "statusLabel": "Filter by status",
+      "allStatuses": "All statuses",
+      "columns": {
+        "request": "Request",
+        "amount": "Price",
+        "scheduled": "Visit",
+        "worker": "Technician",
+        "status": "Status",
+        "updated": "Updated",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "You haven't sent offers yet",
+        "description": "Answer requests from the Requests tab; your offers will show up here.",
+        "filteredTitle": "No offers with that status",
+        "filteredDescription": "Choose another status to see more offers."
+      },
+      "actions": {
+        "open": "Offer actions for {title}",
+        "view": "View request",
+        "edit": "Edit offer",
+        "resend": "Resend offer",
+        "viewOrder": "View order #{folio}",
+        "withdraw": "Withdraw offer",
+        "withdrawDialog": {
+          "title": "Withdraw your offer?",
+          "description": "The customer will stop seeing your offer for “{title}”. You can resend it while the request is still open.",
+          "confirm": "Withdraw offer",
+          "cancel": "Keep it"
+        }
+      }
+    },
+    "feedback": {
+      "offerSent": "Offer sent. We'll let you know if the customer accepts it.",
+      "offerUpdated": "Offer updated.",
+      "offerWithdrawn": "Offer withdrawn.",
       "transportError": "We couldn't complete the action. Check your connection and try again."
     }
   }

@@ -34,3 +34,26 @@ export type CreatedPaymentLink = NonNullable<
 export type CreatePaymentLinkInput = PaymentInput["createPaymentLink"];
 
 export type RequestWithdrawalInput = PaymentInput["requestWithdrawal"];
+
+export type PaymentLinkListItem = NonNullable<
+  PaymentOutput["listPaymentLinks"]["result"]
+>["items"][number];
+
+export type PaymentLinkStatusValue = PaymentLinkListItem["status"];
+
+export type WithdrawalListItem = NonNullable<
+  PaymentOutput["listWithdrawals"]["result"]
+>["items"][number];
+
+export type WithdrawalStatusValue = WithdrawalListItem["status"];
+
+export type LoyaltyBonusListItem = NonNullable<
+  PaymentOutput["listLoyaltyBonuses"]["result"]
+>["items"][number];
+
+export type LoyaltyBonusStatusValue = LoyaltyBonusListItem["status"];
+
+export type TransactionFiltersState = {
+  status: PaymentStatusValue | "";
+  method: PaymentMethodValue | "";
+};

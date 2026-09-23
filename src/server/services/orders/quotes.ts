@@ -88,8 +88,7 @@ function recommendationScore(
 function sortQuotes(quotes: ScoredQuote[], sort: QuoteSort): ScoredQuote[] {
   const bySort: Record<QuoteSort, (a: ScoredQuote, b: ScoredQuote) => number> =
     {
-      recommended: (a, b) =>
-        b.score - a.score || a.amountCents - b.amountCents,
+      recommended: (a, b) => b.score - a.score || a.amountCents - b.amountCents,
       cheapest: (a, b) => a.amountCents - b.amountCents || b.score - a.score,
       bestRated: (a, b) =>
         (b.business.ratingAvg ?? -1) - (a.business.ratingAvg ?? -1) ||
@@ -294,7 +293,14 @@ export async function acceptQuote(
         businessId: true,
         branchId: true,
         workerId: true,
-        request: { select: { title: true, status: true } },
+        request: {
+          select: {
+            title: true,
+            status: true,
+            corporateAccountId: true,
+            corporateLocationId: true,
+          },
+        },
       },
     });
 
@@ -350,6 +356,11 @@ export async function acceptQuote(
         workerId: quote.workerId,
         quoteId: quote.id,
         quantity: 1,
+        // Corporate consumer (F7): the order inherits the account/location
+        // the request was raised for, so commission resolution applies the
+        // preferential corporate rate at checkout.
+        corporateAccountId: quote.request.corporateAccountId,
+        corporateLocationId: quote.request.corporateLocationId,
       },
       select: { id: true },
     });

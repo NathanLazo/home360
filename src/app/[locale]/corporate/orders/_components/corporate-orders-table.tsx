@@ -17,6 +17,7 @@ export type CorporateOrdersTableProps = {
   loadingMore: boolean;
   onLoadMore: () => void;
   onSelect: (order: CorporateOrderItem) => void;
+  renderActions: (order: CorporateOrderItem) => React.ReactNode;
 };
 
 export function CorporateOrdersTable({
@@ -26,6 +27,7 @@ export function CorporateOrdersTable({
   loadingMore,
   onLoadMore,
   onSelect,
+  renderActions,
 }: CorporateOrdersTableProps) {
   const t = useTranslations("corporate.orders");
   const statusT = useTranslations("corporate.orderStatus");
@@ -106,6 +108,12 @@ export function CorporateOrdersTable({
         </time>
       ),
     },
+    {
+      key: "actions",
+      header: <span className="sr-only">{t("table.actions")}</span>,
+      className: "text-right",
+      cell: (order) => renderActions(order),
+    },
   ];
 
   return (
@@ -140,7 +148,6 @@ export function CorporateOrdersTable({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             onClick={onLoadMore}
             disabled={loadingMore}
           >

@@ -38,10 +38,19 @@ const productFields = {
     .regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/),
   category: z.string().trim().min(2).max(60),
   priceCents: z.number().int().positive(),
+  // Public catalog image (Product.imageUrl). HTTPS only: it is rendered as-is
+  // in the marketplace and the dashboard.
+  imageUrl: z
+    .string()
+    .trim()
+    .url()
+    .max(500)
+    .refine((value) => value.startsWith("https://")),
 };
 
 export const productCreateSchema = z.object({
   ...productFields,
+  imageUrl: productFields.imageUrl.optional(),
   status: z.nativeEnum(ProductStatus).default(ProductStatus.DRAFT),
   stocks: productStocksSchema.default([]),
 });
@@ -52,7 +61,15 @@ export const productUpdateSchema = z.object({
   sku: productFields.sku.optional(),
   category: productFields.category.optional(),
   priceCents: productFields.priceCents.optional(),
+  // `undefined` keeps the current image; `null` removes it.
+  imageUrl: productFields.imageUrl.nullable().optional(),
   stocks: productStocksSchema.optional(),
+});
+
+/** Stock-only adjustment from the row action (per-branch dialog). */
+export const productAdjustStockSchema = z.object({
+  id: z.string().cuid(),
+  stocks: productStocksSchema,
 });
 
 export const productListSchema = z.object({
@@ -97,6 +114,7 @@ export const productImportSchema = z.object({
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
+export type ProductAdjustStockInput = z.infer<typeof productAdjustStockSchema>;
 export type ProductListInput = z.infer<typeof productListSchema>;
 export type ProductCsvRow = z.infer<typeof productCsvRowSchema>;
 export type ProductImportInput = z.infer<typeof productImportSchema>;

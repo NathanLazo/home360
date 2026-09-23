@@ -192,7 +192,7 @@ export function ServiceFormSheet({
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute top-3 right-3 min-h-11 min-w-11"
+              className="absolute top-3 right-3"
               aria-label={t("form.close")}
             >
               <XIcon aria-hidden="true" />
@@ -219,7 +219,6 @@ export function ServiceFormSheet({
                 type="button"
                 variant="outline"
                 disabled={submitting}
-                className="min-h-11"
               >
                 {t("form.cancel")}
               </Button>
@@ -228,7 +227,6 @@ export function ServiceFormSheet({
               type="submit"
               metal="live"
               disabled={submitting}
-              className="min-h-11"
             >
               {submitting ? (
                 <LoaderCircleIcon

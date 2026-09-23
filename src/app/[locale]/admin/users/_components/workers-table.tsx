@@ -5,7 +5,10 @@ import { HardHatIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
+import type { UserAccessAction } from "./user-access-dialogs";
+import { UserAccessBadge } from "./user-access-badge";
 import type { WorkerRow } from "./users.types";
+import { WorkerRowActions } from "./worker-row-actions";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import {
@@ -25,9 +28,13 @@ const availabilityVariants: Record<
 
 export function WorkersTable({
   workers,
+  onOpenBusiness,
+  onAccessAction,
   emptyAction,
 }: {
   workers: WorkerRow[];
+  onOpenBusiness: (businessId: string) => void;
+  onAccessAction: (userId: string, action: UserAccessAction) => void;
   emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.users");
@@ -55,9 +62,14 @@ export function WorkersTable({
       key: "business",
       header: t("columns.business"),
       cell: (row) => (
-        <span className="text-muted-foreground text-copy-sm">
+        <button
+          type="button"
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring text-copy-sm rounded-sm text-left underline-offset-4 transition-colors duration-150 ease-out hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          aria-label={t("openBusinessOf", { business: row.businessName })}
+          onClick={() => onOpenBusiness(row.businessId)}
+        >
           {row.businessName}
-        </span>
+        </button>
       ),
     },
     {
@@ -100,6 +112,34 @@ export function WorkersTable({
         >
           {formatter.relativeTime(row.createdAt, now)}
         </time>
+      ),
+    },
+    {
+      key: "access",
+      header: t("columns.account"),
+      cell: (row) =>
+        row.accessStatus ? (
+          <UserAccessBadge status={row.accessStatus} />
+        ) : (
+          <span className="text-muted-foreground text-copy-sm">
+            {t("noAppAccount")}
+          </span>
+        ),
+    },
+    {
+      key: "actions",
+      header: <span className="sr-only">{t("columns.actions")}</span>,
+      className: "text-right",
+      cell: (row) => (
+        <WorkerRowActions
+          accessStatus={row.accessStatus}
+          onViewBusiness={() => onOpenBusiness(row.businessId)}
+          onAccessAction={(action) => {
+            if (row.userId) {
+              onAccessAction(row.userId, action);
+            }
+          }}
+        />
       ),
     },
   ];

@@ -252,7 +252,6 @@ export function BusinessProfileForm({
                 type="submit"
                 metal="live"
                 disabled={saving || !isDirty || isReadOnly}
-                className="min-h-11 sm:min-h-10"
               >
                 <SubmitStatusIcon pending={saving} succeeded={saved} />
                 {t("save")}

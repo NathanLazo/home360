@@ -17,6 +17,7 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar";
 import { SidebarActiveIndicator } from "~/components/sidebar-active-indicator";
+import { SidebarActiveLens } from "~/components/sidebar-active-lens";
 import { UserAvatar } from "~/components/user-avatar";
 import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
@@ -74,6 +75,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname();
   const indicatorId = useId();
+  const lensId = useId();
 
   return (
     <Sidebar
@@ -130,6 +132,7 @@ export function AppSidebar({
                         <span className="truncate">{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
+                    {isActive ? <SidebarActiveLens layoutId={lensId} /> : null}
                     {item.badgeCount !== undefined ? (
                       <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full font-mono tabular-nums">
                         {item.badgeCount}

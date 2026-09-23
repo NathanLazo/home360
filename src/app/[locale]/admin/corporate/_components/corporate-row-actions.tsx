@@ -60,7 +60,6 @@ export function CorporateRowActions({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9"
           aria-label={t("open")}
           onClick={(event) => event.stopPropagation()}
         >

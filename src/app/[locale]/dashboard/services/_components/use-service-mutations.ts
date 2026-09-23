@@ -41,6 +41,8 @@ export function useServiceMutations() {
     await Promise.all([
       utils.service.list.invalidate(),
       utils.service.listCategories.invalidate(),
+      // Worker ↔ service assignments are shown on the team screen too.
+      utils.team.list.invalidate(),
     ]);
     return true;
   }

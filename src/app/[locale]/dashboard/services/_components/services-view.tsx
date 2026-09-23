@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { PlusIcon, RotateCcwIcon, TriangleAlertIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -37,6 +38,9 @@ export function ServicesView() {
   };
   const listQuery = api.service.list.useInfiniteQuery(input, {
     getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
+    // Filter changes keep the current rows on screen instead of flashing the
+    // full-page skeleton; the skeleton is reserved for the first load.
+    placeholderData: keepPreviousData,
   });
   const categoriesQuery = api.service.listCategories.useQuery();
   const workersQuery = api.service.listWorkers.useQuery();
@@ -55,6 +59,10 @@ export function ServicesView() {
   const workers = workersQuery.data?.result ?? [];
   const loading =
     listQuery.isPending || categoriesQuery.isPending || workersQuery.isPending;
+  const filtered =
+    filters.search.length > 0 ||
+    filters.category.length > 0 ||
+    filters.status.length > 0;
   const mutationBusy =
     mutations.creating ||
     mutations.updating ||
@@ -101,7 +109,6 @@ export function ServicesView() {
         action={
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void retryAll()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -123,7 +130,6 @@ export function ServicesView() {
             metalActive={!sheetOpen}
             type="button"
             onClick={openCreate}
-            className="min-h-11 sm:min-h-10"
             disabled={isReadOnly}
             title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
           >
@@ -139,17 +145,24 @@ export function ServicesView() {
         onChange={setFilters}
       />
 
-      <ServicesTable
-        services={services}
-        hasMore={listQuery.hasNextPage}
-        loadingMore={listQuery.isFetchingNextPage}
-        mutationBusy={mutationBusy}
-        onLoadMore={() => void listQuery.fetchNextPage()}
-        onCreate={openCreate}
-        onEdit={openEdit}
-        onStatusChange={handleStatusChange}
-        onDelete={(service) => mutations.remove(service.id)}
-      />
+      <div
+        aria-busy={listQuery.isPlaceholderData}
+        className="transition-opacity duration-150 aria-busy:opacity-60 motion-reduce:transition-none"
+      >
+        <ServicesTable
+          services={services}
+          filtered={filtered}
+          readOnly={isReadOnly}
+          hasMore={listQuery.hasNextPage}
+          loadingMore={listQuery.isFetchingNextPage}
+          mutationBusy={mutationBusy}
+          onLoadMore={() => void listQuery.fetchNextPage()}
+          onCreate={openCreate}
+          onEdit={openEdit}
+          onStatusChange={handleStatusChange}
+          onDelete={(service) => mutations.remove(service.id)}
+        />
+      </div>
 
       <ServiceFormSheet
         open={sheetOpen}

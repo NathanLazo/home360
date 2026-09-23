@@ -35,6 +35,7 @@ const productListSelect = {
   sku: true,
   category: true,
   priceCents: true,
+  imageUrl: true,
   status: true,
   createdAt: true,
   stocks: {
@@ -558,6 +559,7 @@ export async function createProduct(
           sku: input.sku,
           category: input.category,
           priceCents: input.priceCents,
+          imageUrl: input.imageUrl ?? null,
           status: input.status,
           stocks: {
             create: input.stocks.map((stock) => ({
@@ -617,6 +619,7 @@ export async function updateProduct(
           ...(input.priceCents !== undefined
             ? { priceCents: input.priceCents }
             : {}),
+          ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
         },
         select: { id: true },
       });

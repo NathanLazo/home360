@@ -7,6 +7,7 @@ import { businessSettingsRouter } from "~/server/api/routers/business-settings";
 import { checkoutRouter } from "~/server/api/routers/checkout";
 import { corporateRouter } from "~/server/api/routers/corporate";
 import { dashboardRouter } from "~/server/api/routers/dashboard";
+import { disputeRouter } from "~/server/api/routers/dispute";
 import { marketplaceRouter } from "~/server/api/routers/marketplace";
 import { mediaRouter } from "~/server/api/routers/media";
 import { messagingRouter } from "~/server/api/routers/messaging";
@@ -17,6 +18,7 @@ import { pushRouter } from "~/server/api/routers/push";
 import { quoteRouter } from "~/server/api/routers/quote";
 import { radarRouter } from "~/server/api/routers/radar";
 import { requestRouter } from "~/server/api/routers/request";
+import { reviewRouter } from "~/server/api/routers/review";
 import { serviceRouter } from "~/server/api/routers/service";
 import { subscriptionRouter } from "~/server/api/routers/subscription";
 import { teamRouter } from "~/server/api/routers/team";
@@ -42,6 +44,7 @@ export const appRouter = createTRPCRouter({
   checkout: checkoutRouter,
   corporate: corporateRouter,
   dashboard: dashboardRouter,
+  dispute: disputeRouter,
   health: publicProcedure.query(() => ok({ ready: true }, "API is ready")),
   marketplace: marketplaceRouter,
   media: mediaRouter,
@@ -53,6 +56,7 @@ export const appRouter = createTRPCRouter({
   quote: quoteRouter,
   radar: radarRouter,
   request: requestRouter,
+  review: reviewRouter,
   service: serviceRouter,
   subscription: subscriptionRouter,
   team: teamRouter,

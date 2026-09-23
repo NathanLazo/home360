@@ -2,6 +2,7 @@ import { ProductStatus } from "@generated/prisma";
 import { z } from "zod";
 
 import {
+  productAdjustStockSchema,
   productCreateSchema,
   productImportSchema,
   productListSchema,
@@ -112,6 +113,21 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         return await updateProduct(ctx.db, ctx.business.id, input);
+      } catch (error) {
+        return productFailure(error);
+      }
+    }),
+
+  // Per-branch stock adjustment (row action). Same replace-all semantics as
+  // `update.stocks`: branches left out stop carrying the product.
+  adjustStock: activeBusinessProcedure
+    .input(productAdjustStockSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await updateProduct(ctx.db, ctx.business.id, {
+          id: input.id,
+          stocks: input.stocks,
+        });
       } catch (error) {
         return productFailure(error);
       }

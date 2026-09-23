@@ -57,7 +57,7 @@ export function BranchSelector({ branches, className }: BranchSelectorProps) {
       >
         <SelectValue placeholder={t("all")} />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent glass align="end">
         <SelectGroup>
           <SelectItem value={ALL_BRANCHES_VALUE}>{t("all")}</SelectItem>
           {branches.map((branch) => (

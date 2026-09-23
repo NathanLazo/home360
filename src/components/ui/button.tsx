@@ -6,7 +6,8 @@ import { MetalAction } from "~/components/metal";
 import { cn } from "~/lib/utils";
 
 /**
- * Buttons (DESIGN.md §5).
+ * Buttons (DESIGN.md §6): slim pills (32 px default). On coarse pointers an
+ * invisible `::after` extends the hit area to ≥ 44 px without growing the pill.
  *
  * `default` is the liquid-metal primary: an ink core wearing a static CSS
  * chrome rim (`metal-rim` in `globals.css`) — cheap, SSR-safe, no WebGL.
@@ -15,7 +16,7 @@ import { cn } from "~/lib/utils";
  * hero's button: ink pill + full-strength chromatic WebGL ring.
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm text-sm font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,opacity,scale] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-pill text-[0.8125rem] leading-none font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,opacity,scale] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 pointer-coarse:after:content-['']",
   {
     variants: {
       variant: {
@@ -36,18 +37,18 @@ const buttonVariants = cva(
         link: "text-link-deep underline-offset-4 hover:underline active:scale-100",
       },
       size: {
-        default: "h-10 px-4 py-2 has-[>svg]:px-3",
-        xs: "h-6 gap-1 rounded-xs px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-12 px-6 text-base has-[>svg]:px-4",
-        icon: "size-10",
-        "icon-xs": "size-6 rounded-xs [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8",
-        "icon-lg": "size-12",
-        /** Marketing CTA (landing): 48 px pill. */
-        pill: "h-12 rounded-pill px-6 text-[0.9375rem] has-[>svg]:px-5",
-        /** Compact marketing pill (nav bars, glass docks): 40 px. */
-        "pill-sm": "h-10 rounded-pill px-5 has-[>svg]:px-4",
+        default: "h-8 px-3.5 has-[>svg]:px-3",
+        xs: "h-6 gap-1 px-2.5 text-xs has-[>svg]:px-2 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-7 gap-1 px-3 text-xs has-[>svg]:px-2.5 [&_svg:not([class*='size-'])]:size-3",
+        lg: "h-9 px-5 text-sm has-[>svg]:px-4",
+        icon: "size-8 pointer-coarse:after:-inset-x-1.5",
+        "icon-xs": "size-6 [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-7 [&_svg:not([class*='size-'])]:size-3",
+        "icon-lg": "size-9",
+        /** Marketing CTA (landing): 40 px pill. */
+        pill: "h-10 px-5 text-sm has-[>svg]:px-4",
+        /** Compact marketing pill (nav bars, glass docks): 32 px. */
+        "pill-sm": "h-8 px-4 has-[>svg]:px-3.5",
       },
     },
     defaultVariants: {

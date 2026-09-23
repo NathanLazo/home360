@@ -3,22 +3,18 @@
 import { DownloadIcon, LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { UsersFilterSelect } from "./users-filter-select";
 import {
   businessDerivedStatusSchema,
+  userAccessStatusSchema,
+  workerAvailabilitySchema,
   type BusinessDerivedStatus,
+  type UserAccessStatus,
   type UsersTab,
+  type WorkerAvailabilityValue,
 } from "./users.schema";
 import { SearchFilterBar } from "~/components/search-filter-bar";
 import { Button } from "~/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-
-const ALL_STATUSES = "all";
 
 export type UsersFiltersProps = {
   tab: UsersTab;
@@ -26,6 +22,12 @@ export type UsersFiltersProps = {
   onSearchChange: (value: string) => void;
   status: BusinessDerivedStatus | undefined;
   onStatusChange: (status: BusinessDerivedStatus | undefined) => void;
+  accessStatus: UserAccessStatus | undefined;
+  onAccessStatusChange: (status: UserAccessStatus | undefined) => void;
+  availability: WorkerAvailabilityValue | undefined;
+  onAvailabilityChange: (
+    availability: WorkerAvailabilityValue | undefined,
+  ) => void;
   onExport: () => void;
   exporting: boolean;
 };
@@ -36,11 +38,17 @@ export function UsersFilters({
   onSearchChange,
   status,
   onStatusChange,
+  accessStatus,
+  onAccessStatusChange,
+  availability,
+  onAvailabilityChange,
   onExport,
   exporting,
 }: UsersFiltersProps) {
   const t = useTranslations("admin.users");
   const statusT = useTranslations("admin.users.derivedStatus");
+  const accessT = useTranslations("admin.users.accessStatus");
+  const availabilityT = useTranslations("admin.workerAvailability");
 
   return (
     <SearchFilterBar
@@ -49,34 +57,44 @@ export function UsersFilters({
       searchPlaceholder={t(`searchPlaceholder.${tab}`)}
     >
       {tab === "businesses" ? (
-        <Select
-          value={status ?? ALL_STATUSES}
-          onValueChange={(value) =>
-            onStatusChange(
-              value === ALL_STATUSES
-                ? undefined
-                : businessDerivedStatusSchema.parse(value),
-            )
-          }
-        >
-          <SelectTrigger className="min-h-11 w-48 sm:min-h-10">
-            <SelectValue aria-label={t("statusFilterLabel")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_STATUSES}>{t("allStatuses")}</SelectItem>
-            {businessDerivedStatusSchema.options.map((option) => (
-              <SelectItem key={option} value={option}>
-                {statusT(option)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <UsersFilterSelect
+          value={status}
+          options={businessDerivedStatusSchema.options}
+          parse={(value) => businessDerivedStatusSchema.parse(value)}
+          optionLabel={(option) => statusT(option)}
+          allLabel={t("allStatuses")}
+          ariaLabel={t("statusFilterLabel")}
+          onChange={onStatusChange}
+        />
+      ) : null}
+
+      {tab === "customers" ? (
+        <UsersFilterSelect
+          value={accessStatus}
+          options={userAccessStatusSchema.options}
+          parse={(value) => userAccessStatusSchema.parse(value)}
+          optionLabel={(option) => accessT(option)}
+          allLabel={t("allStatuses")}
+          ariaLabel={t("statusFilterLabel")}
+          onChange={onAccessStatusChange}
+        />
+      ) : null}
+
+      {tab === "workers" ? (
+        <UsersFilterSelect
+          value={availability}
+          options={Object.values(workerAvailabilitySchema.enum)}
+          parse={(value) => workerAvailabilitySchema.parse(value)}
+          optionLabel={(option) => availabilityT(option)}
+          allLabel={t("allAvailabilities")}
+          ariaLabel={t("availabilityFilterLabel")}
+          onChange={onAvailabilityChange}
+        />
       ) : null}
 
       <Button
         type="button"
         variant="outline"
-        className="min-h-11 sm:min-h-10"
         disabled={exporting}
         onClick={onExport}
       >

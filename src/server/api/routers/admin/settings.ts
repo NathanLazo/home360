@@ -1,6 +1,9 @@
 import {
+  listCampaignsSchema,
+  sendCampaignSchema,
+} from "~/app/[locale]/admin/settings/_components/campaigns.schema";
+import {
   saveAdminSettingsSchema,
-  updatePlanCommissionsSchema,
   updatePlatformSettingsSchema,
 } from "~/app/[locale]/admin/settings/_components/settings.schema";
 import { fail, normalizeError, ok } from "~/server/api/contract";
@@ -8,10 +11,13 @@ import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
   getPlatformSettings,
   saveAdminSettings,
-  updatePlanCommissions,
   updatePlatformSettings,
   type SettingsErrorCode,
 } from "~/server/services/admin/platform-settings";
+import {
+  listCampaigns,
+  sendCampaign,
+} from "~/server/services/campaigns/send-campaign";
 
 function normalizedFailure(error: unknown, message: string) {
   const normalized = normalizeError(error);
@@ -56,26 +62,6 @@ export const adminSettingsRouter = createTRPCRouter({
       }
     }),
 
-  updatePlanCommissions: adminProcedure
-    .input(updatePlanCommissionsSchema)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        const result = await updatePlanCommissions({ db: ctx.db }, input);
-
-        if (!result.ok) {
-          return fail(
-            result.code,
-            statusFor(result.code),
-            "Commissions could not be updated",
-          );
-        }
-
-        return ok(result.data, "Plan commissions updated");
-      } catch (error) {
-        return normalizedFailure(error, "Plan commissions update failed");
-      }
-    }),
-
   save: adminProcedure
     .input(saveAdminSettingsSchema)
     .mutation(async ({ ctx, input }) => {
@@ -96,6 +82,46 @@ export const adminSettingsRouter = createTRPCRouter({
         return ok(result.data, "Settings saved");
       } catch (error) {
         return normalizedFailure(error, "Settings save failed");
+      }
+    }),
+
+  /** W13 "Campañas y anuncios": manual push broadcast to an audience. */
+  sendCampaign: adminProcedure
+    .input(sendCampaignSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await sendCampaign(
+          { db: ctx.db },
+          { ...input, adminId: ctx.session.user.id },
+        );
+
+        if (!result.ok) {
+          return fail(
+            result.code,
+            result.code === "VALIDATION_ERROR" ? 400 : 409,
+            "Campaign could not be sent",
+          );
+        }
+
+        return ok(result.data, "Campaign sent", 201);
+      } catch (error) {
+        return normalizedFailure(error, "Campaign send failed");
+      }
+    }),
+
+  listCampaigns: adminProcedure
+    .input(listCampaignsSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await listCampaigns({ db: ctx.db }, input);
+
+        if (!result.ok) {
+          return fail(result.code, 409, "Campaigns unavailable");
+        }
+
+        return ok(result.data, "Campaigns loaded");
+      } catch (error) {
+        return normalizedFailure(error, "Campaigns query failed");
       }
     }),
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -17,6 +18,8 @@ export function useSettingsMutations() {
   const t = useTranslations("dashboard.settings");
   const errors = useTranslations("errors");
   const utils = api.useUtils();
+  // Business and owner names live in the server-rendered shell (sidebar).
+  const router = useRouter();
   const profileMutation =
     api.businessSettings.updateBusinessProfile.useMutation();
   const ownerMutation = api.businessSettings.updateOwner.useMutation();
@@ -47,6 +50,7 @@ export function useSettingsMutations() {
       }
       toast.success(t("feedback.profileUpdated"));
       await utils.businessSettings.get.invalidate();
+      router.refresh();
       return { ok: true, code: null };
     } catch {
       return reportError(null);
@@ -61,6 +65,7 @@ export function useSettingsMutations() {
       if (response.error !== null) return reportError(response.error);
       toast.success(t("feedback.ownerUpdated"));
       await utils.businessSettings.get.invalidate();
+      router.refresh();
       return { ok: true, code: null };
     } catch {
       return reportError(null);

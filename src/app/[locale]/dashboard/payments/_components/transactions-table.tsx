@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { LoaderCircleIcon, ReceiptTextIcon } from "lucide-react";
+import { FilterXIcon, ReceiptTextIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PaymentStatusBadge } from "./payment-status-badge";
 import type { TransactionListItem } from "./payment.types";
+import { PaymentsLoadMore } from "./payments-panel-states";
+import { TransactionRowActions } from "./transaction-row-actions";
+import { useMoneyFormat } from "./use-money-format";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import { Badge } from "~/components/ui/badge";
@@ -14,31 +17,30 @@ import { Card, CardContent } from "~/components/ui/card";
 
 export function TransactionsTable({
   transactions,
+  filtered,
   hasMore,
   loadingMore,
   onLoadMore,
+  onSelect,
+  onClearFilters,
 }: {
   transactions: TransactionListItem[];
+  /** Whether a filter or branch scope is narrowing the list. */
+  filtered: boolean;
   hasMore: boolean;
   loadingMore: boolean;
   onLoadMore: () => void;
+  onSelect: (transaction: TransactionListItem) => void;
+  onClearFilters: () => void;
 }) {
   const t = useTranslations("dashboard.payments");
   const statusT = useTranslations("dashboard.payments.status");
   const methodT = useTranslations("dashboard.payments.methods");
   const formatter = useFormatter();
+  const { currency } = useMoneyFormat();
   // Frozen on mount so every relative date in the table is measured against
   // the same instant and re-renders stay stable.
   const [now] = useState(() => new Date());
-  // Only division allowed on the client: it is currency formatting, not money
-  // math. `amountCents` is already the server-side total.
-  const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
 
   const columns: Array<DataTableColumn<TransactionListItem>> = [
     {
@@ -104,6 +106,17 @@ export function TransactionsTable({
         </time>
       ),
     },
+    {
+      key: "actions",
+      header: <span className="sr-only">{t("columns.actions")}</span>,
+      className: "w-14 text-right",
+      cell: (transaction) => (
+        <TransactionRowActions
+          transaction={transaction}
+          onViewDetail={onSelect}
+        />
+      ),
+    },
   ];
 
   return (
@@ -112,35 +125,38 @@ export function TransactionsTable({
         <DataTable
           columns={columns}
           data={transactions}
+          getRowId={(transaction) => transaction.id}
+          onRowClick={onSelect}
           emptyState={
             <div className="p-4 sm:p-6">
-              <EmptyState
-                icon={ReceiptTextIcon}
-                title={t("empty.title")}
-                description={t("empty.description")}
-              />
+              {filtered ? (
+                <EmptyState
+                  icon={FilterXIcon}
+                  title={t("emptyFiltered.title")}
+                  description={t("emptyFiltered.description")}
+                  action={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClearFilters}
+                    >
+                      {t("filters.clear")}
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  icon={ReceiptTextIcon}
+                  title={t("empty.title")}
+                  description={t("empty.description")}
+                />
+              )}
             </div>
           }
         />
       </CardContent>
       {hasMore ? (
-        <div className="flex justify-center border-t p-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11 sm:min-h-10"
-            disabled={loadingMore}
-            onClick={onLoadMore}
-          >
-            {loadingMore ? (
-              <LoaderCircleIcon
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : null}
-            {t("loadMore")}
-          </Button>
-        </div>
+        <PaymentsLoadMore loading={loadingMore} onLoadMore={onLoadMore} />
       ) : null}
     </Card>
   );

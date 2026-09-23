@@ -2,22 +2,28 @@
 
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { AnimatedTabsList } from "../../_components/animated-tabs-list";
+import { ClearFiltersButton } from "../../_components/clear-filters-button";
 import { DisputeDetail } from "./dispute-detail";
+import { DisputeFilters } from "./dispute-filters";
 import { DisputeList } from "./dispute-list";
 import { DisputeListSkeleton } from "./dispute-list-skeleton";
-import { disputeFilterSchema, type DisputeFilter } from "./disputes.schema";
+import {
+  disputeFilterSchema,
+  disputeUrgencyFilterSchema,
+  type DisputeFilter,
+} from "./disputes.schema";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";
-import { Tabs } from "~/components/ui/tabs";
+import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 const DEFAULT_FILTER: DisputeFilter = "open";
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function DisputesView() {
   const t = useTranslations("admin.disputes");
@@ -29,7 +35,18 @@ export function DisputesView() {
     const parsed = disputeFilterSchema.safeParse(searchParams.get("status"));
     return parsed.success ? parsed.data : DEFAULT_FILTER;
   }, [searchParams]);
+  const urgency = useMemo(() => {
+    const parsed = disputeUrgencyFilterSchema.safeParse(
+      searchParams.get("urgency"),
+    );
+    return parsed.success ? parsed.data : null;
+  }, [searchParams]);
   const selectedId = searchParams.get("dispute");
+
+  // The field stays local so typing never waits on the URL; the query and
+  // the URL follow once typing pauses.
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -43,8 +60,27 @@ export function DisputesView() {
     [pathname, router, searchParams],
   );
 
+  useEffect(() => {
+    if ((searchParams.get("q") ?? "") === debouncedSearch) {
+      return;
+    }
+
+    replaceParams((params) => {
+      if (debouncedSearch.length > 0) {
+        params.set("q", debouncedSearch);
+      } else {
+        params.delete("q");
+      }
+      params.delete("dispute");
+    });
+  }, [debouncedSearch, replaceParams, searchParams]);
+
   const query = api.admin.disputes.list.useInfiniteQuery(
-    { status: filter },
+    {
+      status: filter,
+      ...(urgency ? { urgency } : {}),
+      ...(debouncedSearch.length > 0 ? { search: debouncedSearch } : {}),
+    },
     {
       getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
     },
@@ -67,6 +103,18 @@ export function DisputesView() {
 
   const errorCode =
     failedCode ?? (query.error ? toErrorCode(query.error) : null);
+  const filtered =
+    filter !== DEFAULT_FILTER || urgency !== null || debouncedSearch.length > 0;
+
+  const clearFilters = () => {
+    setSearch("");
+    replaceParams((params) => {
+      params.delete("status");
+      params.delete("urgency");
+      params.delete("q");
+      params.delete("dispute");
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,39 +130,33 @@ export function DisputesView() {
         }
       />
 
-      <Tabs
-        value={filter}
-        onValueChange={(value) =>
+      <DisputeFilters
+        status={filter}
+        urgency={urgency}
+        search={search}
+        onStatusChange={(value) =>
           replaceParams((params) => {
-            params.set("status", disputeFilterSchema.parse(value));
+            params.set("status", value);
             params.delete("dispute");
           })
         }
-      >
-        <AnimatedTabsList
-          value={filter}
-          items={[
-            {
-              value: "open",
-              label: stats
-                ? t("tabs.openWithCount", { count: stats.openCount })
-                : t("tabs.open"),
-            },
-            {
-              value: "resolved",
-              label: stats
-                ? t("tabs.resolvedWithCount", {
-                    count: stats.resolvedThisMonth,
-                  })
-                : t("tabs.resolved"),
-            },
-          ]}
-        />
-      </Tabs>
+        onUrgencyChange={(value) =>
+          replaceParams((params) => {
+            if (value === null) {
+              params.delete("urgency");
+            } else {
+              params.set("urgency", value);
+            }
+            params.delete("dispute");
+          })
+        }
+        onSearchChange={setSearch}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <section
           aria-label={t("listLabel")}
+          aria-busy={query.isFetching || undefined}
           className={cn(
             "min-w-0",
             // On small screens the file replaces the list instead of stacking.
@@ -144,11 +186,12 @@ export function DisputesView() {
                 replaceParams((params) => params.set("dispute", disputeId))
               }
               emptyAction={
-                filter === "open" ? (
+                filtered ? (
+                  <ClearFiltersButton onClear={clearFilters} />
+                ) : (
                   <Button
                     type="button"
                     variant="outline"
-                    className="min-h-11 sm:min-h-10"
                     onClick={() =>
                       replaceParams((params) => {
                         params.set("status", "resolved");
@@ -158,7 +201,7 @@ export function DisputesView() {
                   >
                     {t("empty.showResolved")}
                   </Button>
-                ) : undefined
+                )
               }
             />
           ) : null}

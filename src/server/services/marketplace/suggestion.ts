@@ -68,9 +68,7 @@ const suggestionOrderBy = [
   | Prisma.ProductOrderByWithRelationInput[];
 
 function inRange(priceCents: number, range: PriceRange): boolean {
-  return (
-    priceCents >= range.minPriceCents && priceCents <= range.maxPriceCents
-  );
+  return priceCents >= range.minPriceCents && priceCents <= range.maxPriceCents;
 }
 
 /**
@@ -91,8 +89,7 @@ function pickBest(
     }
 
     return (
-      (b.ratingAvg ?? -1) - (a.ratingAvg ?? -1) ||
-      b.ratingCount - a.ratingCount
+      (b.ratingAvg ?? -1) - (a.ratingAvg ?? -1) || b.ratingCount - a.ratingCount
     );
   })[0];
 
@@ -165,5 +162,35 @@ export async function suggestForRequest(
   return {
     service: pickBest(serviceRows.map(serviceCandidate), input),
     product: pickBest(productRows.map(productCandidate), input),
+  };
+}
+
+/**
+ * Re-hydrates the suggestions frozen on a request/diagnosis (by id). Only rows
+ * still in the public catalog surface, so an unpublished product or paused
+ * service quietly disappears instead of leaking.
+ */
+export async function loadSuggestionsByIds(
+  db: PrismaClient,
+  input: { serviceId: string | null; productId: string | null },
+): Promise<RequestSuggestions> {
+  const [service, product] = await Promise.all([
+    input.serviceId
+      ? db.service.findFirst({
+          where: { ...serviceCatalogFilter, id: input.serviceId },
+          select: suggestionServiceSelect,
+        })
+      : null,
+    input.productId
+      ? db.product.findFirst({
+          where: { ...productCatalogFilter, id: input.productId },
+          select: suggestionProductSelect,
+        })
+      : null,
+  ]);
+
+  return {
+    service: service ? serviceCandidate(service) : null,
+    product: product ? productCandidate(product) : null,
   };
 }

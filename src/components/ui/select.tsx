@@ -4,6 +4,10 @@ import * as React from "react";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 
+import {
+  MENU_GLASS_CONTAINER_CLASS,
+  MenuGlassHighlight,
+} from "~/components/glass/menu-glass-highlight";
 import { cn } from "~/lib/utils";
 
 function Select({
@@ -55,8 +59,12 @@ function SelectContent({
   children,
   position = "item-aligned",
   align = "center",
+  glass = false,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+}: React.ComponentProps<typeof SelectPrimitive.Content> & {
+  /** Sliding Liquid Glass + metal-hairline selection on the highlighted option. */
+  glass?: boolean;
+}) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -75,11 +83,13 @@ function SelectContent({
         <SelectPrimitive.Viewport
           className={cn(
             "p-1",
+            glass && MENU_GLASS_CONTAINER_CLASS,
             position === "popper" &&
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
           )}
         >
           {children}
+          {glass ? <MenuGlassHighlight /> : null}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />
       </SelectPrimitive.Content>

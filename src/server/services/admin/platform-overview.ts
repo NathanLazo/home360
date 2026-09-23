@@ -10,6 +10,7 @@ import {
 
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { getFinancialMonthBounds } from "../payments/balances";
+import { boundsForMonth, previousMonthBounds } from "./month-bounds";
 import {
   CHARGED_PAYMENT_STATUSES,
   ESCROW_PAYMENT_STATUSES,
@@ -28,6 +29,10 @@ const PLATFORM_USER_ROLES = [
 ] as const;
 
 export interface PlatformKpis {
+  /** "YYYY-MM" of the reported month (platform financial calendar). */
+  month: string;
+  /** "YYYY-MM" of the month in course, upper bound of the month selector. */
+  currentMonth: string;
   totalUsers: number;
   newUsersMonth: number;
   activeBusinesses: number;
@@ -54,6 +59,10 @@ export interface OpenDisputeSummary {
   businessName: string;
   customerName: string | null;
   escrowCents: number;
+  /** D6 evidence the admin reviews before deciding (W9 quick actions). */
+  hasRecording: boolean;
+  recordingComplete: boolean;
+  evidenceCount: number;
   createdAt: Date;
 }
 
@@ -64,13 +73,12 @@ export interface AiConfigSummary {
   updatedAt: Date;
 }
 
-function previousMonthBounds(currentStart: Date): { start: Date; end: Date } {
-  // One millisecond before the current month start always lands inside the
-  // previous month, whatever its length or DST offset.
-  const insidePreviousMonth = new Date(currentStart.getTime() - 1);
-  const previous = getFinancialMonthBounds(insidePreviousMonth);
-
-  return { start: previous.start, end: previous.end };
+/**
+ * Local midnight in the platform's (negative-offset) financial time zone is
+ * still the first day of the month in UTC, mirroring the finance KPIs key.
+ */
+function monthKey(start: Date): string {
+  return start.toISOString().slice(0, 7);
 }
 
 function deltaPct(current: number, previous: number): number | null {
@@ -83,7 +91,7 @@ function deltaPct(current: number, previous: number): number | null {
 
 export async function getPlatformKpis(
   deps: { db: OverviewDb },
-  input: { now?: Date } = {},
+  input: { now?: Date; month?: string } = {},
 ): Promise<ServiceResult<PlatformKpis>> {
   const now = input.now ?? new Date();
 
@@ -91,7 +99,12 @@ export async function getPlatformKpis(
     return svcFail("CONFLICT", "Invalid KPI cutoff date");
   }
 
-  const month = getFinancialMonthBounds(now);
+  const month = boundsForMonth(input.month, now);
+
+  if (!month) {
+    return svcFail("CONFLICT", "Invalid KPI month");
+  }
+
   const previous = previousMonthBounds(month.start);
   const platformUserFilter = { role: { in: [...PLATFORM_USER_ROLES] } };
 
@@ -104,7 +117,10 @@ export async function getPlatformKpis(
     previousGmv,
     escrow,
   ] = await Promise.all([
-    deps.db.user.count({ where: platformUserFilter }),
+    // Platform size as of the end of the reported month.
+    deps.db.user.count({
+      where: { ...platformUserFilter, createdAt: { lt: month.end } },
+    }),
     deps.db.user.count({
       where: {
         ...platformUserFilter,
@@ -141,6 +157,8 @@ export async function getPlatformKpis(
   const previousGmvCents = previousGmv._sum.amountCents ?? 0;
 
   return svcOk({
+    month: monthKey(month.start),
+    currentMonth: monthKey(getFinancialMonthBounds(now).start),
     totalUsers,
     newUsersMonth,
     activeBusinesses,
@@ -186,10 +204,13 @@ export async function getOpenDisputes(
       title: true,
       urgency: true,
       status: true,
+      evidenceUrls: true,
       createdAt: true,
       business: { select: { name: true } },
       order: {
         select: {
+          recordingUrl: true,
+          recordingComplete: true,
           customer: { select: { name: true } },
           payment: { select: { amountCents: true } },
         },
@@ -206,6 +227,9 @@ export async function getOpenDisputes(
       businessName: dispute.business.name,
       customerName: dispute.order.customer.name,
       escrowCents: dispute.order.payment?.amountCents ?? 0,
+      hasRecording: dispute.order.recordingUrl !== null,
+      recordingComplete: dispute.order.recordingComplete,
+      evidenceCount: dispute.evidenceUrls.length,
       createdAt: dispute.createdAt,
     })),
   );

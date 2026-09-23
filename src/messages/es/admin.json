@@ -104,7 +104,8 @@
       "registeredAt": "Registro",
       "orders": "Órdenes",
       "status": "Estado",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "account": "Cuenta"
     },
     "actions": {
       "open": "Abrir acciones",
@@ -112,7 +113,14 @@
       "approve": "Aprobar",
       "reject": "Rechazar",
       "suspend": "Suspender",
-      "reactivate": "Reactivar"
+      "reactivate": "Reactivar",
+      "reviewDocuments": "Revisar documentos",
+      "viewDispute": "Ver disputa",
+      "reopen": "Reabrir revisión",
+      "viewBusiness": "Ver negocio",
+      "suspendAccount": "Suspender cuenta",
+      "reactivateAccount": "Reactivar cuenta",
+      "noAppAccount": "Sin cuenta en la app"
     },
     "empty": {
       "businesses": {
@@ -137,8 +145,10 @@
         "approved": "Aprobando negocio…",
         "rejected": "Rechazando negocio…",
         "suspended": "Suspendiendo negocio…",
-        "reactivated": "Reactivando negocio…"
-      }
+        "reactivated": "Reactivando negocio…",
+        "reopened": "Reabriendo revisión…"
+      },
+      "reopened": "Negocio devuelto a revisión."
     },
     "reasonDialog": {
       "label": "Motivo",
@@ -162,6 +172,11 @@
         "title": "Reactivar negocio",
         "description": "El negocio volverá a operar con normalidad. No es posible reactivar si tiene disputas abiertas.",
         "confirm": "Reactivar"
+      },
+      "reopen": {
+        "title": "Reabrir revisión",
+        "description": "El negocio volverá a la cola de aprobación como pendiente y se borrará el motivo del rechazo.",
+        "confirm": "Reabrir revisión"
       }
     },
     "approveDialog": {
@@ -201,6 +216,87 @@
       "disputes": "Disputas ({count} abiertas)",
       "noDisputes": "Este negocio no tiene disputas.",
       "loading": "Cargando expediente del negocio…"
+    },
+    "allAvailabilities": "Toda disponibilidad",
+    "availabilityFilterLabel": "Filtrar por disponibilidad",
+    "noAppAccount": "Sin cuenta en la app",
+    "openBusinessOf": "Ver negocio {business}",
+    "accessStatus": {
+      "active": "Activa",
+      "suspended": "Suspendida"
+    },
+    "documents": {
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "approveLabel": "Aprobar {name}",
+      "rejectLabel": "Rechazar {name}",
+      "open": "Abrir {name}",
+      "uploadedAt": "Subido el {date}",
+      "reviewedAt": "Revisado el {date} por {reviewer}",
+      "unknownReviewer": "un administrador",
+      "notes": "Nota: {notes}",
+      "pendingCount": "{count, plural, one {# por revisar} other {# por revisar}}",
+      "kind": {
+        "pdf": "PDF",
+        "file": "Archivo"
+      },
+      "rejectDialog": {
+        "title": "Rechazar documento",
+        "description": "El negocio verá esta nota y deberá subir el documento de nuevo.",
+        "confirm": "Rechazar documento"
+      },
+      "toasts": {
+        "APPROVED": "Documento aprobado.",
+        "REJECTED": "Documento rechazado.",
+        "pending": {
+          "APPROVED": "Aprobando documento…",
+          "REJECTED": "Rechazando documento…"
+        }
+      }
+    },
+    "access": {
+      "cancel": "Cancelar",
+      "suspend": {
+        "title": "Suspender cuenta",
+        "description": "La persona no podrá iniciar sesión y todas sus sesiones activas se cerrarán de inmediato.",
+        "confirm": "Suspender"
+      },
+      "reactivate": {
+        "title": "Reactivar cuenta",
+        "description": "La persona podrá volver a iniciar sesión con normalidad.",
+        "confirm": "Reactivar"
+      },
+      "toasts": {
+        "suspended": "Cuenta suspendida.",
+        "reactivated": "Cuenta reactivada.",
+        "pending": {
+          "suspended": "Suspendiendo cuenta…",
+          "reactivated": "Reactivando cuenta…"
+        }
+      }
+    },
+    "customerDetail": {
+      "title": "Detalle del cliente",
+      "subtitle": "Perfil, actividad, reseñas y disputas.",
+      "loading": "Cargando expediente del cliente…",
+      "errorTitle": "No pudimos cargar el detalle",
+      "suspendedReason": "Cuenta suspendida. Motivo: {reason}",
+      "suspendedNoReason": "Cuenta suspendida.",
+      "profile": "Perfil",
+      "email": "Correo",
+      "registeredAt": "Registro",
+      "language": "Idioma",
+      "addresses": "Direcciones",
+      "notAvailable": "—",
+      "recentOrders": "Órdenes recientes ({count} en total)",
+      "noOrders": "Este cliente aún no tiene órdenes.",
+      "orderMeta": "#{folio} · {status} · {business}",
+      "reviews": "Reseñas ({count})",
+      "averageRating": "Calificación promedio {rating} de 5",
+      "rating": "{rating}/5",
+      "noReviews": "Este cliente aún no ha dejado reseñas.",
+      "disputes": "Disputas ({count})",
+      "noDisputes": "Este cliente no tiene disputas."
     }
   },
   "overview": {
@@ -236,7 +332,7 @@
         "guarantee": "Garantía",
         "actions": "Acciones"
       },
-      "viewAll": "Ver todos los negocios",
+      "viewAll": "Ver todos los pendientes",
       "emptyCta": "Ir a negocios"
     },
     "disputes": {
@@ -248,7 +344,9 @@
       "parties": "{business} · {customer}",
       "unknownParty": "Cliente sin nombre",
       "viewAll": "Ver todas las disputas",
-      "emptyCta": "Ver disputas resueltas"
+      "emptyCta": "Ver disputas resueltas",
+      "viewRecording": "Ver grabación del servicio",
+      "viewEvidence": "{count, plural, one {Ver evidencia} other {Ver evidencia (#)}}"
     },
     "ai": {
       "sectionTitle": "Inteligencia artificial",
@@ -260,10 +358,14 @@
       "humanReviewOn": "Activada bajo el umbral",
       "humanReviewOff": "Desactivada",
       "updatedAt": "Configuración actualizada {when}",
-      "openSettings": "Ir a configuración",
+      "openSettings": "Ajustar variables",
       "loading": "Cargando configuración de IA…"
     },
-    "primaryAction": "Revisar disputas"
+    "primaryAction": "Revisar disputas",
+    "month": {
+      "label": "Mes del reporte",
+      "option": "{month} {year}"
+    }
   },
   "paymentStatus": {
     "PENDING": "Pendiente",
@@ -308,20 +410,49 @@
       "noSelectionDescription": "Elige una disputa de la lista para ver su expediente completo.",
       "errorTitle": "No pudimos cargar el expediente",
       "resolutionNotes": "Justificación registrada",
-      "loading": "Cargando expediente de la disputa…"
+      "loading": "Cargando expediente de la disputa…",
+      "evidenceRequested": "Evidencia solicitada",
+      "evidenceRequestedAt": "Solicitada el {date}"
     },
     "recording": {
       "title": "Grabación del servicio",
       "missingTitle": "Sin grabación del servicio",
       "incompleteTitle": "Grabación incompleta",
       "ruleDescription": "La grabación es obligatoria e ininterrumpida. Si falta o quedó incompleta, la disputa se resuelve a favor del cliente; cualquier otra resolución requiere justificación escrita.",
-      "duration": "Duración: {minutes} min {seconds} s"
+      "duration": "Duración: {minutes} min {seconds} s",
+      "partialDescription": "Se muestra lo que alcanzó a grabarse.",
+      "segments": {
+        "title": "Segmentos de grabación",
+        "empty": "No hay segmentos de grabación registrados.",
+        "label": "Segmento {index}",
+        "range": "{start} – {end} · {minutes} min {seconds} s",
+        "rangeOpen": "Inició {start} · sin cierre",
+        "state": {
+          "interrupted": "Interrumpido",
+          "open": "Sin cierre",
+          "notUploaded": "Sin subir",
+          "ok": "Completo"
+        }
+      }
     },
     "evidence": {
       "title": "Evidencia",
       "itemAlt": "Evidencia {index}",
       "more": "+{count}",
-      "showAll": "Mostrar las {count} evidencias"
+      "showAll": "Mostrar las {count} evidencias",
+      "empty": "Ninguna de las partes adjuntó evidencia.",
+      "itemLabel": {
+        "image": "Imagen de evidencia {index}",
+        "video": "Video de evidencia {index}",
+        "pdf": "PDF de evidencia {index}",
+        "other": "Archivo de evidencia {index}"
+      },
+      "kind": {
+        "image": "Imagen",
+        "video": "Video",
+        "pdf": "PDF",
+        "other": "Archivo"
+      }
     },
     "arguments": {
       "title": "Argumentos",
@@ -332,7 +463,13 @@
       "collapse": "Mostrar menos"
     },
     "aiSummary": {
-      "title": "Resumen de IA"
+      "title": "Resumen de IA",
+      "generate": "Generar resumen IA",
+      "regenerate": "Regenerar",
+      "generating": "Generando…",
+      "notGenerated": "Aún no hay un resumen de IA para este expediente.",
+      "generatedAt": "Generado el {date}",
+      "disclaimer": "Resumen orientativo generado por IA. La resolución es siempre tuya."
     },
     "payment": {
       "escrow": "En escrow",
@@ -372,9 +509,35 @@
     },
     "toasts": {
       "resolved": "Disputa resuelta.",
-      "resolving": "Resolviendo disputa…"
+      "resolving": "Resolviendo disputa…",
+      "requestingEvidence": "Enviando solicitud…",
+      "evidenceRequested": "Solicitud enviada.",
+      "generatingSummary": "Generando resumen de IA…",
+      "summaryGenerated": "Resumen de IA listo."
     },
-    "loading": "Cargando disputas…"
+    "loading": "Cargando disputas…",
+    "filters": {
+      "searchPlaceholder": "Buscar por folio, negocio, cliente o título",
+      "statusLabel": "Filtrar por estado",
+      "urgencyLabel": "Filtrar por urgencia",
+      "allUrgencies": "Todas las urgencias",
+      "status": {
+        "open": "Abiertas",
+        "in_review": "En revisión",
+        "resolved": "Resueltas",
+        "all": "Todas"
+      }
+    },
+    "evidenceDialog": {
+      "title": "Pedir más evidencia",
+      "description": "«{dispute}» pasará a revisión y avisaremos al cliente y al negocio.",
+      "noteLabel": "¿Qué evidencia necesitas?",
+      "notePlaceholder": "Ej. fotos del resultado final y el comprobante de materiales.",
+      "noteHint": "Mínimo {min} caracteres. Ambas partes verán la solicitud.",
+      "notice": "No se mueve dinero: el pago sigue retenido mientras llega la evidencia.",
+      "cancel": "Cancelar",
+      "confirm": "Solicitar evidencia"
+    }
   },
   "withdrawalStatus": {
     "REQUESTED": "Pendiente",
@@ -437,10 +600,25 @@
         "actions": "Acciones"
       },
       "empty": {
-        "title": "Sin retiros",
-        "description": "No hay solicitudes de retiro con el filtro seleccionado."
+        "title": "Nada por aprobar",
+        "description": "No hay solicitudes de retiro pendientes.",
+        "historyTitle": "Sin retiros",
+        "historyDescription": "No hay retiros con los filtros seleccionados."
       },
-      "loading": "Cargando retiros…"
+      "loading": "Cargando retiros…",
+      "pendingTitle": "Retiros por aprobar",
+      "pendingDescription": "Solicitudes en espera, de la más antigua a la más reciente.",
+      "historyTitle": "Historial de retiros",
+      "historyDescription": "Retiros aprobados, rechazados, fallidos o en proceso.",
+      "showHistory": "Ver historial",
+      "showPending": "Ver por aprobar",
+      "history": {
+        "businessPlaceholder": "Buscar negocio",
+        "statusLabel": "Filtrar por estado",
+        "allStatuses": "Todos los estados",
+        "from": "Desde",
+        "to": "Hasta"
+      }
     },
     "actions": {
       "approve": "Aprobar",
@@ -451,21 +629,25 @@
       "rejectTitle": "Rechazar retiro",
       "rejectDescription": "Vas a rechazar el retiro de {amount} a {destination}. El monto vuelve al saldo disponible del negocio.",
       "reasonLabel": "Motivo",
-      "reasonPlaceholder": "Explica brevemente el rechazo (mínimo 5 caracteres)."
+      "reasonPlaceholder": "Explica brevemente el rechazo (mínimo 5 caracteres).",
+      "retry": "Reintentar",
+      "retryTitle": "Reintentar retiro",
+      "retryDescription": "El pago de {amount} a {destination} quedó en proceso. Reintentarlo no duplica el envío."
     },
     "toasts": {
       "approved": "Retiro aprobado.",
       "rejected": "Retiro rechazado.",
       "pending": {
         "approved": "Aprobando retiro…",
-        "rejected": "Rechazando retiro…"
-      }
+        "rejected": "Rechazando retiro…",
+        "retried": "Reintentando retiro…"
+      },
+      "retried": "Retiro reintentado."
     },
     "loyalty": {
       "title": "Bonos de lealtad",
       "description": "Cola de liquidación de bonos devengados. El pago ocurre fuera de la plataforma; aquí solo se registra.",
       "errorTitle": "No pudimos cargar los bonos",
-      "cancelReason": "Cancelado por el administrador desde el panel de finanzas.",
       "columns": {
         "business": "Negocio",
         "amount": "Monto",
@@ -506,8 +688,18 @@
         "title": "¿Cancelar este bono?",
         "description": "El bono de {business} quedará cancelado y ya no podrá registrarse como pagado. Esta acción no se puede deshacer.",
         "confirm": "Cancelar bono",
-        "dismiss": "Conservar bono"
-      }
+        "dismiss": "Conservar bono",
+        "reasonLabel": "Motivo",
+        "reasonPlaceholder": "Explica por qué se cancela el bono.",
+        "reasonHint": "Mínimo 5 caracteres."
+      },
+      "statusFilterLabel": "Filtrar por estado",
+      "allStatuses": "Todos los estados",
+      "loadMore": "Cargar más"
+    },
+    "month": {
+      "label": "Periodo",
+      "current": "{month} (actual)"
     }
   },
   "corporate": {
@@ -746,7 +938,7 @@
   },
   "settings": {
     "title": "Configuración de plataforma",
-    "subtitle": "Parámetros de IA, tarifas, escrow y notificaciones.",
+    "subtitle": "Parámetros de IA, tarifas, escrow, notificaciones y campañas.",
     "formLabel": "Formulario de configuración de plataforma",
     "errorTitle": "No pudimos cargar la configuración",
     "errorDescription": "Ocurrió un problema al preparar esta pantalla. Intenta de nuevo.",
@@ -788,15 +980,14 @@
     },
     "notifications": {
       "title": "Notificaciones",
-      "description": "Radio de aviso de nuevas solicitudes y recordatorios de calificación.",
+      "description": "Radio de aviso de nuevas solicitudes, recordatorios de calificación y avisos de liberación de pago en la app móvil.",
       "radius": "Radio de nuevas solicitudes",
       "radiusHint": "Entre {min} y {max} km.",
       "ratingReminder": "Recordatorio de calificación",
-      "ratingReminderHint": "Entre {min} y {max} horas.",
+      "ratingReminderHint": "Entre {min} y {max} horas después de completar la orden, si el cliente no ha calificado.",
       "hoursSuffix": "h",
       "paymentRelease": "Avisar liberación de pago",
-      "paymentReleaseHint": "Notifica al negocio cuando se libera un pago.",
-      "consumerNote": "Estos valores los consumirá la app móvil; el producto web no envía notificaciones."
+      "paymentReleaseHint": "Notifica al negocio cuando se libera un pago."
     },
     "saveBar": {
       "unsaved": "Tienes cambios sin guardar.",
@@ -809,7 +1000,39 @@
       "saved": "Configuración guardada.",
       "saving": "Guardando configuración…"
     },
-    "loading": "Cargando configuración…"
+    "loading": "Cargando configuración…",
+    "campaigns": {
+      "title": "Campañas y anuncios",
+      "description": "Envío manual desde este panel: una notificación push a todos los usuarios de la audiencia con la app instalada.",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Ej. Nuevos servicios en tu zona",
+      "bodyLabel": "Mensaje",
+      "bodyPlaceholder": "Escribe el texto que verán en la notificación.",
+      "bodyCount": "{count}/{max} caracteres",
+      "audienceLabel": "Audiencia",
+      "audience": {
+        "ALL": "Todos",
+        "CUSTOMERS": "Clientes",
+        "BUSINESSES": "Negocios",
+        "WORKERS": "Técnicos"
+      },
+      "send": "Enviar campaña",
+      "cancel": "Cancelar",
+      "confirmTitle": "¿Enviar esta campaña?",
+      "confirmDescription": "«{title}» llegará como notificación a: {audience}. Una notificación enviada no se puede retirar.",
+      "historyTitle": "Enviadas",
+      "historyLoading": "Cargando campañas…",
+      "historyErrorTitle": "No pudimos cargar las campañas",
+      "historyEmptyTitle": "Sin campañas",
+      "historyEmptyDescription": "Las campañas que envíes aparecerán aquí.",
+      "historyMeta": "{audience} · {count, plural, =0 {sin destinatarios} one {# destinatario} other {# destinatarios}} · {sender}",
+      "unknownSender": "Administrador",
+      "loadMore": "Cargar más",
+      "toasts": {
+        "sending": "Enviando campaña…",
+        "sent": "{count, plural, =0 {Campaña registrada; nadie tenía la app instalada.} one {Campaña enviada a # usuario.} other {Campaña enviada a # usuarios.}}"
+      }
+    }
   },
   "loyaltyBonusStatus": {
     "PENDING": "Pendiente",

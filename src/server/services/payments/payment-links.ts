@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  PaymentLinkStatus,
-  type PrismaClient,
-} from "@generated/prisma";
+import { PaymentLinkStatus, type PrismaClient } from "@generated/prisma";
 import Stripe from "stripe";
 
 import {
@@ -302,4 +299,66 @@ export async function reconcilePaymentLink(
   }
 
   return publishPaymentLink(deps, paymentLink);
+}
+
+export type DeactivatePaymentLinkInput = {
+  businessId: string;
+  paymentLinkId: string;
+};
+
+/**
+ * Stops a published link from accepting new checkouts. Stripe is switched off
+ * first so the local row never claims INACTIVE while the hosted page still
+ * takes money. Idempotent: an already inactive (or already paid) link returns
+ * success without calling Stripe again. A CREATING row is rejected because the
+ * remote link may exist without a local id; it must be reconciled first.
+ */
+export async function deactivatePaymentLink(
+  deps: PaymentLinkServiceDeps,
+  input: DeactivatePaymentLinkInput,
+): Promise<ServiceResult<{ paymentLinkId: string }>> {
+  const paymentLink = await deps.db.paymentLink.findFirst({
+    where: { id: input.paymentLinkId, businessId: input.businessId },
+    select: { id: true, status: true, stripePaymentLinkId: true },
+  });
+
+  if (!paymentLink) {
+    return svcFail("NOT_FOUND");
+  }
+
+  if (paymentLink.status === PaymentLinkStatus.INACTIVE) {
+    return svcOk({ paymentLinkId: paymentLink.id });
+  }
+
+  if (
+    paymentLink.status !== PaymentLinkStatus.ACTIVE ||
+    paymentLink.stripePaymentLinkId === null
+  ) {
+    return svcFail("CONFLICT", "Payment link is not published yet");
+  }
+
+  try {
+    await deps.stripe.paymentLinks.update(paymentLink.stripePaymentLinkId, {
+      active: false,
+    });
+  } catch (error) {
+    if (isStripeError(error)) {
+      return svcFail("STRIPE_ERROR");
+    }
+
+    throw error;
+  }
+
+  // Conditional write: a concurrent checkout completion may have settled the
+  // link in between; either way the row ends INACTIVE.
+  await deps.db.paymentLink.updateMany({
+    where: {
+      id: paymentLink.id,
+      businessId: input.businessId,
+      status: PaymentLinkStatus.ACTIVE,
+    },
+    data: { status: PaymentLinkStatus.INACTIVE },
+  });
+
+  return svcOk({ paymentLinkId: paymentLink.id });
 }

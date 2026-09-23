@@ -45,14 +45,23 @@ export async function POST(request: Request): Promise<Response> {
 
     const user = await db.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, role: true, sessionsValidFrom: true },
+      select: {
+        id: true,
+        role: true,
+        sessionsValidFrom: true,
+        suspendedAt: true,
+      },
     });
 
-    if (!user || user.sessionsValidFrom.getTime() > payload.authIssuedAtMs) {
+    // A missing user also fails the suspension check (undefined !== null).
+    if (
+      user?.suspendedAt !== null ||
+      user.sessionsValidFrom.getTime() > payload.authIssuedAtMs
+    ) {
       return respond(fail("INVALID_TOKEN", 401, "Invalid token"));
     }
 
-    const token = await issueMobileToken(user);
+    const token = await issueMobileToken({ id: user.id, role: user.role });
 
     return respond(ok({ token }, "Token refreshed"));
   } catch {

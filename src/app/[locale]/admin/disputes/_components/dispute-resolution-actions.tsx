@@ -68,7 +68,6 @@ export function DisputeResolutionActions({
         // The decisive action of the pane is the only one wearing live metal
         // (with the liquid dent); `Button` drops the ring while disabled.
         metal={primary ? "bend" : "static"}
-        className="min-h-11 sm:min-h-10"
         disabled={reason !== null}
         title={reason ?? undefined}
         onClick={() => onSelect(resolution)}

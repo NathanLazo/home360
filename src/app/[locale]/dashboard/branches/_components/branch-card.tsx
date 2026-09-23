@@ -1,17 +1,19 @@
 "use client";
 
 import {
+  LocateFixedIcon,
   MapPinIcon,
+  MapPinOffIcon,
   RadiusIcon,
   ShoppingBagIcon,
   UserRoundIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { BranchCardActions } from "./branch-card-actions";
-import { BranchCoverageMap } from "./branch-coverage-map";
 import type { BranchListItem } from "./branch.types";
 import { StatusBadge } from "~/components/status-badge";
+import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 
 export function BranchCard({
@@ -19,6 +21,7 @@ export function BranchCard({
   statusPending,
   deletePending,
   onEdit,
+  onAssignManager,
   onStatus,
   onDelete,
 }: {
@@ -26,10 +29,15 @@ export function BranchCard({
   statusPending: boolean;
   deletePending: boolean;
   onEdit: () => void;
+  onAssignManager: () => void;
   onStatus: (status: "ACTIVE" | "PAUSED") => Promise<boolean>;
   onDelete: () => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.branches");
+  const formatter = useFormatter();
+  const located = branch.latitude !== null && branch.longitude !== null;
+  const coordinate = (value: number) =>
+    formatter.number(value, { maximumFractionDigits: 4 });
   return (
     <Card className="hover:border-hairline-strong/60 gap-0 overflow-hidden py-0 transition-[border-color,box-shadow] duration-150 ease-out hover:shadow-md motion-reduce:transition-none">
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5">
@@ -41,6 +49,15 @@ export function BranchCard({
               variantMap={{ ACTIVE: "success", PAUSED: "warning" }}
               label={t(`status.${branch.status.toLowerCase()}`)}
             />
+            {located ? null : (
+              <Badge
+                variant="outline"
+                className="bg-warning-soft text-warning-deep gap-1.5 border-transparent"
+              >
+                <MapPinOffIcon aria-hidden="true" className="size-3" />
+                {t("card.noLocation")}
+              </Badge>
+            )}
           </div>
           <p className="text-muted-foreground text-copy-sm flex items-start gap-2">
             <MapPinIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
@@ -52,12 +69,12 @@ export function BranchCard({
           statusPending={statusPending}
           deletePending={deletePending}
           onEdit={onEdit}
+          onAssignManager={onAssignManager}
           onStatus={onStatus}
           onDelete={onDelete}
         />
       </CardHeader>
-      <BranchCoverageMap radiusKm={branch.coverageRadiusKm} />
-      <CardContent className="text-copy-sm grid gap-3 px-5 py-4">
+      <CardContent className="text-copy-sm grid gap-3 border-t px-5 py-4">
         <p className="flex items-center gap-2">
           <UserRoundIcon
             aria-hidden="true"
@@ -89,6 +106,23 @@ export function BranchCard({
           <span className="ml-auto font-mono font-medium tabular-nums">
             {t("card.kilometers", { count: branch.coverageRadiusKm })}
           </span>
+        </p>
+        <p className="flex items-center gap-2">
+          <LocateFixedIcon
+            aria-hidden="true"
+            className="text-muted-foreground size-4"
+          />
+          <span className="text-muted-foreground">{t("card.location")}</span>
+          {located ? (
+            <span className="ml-auto font-mono font-medium tabular-nums">
+              {coordinate(branch.latitude ?? 0)},{" "}
+              {coordinate(branch.longitude ?? 0)}
+            </span>
+          ) : (
+            <span className="text-warning-deep ml-auto text-right">
+              {t("card.noLocationHint")}
+            </span>
+          )}
         </p>
       </CardContent>
     </Card>

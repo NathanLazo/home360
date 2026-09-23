@@ -5,6 +5,7 @@ import {
   EllipsisIcon,
   EyeIcon,
   EyeOffIcon,
+  PackageIcon,
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -26,12 +27,14 @@ export function ProductRowActions({
   product,
   busy,
   onEdit,
+  onAdjustStock,
   onStatusChange,
   onDelete,
 }: {
   product: ProductListItem;
   busy: boolean;
   onEdit: (product: ProductListItem) => void;
+  onAdjustStock: (product: ProductListItem) => void;
   onStatusChange: (product: ProductListItem) => Promise<boolean>;
   onDelete: (product: ProductListItem) => Promise<boolean>;
 }) {
@@ -56,7 +59,6 @@ export function ProductRowActions({
             type="button"
             variant="ghost"
             size="icon"
-            className="min-h-11 min-w-11 sm:min-h-10 sm:min-w-10"
             aria-label={t("actions.open", { name: product.name })}
             disabled={busy}
           >
@@ -71,6 +73,14 @@ export function ProductRowActions({
           >
             <PencilIcon aria-hidden="true" />
             {t("actions.edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => onAdjustStock(product)}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
+          >
+            <PackageIcon aria-hidden="true" />
+            {t("actions.adjustStock")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => void onStatusChange(product)}

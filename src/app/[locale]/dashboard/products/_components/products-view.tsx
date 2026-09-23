@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 import {
   FileUpIcon,
   PlusIcon,
@@ -12,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { ProductFilters } from "./product-filters";
 import { ProductFormSheet } from "./product-form-sheet";
 import { ProductImportDialog } from "./product-import-dialog";
+import { ProductStockDialog } from "./product-stock-dialog";
 import type { ProductFiltersState, ProductListItem } from "./product.types";
 import { ProductsSkeleton } from "./products-skeleton";
 import { ProductsTable } from "./products-table";
@@ -38,6 +40,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<ProductListItem | null>(null);
+  const [adjusting, setAdjusting] = useState<ProductListItem | null>(null);
   const input = {
     ...(filters.search ? { search: filters.search } : {}),
     ...(filters.category ? { category: filters.category } : {}),
@@ -47,6 +50,9 @@ export function ProductsView({ branchId }: { branchId?: string }) {
   };
   const listQuery = api.product.list.useInfiniteQuery(input, {
     getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
+    // Filter/branch changes keep the current rows visible; the full skeleton
+    // is only for the first load.
+    placeholderData: keepPreviousData,
   });
   const categoriesQuery = api.product.listCategories.useQuery();
   const branchesQuery = api.product.listStockBranches.useQuery();
@@ -72,6 +78,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
     mutations.creating ||
     mutations.updating ||
     mutations.changingStatus ||
+    mutations.adjustingStock ||
     mutations.deleting;
   const filtered =
     branchId !== undefined ||
@@ -103,7 +110,6 @@ export function ProductsView({ branchId }: { branchId?: string }) {
         action={
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void retryAll()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -128,7 +134,6 @@ export function ProductsView({ branchId }: { branchId?: string }) {
               type="button"
               variant="outline"
               onClick={() => setImportOpen(true)}
-              className="min-h-11 sm:min-h-10"
               disabled={isReadOnly}
               title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
             >
@@ -143,7 +148,6 @@ export function ProductsView({ branchId }: { branchId?: string }) {
                 setEditing(null);
                 setSheetOpen(true);
               }}
-              className="min-h-11 sm:min-h-10"
               disabled={isReadOnly}
               title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
             >
@@ -158,31 +162,45 @@ export function ProductsView({ branchId }: { branchId?: string }) {
         categories={categories}
         onChange={setFilters}
       />
-      <ProductsTable
-        products={products}
-        branchSelected={Boolean(branchId)}
-        filtered={filtered}
-        hasMore={Boolean(listQuery.hasNextPage)}
-        loadingMore={listQuery.isFetchingNextPage}
-        mutationBusy={mutationBusy}
-        onLoadMore={() => void listQuery.fetchNextPage()}
-        onCreate={() => {
-          setEditing(null);
-          setSheetOpen(true);
+      <div
+        aria-busy={listQuery.isPlaceholderData}
+        className="transition-opacity duration-150 aria-busy:opacity-60 motion-reduce:transition-none"
+      >
+        <ProductsTable
+          products={products}
+          branchSelected={Boolean(branchId)}
+          filtered={filtered}
+          hasMore={Boolean(listQuery.hasNextPage)}
+          loadingMore={listQuery.isFetchingNextPage}
+          mutationBusy={mutationBusy}
+          onLoadMore={() => void listQuery.fetchNextPage()}
+          onCreate={() => {
+            setEditing(null);
+            setSheetOpen(true);
+          }}
+          onEdit={(product) => {
+            setEditing(product);
+            setSheetOpen(true);
+          }}
+          onAdjustStock={setAdjusting}
+          onStatusChange={async (product) =>
+            (
+              await mutations.setStatus(
+                product.id,
+                product.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED",
+              )
+            ).ok
+          }
+          onDelete={async (product) => (await mutations.remove(product.id)).ok}
+        />
+      </div>
+      <ProductStockDialog
+        product={adjusting}
+        submitting={mutations.adjustingStock}
+        onOpenChange={(open) => {
+          if (!open) setAdjusting(null);
         }}
-        onEdit={(product) => {
-          setEditing(product);
-          setSheetOpen(true);
-        }}
-        onStatusChange={async (product) =>
-          (
-            await mutations.setStatus(
-              product.id,
-              product.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED",
-            )
-          ).ok
-        }
-        onDelete={async (product) => (await mutations.remove(product.id)).ok}
+        onSubmit={mutations.adjustStock}
       />
       <ProductFormSheet
         open={sheetOpen}

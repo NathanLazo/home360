@@ -1,6 +1,6 @@
 "use client";
 
-import { BellIcon, InfoIcon } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, type UseFormReturn } from "react-hook-form";
 
@@ -20,6 +20,7 @@ export function NotificationsSettingsSection({
 
   return (
     <SettingsSectionCard
+      id="notifications"
       title={t("title")}
       description={t("description")}
       icon={BellIcon}
@@ -69,14 +70,6 @@ export function NotificationsSettingsSection({
           </div>
         )}
       />
-
-      <p
-        role="note"
-        className="text-muted-foreground flex items-start gap-2 text-xs"
-      >
-        <InfoIcon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-        {t("consumerNote")}
-      </p>
     </SettingsSectionCard>
   );
 }

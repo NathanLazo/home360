@@ -30,8 +30,41 @@ export const GLASS_OPTICS_STILL: Partial<GlassOptics> = {
   bend: 0,
 };
 
+/**
+ * Selection lens: a clear bead laid OVER the selected item, so it bends the
+ * item's own icon and label at the rim (Chromium) while the centre stays
+ * neutral. No frost and no veil — text under it must stay crisp in every
+ * browser; Safari/Firefox keep only the edge light.
+ */
+export const GLASS_LENS_OPTICS: Partial<GlassOptics> = {
+  strength: 0.06,
+  depth: 0.35,
+  curvature: 0.2,
+  dispersion: 0.35,
+  bend: 0.55,
+  bendWidth: 0.22,
+  frost: 0,
+  saturate: 1.2,
+  brightness: 0,
+  specular: 1,
+  sheen: 0.45,
+  sheenWidth: 1.5,
+  sheenAngle: 300,
+  glow: 0.12,
+  glowSpread: 0.35,
+};
+
+/** Reduced motion: the lens keeps its edge light but stops bending. */
+export const GLASS_LENS_OPTICS_STILL: Partial<GlassOptics> = {
+  ...GLASS_LENS_OPTICS,
+  strength: 0,
+  dispersion: 0,
+  bend: 0,
+};
+
 /** Corner radii in px (the lens needs numbers); mirror the Tailwind scale. */
 export const GLASS_RADIUS = {
+  xs: 4,
   sm: 6,
   md: 8,
   lg: 12,

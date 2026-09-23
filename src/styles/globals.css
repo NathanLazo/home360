@@ -473,6 +473,22 @@
     var(--metal-rim) border-box;
 }
 
+/*
+ * Hollow liquid-metal hairline: only the polished-silver ring, no core, so it
+ * can sit over content (glass selection lenses). Masked to the border box.
+ */
+@utility metal-hairline {
+  border: var(--metal-rim-width, 1px) solid transparent;
+  background: var(--metal-rim) border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box exclude,
+    linear-gradient(#000 0 0);
+}
+
 /* Chrome fill for badges, pills and active indicators. Pair with `text-ink`. */
 @utility bg-metal {
   background-image: var(--metal-gloss), var(--metal-fill);

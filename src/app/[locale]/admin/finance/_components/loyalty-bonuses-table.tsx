@@ -2,7 +2,7 @@
 
 import { GiftIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { LoyaltyBonusRow } from "./finance.types";
 import { LoyaltyBonusRowActions } from "./loyalty-bonus-row-actions";
@@ -23,10 +23,12 @@ export function LoyaltyBonusesTable({
   bonuses,
   onPay,
   onCancel,
+  emptyAction,
 }: {
   bonuses: LoyaltyBonusRow[];
   onPay: (bonus: LoyaltyBonusRow) => void;
   onCancel: (bonus: LoyaltyBonusRow) => void;
+  emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.finance.loyalty");
   const statusT = useTranslations("admin.loyaltyBonusStatus");
@@ -126,6 +128,7 @@ export function LoyaltyBonusesTable({
             icon={GiftIcon}
             title={t("empty.title")}
             description={t("empty.description")}
+            action={emptyAction}
           />
         </div>
       }

@@ -10,6 +10,8 @@ export type BranchFormValues = {
   address: string;
   managerName: string;
   coverageRadiusKm: string;
+  latitude: string;
+  longitude: string;
 };
 
 export type BranchFormErrors = Partial<Record<keyof BranchFormValues, string>>;

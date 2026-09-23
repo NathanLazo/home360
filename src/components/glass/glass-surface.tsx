@@ -42,6 +42,7 @@ const TONE_CLASS: Record<GlassTone, { glass: string; solid: string }> = {
 };
 
 const RADIUS_CLASS: Record<GlassRadius, string> = {
+  xs: "rounded-xs",
   sm: "rounded-sm",
   md: "rounded-md",
   lg: "rounded-lg",

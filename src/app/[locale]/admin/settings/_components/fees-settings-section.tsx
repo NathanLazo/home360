@@ -25,6 +25,7 @@ export function FeesSettingsSection({
 
   return (
     <SettingsSectionCard
+      id="fees"
       title={t("title")}
       description={t("description")}
       icon={PercentIcon}

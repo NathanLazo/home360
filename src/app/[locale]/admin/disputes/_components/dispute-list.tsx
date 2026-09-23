@@ -59,7 +59,6 @@ export function DisputeList({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 sm:min-h-10"
           disabled={loadingMore}
           onClick={onLoadMore}
         >

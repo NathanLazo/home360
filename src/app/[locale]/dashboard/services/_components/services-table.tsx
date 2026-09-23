@@ -13,6 +13,8 @@ import { Card, CardContent } from "~/components/ui/card";
 
 export function ServicesTable({
   services,
+  filtered,
+  readOnly,
   hasMore,
   loadingMore,
   mutationBusy,
@@ -23,6 +25,9 @@ export function ServicesTable({
   onDelete,
 }: {
   services: ServiceListItem[];
+  /** True when search/category/status filters are narrowing the list. */
+  filtered: boolean;
+  readOnly: boolean;
   hasMore: boolean;
   loadingMore: boolean;
   mutationBusy: boolean;
@@ -33,6 +38,7 @@ export function ServicesTable({
   onDelete: (service: ServiceListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.services");
+  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
   const formatter = useFormatter();
   const currency = (cents: number) =>
     formatter.number(cents / 100, {
@@ -143,12 +149,21 @@ export function ServicesTable({
             <div className="p-6">
               <EmptyState
                 icon={WrenchIcon}
-                title={t("empty.title")}
-                description={t("empty.description")}
+                title={t(filtered ? "empty.filteredTitle" : "empty.title")}
+                description={t(
+                  filtered ? "empty.filteredDescription" : "empty.description",
+                )}
                 action={
-                  <Button type="button" onClick={onCreate} className="min-h-11">
-                    {t("newService")}
-                  </Button>
+                  filtered ? undefined : (
+                    <Button
+                      type="button"
+                      onClick={onCreate}
+                      disabled={readOnly}
+                      title={readOnly ? readOnlyT("actionDisabled") : undefined}
+                    >
+                      {t("newService")}
+                    </Button>
+                  )
                 }
               />
             </div>
@@ -160,7 +175,6 @@ export function ServicesTable({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={loadingMore}
             onClick={onLoadMore}
           >

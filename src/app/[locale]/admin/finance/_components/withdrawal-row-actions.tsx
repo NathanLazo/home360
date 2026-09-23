@@ -21,17 +21,19 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
-type OpenDialog = "approve" | "reject" | null;
+type OpenDialog = "approve" | "reject" | "retry" | null;
 
 export function WithdrawalRowActions({
   withdrawal,
   pending,
   onApprove,
+  onRetry,
   onReject,
 }: {
   withdrawal: WithdrawalRow;
   pending: boolean;
   onApprove: (withdrawalId: string) => void;
+  onRetry: (withdrawalId: string) => void;
   onReject: (input: { withdrawalId: string; reason: string }) => void;
 }) {
   const t = useTranslations("admin.finance.actions");
@@ -46,11 +48,13 @@ export function WithdrawalRowActions({
     }
   }, [dialog]);
 
-  // Only a REQUESTED withdrawal of a non-suspended business is actionable.
-  if (
-    withdrawal.status !== "REQUESTED" ||
-    withdrawal.business.status === "SUSPENDED"
-  ) {
+  const requested = withdrawal.status === "REQUESTED";
+  const processing = withdrawal.status === "PROCESSING";
+  // A suspended business can still be rejected (money back to its balance),
+  // never paid out: only "Aprobar" is withheld.
+  const canApprove = requested && withdrawal.business.status !== "SUSPENDED";
+
+  if (!requested && !processing) {
     return null;
   }
 
@@ -65,23 +69,42 @@ export function WithdrawalRowActions({
 
   return (
     <div className="flex justify-end gap-2">
-      <Button
-        type="button"
-        size="sm"
-        className="min-h-9"
-        onClick={() => setDialog("approve")}
-      >
-        {t("approve")}
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        className="min-h-9"
-        onClick={() => setDialog("reject")}
-      >
-        {t("reject")}
-      </Button>
+      {canApprove ? (
+        <Button type="button" size="sm" onClick={() => setDialog("approve")}>
+          {t("approve")}
+        </Button>
+      ) : null}
+      {requested ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setDialog("reject")}
+        >
+          {t("reject")}
+        </Button>
+      ) : null}
+      {processing ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setDialog("retry")}
+        >
+          {t("retry")}
+        </Button>
+      ) : null}
+
+      <ConfirmDialog
+        open={dialog === "retry"}
+        onOpenChange={(open) => setDialog(open ? "retry" : null)}
+        title={t("retryTitle")}
+        description={t("retryDescription", { amount, destination })}
+        confirmLabel={t("retry")}
+        cancelLabel={t("cancel")}
+        loading={pending}
+        onConfirm={() => onRetry(withdrawal.id)}
+      />
 
       <ConfirmDialog
         open={dialog === "approve"}

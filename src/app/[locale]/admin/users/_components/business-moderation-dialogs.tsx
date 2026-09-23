@@ -22,7 +22,7 @@ export type BusinessModerationDialogsProps = {
 };
 
 /**
- * One mount point for the four moderation dialogs: the row dropdown and the
+ * One mount point for the five moderation dialogs: the row dropdown and the
  * detail sheet both raise the same `PendingModeration` and never own a dialog.
  */
 export function BusinessModerationDialogs({
@@ -104,6 +104,25 @@ export function BusinessModerationDialogs({
         onConfirm={() => {
           if (businessId) {
             mutations.reactivate.run({ businessId });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={pending?.action === "reopen"}
+        onOpenChange={(open) => {
+          if (!open) {
+            onClose();
+          }
+        }}
+        title={t("reopen.title")}
+        description={t("reopen.description")}
+        confirmLabel={t("reopen.confirm")}
+        cancelLabel={t("cancel")}
+        loading={mutations.reopen.pending}
+        onConfirm={() => {
+          if (businessId) {
+            mutations.reopen.run({ businessId });
           }
         }}
       />

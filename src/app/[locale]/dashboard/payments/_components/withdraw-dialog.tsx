@@ -231,7 +231,6 @@ export function WithdrawDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11"
                 disabled={requestingWithdrawal}
                 onClick={() => onOpenChange(false)}
               >
@@ -240,7 +239,6 @@ export function WithdrawDialog({
               <Button
                 type="submit"
                 metal="live"
-                className="min-h-11"
                 disabled={requestingWithdrawal || exceedsAvailable}
               >
                 {requestingWithdrawal ? (

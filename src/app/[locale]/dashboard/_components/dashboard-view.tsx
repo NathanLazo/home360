@@ -8,12 +8,14 @@ import { OrdersByBranchList } from "./orders-by-branch-list";
 import { RecentOrdersTable } from "./recent-orders-table";
 import { WeeklyRevenueChart } from "./weekly-revenue-chart";
 import { PageHeader } from "~/components/page-header";
+import type { DashboardRangeDays } from "~/lib/search-params";
 
 export type DashboardViewProps = {
   branchId?: string;
+  days: DashboardRangeDays;
 };
 
-export function DashboardView({ branchId }: DashboardViewProps) {
+export function DashboardView({ branchId, days }: DashboardViewProps) {
   const t = useTranslations("dashboard.home");
 
   return (
@@ -23,10 +25,14 @@ export function DashboardView({ branchId }: DashboardViewProps) {
         subtitle={t("subtitle")}
         actions={<HomePrimaryAction />}
       />
-      <KpiRow branchId={branchId} />
+      <KpiRow branchId={branchId} days={days} />
       <div className="grid items-stretch gap-4 xl:grid-cols-3">
-        <WeeklyRevenueChart branchId={branchId} className="xl:col-span-2" />
-        <OrdersByBranchList branchId={branchId} />
+        <WeeklyRevenueChart
+          branchId={branchId}
+          days={days}
+          className="xl:col-span-2"
+        />
+        <OrdersByBranchList branchId={branchId} days={days} />
       </div>
       <RecentOrdersTable branchId={branchId} />
     </div>

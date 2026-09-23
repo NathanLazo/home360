@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { WorkerListItem } from "./team.types";
 import { WorkerRowActions } from "./worker-row-actions";
+import { WorkerStatusCell } from "./worker-status-cell";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import {
@@ -79,6 +80,12 @@ export function TeamTable({
         ),
     },
     {
+      key: "status",
+      header: t("columns.status"),
+      className: "min-w-40",
+      cell: (worker) => <WorkerStatusCell worker={worker} />,
+    },
+    {
       key: "branch",
       header: t("columns.branch"),
       cell: (worker) => (
@@ -137,7 +144,6 @@ export function TeamTable({
                     type="button"
                     onClick={onCreate}
                     disabled={!canCreate}
-                    className="min-h-11"
                   >
                     {t("newWorker")}
                   </Button>

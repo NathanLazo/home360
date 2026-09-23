@@ -40,7 +40,9 @@ export const platformSettingsSchema = z
     aiPriceMarginPct: intInRange(SETTINGS_RANGES.aiPriceMarginPct),
     aiPricingModel: z.enum(AI_PRICING_MODELS),
     aiHumanReviewBelowThreshold: z.boolean(),
-    customerServiceFeeCents: intInRange(SETTINGS_RANGES.customerServiceFeeCents),
+    customerServiceFeeCents: intInRange(
+      SETTINGS_RANGES.customerServiceFeeCents,
+    ),
     // D3: the loyalty bonus is a percentage of the service fee, not a fixed
     // amount per volume.
     loyaltyBonusPct: intInRange(SETTINGS_RANGES.loyaltyBonusPct),
@@ -82,13 +84,6 @@ export const planCommissionValuesSchema = z
 
 export type PlanCommissionValues = z.infer<typeof planCommissionValuesSchema>;
 
-export const updatePlanCommissionsSchema = z
-  .object({
-    expected: planCommissionValuesSchema,
-    commissions: planCommissionValuesSchema,
-  })
-  .strict();
-
 /**
  * The single W13 submit cannot be atomic across two sequential mutations, so
  * the screen uses `save`: one transaction, optimistic control through
@@ -106,7 +101,8 @@ export const saveAdminSettingsSchema = z
     message: "no changes",
   })
   .refine(
-    (value) => Boolean(value.commissions) === Boolean(value.expectedCommissions),
+    (value) =>
+      Boolean(value.commissions) === Boolean(value.expectedCommissions),
     { message: "commissions and expectedCommissions must be sent together" },
   );
 

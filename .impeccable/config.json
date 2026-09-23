@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "createdAt": "2026-09-22T23:06:34.338Z",
+        "reason": "claude: #000 is a CSS mask alpha channel in metal-hairline, not a rendered color"
+      }
+    ]
+  }
+}

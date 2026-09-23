@@ -3,7 +3,8 @@
     "home": "Overview",
     "orders": "Orders",
     "locations": "Locations",
-    "membership": "Membership"
+    "membership": "Membership",
+    "settings": "Settings"
   },
   "sidebar": {
     "brandLabel": "HOME360, go to corporate overview",
@@ -63,11 +64,17 @@
     "queryErrorTitle": "We could not load the overview",
     "errorTitle": "Something went wrong",
     "errorDescription": "We could not show the corporate overview. Please try again.",
-    "primaryAction": "View orders"
+    "primaryAction": "View orders",
+    "filters": {
+      "monthLabel": "Overview month",
+      "currentMonth": "Current month",
+      "locationLabel": "Filter by location",
+      "allLocations": "All locations"
+    }
   },
   "orders": {
     "title": "Orders",
-    "subtitle": "Consolidated orders across all your locations.",
+    "subtitle": "Request services for your locations, compare offers and follow your orders.",
     "filters": {
       "locationLabel": "Filter by location",
       "allLocations": "All locations",
@@ -83,7 +90,8 @@
       "amount": "Amount",
       "status": "Status",
       "date": "Date",
-      "noLocation": "No location"
+      "noLocation": "No location",
+      "actions": "Actions"
     },
     "loadMore": "Load more",
     "loading": "Loading orders…",
@@ -103,10 +111,155 @@
       "amount": "Amount",
       "created": "Created",
       "noLocation": "No location",
-      "close": "Close"
+      "close": "Close",
+      "loading": "Loading order…",
+      "errorTitle": "We couldn't load the order",
+      "worker": "Technician",
+      "scheduledFor": "Scheduled visit",
+      "disputeNotice": "This order has a dispute. The payment stays on hold until the team resolves it.",
+      "receiptTitle": "Receipt",
+      "evidenceTitle": "Work evidence",
+      "timelineTitle": "History",
+      "noEvents": "No activity yet.",
+      "evidence": {
+        "before": "Before",
+        "after": "After",
+        "noPhotos": "No work photos yet.",
+        "notes": "Technician notes",
+        "materials": "Materials",
+        "materialLine": "{quantity} × {name}",
+        "recordingComplete": "Full recording available for review.",
+        "recordingIncomplete": "The recording is incomplete.",
+        "recordingMissing": "No recording of the service."
+      },
+      "receipt": {
+        "labor": "Service",
+        "serviceFee": "HOME360 fee",
+        "refunded": "Refunded",
+        "total": "Total",
+        "paymentState": "Payment: {status} · {date}",
+        "unpaid": "Awaiting payment.",
+        "releasedAt": "Released to the provider on {date}"
+      }
     },
     "errorTitle": "Something went wrong",
-    "errorDescription": "We could not show your orders. Please try again."
+    "errorDescription": "We could not show your orders. Please try again.",
+    "ordersTitle": "Orders",
+    "needLocation": "Add or reactivate a location to request services.",
+    "newRequest": {
+      "open": "New request",
+      "title": "New service request",
+      "description": "Describe what you need. Nearby providers will send you their offers.",
+      "close": "Close form",
+      "location": "Location",
+      "locationPlaceholder": "Choose a location",
+      "category": "Category",
+      "categoryPlaceholder": "Choose a category",
+      "details": "What you need",
+      "detailsPlaceholder": "E.g. Leak under the staff bathroom sink, dripping since yesterday…",
+      "cancel": "Cancel",
+      "submit": "Send request",
+      "validation": {
+        "corporateLocationId": "Choose an active location.",
+        "category": "Choose a category.",
+        "description": "Describe what you need (10 to 1,000 characters)."
+      },
+      "photos": {
+        "label": "Photos (optional)",
+        "hint": "JPG, PNG or WebP up to 10 MB. Up to {max}.",
+        "uploading": "Uploading…",
+        "add": "Add photos",
+        "listLabel": "Added photos",
+        "remove": "Remove {name}",
+        "errors": {
+          "type": "Only JPG, PNG or WebP photos are accepted.",
+          "size": "Each photo must be 10 MB or less.",
+          "count": "You can add up to {max} photos.",
+          "upload": "We couldn't upload the photo. Try again."
+        }
+      }
+    },
+    "requests": {
+      "title": "Requests",
+      "subtitle": "Your service requests and the offers they received.",
+      "loading": "Loading requests…",
+      "errorTitle": "We couldn't load your requests",
+      "emptyTitle": "No requests yet",
+      "emptyDescription": "Request a service for any of your locations and get offers from verified providers.",
+      "loadMore": "Load more",
+      "noRating": "No ratings yet",
+      "rating": "{rating} ({count, plural, one {# review} other {# reviews}})",
+      "scheduledFor": "Visit: {date}",
+      "accept": "Accept",
+      "acceptAria": "Accept the offer from {business}",
+      "status": {
+        "OPEN": "Waiting for offers",
+        "QUOTED": "Offers received",
+        "ACCEPTED": "Offer accepted",
+        "CANCELLED": "Cancelled",
+        "EXPIRED": "Expired"
+      },
+      "orderAwaitingPayment": "Order #{folio} created. Pay it so the provider can schedule the visit.",
+      "orderCreated": "Order #{folio} in progress.",
+      "pay": "Pay",
+      "viewOrder": "View order",
+      "quotesLabel": "Offers received",
+      "waitingForQuotes": "No offers yet. We'll let you know when a provider quotes."
+    },
+    "feedback": {
+      "requestCreated": "Request sent to nearby providers.",
+      "requestError": "We couldn't send the request. Try again.",
+      "quoteAccepted": "Offer accepted. Pay the order to confirm it.",
+      "quoteError": "We couldn't accept the offer. Try again.",
+      "payError": "We couldn't open the payment. Try again.",
+      "confirmed": "Delivery confirmed. We released the payment to the provider.",
+      "confirmError": "We couldn't confirm the delivery. Try again.",
+      "disputeOpened": "Dispute opened. The payment stays on hold while we review it.",
+      "disputeError": "We couldn't open the dispute. Try again.",
+      "cancelled": "Order cancelled. The request is open for offers again.",
+      "cancelError": "We couldn't cancel the order. Try again."
+    },
+    "actions": {
+      "open": "Actions for order #{folio}",
+      "view": "View details",
+      "pay": "Pay",
+      "confirm": "Confirm delivery",
+      "dispute": "Open dispute",
+      "cancel": "Cancel order"
+    },
+    "dispute": {
+      "title": "Open a dispute",
+      "description": "The payment stays on hold while the HOME360 team reviews the case with both parties.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Choose a reason",
+      "reasons": {
+        "NOT_COMPLETED": "The work wasn't finished",
+        "POOR_QUALITY": "Poor quality",
+        "DAMAGE": "Something was damaged",
+        "NO_SHOW": "The technician didn't show up",
+        "OVERCHARGE": "Incorrect charge",
+        "OTHER": "Other"
+      },
+      "details": "What happened",
+      "cancel": "Cancel",
+      "submit": "Open dispute",
+      "validation": {
+        "reason": "Choose a reason.",
+        "description": "Describe what happened (at least {min} characters)."
+      }
+    },
+    "confirmDialog": {
+      "title": "Confirm the delivery?",
+      "description": "Confirming releases the payment to the provider. This can't be undone.",
+      "confirm": "Confirm and release",
+      "cancel": "Go back"
+    },
+    "cancelDialog": {
+      "title": "Cancel this order?",
+      "description": "The order isn't paid yet. Cancelling it reopens your request for offers.",
+      "confirm": "Cancel order",
+      "cancel": "Go back"
+    }
   },
   "locations": {
     "title": "Locations",
@@ -171,12 +324,16 @@
       "updateError": "We could not update the location. Please try again.",
       "deactivateError": "We could not deactivate the location. Please try again.",
       "planLimit": "You reached your tier's location limit. Review your membership to expand it.",
-      "deactivateConflict": "This location has active orders; close them before deactivating it."
+      "deactivateConflict": "This location has active orders; close them before deactivating it.",
+      "reactivated": "Location reactivated.",
+      "reactivateError": "We couldn't reactivate the location. Try again."
     },
     "loading": "Loading locations…",
     "queryErrorTitle": "We could not load your locations",
     "errorTitle": "Something went wrong",
-    "errorDescription": "We could not show your locations. Please try again."
+    "errorDescription": "We could not show your locations. Please try again.",
+    "reactivate": "Reactivate",
+    "ordersLink": "View {count, plural, one {# order} other {# orders}} of {name}"
   },
   "membership": {
     "title": "Membership",
@@ -223,7 +380,16 @@
       "pendingNotice": "You have a pending request for the {tier} tier. The team is reviewing it.",
       "requested": "Request sent. The team will contact you.",
       "requestError": "We could not send the request. Please try again.",
-      "alreadyPending": "A different request is already pending; wait for its resolution."
+      "alreadyPending": "A different request is already pending; wait for its resolution.",
+      "withdraw": "Withdraw request",
+      "withdrawn": "Request withdrawn.",
+      "withdrawError": "We couldn't withdraw the request. Try again.",
+      "withdrawDialog": {
+        "title": "Withdraw the tier change request?",
+        "description": "The team will stop reviewing it. You can send a new one anytime.",
+        "confirm": "Withdraw",
+        "cancel": "Go back"
+      }
     },
     "invoices": {
       "title": "Membership invoices",
@@ -245,5 +411,79 @@
     "queryErrorTitle": "We could not load your membership",
     "errorTitle": "Something went wrong",
     "errorDescription": "We could not show your membership. Please try again."
+  },
+  "checkout": {
+    "serviceFeeLabel": "HOME360 service fee"
+  },
+  "requestCategory": {
+    "Plomería": "Plumbing",
+    "Eléctrico": "Electrical",
+    "Pintura": "Painting",
+    "Carpintería": "Carpentry",
+    "Limpieza": "Cleaning",
+    "Jardinería": "Gardening",
+    "Clima": "HVAC",
+    "Otro": "Other"
+  },
+  "orderEvent": {
+    "ACCEPTED": "Offer accepted",
+    "ESCROW_HELD": "Payment held in escrow",
+    "EN_ROUTE": "Technician on the way",
+    "ARRIVED": "Technician on site",
+    "RECORDING_STARTED": "Recording started",
+    "RECORDING_STOPPED": "Recording stopped",
+    "WORK_DONE": "Work finished",
+    "CONFIRMATION_REQUESTED": "Confirmation requested",
+    "CONFIRMED": "Delivery confirmed",
+    "AUTO_RELEASED": "Payment released automatically",
+    "CANCELLED": "Order cancelled",
+    "WORKER_ASSIGNED": "Technician assigned",
+    "REWORK_REQUESTED": "Rework requested",
+    "DISPUTE_OPENED": "Dispute opened"
+  },
+  "paymentStatus": {
+    "PENDING": "Pending",
+    "IN_ESCROW": "Held in escrow",
+    "REFUNDING": "Refunding",
+    "RELEASING": "Releasing",
+    "RELEASED": "Released to provider",
+    "REFUNDED": "Refunded",
+    "PARTIALLY_REFUNDED": "Partially refunded"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Your company details and account access.",
+    "loading": "Loading settings…",
+    "queryErrorTitle": "We couldn't load the settings",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We couldn't show the settings. Try again.",
+    "company": {
+      "title": "Company",
+      "name": "Legal name",
+      "taxId": "RFC (tax ID)",
+      "noTaxId": "No RFC on file",
+      "tier": "Tier",
+      "owner": "Account owner",
+      "email": "Email",
+      "accountManager": "Account manager",
+      "noOwner": "No name",
+      "readOnlyHint": "To change the legal name or RFC, contact your HOME360 account manager."
+    },
+    "password": {
+      "title": "Password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm the new password",
+      "submit": "Change password",
+      "success": "Password updated. Sign in again.",
+      "error": "We couldn't change the password. Try again.",
+      "signOutHint": "Changing it signs you out of every session.",
+      "noPassword": "Your account signs in with Google or has no password yet. Use “Forgot password” to create one.",
+      "validation": {
+        "currentPassword": "Enter your current password.",
+        "newPassword": "Use 8 to 72 characters, different from the current one.",
+        "confirmPassword": "The passwords don't match."
+      }
+    }
   }
 }

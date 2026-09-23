@@ -41,6 +41,7 @@ export function useLocationMutations() {
   const createMutation = api.corporate.createLocation.useMutation();
   const updateMutation = api.corporate.updateLocation.useMutation();
   const deactivateMutation = api.corporate.deactivateLocation.useMutation();
+  const reactivateMutation = api.corporate.reactivateLocation.useMutation();
 
   async function create(input: CorporateLocationCreateInput) {
     try {
@@ -85,10 +86,25 @@ export function useLocationMutations() {
     }
   }
 
+  async function reactivate(locationId: string) {
+    try {
+      const response = await reactivateMutation.mutateAsync({ locationId });
+      if (failed(response) || !response.result) return false;
+      toast.success(t("reactivated"));
+      await refresh();
+      return true;
+    } catch {
+      toast.error(t("reactivateError"));
+      return false;
+    }
+  }
+
   return {
     create,
     update,
     deactivate,
+    reactivate,
+    reactivating: reactivateMutation.isPending,
     submitting: createMutation.isPending || updateMutation.isPending,
     deactivating: deactivateMutation.isPending,
   };

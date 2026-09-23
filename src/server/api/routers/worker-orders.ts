@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import {
-  OrderEventType,
-  WorkerAvailability,
-} from "@generated/prisma";
+import { OrderEventType, WorkerAvailability } from "@generated/prisma";
 import {
   fail,
   normalizeError,
@@ -12,6 +9,7 @@ import {
 } from "~/server/api/contract";
 import { createTRPCRouter, workerProcedure } from "~/server/api/trpc";
 import {
+  ASSIGNED_ORDER_SCOPES,
   finishAssignedOrder,
   getAssignedOrderById,
   listAssignedOrders,
@@ -62,7 +60,17 @@ const finishSchema = orderIdSchema.extend({
   afterPathnames: z.array(z.string().trim().min(1).max(500)).min(1).max(20),
   workNotes: z.string().trim().min(1).max(5_000),
   materials: z.array(materialSchema).max(100),
+  // Required by the service only when the recording is missing/incomplete
+  // (RECORDING_JUSTIFICATION_REQUIRED otherwise).
+  recordingJustification: z.string().trim().min(20).max(2_000).optional(),
 });
+
+const listAssignedSchema = z
+  .object({
+    scope: z.enum(ASSIGNED_ORDER_SCOPES).default("today"),
+    cursor: z.string().cuid().optional(),
+  })
+  .default({ scope: "today" });
 
 const setAvailabilitySchema = z.object({
   availability: z.nativeEnum(WorkerAvailability),
@@ -95,19 +103,28 @@ function unexpectedFailure(
 
 /** Worker-only service order lifecycle. Every resource is scoped by ctx.worker. */
 export const workerOrdersRouter = createTRPCRouter({
-  listAssigned: workerProcedure.query(async ({ ctx }) => {
-    try {
-      const assigned = await listAssignedOrders(ctx.db, ctx.worker.id);
+  listAssigned: workerProcedure
+    .input(listAssignedSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const assigned = await listAssignedOrders(ctx.db, {
+          workerId: ctx.worker.id,
+          scope: input.scope,
+          cursor: input.cursor,
+        });
 
-      if (!assigned.ok) {
-        return serviceFailure(assigned.code, "Assigned orders could not load");
+        if (!assigned.ok) {
+          return serviceFailure(
+            assigned.code,
+            "Assigned orders could not load",
+          );
+        }
+
+        return ok(assigned.data, "Assigned orders loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Assigned orders could not load");
       }
-
-      return ok(assigned.data, "Assigned orders loaded");
-    } catch (error) {
-      return unexpectedFailure(error, "Assigned orders could not load");
-    }
-  }),
+    }),
 
   getById: workerProcedure
     .input(orderIdSchema)
@@ -211,6 +228,7 @@ export const workerOrdersRouter = createTRPCRouter({
           afterPathnames: input.afterPathnames,
           workNotes: input.workNotes,
           materials: input.materials,
+          recordingJustification: input.recordingJustification,
         });
 
         if (!finished.ok) {

@@ -20,7 +20,6 @@ export function OverviewPrimaryAction({ urgent }: OverviewPrimaryActionProps) {
       asChild
       metal="live"
       metalActive={urgent}
-      className="min-h-11 sm:min-h-10"
     >
       <Link href="/admin/disputes">
         <ScaleIcon aria-hidden="true" />

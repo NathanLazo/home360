@@ -7,6 +7,10 @@ import {
   type PrismaClient,
 } from "@generated/prisma";
 import { haversineKm } from "~/server/services/geo/haversine";
+import {
+  getConsumerOrderDetail,
+  type ConsumerOrderDetail,
+} from "~/server/services/orders/consumer-order-detail";
 import { triggerPusherEvent } from "~/server/services/messaging/pusher-server";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -146,7 +150,10 @@ export async function getOrderTracking(
           latitude: order.quote?.request.latitude ?? null,
           longitude: order.quote?.request.longitude ?? null,
         }
-      : { latitude: order.deliveryLatitude, longitude: order.deliveryLongitude };
+      : {
+          latitude: order.deliveryLatitude,
+          longitude: order.deliveryLongitude,
+        };
 
   if (
     order.worker.lastLatitude !== null &&
@@ -278,4 +285,51 @@ export async function updateWorkerLocation(
   );
 
   return svcOk({ updated: true, notifiedOrders: activeOrders.length });
+}
+
+export type CustomerOrderView = Omit<ConsumerOrderDetail, "worker"> & {
+  /** Assigned technician profile (always present when assigned). */
+  assignedWorker: ConsumerOrderDetail["worker"];
+  /** Live position, only inside the tracking window (see above). */
+  worker?: TrackedWorker;
+  etaMinutes?: number;
+};
+
+/**
+ * C6 full view (workstream D): the live-tracking payload merged with the
+ * consumer order detail (evidence, materials, recording availability, money
+ * breakdown, payment/dispute state, quote, business and worker profile and
+ * the server-computed action guards).
+ */
+export async function getCustomerOrderView(
+  db: PrismaClient,
+  input: { customerId: string; orderId: string },
+): Promise<ServiceResult<CustomerOrderView>> {
+  const [tracking, detail] = await Promise.all([
+    getOrderTracking(db, input),
+    getConsumerOrderDetail(
+      db,
+      { kind: "CUSTOMER", customerId: input.customerId },
+      input.orderId,
+    ),
+  ]);
+
+  if (!tracking.ok) {
+    return tracking;
+  }
+
+  if (!detail.ok) {
+    return detail;
+  }
+
+  const { worker: assignedWorker, ...rest } = detail.data;
+
+  return svcOk({
+    ...rest,
+    assignedWorker,
+    ...(tracking.data.worker ? { worker: tracking.data.worker } : {}),
+    ...(tracking.data.etaMinutes !== undefined
+      ? { etaMinutes: tracking.data.etaMinutes }
+      : {}),
+  });
 }

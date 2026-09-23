@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import {
   parseLocationParam,
+  parseOrderParam,
   parseOrderStatusParam,
 } from "../_components/corporate-search-params";
 import { CorporateOrdersView } from "./_components/corporate-orders-view";
@@ -31,18 +32,27 @@ export default async function CorporateOrdersPage({
   setRequestLocale(locale);
   const locationId = parseLocationParam(resolvedSearchParams);
   const status = parseOrderStatusParam(resolvedSearchParams);
+  const orderId = parseOrderParam(resolvedSearchParams);
 
   await Promise.all([
     api.corporate.listOrders.prefetchInfinite({
       ...(locationId ? { locationId } : {}),
       ...(status ? { status } : {}),
     }),
+    api.corporate.listRequests.prefetchInfinite(
+      locationId ? { locationId } : {},
+    ),
     api.corporate.listLocations.prefetch({ includeInactive: true }),
+    api.corporate.getMembership.prefetch(),
   ]);
 
   return (
     <HydrateClient>
-      <CorporateOrdersView locationId={locationId} status={status} />
+      <CorporateOrdersView
+        locationId={locationId}
+        status={status}
+        orderId={orderId}
+      />
     </HydrateClient>
   );
 }

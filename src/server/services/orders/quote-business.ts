@@ -5,7 +5,6 @@ import {
   QuoteStatus,
   RequestStatus,
   type PrismaClient,
-  type Quote,
 } from "@generated/prisma";
 import { getOrCreateForRequest } from "~/server/services/messaging/conversations";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
@@ -18,12 +17,33 @@ import {
 export type SubmitQuoteResult = {
   quoteId: string;
   conversationId: string;
+  /** `true` when an own PENDING quote was edited in place. */
+  updated: boolean;
 };
 
 export type WithdrawQuoteResult = {
   quoteId: string;
   status: typeof QuoteStatus.WITHDRAWN;
 };
+
+/** Request states in which the marketplace still accepts offers. */
+export const QUOTABLE_REQUEST_STATUSES: RequestStatus[] = [
+  RequestStatus.OPEN,
+  RequestStatus.QUOTED,
+];
+
+/** Own quote states that can be (re)sent through quote.submit. */
+const RESUBMITTABLE_QUOTE_STATUSES: QuoteStatus[] = [
+  QuoteStatus.PENDING,
+  QuoteStatus.WITHDRAWN,
+];
+
+class QuoteChangedError extends Error {
+  constructor() {
+    super("Quote changed concurrently");
+    this.name = "QuoteChangedError";
+  }
+}
 
 function isUniqueViolation(error: unknown): boolean {
   return (
@@ -33,11 +53,16 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 /**
- * Business-side quote submit (M5-W1 / N2): validates the request is OPEN and
- * visible on the radar, the worker belongs to the business, then creates a
- * PENDING Quote and upserts the pre-order Conversation (MA-08). A second
- * submit for the same [requestId, businessId] surfaces CONFLICT (P2002),
- * including after WITHDRAWN — re-quoting is deliberately blocked (MA-16).
+ * Business-side quote submit (M5-W1 / N2, P-WEB-02): validates the request is
+ * OPEN or QUOTED and visible on the radar, the worker belongs to the business,
+ * then writes the Quote and upserts the pre-order Conversation (MA-08).
+ *
+ * Request lifecycle: the first active offer moves the request OPEN → QUOTED;
+ * it stays QUOTED while at least one PENDING offer exists (see withdrawQuote).
+ *
+ * Re-quoting: the [requestId, businessId] pair keeps a single row. A PENDING
+ * quote is edited in place; a WITHDRAWN one is revived back to PENDING with
+ * the new terms. ACCEPTED / REJECTED / EXPIRED rows answer CONFLICT.
  */
 export async function submitQuote(
   db: PrismaClient,
@@ -48,6 +73,7 @@ export async function submitQuote(
     priceCents: number;
     scheduledAt: Date;
     workerId: string;
+    message?: string;
     branchId?: string;
   },
 ): Promise<ServiceResult<SubmitQuoteResult, "VALIDATION_ERROR">> {
@@ -64,8 +90,15 @@ export async function submitQuote(
     return svcFail("VALIDATION_ERROR", "Worker does not belong to business");
   }
 
+  if (input.scheduledAt.getTime() <= Date.now()) {
+    return svcFail("VALIDATION_ERROR", "Scheduled time must be in the future");
+  }
+
   const request = await db.serviceRequest.findFirst({
-    where: { id: input.requestId, status: RequestStatus.OPEN },
+    where: {
+      id: input.requestId,
+      status: { in: QUOTABLE_REQUEST_STATUSES },
+    },
     select: { id: true, customerId: true },
   });
 
@@ -91,24 +124,73 @@ export async function submitQuote(
     return branch;
   }
 
-  let quote: Pick<Quote, "id">;
-
-  try {
-    quote = await db.quote.create({
-      data: {
+  const existing = await db.quote.findUnique({
+    where: {
+      requestId_businessId: {
         requestId: input.requestId,
         businessId: input.businessId,
-        branchId: branch.data.id,
-        workerId: input.workerId,
-        amountCents: input.priceCents,
-        scheduledFor: input.scheduledAt,
-        status: QuoteStatus.PENDING,
       },
-      select: { id: true },
+    },
+    select: { id: true, status: true },
+  });
+
+  if (existing && !RESUBMITTABLE_QUOTE_STATUSES.includes(existing.status)) {
+    return svcFail("CONFLICT", "Quote can no longer be changed");
+  }
+
+  const terms = {
+    branchId: branch.data.id,
+    workerId: input.workerId,
+    amountCents: input.priceCents,
+    scheduledFor: input.scheduledAt,
+    message: input.message ?? null,
+    status: QuoteStatus.PENDING,
+  };
+
+  let quoteId: string;
+
+  try {
+    quoteId = await db.$transaction(async (tx) => {
+      let id: string;
+
+      if (existing) {
+        const revived = await tx.quote.updateMany({
+          where: {
+            id: existing.id,
+            businessId: input.businessId,
+            status: { in: RESUBMITTABLE_QUOTE_STATUSES },
+          },
+          data: terms,
+        });
+
+        if (revived.count === 0) {
+          throw new QuoteChangedError();
+        }
+
+        id = existing.id;
+      } else {
+        const created = await tx.quote.create({
+          data: {
+            requestId: input.requestId,
+            businessId: input.businessId,
+            ...terms,
+          },
+          select: { id: true },
+        });
+
+        id = created.id;
+      }
+
+      await tx.serviceRequest.updateMany({
+        where: { id: input.requestId, status: RequestStatus.OPEN },
+        data: { status: RequestStatus.QUOTED },
+      });
+
+      return id;
     });
   } catch (error) {
-    if (isUniqueViolation(error)) {
-      return svcFail("CONFLICT", "Quote already exists for this request");
+    if (isUniqueViolation(error) || error instanceof QuoteChangedError) {
+      return svcFail("CONFLICT", "Quote changed concurrently");
     }
 
     throw error;
@@ -125,20 +207,26 @@ export async function submitQuote(
     return svcFail("NOT_FOUND", "Conversation could not be opened");
   }
 
-  await sendLocalizedPushToUser(db, request.customerId, {
-    message: "quoteReceived",
-    url: `home360app://request/${request.id}/quotes`,
-  });
+  const updated = existing?.status === QuoteStatus.PENDING;
+
+  if (!updated) {
+    await sendLocalizedPushToUser(db, request.customerId, {
+      message: "quoteReceived",
+      url: `home360app://request/${request.id}/quotes`,
+    });
+  }
 
   return svcOk({
-    quoteId: quote.id,
+    quoteId,
     conversationId: conversation.data.conversationId,
+    updated,
   });
 }
 
 /**
- * Withdraws an own PENDING quote → WITHDRAWN. The row stays so
- * @@unique([requestId, businessId]) blocks a second submit (MA-16).
+ * Withdraws an own PENDING quote → WITHDRAWN. The row stays (a later submit
+ * revives it). When it was the last PENDING offer on a QUOTED request, the
+ * request returns to OPEN so the radar and the customer see it unquoted.
  */
 export async function withdrawQuote(
   db: PrismaClient,
@@ -146,7 +234,7 @@ export async function withdrawQuote(
 ): Promise<ServiceResult<WithdrawQuoteResult>> {
   const quote = await db.quote.findFirst({
     where: { id: input.quoteId, businessId: input.businessId },
-    select: { id: true, status: true },
+    select: { id: true, status: true, requestId: true },
   });
 
   if (!quote) {
@@ -157,16 +245,35 @@ export async function withdrawQuote(
     return svcFail("CONFLICT", "Quote is not pending");
   }
 
-  const withdrawn = await db.quote.updateMany({
-    where: {
-      id: quote.id,
-      businessId: input.businessId,
-      status: QuoteStatus.PENDING,
-    },
-    data: { status: QuoteStatus.WITHDRAWN },
+  const withdrawn = await db.$transaction(async (tx) => {
+    const changed = await tx.quote.updateMany({
+      where: {
+        id: quote.id,
+        businessId: input.businessId,
+        status: QuoteStatus.PENDING,
+      },
+      data: { status: QuoteStatus.WITHDRAWN },
+    });
+
+    if (changed.count === 0) {
+      return false;
+    }
+
+    const remaining = await tx.quote.count({
+      where: { requestId: quote.requestId, status: QuoteStatus.PENDING },
+    });
+
+    if (remaining === 0) {
+      await tx.serviceRequest.updateMany({
+        where: { id: quote.requestId, status: RequestStatus.QUOTED },
+        data: { status: RequestStatus.OPEN },
+      });
+    }
+
+    return true;
   });
 
-  if (withdrawn.count === 0) {
+  if (!withdrawn) {
     return svcFail("CONFLICT", "Quote is not pending");
   }
 

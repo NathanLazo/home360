@@ -1,20 +1,19 @@
 import { z } from "zod";
 
+import { QuoteStatus } from "@generated/prisma";
 import {
   fail,
   normalizeError,
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
-import {
-  activeBusinessProcedure,
-  createTRPCRouter,
-  userProcedure,
-} from "~/server/api/trpc";
+import { consumerProcedure } from "~/server/api/consumer-procedure";
+import { activeBusinessProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
   submitQuote,
   withdrawQuote,
 } from "~/server/services/orders/quote-business";
+import { listMyQuotes } from "~/server/services/orders/quote-directory";
 import {
   acceptQuote,
   getMyQuote,
@@ -29,12 +28,25 @@ const listByRequestSchema = z.object({
 
 const quoteIdSchema = z.object({ id: z.string().cuid() });
 
+const QUOTE_MESSAGE_MAX = 500;
+
 const submitSchema = z.object({
   requestId: z.string().cuid(),
   priceCents: z.number().int().positive(),
   scheduledAt: z.coerce.date(),
   workerId: z.string().cuid(),
+  message: z
+    .string()
+    .trim()
+    .max(QUOTE_MESSAGE_MAX)
+    .optional()
+    .transform((value) => (value === "" ? undefined : value)),
   branchId: z.string().cuid().optional(),
+});
+
+const listMineSchema = z.object({
+  status: z.nativeEnum(QuoteStatus).optional(),
+  cursor: z.string().cuid().optional(),
 });
 
 /** HTTP status per service code surfaced by the quote services. */
@@ -68,7 +80,7 @@ function unexpectedFailure(
  * answer a generic NOT_FOUND.
  */
 export const quoteRouter = createTRPCRouter({
-  listByRequest: userProcedure
+  listByRequest: consumerProcedure
     .input(listByRequestSchema)
     .query(async ({ ctx, input }) => {
       try {
@@ -88,24 +100,26 @@ export const quoteRouter = createTRPCRouter({
       }
     }),
 
-  getById: userProcedure.input(quoteIdSchema).query(async ({ ctx, input }) => {
-    try {
-      const quote = await getMyQuote(ctx.db, {
-        customerId: ctx.customer.id,
-        quoteId: input.id,
-      });
+  getById: consumerProcedure
+    .input(quoteIdSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const quote = await getMyQuote(ctx.db, {
+          customerId: ctx.customer.id,
+          quoteId: input.id,
+        });
 
-      if (!quote.ok) {
-        return serviceFailure(quote.code, "Quote not found");
+        if (!quote.ok) {
+          return serviceFailure(quote.code, "Quote not found");
+        }
+
+        return ok(quote.data, "Quote loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Quote load failed");
       }
+    }),
 
-      return ok(quote.data, "Quote loaded");
-    } catch (error) {
-      return unexpectedFailure(error, "Quote load failed");
-    }
-  }),
-
-  accept: userProcedure
+  accept: consumerProcedure
     .input(quoteIdSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -135,6 +149,7 @@ export const quoteRouter = createTRPCRouter({
           priceCents: input.priceCents,
           scheduledAt: input.scheduledAt,
           workerId: input.workerId,
+          message: input.message,
           branchId: input.branchId,
         });
 
@@ -164,6 +179,27 @@ export const quoteRouter = createTRPCRouter({
         return ok(withdrawn.data, "Quote withdrawn");
       } catch (error) {
         return unexpectedFailure(error, "Quote withdraw failed");
+      }
+    }),
+
+  /** Business "Mis ofertas": own quotes, optionally by status. */
+  listMine: activeBusinessProcedure
+    .input(listMineSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const list = await listMyQuotes(ctx.db, {
+          businessId: ctx.business.id,
+          status: input.status,
+          cursor: input.cursor,
+        });
+
+        if (!list.ok) {
+          return serviceFailure(list.code, "Quote list failed");
+        }
+
+        return ok(list.data, "Quotes loaded");
+      } catch (error) {
+        return unexpectedFailure(error, "Quote list failed");
       }
     }),
 });

@@ -22,7 +22,11 @@ export function TeamView() {
   const { isReadOnly } = useSubscriptionAccess();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<WorkerListItem | null>(null);
-  const listQuery = api.team.list.useQuery();
+  // Availability is reported by the worker app, so the table polls to keep
+  // the live status badge honest while the owner watches it.
+  const listQuery = api.team.list.useQuery(undefined, {
+    refetchInterval: 30_000,
+  });
   // Branches feed the form selector only: a business without an active plan
   // gets an empty selector instead of blocking the whole screen.
   const branchesQuery = api.branch.list.useQuery();
@@ -62,7 +66,6 @@ export function TeamView() {
         action={
           <Button
             type="button"
-            className="min-h-11"
             onClick={() => void listQuery.refetch()}
           >
             <RotateCcwIcon aria-hidden="true" />
@@ -107,7 +110,6 @@ export function TeamView() {
               aria-describedby={
                 createBlockedReason ? "team-create-hint" : undefined
               }
-              className="min-h-11 sm:min-h-10"
             >
               <PlusIcon aria-hidden="true" />
               {t("newWorker")}

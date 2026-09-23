@@ -41,6 +41,10 @@ export const DOMAIN_ERROR_CODES = [
   "SETTINGS_STALE",
   "AI_UNAVAILABLE",
   "ADDRESS_LIMIT_REACHED",
+  // Payment router codes (already translated in errors.json).
+  "ORDER_NOT_FOUND",
+  "INVALID_TARGET",
+  "CORPORATE_PRICING_NOT_AVAILABLE",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

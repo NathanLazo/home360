@@ -7,6 +7,7 @@ import {
   PencilIcon,
   PlayIcon,
   Trash2Icon,
+  UserRoundCogIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -27,6 +28,7 @@ export function BranchCardActions({
   statusPending,
   deletePending,
   onEdit,
+  onAssignManager,
   onStatus,
   onDelete,
 }: {
@@ -34,6 +36,7 @@ export function BranchCardActions({
   statusPending: boolean;
   deletePending: boolean;
   onEdit: () => void;
+  onAssignManager: () => void;
   onStatus: (status: "ACTIVE" | "PAUSED") => Promise<boolean>;
   onDelete: () => Promise<boolean>;
 }) {
@@ -54,7 +57,6 @@ export function BranchCardActions({
             type="button"
             variant="ghost"
             size="icon"
-            className="min-h-11 min-w-11"
             aria-label={t("actions.open", { name: branch.name })}
           >
             <MoreHorizontalIcon aria-hidden="true" />
@@ -68,6 +70,14 @@ export function BranchCardActions({
           >
             <PencilIcon aria-hidden="true" />
             {t("actions.edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={onAssignManager}
+            disabled={isReadOnly}
+            title={readOnlyTitle}
+          >
+            <UserRoundCogIcon aria-hidden="true" />
+            {t("actions.assignManager")}
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={statusPending || isReadOnly}

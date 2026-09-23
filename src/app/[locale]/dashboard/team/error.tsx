@@ -14,7 +14,7 @@ export default function TeamError({ reset }: { reset: () => void }) {
       title={t("errorTitle")}
       description={t("errorDescription")}
       action={
-        <Button type="button" onClick={reset} className="min-h-11">
+        <Button type="button" onClick={reset}>
           <RotateCcwIcon aria-hidden="true" />
           {t("retry")}
         </Button>

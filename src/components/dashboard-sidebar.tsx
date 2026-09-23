@@ -49,6 +49,26 @@ export function DashboardSidebar({
       ? (subscriptionQuery.data.result?.plan.name ?? null)
       : null;
   const searchParams = useSearchParams();
+  const branchParam = searchParams.get("branch") ?? undefined;
+  // Live badge: refetched after order mutations (they invalidate the
+  // dashboard router) and on focus. The server value seeds the unfiltered
+  // query so first paint shows the right number without a request.
+  const activeOrdersQuery = api.dashboard.getActiveOrdersCount.useQuery(
+    branchParam ? { branchId: branchParam } : {},
+    {
+      initialData: branchParam
+        ? undefined
+        : {
+            result: { count: activeOrdersCount },
+            error: null,
+            status: 200,
+            message: "Active orders counted",
+          },
+      staleTime: 30_000,
+    },
+  );
+  const liveActiveOrders =
+    activeOrdersQuery.data?.result?.count ?? activeOrdersCount;
   const items: SidebarItem[] = DASHBOARD_NAV.map((item) => {
     const nextSearchParams = isCurrentSection(pathname, item.href)
       ? new URLSearchParams(searchParams.toString())
@@ -66,7 +86,7 @@ export function DashboardSidebar({
       ...item,
       href,
       label: labels[item.key],
-      badgeCount: item.key === "orders" ? activeOrdersCount : undefined,
+      badgeCount: item.key === "orders" ? liveActiveOrders : undefined,
     };
   });
 

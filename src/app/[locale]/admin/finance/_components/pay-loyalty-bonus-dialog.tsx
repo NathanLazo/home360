@@ -120,7 +120,6 @@ export function PayLoyaltyBonusDialog({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={loading}
             onClick={() => onOpenChange(false)}
           >
@@ -129,7 +128,6 @@ export function PayLoyaltyBonusDialog({
           <Button
             type="button"
             metal="live"
-            className="min-h-11 sm:min-h-10"
             disabled={loading || bonus === null}
             onClick={() => {
               if (bonus) {

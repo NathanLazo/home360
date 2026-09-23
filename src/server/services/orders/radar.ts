@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   Prisma,
+  QuoteStatus,
   RequestStatus,
   type PrismaClient,
 } from "@generated/prisma";
@@ -142,9 +143,10 @@ function toRadarItem(
 }
 
 /**
- * OPEN requests inside the branch radius, matching the business catalog and
- * without an existing quote from this business (including WITHDRAWN — the
- * unique pair blocks re-quoting).
+ * OPEN or QUOTED requests (other businesses may already have offered) inside
+ * the branch radius, matching the business catalog and without a quote from
+ * this business in any state — own offers (incl. WITHDRAWN, which can be
+ * revived) live in quote.listMine.
  */
 export async function listOpenRequests(
   db: PrismaClient,
@@ -228,7 +230,7 @@ export async function listOpenRequests(
       )} AS "distanceKm"
     FROM "ServiceRequest" AS r
     INNER JOIN "User" AS u ON u."id" = r."customerId"
-    WHERE r."status"::text = ${RequestStatus.OPEN}
+    WHERE r."status"::text IN (${RequestStatus.OPEN}, ${RequestStatus.QUOTED})
       AND r."latitude" IS NOT NULL
       AND r."longitude" IS NOT NULL
       AND r."category" IN (${Prisma.join(categories)})
@@ -267,9 +269,32 @@ export async function listOpenRequests(
   });
 }
 
+export type RadarOwnQuote = {
+  id: string;
+  status: QuoteStatus;
+  amountCents: number;
+  scheduledFor: Date | null;
+  message: string | null;
+  workerId: string | null;
+  workerName: string | null;
+  branchId: string | null;
+  updatedAt: Date;
+};
+
+export type RadarRequestDetail = RadarRequestItem & {
+  description: string | null;
+  status: RequestStatus;
+  /** Whether a new/revived offer can still be sent (P-WEB-02 / N2). */
+  quotable: boolean;
+  /** The business's own quote on this request, if any (P-WEB-02). */
+  ownQuote: RadarOwnQuote | null;
+};
+
 /**
- * Detail for N2. Visible when the request is on the radar (OPEN + radius +
- * category) OR the business already has a quote on it (so withdraw UI works).
+ * Detail for N2. Visible when the request is on the radar (OPEN/QUOTED +
+ * radius + category) OR the business already has a quote on it (so the
+ * withdraw / re-send UI works). Returns the own quote so the client can tell
+ * "no offer", "quoted" and "withdrawn" apart without inferring (P-WEB-02).
  * Never exposes `addressLine` — only neighborhood + coords to 3 decimals.
  */
 export async function getRadarRequest(
@@ -280,7 +305,7 @@ export async function getRadarRequest(
     requestId: string;
     branchId?: string;
   },
-): Promise<ServiceResult<RadarRequestItem & { description: string | null }>> {
+): Promise<ServiceResult<RadarRequestDetail>> {
   const request = await db.serviceRequest.findUnique({
     where: { id: input.requestId },
     select: {
@@ -302,7 +327,16 @@ export async function getRadarRequest(
       customer: { select: { name: true } },
       quotes: {
         where: { businessId: input.businessId },
-        select: { id: true },
+        select: {
+          id: true,
+          status: true,
+          amountCents: true,
+          scheduledFor: true,
+          message: true,
+          branchId: true,
+          updatedAt: true,
+          worker: { select: { id: true, fullName: true } },
+        },
         take: 1,
       },
     },
@@ -312,15 +346,18 @@ export async function getRadarRequest(
     return svcFail("NOT_FOUND", "Request not found");
   }
 
-  const hasOwnQuote = request.quotes.length > 0;
+  const ownQuote = request.quotes[0] ?? null;
+  const openForQuotes =
+    request.status === RequestStatus.OPEN ||
+    request.status === RequestStatus.QUOTED;
   const onRadar =
-    request.status === RequestStatus.OPEN &&
+    openForQuotes &&
     (await isRequestVisibleOnRadar(db, {
       businessId: input.businessId,
       requestId: request.id,
     }));
 
-  if (!hasOwnQuote && !onRadar) {
+  if (!ownQuote && !onRadar) {
     return svcFail("NOT_FOUND", "Request not found");
   }
 
@@ -367,5 +404,24 @@ export async function getRadarRequest(
       request.longitude,
     ),
     evidence,
+    status: request.status,
+    quotable:
+      onRadar &&
+      (ownQuote === null ||
+        ownQuote.status === QuoteStatus.PENDING ||
+        ownQuote.status === QuoteStatus.WITHDRAWN),
+    ownQuote: ownQuote
+      ? {
+          id: ownQuote.id,
+          status: ownQuote.status,
+          amountCents: ownQuote.amountCents,
+          scheduledFor: ownQuote.scheduledFor,
+          message: ownQuote.message,
+          workerId: ownQuote.worker?.id ?? null,
+          workerName: ownQuote.worker?.fullName ?? null,
+          branchId: ownQuote.branchId,
+          updatedAt: ownQuote.updatedAt,
+        }
+      : null,
   });
 }

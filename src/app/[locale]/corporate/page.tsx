@@ -3,7 +3,10 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CorporateOverview } from "./_components/corporate-overview";
-import { parseMonthParam } from "./_components/corporate-search-params";
+import {
+  parseLocationParam,
+  parseMonthParam,
+} from "./_components/corporate-search-params";
 import { routing } from "~/i18n/routing";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -29,15 +32,27 @@ export default async function CorporatePage({
 
   setRequestLocale(locale);
   const month = parseMonthParam(resolvedSearchParams);
+  const locationId = parseLocationParam(resolvedSearchParams);
 
   await Promise.all([
-    api.corporate.getOverview.prefetch(month ? { month } : {}),
-    api.corporate.listOrders.prefetch({ limit: RECENT_ORDERS_LIMIT }),
+    api.corporate.getOverview.prefetch({
+      ...(month ? { month } : {}),
+      ...(locationId ? { locationId } : {}),
+    }),
+    api.corporate.listOrders.prefetch({
+      limit: RECENT_ORDERS_LIMIT,
+      ...(locationId ? { locationId } : {}),
+    }),
+    api.corporate.listLocations.prefetch({ includeInactive: true }),
   ]);
 
   return (
     <HydrateClient>
-      <CorporateOverview month={month} recentLimit={RECENT_ORDERS_LIMIT} />
+      <CorporateOverview
+        month={month}
+        locationId={locationId}
+        recentLimit={RECENT_ORDERS_LIMIT}
+      />
     </HydrateClient>
   );
 }

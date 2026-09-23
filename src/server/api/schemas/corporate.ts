@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { CorporateTier, OrderStatus } from "@generated/prisma";
+import { DISPUTE_REASONS } from "~/schemas/disputes/dispute-reasons";
+import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 
 /**
  * Shared Zod schemas for the corporate dashboard (F7-05). The router validates
@@ -9,12 +11,11 @@ import { CorporateTier, OrderStatus } from "@generated/prisma";
  */
 
 /** Calendar month in the business time zone, e.g. "2026-08". */
-export const corporateMonthSchema = z
-  .string()
-  .regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+export const corporateMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
 export const corporateOverviewSchema = z.object({
   month: corporateMonthSchema.optional(),
+  locationId: z.string().cuid().optional(),
 });
 
 export const corporateOrderListSchema = z.object({
@@ -68,6 +69,47 @@ export const corporateTierChangeRequestSchema = z.object({
 });
 
 export type CorporateOverviewInput = z.infer<typeof corporateOverviewSchema>;
+
+/** Corporate consumer flow (workstream D): request → quotes → order. */
+export const corporateRequestCreateSchema = z.object({
+  corporateLocationId: z.string().cuid(),
+  category: z.enum(REQUEST_CATEGORIES),
+  description: z.string().trim().min(10).max(1_000),
+  mediaPathnames: z.array(z.string().trim().min(1).max(500)).max(5).default([]),
+});
+
+export const corporateRequestListSchema = z.object({
+  locationId: z.string().cuid().optional(),
+  cursor: z.string().cuid().optional(),
+});
+
+export const corporateRequestIdSchema = z.object({
+  requestId: z.string().cuid(),
+});
+
+export const corporateQuoteIdSchema = z.object({
+  quoteId: z.string().cuid(),
+});
+
+export const corporateOrderIdSchema = z.object({
+  orderId: z.string().cuid(),
+});
+
+export const corporateReworkSchema = corporateOrderIdSchema.extend({
+  note: z.string().trim().min(10).max(1_000),
+});
+
+export const corporateOpenDisputeSchema = corporateOrderIdSchema.extend({
+  reason: z.enum(DISPUTE_REASONS),
+  description: z.string().trim().min(20).max(2_000),
+});
+
+export type CorporateRequestCreateInput = z.infer<
+  typeof corporateRequestCreateSchema
+>;
+export type CorporateRequestListInput = z.infer<
+  typeof corporateRequestListSchema
+>;
 export type CorporateOrderListInput = z.infer<typeof corporateOrderListSchema>;
 export type CorporateLocationListInput = z.infer<
   typeof corporateLocationListSchema

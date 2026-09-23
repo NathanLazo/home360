@@ -24,6 +24,7 @@ const CURRENCY_FORMAT = {
 
 export type CorporateKpiRowProps = {
   month?: string;
+  locationId?: string;
 };
 
 /**
@@ -31,11 +32,15 @@ export type CorporateKpiRowProps = {
  * frozen snapshots produced a real saving (`savedByRateCents > 0`): showing a
  * $0 saving would be worse than showing nothing.
  */
-export function CorporateKpiRow({ month }: CorporateKpiRowProps) {
+export function CorporateKpiRow({ month, locationId }: CorporateKpiRowProps) {
   const t = useTranslations("corporate.home");
   const tierT = useTranslations("corporate.tier");
   const formatter = useFormatter();
-  const query = api.corporate.getOverview.useQuery(month ? { month } : {}, {
+  const overviewInput = {
+    ...(month ? { month } : {}),
+    ...(locationId ? { locationId } : {}),
+  };
+  const query = api.corporate.getOverview.useQuery(overviewInput, {
     // Month switches keep the old figures until the new ones roll in.
     placeholderData: keepPreviousData,
   });

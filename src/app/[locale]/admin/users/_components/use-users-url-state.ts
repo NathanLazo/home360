@@ -5,44 +5,104 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import {
+  businessDeepLinkActionSchema,
   businessDerivedStatusSchema,
+  businessSheetSectionSchema,
+  userAccessStatusSchema,
   usersTabSchema,
+  workerAvailabilitySchema,
   type BusinessDerivedStatus,
+  type BusinessSheetSection,
+  type UserAccessStatus,
   type UsersTab,
+  type WorkerAvailabilityValue,
 } from "./users.schema";
+
+/** Params that only make sense inside one tab; cleared on every tab change. */
+const TAB_SCOPED_PARAMS = [
+  "status",
+  "access",
+  "availability",
+  "business",
+  "section",
+  "action",
+  "customer",
+] as const;
 
 export type UsersUrlState = {
   tab: UsersTab;
+  search: string;
   status: BusinessDerivedStatus | undefined;
+  accessStatus: UserAccessStatus | undefined;
+  availability: WorkerAvailabilityValue | undefined;
   businessId: string | null;
+  businessSection: BusinessSheetSection | null;
+  /** Deep-link request to open the approval dialog on arrival (W9). */
+  approveRequested: boolean;
+  customerId: string | null;
   setTab: (tab: UsersTab) => void;
+  setSearch: (search: string) => void;
   setStatus: (status: BusinessDerivedStatus | undefined) => void;
-  openBusiness: (businessId: string) => void;
+  setAccessStatus: (status: UserAccessStatus | undefined) => void;
+  setAvailability: (availability: WorkerAvailabilityValue | undefined) => void;
+  clearFilters: () => void;
+  openBusiness: (businessId: string, section?: BusinessSheetSection) => void;
   closeBusiness: () => void;
+  clearApproveRequest: () => void;
+  openCustomer: (customerId: string) => void;
+  closeCustomer: () => void;
 };
 
+function parseOptional<T>(
+  schema: { safeParse: (value: unknown) => { success: boolean; data?: T } },
+  value: string | null,
+): T | undefined {
+  const parsed = schema.safeParse(value);
+  return parsed.success ? parsed.data : undefined;
+}
+
 /**
- * Tab, status filter and the detail sheet live in the URL so a refresh keeps
- * the screen and W9 can deep-link straight into a business.
+ * Tab, search, filters and the detail sheets live in the URL so a refresh
+ * keeps the screen and W9 can deep-link straight into a business (or its
+ * approval dialog).
  */
 export function useUsersUrlState(): UsersUrlState {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const tab = useMemo(() => {
-    const parsed = usersTabSchema.safeParse(searchParams.get("tab"));
-    return parsed.success ? parsed.data : "businesses";
-  }, [searchParams]);
+  const tab = useMemo(
+    () =>
+      parseOptional(usersTabSchema, searchParams.get("tab")) ?? "businesses",
+    [searchParams],
+  );
+  const status = useMemo(
+    () =>
+      parseOptional(businessDerivedStatusSchema, searchParams.get("status")),
+    [searchParams],
+  );
+  const accessStatus = useMemo(
+    () => parseOptional(userAccessStatusSchema, searchParams.get("access")),
+    [searchParams],
+  );
+  const availability = useMemo(
+    () =>
+      parseOptional(workerAvailabilitySchema, searchParams.get("availability")),
+    [searchParams],
+  );
+  const businessSection = useMemo(
+    () =>
+      parseOptional(businessSheetSectionSchema, searchParams.get("section")) ??
+      null,
+    [searchParams],
+  );
+  const approveRequested =
+    parseOptional(businessDeepLinkActionSchema, searchParams.get("action")) ===
+    "approve";
 
-  const status = useMemo(() => {
-    const parsed = businessDerivedStatusSchema.safeParse(
-      searchParams.get("status"),
-    );
-    return parsed.success ? parsed.data : undefined;
-  }, [searchParams]);
-
+  const search = searchParams.get("q") ?? "";
   const businessId = searchParams.get("business");
+  const customerId = searchParams.get("customer");
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -56,39 +116,90 @@ export function useUsersUrlState(): UsersUrlState {
     [pathname, router, searchParams],
   );
 
+  const setParam = useCallback(
+    (key: string, value: string | undefined) =>
+      replaceParams((params) => {
+        if (value === undefined || value.length === 0) {
+          params.delete(key);
+          return;
+        }
+        params.set(key, value);
+      }),
+    [replaceParams],
+  );
+
   return {
     tab,
+    search,
     status,
+    accessStatus,
+    availability,
     businessId,
+    businessSection,
+    approveRequested,
+    customerId,
     setTab: useCallback(
       (nextTab) =>
         replaceParams((params) => {
           params.set("tab", nextTab);
-          // Status only applies to businesses; carrying it across tabs would
+          // Filters are tab-specific; carrying them across tabs would
           // silently filter a list that has no such column.
-          params.delete("status");
-          params.delete("business");
+          TAB_SCOPED_PARAMS.forEach((key) => params.delete(key));
+          params.delete("q");
         }),
       [replaceParams],
     ),
-    setStatus: useCallback(
-      (nextStatus) =>
+    setSearch: useCallback((next) => setParam("q", next), [setParam]),
+    setStatus: useCallback((next) => setParam("status", next), [setParam]),
+    setAccessStatus: useCallback(
+      (next) => setParam("access", next),
+      [setParam],
+    ),
+    setAvailability: useCallback(
+      (next) => setParam("availability", next),
+      [setParam],
+    ),
+    clearFilters: useCallback(
+      () =>
         replaceParams((params) => {
-          if (nextStatus === undefined) {
-            params.delete("status");
-            return;
-          }
-          params.set("status", nextStatus);
+          ["q", "status", "access", "availability"].forEach((key) =>
+            params.delete(key),
+          );
         }),
       [replaceParams],
     ),
     openBusiness: useCallback(
-      (nextBusinessId) =>
-        replaceParams((params) => params.set("business", nextBusinessId)),
+      (nextBusinessId, section) =>
+        replaceParams((params) => {
+          params.set("business", nextBusinessId);
+          if (section) {
+            params.set("section", section);
+          } else {
+            params.delete("section");
+          }
+        }),
       [replaceParams],
     ),
     closeBusiness: useCallback(
-      () => replaceParams((params) => params.delete("business")),
+      () =>
+        replaceParams((params) => {
+          params.delete("business");
+          params.delete("section");
+          params.delete("action");
+        }),
+      [replaceParams],
+    ),
+    clearApproveRequest: useCallback(
+      () => replaceParams((params) => params.delete("action")),
+      [replaceParams],
+    ),
+    openCustomer: useCallback(
+      (nextCustomerId) =>
+        replaceParams((params) => params.set("customer", nextCustomerId)),
+      [replaceParams],
+    ),
+    closeCustomer: useCallback(
+      () => replaceParams((params) => params.delete("customer")),
       [replaceParams],
     ),
   };

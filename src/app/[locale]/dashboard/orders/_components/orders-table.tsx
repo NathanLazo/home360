@@ -23,6 +23,7 @@ export function OrdersTable({
   loadingMore,
   onLoadMore,
   onSelect,
+  onClearFilters,
 }: {
   orders: OrderListItem[];
   filtered: boolean;
@@ -30,6 +31,7 @@ export function OrdersTable({
   loadingMore: boolean;
   onLoadMore: () => void;
   onSelect: (order: OrderListItem) => void;
+  onClearFilters?: () => void;
 }) {
   const t = useTranslations("dashboard.orders");
   const statusT = useTranslations("dashboard.orderStatus");
@@ -93,6 +95,16 @@ export function OrdersTable({
       ),
     },
     {
+      key: "worker",
+      header: t("columns.worker"),
+      className: "min-w-36",
+      cell: (order) => (
+        <span className="text-muted-foreground">
+          {order.workerName ?? t("notAvailable")}
+        </span>
+      ),
+    },
+    {
       key: "amount",
       header: t("columns.amount"),
       className: "text-right",
@@ -144,6 +156,17 @@ export function OrdersTable({
                 description={t(
                   filtered ? "empty.filteredDescription" : "empty.description",
                 )}
+                action={
+                  onClearFilters ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClearFilters}
+                    >
+                      {t("empty.clearFilters")}
+                    </Button>
+                  ) : undefined
+                }
               />
             </div>
           }
@@ -154,7 +177,6 @@ export function OrdersTable({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 sm:min-h-10"
             disabled={loadingMore}
             onClick={onLoadMore}
           >

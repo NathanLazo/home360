@@ -11,20 +11,28 @@ import { SectionError } from "~/components/section-error";
 import { TableSkeleton } from "~/components/table-skeleton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Link } from "~/i18n/navigation";
+import { Link, useRouter } from "~/i18n/navigation";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
 export type RecentCorporateOrdersProps = {
   limit: number;
+  locationId?: string;
 };
 
-export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
+export function RecentCorporateOrders({
+  limit,
+  locationId,
+}: RecentCorporateOrdersProps) {
+  const router = useRouter();
   const t = useTranslations("corporate.home");
   const ordersT = useTranslations("corporate.orders.table");
   const statusT = useTranslations("corporate.orderStatus");
   const formatter = useFormatter();
-  const query = api.corporate.listOrders.useQuery({ limit });
+  const query = api.corporate.listOrders.useQuery({
+    limit,
+    ...(locationId ? { locationId } : {}),
+  });
   const state = unwrapEnvelope(query);
 
   const columns: Array<DataTableColumn<CorporateOrderItem>> = [
@@ -111,6 +119,12 @@ export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
               columns={columns}
               data={state.data.items}
               getRowId={(order) => order.id}
+              onRowClick={(order) =>
+                router.push({
+                  pathname: "/corporate/orders",
+                  query: { order: order.id },
+                })
+              }
               emptyState={
                 <EmptyState
                   headingLevel="h3"
@@ -118,7 +132,7 @@ export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
                   title={t("recentEmptyTitle")}
                   description={t("recentEmptyDescription")}
                   action={
-                    <Button asChild variant="outline" className="min-h-11">
+                    <Button asChild variant="outline">
                       <Link href="/corporate/locations">
                         {t("recentEmptyAction")}
                       </Link>
@@ -128,11 +142,7 @@ export function RecentCorporateOrders({ limit }: RecentCorporateOrdersProps) {
               }
             />
             {state.data.items.length > 0 ? (
-              <Button
-                asChild
-                variant="ghost"
-                className="min-h-11 self-start sm:min-h-9"
-              >
+              <Button asChild variant="ghost" className="self-start">
                 <Link href="/corporate/orders">
                   {t("viewAll")}
                   <ArrowRightIcon aria-hidden="true" />

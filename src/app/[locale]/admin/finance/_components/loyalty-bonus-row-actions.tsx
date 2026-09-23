@@ -23,16 +23,10 @@ export function LoyaltyBonusRowActions({
 
   return (
     <div className="flex justify-end gap-2">
-      <Button type="button" size="sm" className="min-h-9" onClick={onPay}>
+      <Button type="button" size="sm" onClick={onPay}>
         {t("pay")}
       </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        className="min-h-9"
-        onClick={onCancel}
-      >
+      <Button type="button" size="sm" variant="outline" onClick={onCancel}>
         {t("cancel")}
       </Button>
     </div>

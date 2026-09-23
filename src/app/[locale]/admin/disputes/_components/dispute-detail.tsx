@@ -18,10 +18,11 @@ import { DisputeDetailSkeleton } from "./dispute-detail-skeleton";
 import { DisputeEvidenceGrid } from "./dispute-evidence-grid";
 import { DisputeRecordingPlayer } from "./dispute-recording-player";
 import { DisputeResolutionActions } from "./dispute-resolution-actions";
+import { RequestEvidenceDialog } from "./request-evidence-dialog";
 import { ResolveDisputeDialog } from "./resolve-dispute-dialog";
 import { useDisputeMutations } from "./use-dispute-mutations";
 import type { DisputeDetail as DisputeDetailType } from "./disputes.types";
-import type { DisputeResolution } from "@generated/prisma";
+import { DisputeResolution } from "@generated/prisma";
 import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";
@@ -100,11 +101,14 @@ export function DisputeDetail({
 }) {
   const t = useTranslations("admin.disputes.detail");
   const reduceMotion = useReducedMotion();
+  const formatter = useFormatter();
   const [resolution, setResolution] = useState<DisputeResolution | null>(null);
+  const [requestingEvidence, setRequestingEvidence] = useState(false);
   const successBeat = useSuccessBeat();
   const mutations = useDisputeMutations({
     // The check lands on the confirm button before the dialog closes.
     onResolved: () => successBeat.celebrate(() => setResolution(null)),
+    onEvidenceRequested: () => setRequestingEvidence(false),
   });
 
   const query = api.admin.disputes.getById.useQuery(
@@ -161,7 +165,7 @@ export function DisputeDetail({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 xl:hidden"
+          className="shrink-0 xl:hidden"
           aria-label={t("back")}
           onClick={onBack}
         >
@@ -182,9 +186,15 @@ export function DisputeDetail({
       <DisputeRecordingPlayer
         recordingUrl={dispute.recordingUrl}
         recordingComplete={dispute.recordingComplete}
+        segments={dispute.recordingSegments}
       />
 
-      <DisputeAiSummary summary={dispute.aiSummary} />
+      <DisputeAiSummary
+        summary={dispute.aiSummary}
+        generatedAt={dispute.aiSummaryGeneratedAt}
+        generating={mutations.generatingSummary}
+        onGenerate={() => mutations.generateSummary(dispute.id)}
+      />
 
       <PaymentSummary dispute={dispute} />
 
@@ -197,6 +207,27 @@ export function DisputeDetail({
 
       <DisputeEvidenceGrid urls={dispute.evidenceUrls} />
 
+      {dispute.evidenceRequestNote ? (
+        <section className="flex flex-col gap-2">
+          <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+            {t("evidenceRequested")}
+          </h3>
+          <p className="text-copy-sm text-pretty">
+            {dispute.evidenceRequestNote}
+          </p>
+          {dispute.evidenceRequestedAt ? (
+            <p className="text-muted-foreground text-xs">
+              {t("evidenceRequestedAt", {
+                date: formatter.dateTime(dispute.evidenceRequestedAt, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }),
+              })}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
       {dispute.resolutionNotes ? (
         <section className="flex flex-col gap-2">
           <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
@@ -208,7 +239,27 @@ export function DisputeDetail({
         </section>
       ) : null}
 
-      <DisputeResolutionActions dispute={dispute} onSelect={setResolution} />
+      <DisputeResolutionActions
+        dispute={dispute}
+        onSelect={(selected) => {
+          // Asking for evidence moves no money: it has its own dialog.
+          if (selected === DisputeResolution.MORE_EVIDENCE) {
+            setRequestingEvidence(true);
+            return;
+          }
+
+          setResolution(selected);
+        }}
+      />
+
+      <RequestEvidenceDialog
+        disputeId={dispute.id}
+        disputeTitle={dispute.title}
+        open={requestingEvidence}
+        loading={mutations.requestingEvidence}
+        onOpenChange={setRequestingEvidence}
+        onConfirm={mutations.requestEvidence}
+      />
 
       <ResolveDisputeDialog
         dispute={dispute}

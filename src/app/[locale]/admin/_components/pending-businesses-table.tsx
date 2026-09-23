@@ -13,11 +13,16 @@ import { Card } from "~/components/ui/card";
 import { Link } from "~/i18n/navigation";
 
 /**
- * W9 only routes to the moderation module: approving a business is a W10
- * mutation and no module imports another module's private components.
+ * W9 only routes to the moderation module: approving a business needs the W10
+ * plan picker and no module imports another module's private components, so
+ * "approve" deep-links straight into the approval dialog.
  */
 function businessDetailHref(businessId: string): string {
-  return `/admin/users?business=${businessId}`;
+  return `/admin/users?tab=businesses&business=${businessId}`;
+}
+
+function businessApproveHref(businessId: string): string {
+  return `${businessDetailHref(businessId)}&action=approve`;
 }
 
 export function PendingBusinessesTable({
@@ -59,12 +64,12 @@ export function PendingBusinessesTable({
       className: "text-right",
       cell: (row) => (
         <div className="flex justify-end gap-2">
-          <Button asChild size="sm" variant="secondary" className="min-h-9">
-            <Link href={businessDetailHref(row.id)}>
+          <Button asChild size="sm" variant="secondary">
+            <Link href={businessApproveHref(row.id)}>
               {t("pending.approve")}
             </Link>
           </Button>
-          <Button asChild size="sm" variant="ghost" className="min-h-9">
+          <Button asChild size="sm" variant="ghost">
             <Link href={businessDetailHref(row.id)}>{t("pending.review")}</Link>
           </Button>
         </div>
@@ -79,7 +84,7 @@ export function PendingBusinessesTable({
         title={t("pending.emptyTitle")}
         description={t("pending.emptyDescription")}
         action={
-          <Button asChild variant="outline" className="min-h-11 sm:min-h-10">
+          <Button asChild variant="outline">
             <Link href="/admin/users">{t("pending.emptyCta")}</Link>
           </Button>
         }

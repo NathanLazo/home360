@@ -3,7 +3,8 @@
     "home": "Resumen",
     "orders": "Órdenes",
     "locations": "Ubicaciones",
-    "membership": "Membresía"
+    "membership": "Membresía",
+    "settings": "Configuración"
   },
   "sidebar": {
     "brandLabel": "HOME360, ir al resumen corporativo",
@@ -63,11 +64,17 @@
     "queryErrorTitle": "No pudimos cargar el resumen",
     "errorTitle": "Algo salió mal",
     "errorDescription": "No pudimos mostrar el resumen corporativo. Inténtalo de nuevo.",
-    "primaryAction": "Ver órdenes"
+    "primaryAction": "Ver órdenes",
+    "filters": {
+      "monthLabel": "Mes del resumen",
+      "currentMonth": "Mes actual",
+      "locationLabel": "Filtrar por ubicación",
+      "allLocations": "Todas las ubicaciones"
+    }
   },
   "orders": {
     "title": "Órdenes",
-    "subtitle": "Órdenes consolidadas de todas tus ubicaciones.",
+    "subtitle": "Pide servicios para tus ubicaciones, compara ofertas y sigue tus órdenes.",
     "filters": {
       "locationLabel": "Filtrar por ubicación",
       "allLocations": "Todas las ubicaciones",
@@ -83,7 +90,8 @@
       "amount": "Monto",
       "status": "Estado",
       "date": "Fecha",
-      "noLocation": "Sin ubicación"
+      "noLocation": "Sin ubicación",
+      "actions": "Acciones"
     },
     "loadMore": "Cargar más",
     "loading": "Cargando órdenes…",
@@ -103,10 +111,155 @@
       "amount": "Monto",
       "created": "Creada",
       "noLocation": "Sin ubicación",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "loading": "Cargando orden…",
+      "errorTitle": "No pudimos cargar la orden",
+      "worker": "Técnico",
+      "scheduledFor": "Visita programada",
+      "disputeNotice": "Esta orden tiene una disputa. El pago queda retenido hasta que el equipo la resuelva.",
+      "receiptTitle": "Recibo",
+      "evidenceTitle": "Evidencia del trabajo",
+      "timelineTitle": "Historial",
+      "noEvents": "Aún no hay movimientos.",
+      "evidence": {
+        "before": "Antes",
+        "after": "Después",
+        "noPhotos": "Aún no hay fotos del trabajo.",
+        "notes": "Notas del técnico",
+        "materials": "Materiales",
+        "materialLine": "{quantity} × {name}",
+        "recordingComplete": "Grabación completa disponible para revisión.",
+        "recordingIncomplete": "La grabación está incompleta.",
+        "recordingMissing": "Sin grabación del servicio."
+      },
+      "receipt": {
+        "labor": "Servicio",
+        "serviceFee": "Tarifa HOME360",
+        "refunded": "Reembolsado",
+        "total": "Total",
+        "paymentState": "Pago: {status} · {date}",
+        "unpaid": "Pendiente de pago.",
+        "releasedAt": "Liberado al proveedor el {date}"
+      }
     },
     "errorTitle": "Algo salió mal",
-    "errorDescription": "No pudimos mostrar tus órdenes. Inténtalo de nuevo."
+    "errorDescription": "No pudimos mostrar tus órdenes. Inténtalo de nuevo.",
+    "ordersTitle": "Órdenes",
+    "needLocation": "Registra o reactiva una ubicación para pedir servicios.",
+    "newRequest": {
+      "open": "Nueva solicitud",
+      "title": "Nueva solicitud de servicio",
+      "description": "Describe lo que necesitas. Los proveedores cercanos te enviarán sus ofertas.",
+      "close": "Cerrar formulario",
+      "location": "Ubicación",
+      "locationPlaceholder": "Elige una ubicación",
+      "category": "Categoría",
+      "categoryPlaceholder": "Elige una categoría",
+      "details": "Qué necesitas",
+      "detailsPlaceholder": "Ej. Fuga en el lavabo del baño de empleados, gotea desde ayer…",
+      "cancel": "Cancelar",
+      "submit": "Enviar solicitud",
+      "validation": {
+        "corporateLocationId": "Elige una ubicación activa.",
+        "category": "Elige una categoría.",
+        "description": "Describe lo que necesitas (10 a 1,000 caracteres)."
+      },
+      "photos": {
+        "label": "Fotos (opcional)",
+        "hint": "JPG, PNG o WebP de hasta 10 MB. Máximo {max}.",
+        "uploading": "Subiendo…",
+        "add": "Agregar fotos",
+        "listLabel": "Fotos agregadas",
+        "remove": "Quitar {name}",
+        "errors": {
+          "type": "Solo se aceptan fotos JPG, PNG o WebP.",
+          "size": "Cada foto debe pesar 10 MB o menos.",
+          "count": "Puedes agregar hasta {max} fotos.",
+          "upload": "No pudimos subir la foto. Inténtalo de nuevo."
+        }
+      }
+    },
+    "requests": {
+      "title": "Solicitudes",
+      "subtitle": "Tus solicitudes de servicio y las ofertas que recibieron.",
+      "loading": "Cargando solicitudes…",
+      "errorTitle": "No pudimos cargar tus solicitudes",
+      "emptyTitle": "Aún no hay solicitudes",
+      "emptyDescription": "Pide un servicio para cualquiera de tus ubicaciones y recibe ofertas de proveedores verificados.",
+      "loadMore": "Cargar más",
+      "noRating": "Sin calificaciones",
+      "rating": "{rating} ({count, plural, one {# reseña} other {# reseñas}})",
+      "scheduledFor": "Visita: {date}",
+      "accept": "Aceptar",
+      "acceptAria": "Aceptar la oferta de {business}",
+      "status": {
+        "OPEN": "Esperando ofertas",
+        "QUOTED": "Con ofertas",
+        "ACCEPTED": "Oferta aceptada",
+        "CANCELLED": "Cancelada",
+        "EXPIRED": "Vencida"
+      },
+      "orderAwaitingPayment": "Orden #{folio} creada. Págala para que el proveedor agende la visita.",
+      "orderCreated": "Orden #{folio} en seguimiento.",
+      "pay": "Pagar",
+      "viewOrder": "Ver orden",
+      "quotesLabel": "Ofertas recibidas",
+      "waitingForQuotes": "Aún no hay ofertas. Te avisaremos cuando un proveedor cotice."
+    },
+    "feedback": {
+      "requestCreated": "Solicitud enviada a proveedores cercanos.",
+      "requestError": "No pudimos enviar la solicitud. Inténtalo de nuevo.",
+      "quoteAccepted": "Oferta aceptada. Paga la orden para confirmarla.",
+      "quoteError": "No pudimos aceptar la oferta. Inténtalo de nuevo.",
+      "payError": "No pudimos abrir el pago. Inténtalo de nuevo.",
+      "confirmed": "Entrega confirmada. Liberamos el pago al proveedor.",
+      "confirmError": "No pudimos confirmar la entrega. Inténtalo de nuevo.",
+      "disputeOpened": "Disputa abierta. El pago queda retenido mientras la revisamos.",
+      "disputeError": "No pudimos abrir la disputa. Inténtalo de nuevo.",
+      "cancelled": "Orden cancelada. La solicitud vuelve a recibir ofertas.",
+      "cancelError": "No pudimos cancelar la orden. Inténtalo de nuevo."
+    },
+    "actions": {
+      "open": "Acciones de la orden #{folio}",
+      "view": "Ver detalle",
+      "pay": "Pagar",
+      "confirm": "Confirmar entrega",
+      "dispute": "Abrir disputa",
+      "cancel": "Cancelar orden"
+    },
+    "dispute": {
+      "title": "Abrir una disputa",
+      "description": "El pago sigue retenido mientras el equipo de HOME360 revisa el caso con ambas partes.",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Elige un motivo",
+      "reasons": {
+        "NOT_COMPLETED": "El trabajo no se terminó",
+        "POOR_QUALITY": "Mala calidad",
+        "DAMAGE": "Hubo daños",
+        "NO_SHOW": "El técnico no llegó",
+        "OVERCHARGE": "Cobro incorrecto",
+        "OTHER": "Otro"
+      },
+      "details": "Qué pasó",
+      "cancel": "Cancelar",
+      "submit": "Abrir disputa",
+      "validation": {
+        "reason": "Elige un motivo.",
+        "description": "Describe lo que pasó (al menos {min} caracteres)."
+      }
+    },
+    "confirmDialog": {
+      "title": "¿Confirmar la entrega?",
+      "description": "Al confirmar, liberamos el pago al proveedor. Esta acción no se puede deshacer.",
+      "confirm": "Confirmar y liberar",
+      "cancel": "Volver"
+    },
+    "cancelDialog": {
+      "title": "¿Cancelar esta orden?",
+      "description": "La orden aún no está pagada. Al cancelarla, tu solicitud vuelve a recibir ofertas.",
+      "confirm": "Cancelar orden",
+      "cancel": "Volver"
+    }
   },
   "locations": {
     "title": "Ubicaciones",
@@ -171,12 +324,16 @@
       "updateError": "No pudimos actualizar la ubicación. Inténtalo de nuevo.",
       "deactivateError": "No pudimos desactivar la ubicación. Inténtalo de nuevo.",
       "planLimit": "Alcanzaste el límite de ubicaciones de tu tier. Revisa tu membresía para ampliarlo.",
-      "deactivateConflict": "Esta ubicación tiene órdenes activas; ciérralas antes de desactivarla."
+      "deactivateConflict": "Esta ubicación tiene órdenes activas; ciérralas antes de desactivarla.",
+      "reactivated": "Ubicación reactivada.",
+      "reactivateError": "No pudimos reactivar la ubicación. Inténtalo de nuevo."
     },
     "loading": "Cargando ubicaciones…",
     "queryErrorTitle": "No pudimos cargar tus ubicaciones",
     "errorTitle": "Algo salió mal",
-    "errorDescription": "No pudimos mostrar tus ubicaciones. Inténtalo de nuevo."
+    "errorDescription": "No pudimos mostrar tus ubicaciones. Inténtalo de nuevo.",
+    "reactivate": "Reactivar",
+    "ordersLink": "Ver {count, plural, one {# orden} other {# órdenes}} de {name}"
   },
   "membership": {
     "title": "Membresía",
@@ -223,7 +380,16 @@
       "pendingNotice": "Tienes una solicitud pendiente para el tier {tier}. El equipo la está revisando.",
       "requested": "Solicitud enviada. El equipo te contactará.",
       "requestError": "No pudimos enviar la solicitud. Inténtalo de nuevo.",
-      "alreadyPending": "Ya hay una solicitud pendiente distinta; espera su resolución."
+      "alreadyPending": "Ya hay una solicitud pendiente distinta; espera su resolución.",
+      "withdraw": "Retirar solicitud",
+      "withdrawn": "Solicitud retirada.",
+      "withdrawError": "No pudimos retirar la solicitud. Inténtalo de nuevo.",
+      "withdrawDialog": {
+        "title": "¿Retirar la solicitud de cambio?",
+        "description": "El equipo dejará de revisarla. Puedes enviar otra cuando quieras.",
+        "confirm": "Retirar",
+        "cancel": "Volver"
+      }
     },
     "invoices": {
       "title": "Facturas de membresía",
@@ -245,5 +411,79 @@
     "queryErrorTitle": "No pudimos cargar tu membresía",
     "errorTitle": "Algo salió mal",
     "errorDescription": "No pudimos mostrar tu membresía. Inténtalo de nuevo."
+  },
+  "checkout": {
+    "serviceFeeLabel": "Tarifa de servicio HOME360"
+  },
+  "requestCategory": {
+    "Plomería": "Plomería",
+    "Eléctrico": "Eléctrico",
+    "Pintura": "Pintura",
+    "Carpintería": "Carpintería",
+    "Limpieza": "Limpieza",
+    "Jardinería": "Jardinería",
+    "Clima": "Clima",
+    "Otro": "Otro"
+  },
+  "orderEvent": {
+    "ACCEPTED": "Oferta aceptada",
+    "ESCROW_HELD": "Pago retenido en garantía",
+    "EN_ROUTE": "Técnico en camino",
+    "ARRIVED": "Técnico en el sitio",
+    "RECORDING_STARTED": "Grabación iniciada",
+    "RECORDING_STOPPED": "Grabación detenida",
+    "WORK_DONE": "Trabajo terminado",
+    "CONFIRMATION_REQUESTED": "Confirmación solicitada",
+    "CONFIRMED": "Entrega confirmada",
+    "AUTO_RELEASED": "Pago liberado automáticamente",
+    "CANCELLED": "Orden cancelada",
+    "WORKER_ASSIGNED": "Técnico asignado",
+    "REWORK_REQUESTED": "Ajuste solicitado",
+    "DISPUTE_OPENED": "Disputa abierta"
+  },
+  "paymentStatus": {
+    "PENDING": "Pendiente",
+    "IN_ESCROW": "Retenido en garantía",
+    "REFUNDING": "Reembolsando",
+    "RELEASING": "Liberando",
+    "RELEASED": "Liberado al proveedor",
+    "REFUNDED": "Reembolsado",
+    "PARTIALLY_REFUNDED": "Reembolso parcial"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Datos de tu empresa y acceso a la cuenta.",
+    "loading": "Cargando configuración…",
+    "queryErrorTitle": "No pudimos cargar la configuración",
+    "errorTitle": "Algo salió mal",
+    "errorDescription": "No pudimos mostrar la configuración. Inténtalo de nuevo.",
+    "company": {
+      "title": "Empresa",
+      "name": "Razón social",
+      "taxId": "RFC",
+      "noTaxId": "Sin RFC registrado",
+      "tier": "Tier",
+      "owner": "Responsable",
+      "email": "Correo",
+      "accountManager": "Ejecutivo de cuenta",
+      "noOwner": "Sin nombre",
+      "readOnlyHint": "Para cambiar la razón social o el RFC, contacta a tu ejecutivo de HOME360."
+    },
+    "password": {
+      "title": "Contraseña",
+      "currentPassword": "Contraseña actual",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirma la nueva contraseña",
+      "submit": "Cambiar contraseña",
+      "success": "Contraseña actualizada. Inicia sesión de nuevo.",
+      "error": "No pudimos cambiar la contraseña. Inténtalo de nuevo.",
+      "signOutHint": "Al cambiarla cerraremos todas tus sesiones.",
+      "noPassword": "Tu cuenta entra con Google o aún no tiene contraseña. Usa “Olvidé mi contraseña” para crear una.",
+      "validation": {
+        "currentPassword": "Escribe tu contraseña actual.",
+        "newPassword": "Usa de 8 a 72 caracteres, distinta de la actual.",
+        "confirmPassword": "Las contraseñas no coinciden."
+      }
+    }
   }
 }
