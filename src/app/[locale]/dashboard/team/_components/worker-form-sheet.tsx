@@ -18,6 +18,7 @@ import type {
 } from "./team.types";
 import { WorkerFormFields } from "./worker-form-fields";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
+import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
 import { useErrorShake } from "~/components/motion";
 import {
@@ -25,7 +26,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
@@ -192,8 +192,11 @@ export function WorkerFormSheet({
             </Button>
           </SheetClose>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto py-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
+          <div className="flex-1 py-4">
             <WorkerFormFields
               values={values}
               errors={errors}
@@ -203,7 +206,7 @@ export function WorkerFormSheet({
               onChange={setValues}
             />
           </div>
-          <SheetFooter className="border-t sm:flex-row sm:justify-end">
+          <SheetFormDock>
             <SheetClose asChild>
               <Button
                 type="button"
@@ -216,6 +219,7 @@ export function WorkerFormSheet({
             </SheetClose>
             <Button
               type="submit"
+              metal="live"
               disabled={submitting || (isEditing && !isDirty)}
               className="min-h-11"
             >
@@ -227,7 +231,7 @@ export function WorkerFormSheet({
               ) : null}
               {t(isEditing ? "form.save" : "form.create")}
             </Button>
-          </SheetFooter>
+          </SheetFormDock>
         </form>
       </SheetContent>
     </Sheet>

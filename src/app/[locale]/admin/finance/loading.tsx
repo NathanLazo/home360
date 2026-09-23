@@ -6,7 +6,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export default function AdminFinanceLoading() {
   return (
-    <div className="flex flex-col gap-8" aria-busy="true">
+    <div className="flex flex-col gap-6" aria-busy="true">
       <PageHeaderSkeleton />
       <KpiGridSkeleton />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">

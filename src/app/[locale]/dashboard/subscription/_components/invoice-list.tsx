@@ -35,7 +35,7 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
               year: "numeric",
             })}
           </span>
-          <span className="font-mono text-sm tabular-nums">
+          <span className="text-copy-sm font-mono tabular-nums">
             {currency(invoice.amountCents)}
           </span>
           <InvoiceStatusBadge

@@ -137,6 +137,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
             </Button>
             <Button
               metal="live"
+              metalActive={!sheetOpen && !importOpen}
               type="button"
               onClick={() => {
                 setEditing(null);

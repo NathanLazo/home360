@@ -38,7 +38,7 @@ export function CorporateTierRequests({
     useState<CorporateTierRequestItem | null>(null);
 
   if (requests.length === 0) {
-    return <p className="text-muted-foreground text-sm">{t("empty")}</p>;
+    return <p className="text-muted-foreground text-copy-sm">{t("empty")}</p>;
   }
 
   return (
@@ -47,7 +47,7 @@ export function CorporateTierRequests({
         {requests.map((request) => (
           <li
             key={request.id}
-            className="flex flex-col gap-3 rounded-md border p-3 text-sm"
+            className="text-copy-sm flex flex-col gap-3 rounded-md border p-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex items-center gap-2">

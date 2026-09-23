@@ -90,13 +90,13 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-canvas-soft text-muted-foreground rounded-md border p-3 text-sm">
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border p-3">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
 
       <DetailSection title={t("owner")}>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="text-copy-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <dt className="text-muted-foreground">{t("ownerName")}</dt>
           <dd className="min-w-0">{detail.ownerName ?? t("notAvailable")}</dd>
           <dt className="text-muted-foreground">{t("ownerEmail")}</dt>
@@ -115,7 +115,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
       <DetailSection title={t("guarantee")}>
         <GuaranteeBadge guaranteeType={detail.guaranteeType} />
         {detail.guaranteeNotes ? (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-copy-sm">
             {detail.guaranteeNotes}
           </p>
         ) : null}
@@ -125,7 +125,9 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
       <DetailSection title={t("documents")}>
         {detail.documents.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noDocuments")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noDocuments")}
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.documents.map((document) => (
@@ -138,7 +140,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
                   className="text-muted-foreground size-4 shrink-0"
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="truncate text-sm font-medium">
+                  <span className="text-copy-sm truncate font-medium">
                     {documentTypeT(document.type)}
                   </span>
                   {document.notes ? (
@@ -171,7 +173,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
       <DetailSection title={t("subscription")}>
         {detail.subscription ? (
-          <div className="flex flex-wrap items-center gap-2 text-sm">
+          <div className="text-copy-sm flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="font-normal">
               {detail.subscription.planCode}
             </Badge>
@@ -189,7 +191,9 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
             </span>
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm">{t("noSubscription")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noSubscription")}
+          </p>
         )}
       </DetailSection>
 
@@ -197,13 +201,13 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
 
       <DetailSection title={t("recentOrders", { count: detail.ordersCount })}>
         {detail.recentOrders.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noOrders")}</p>
+          <p className="text-muted-foreground text-copy-sm">{t("noOrders")}</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.recentOrders.map((order) => (
               <li
                 key={order.id}
-                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
+                className="text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>
@@ -226,7 +230,9 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
         title={t("disputes", { count: detail.disputes.openCount })}
       >
         {detail.disputes.items.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noDisputes")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noDisputes")}
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.disputes.items.map((dispute) => (
@@ -234,7 +240,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
                 <Link
                   href={`/admin/disputes?dispute=${dispute.id}`}
                   className={cn(
-                    "focus-visible:ring-ring hover:bg-canvas-soft flex items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:ring-2 focus-visible:outline-none",
+                    "focus-visible:ring-ring hover:bg-canvas-soft text-copy-sm flex items-center justify-between gap-3 rounded-md border p-3 focus-visible:ring-2 focus-visible:outline-none",
                     PRESS_SURFACE_CLASS,
                   )}
                 >

@@ -37,7 +37,7 @@ export function CorporateInvoiceList({
               year: "numeric",
             })}
           </span>
-          <span className="font-mono text-sm tabular-nums">
+          <span className="text-copy-sm font-mono tabular-nums">
             {format.number(invoice.amountCents / 100, {
               style: "currency",
               currency: "MXN",

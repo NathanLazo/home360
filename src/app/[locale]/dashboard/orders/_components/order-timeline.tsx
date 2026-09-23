@@ -46,7 +46,7 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
             ) : null}
           </div>
           <div className="min-w-0 pb-5">
-            <p className="text-sm font-medium">{t(item.key)}</p>
+            <p className="text-copy-sm font-medium">{t(item.key)}</p>
             {item.date ? (
               <time
                 dateTime={item.date.toISOString()}

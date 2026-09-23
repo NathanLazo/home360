@@ -67,7 +67,7 @@ export function SettingsSaveBar({
       }
     >
       <p
-        className="text-muted-foreground flex items-center gap-2 pl-1 text-sm"
+        className="text-muted-foreground text-copy-sm flex items-center gap-2 pl-1"
         aria-live="polite"
       >
         {/* The dot is a second, static cue next to the text: it fades and

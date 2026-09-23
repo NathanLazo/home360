@@ -56,7 +56,7 @@ export function RevenueBreakdownList({
         ) : null}
         <dl className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">
+            <dt className="text-muted-foreground text-copy-sm">
               {t("platformGrossRevenue")}
             </dt>
             <dd className="font-mono font-semibold tabular-nums">
@@ -64,7 +64,7 @@ export function RevenueBreakdownList({
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">
+            <dt className="text-muted-foreground text-copy-sm">
               {t("subscriptions")}
             </dt>
             <dd className="font-mono font-semibold tabular-nums">
@@ -72,7 +72,7 @@ export function RevenueBreakdownList({
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-muted-foreground text-sm">
+            <dt className="text-muted-foreground text-copy-sm">
               {t("loyaltyBonuses")}
             </dt>
             <dd className="text-error-deep font-mono font-semibold tabular-nums">

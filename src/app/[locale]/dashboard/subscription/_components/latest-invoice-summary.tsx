@@ -25,7 +25,7 @@ export function LatestInvoiceSummary({
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="flex flex-wrap items-center gap-2 text-sm">
+      <p className="text-copy-sm flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground">{t("latestLabel")}</span>
         <span className="font-mono font-medium tabular-nums">
           {currency(invoice.amountCents)}

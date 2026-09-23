@@ -7,7 +7,7 @@ export function SectionLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring group inline-flex min-h-9 items-center gap-1 rounded-sm text-sm font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none"
+      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring group text-copy-sm inline-flex min-h-9 items-center gap-1 rounded-sm font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:outline-none"
     >
       {label}
       <ArrowRightIcon

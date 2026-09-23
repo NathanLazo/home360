@@ -24,7 +24,9 @@ export function LocationUsageCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>
+          <h2>{t("title")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-muted-foreground text-copy-sm">{t("description")}</p>

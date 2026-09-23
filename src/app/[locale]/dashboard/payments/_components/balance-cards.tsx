@@ -35,7 +35,7 @@ export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
 
   return (
     <section
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      className="grid gap-4 md:grid-cols-3"
       aria-label={t("balancesLabel")}
     >
       <KpiCard

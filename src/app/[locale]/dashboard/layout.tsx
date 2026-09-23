@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 
 import { DashboardHeader } from "./_components/dashboard-header";
 import { SubscriptionStatusBanner } from "./_components/subscription-status-banner";
+import { AppShellContent } from "~/components/app-shell-content";
 import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
@@ -63,7 +64,7 @@ export default async function DashboardLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <a
         href="#dashboard-content"
-        className="bg-card text-foreground focus-visible:ring-ring shadow-float fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="bg-card text-foreground focus-visible:ring-ring shadow-float text-copy-sm fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
       >
         {t("header.skipToContent")}
       </a>
@@ -92,10 +93,7 @@ export default async function DashboardLayout({
           branches={shell.branches}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
-        <main
-          id="dashboard-content"
-          className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8"
-        >
+        <AppShellContent id="dashboard-content">
           <SubscriptionAccessProvider
             initialStatus={shell.subscription?.status ?? null}
           >
@@ -105,7 +103,7 @@ export default async function DashboardLayout({
             />
             {children}
           </SubscriptionAccessProvider>
-        </main>
+        </AppShellContent>
       </SidebarInset>
     </SidebarProvider>
   );

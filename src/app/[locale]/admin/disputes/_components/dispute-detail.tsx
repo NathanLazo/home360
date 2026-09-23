@@ -36,7 +36,9 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
   const payment = dispute.payment;
 
   if (!payment) {
-    return <p className="text-muted-foreground text-sm">{t("noPayment")}</p>;
+    return (
+      <p className="text-muted-foreground text-copy-sm">{t("noPayment")}</p>
+    );
   }
 
   const currency = (cents: number) =>
@@ -50,12 +52,12 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
   return (
     <Card>
       <CardContent>
-        <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+        <dl className="text-copy-sm grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="flex flex-col gap-1">
             <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
               {t("escrow")}
             </dt>
-            <dd className="font-mono text-sm font-semibold tabular-nums">
+            <dd className="text-copy-sm font-mono font-semibold tabular-nums">
               {currency(payment.amountCents)}
             </dd>
           </div>
@@ -63,7 +65,7 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
             <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
               {t("commission")}
             </dt>
-            <dd className="font-mono text-sm font-semibold tabular-nums">
+            <dd className="text-copy-sm font-mono font-semibold tabular-nums">
               {currency(payment.commissionCents)}
             </dd>
           </div>
@@ -71,7 +73,7 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
             <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
               {t("refunded")}
             </dt>
-            <dd className="font-mono text-sm font-semibold tabular-nums">
+            <dd className="text-copy-sm font-mono font-semibold tabular-nums">
               {currency(payment.refundedCents)}
             </dd>
           </div>
@@ -167,7 +169,7 @@ export function DisputeDetail({
         </Button>
         <div className="min-w-0">
           <h2 className="text-display-sm text-balance">{dispute.title}</h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-copy-sm">
             {t("subtitle", {
               folio: dispute.order.folio,
               business: dispute.business.name,
@@ -200,7 +202,7 @@ export function DisputeDetail({
           <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("resolutionNotes")}
           </h3>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-copy-sm">
             {dispute.resolutionNotes}
           </p>
         </section>

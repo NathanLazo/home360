@@ -24,7 +24,7 @@ export function CurrentPlanBanner({
   return (
     <Card>
       <CardContent className="flex flex-col gap-4">
-        <p className="text-sm">
+        <p className="text-copy-sm">
           <span className="font-semibold">
             {t("currentPlan", { plan: subscription.plan.name })}
           </span>

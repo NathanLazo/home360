@@ -33,7 +33,9 @@ export function ProductStockFields({
   return (
     <fieldset className="flex flex-col gap-3 px-4">
       <legend className="mb-1 font-medium">{t("title")}</legend>
-      <p className="text-muted-foreground -mt-2 text-sm">{t("description")}</p>
+      <p className="text-muted-foreground text-copy-sm -mt-2">
+        {t("description")}
+      </p>
       {errors.stocks ? (
         <p role="alert" className="text-error-deep text-copy-sm">
           {errors.stocks}

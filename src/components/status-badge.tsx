@@ -28,7 +28,10 @@ export function StatusBadge<TStatus extends string>({
     <Badge
       variant="outline"
       data-status={status}
-      className={cn("gap-1.5", variantClasses[variantMap[status]])}
+      className={cn(
+        "gap-1.5 transition-[color,background-color,border-color] duration-150 ease-out motion-reduce:transition-none",
+        variantClasses[variantMap[status]],
+      )}
     >
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {label}

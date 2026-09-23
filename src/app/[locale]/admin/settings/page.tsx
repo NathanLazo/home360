@@ -10,9 +10,7 @@ type SettingsPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-export default async function AdminSettingsPage({
-  params,
-}: SettingsPageProps) {
+export default async function AdminSettingsPage({ params }: SettingsPageProps) {
   const { locale } = await params;
 
   if (!hasLocale(routing.locales, locale)) {

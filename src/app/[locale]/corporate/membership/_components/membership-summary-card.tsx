@@ -40,7 +40,7 @@ function SummaryRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 text-sm">
+    <div className="text-copy-sm flex items-center justify-between gap-3">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="text-right font-medium">{children}</dd>
     </div>
@@ -59,7 +59,9 @@ export function MembershipSummaryCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("summary.title")}</CardTitle>
+        <CardTitle>
+          <h2>{t("summary.title")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="flex flex-col gap-3">

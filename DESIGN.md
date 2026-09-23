@@ -246,6 +246,18 @@ Sin glass, nunca.
 </GlassDock>
 ```
 
+**Patrones de la herramienta (dashboard/admin/corporate):**
+- Shell: header flotante `GlassSurface` idéntico en las tres áreas; contenido en
+  `AppShellContent` (`max-w-7xl`, `p-4 sm:p-6 lg:p-8`, destino del skip link).
+- Sidebar: notch activo de metal **estático** (`SidebarActiveIndicator`, `bg-metal`)
+  que se desliza entre ítems (250 ms smooth-out, instantáneo con reduced motion);
+  marca "H" con `metal-rim`. Chips de identidad (rol, plan actual) = `bg-metal`
+  estático, nunca `MetalPill` vivo en cromática persistente.
+- Sheets con formulario: `SheetFormDock` (GlassDock `panel` sticky; los campos
+  scrollean debajo) con submit `metal="live"`. El CTA de la página que abre el
+  sheet cede su anillo con `metalActive={!sheetOpen}` (mismo patrón en diálogos:
+  retirar, aprobar). `ConfirmDialog decisive` = confirmación de dinero con metal vivo.
+
 **Dónde sí:** cromática flotante/sticky sobre contenido — nav de la landing, barras de
 guardado sticky, toolbars flotantes, opcionalmente popovers/dropdowns. **Dónde no:**
 tablas densas, cards, formularios, fondos de sección. **Glass + metal juntos = la
@@ -276,6 +288,10 @@ Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintent
   dropdown/modal), 350–400 (paneles), ≤500 (énfasis). UI ≤300 ms.
 - Overshoot solo en micro-éxitos (`MOTION_EASE.bounce`: check, badge), nunca en cierres.
 - Dashboard/admin/corporate: sin entradas por scroll; motion solo como feedback.
+  `ToolMotionProvider` (`MotionConfig reducedMotion="user"`) envuelve los shells.
+  Feedback vigente: press 0.97, fila clicable `active:bg-canvas-soft-2`, relleno de
+  `StatusBadge` 150 ms, punto de "cambios sin guardar", tooltip de chart 120 ms
+  (scale 0.97), revelado de barras 300 ms, check dibujado en `/pay/success`.
 - Nunca `transition: all`; anima `transform`/`opacity` (y color/sombra en hover).
 
 ## 8. Budgets por pantalla

@@ -57,9 +57,9 @@ function BarXAxisLabel({
     >
       <motion.span
         animate={{ opacity }}
-        className={cn("whitespace-nowrap text-chart-label text-xs")}
+        className={cn("text-chart-label text-xs whitespace-nowrap")}
         initial={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
       >
         {label}
       </motion.span>
@@ -144,7 +144,7 @@ const BarXAxisInner = memo(function BarXAxisInner({
         />
       ))}
     </div>,
-    container
+    container,
   );
 });
 

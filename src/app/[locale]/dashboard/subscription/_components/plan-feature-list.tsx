@@ -23,7 +23,7 @@ export function PlanFeatureList({ plan }: { plan: PlanListItem }) {
   ];
 
   return (
-    <ul className="flex flex-col gap-2 text-sm">
+    <ul className="text-copy-sm flex flex-col gap-2">
       {features.map((feature) => (
         <li key={feature} className="flex items-start gap-2">
           <CheckIcon

@@ -65,7 +65,7 @@ export function BusinessesTable({
       cell: (row) => (
         <time
           dateTime={row.createdAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-copy-sm"
           suppressHydrationWarning
         >
           {formatter.relativeTime(row.createdAt, now)}
@@ -77,7 +77,7 @@ export function BusinessesTable({
       header: t("columns.orders"),
       className: "text-right",
       cell: (row) => (
-        <span className="font-mono text-sm tabular-nums">
+        <span className="text-copy-sm font-mono tabular-nums">
           {row.ordersCount}
         </span>
       ),

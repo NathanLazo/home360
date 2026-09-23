@@ -33,7 +33,7 @@ export function SettingsSectionCard({
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className="text-muted-foreground text-copy-sm">{description}</p>
         {children}
       </CardContent>
     </Card>

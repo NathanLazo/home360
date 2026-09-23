@@ -91,6 +91,7 @@ export function WithdrawalRowActions({
         confirmLabel={t("approve")}
         cancelLabel={t("cancel")}
         loading={pending}
+        decisive
         onConfirm={() => onApprove(withdrawal.id)}
       />
 

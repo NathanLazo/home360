@@ -48,7 +48,7 @@ export function PendingBusinessesTable({
       key: "guarantee",
       header: t("pending.columns.guarantee"),
       cell: (row) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-copy-sm">
           {guaranteeT(row.guaranteeType)}
         </span>
       ),

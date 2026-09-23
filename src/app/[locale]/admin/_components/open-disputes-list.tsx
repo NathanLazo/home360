@@ -67,7 +67,7 @@ export function OpenDisputesList({
                 </Badge>
                 <p className="truncate font-medium">{dispute.title}</p>
               </div>
-              <p className="text-muted-foreground truncate text-sm">
+              <p className="text-muted-foreground text-copy-sm truncate">
                 {t("disputes.parties", {
                   business: dispute.businessName,
                   customer: dispute.customerName ?? t("disputes.unknownParty"),
@@ -82,7 +82,7 @@ export function OpenDisputesList({
               </time>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <span className="font-mono text-sm font-semibold tabular-nums">
+              <span className="text-copy-sm font-mono font-semibold tabular-nums">
                 {currency(dispute.escrowCents)}
               </span>
               <ChevronRightIcon

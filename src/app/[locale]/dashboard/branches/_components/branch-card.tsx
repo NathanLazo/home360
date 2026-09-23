@@ -35,16 +35,14 @@ export function BranchCard({
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-foreground truncate text-base font-semibold tracking-tight">
-              {branch.name}
-            </h2>
+            <h2 className="text-display-sm truncate">{branch.name}</h2>
             <StatusBadge
               status={branch.status}
               variantMap={{ ACTIVE: "success", PAUSED: "warning" }}
               label={t(`status.${branch.status.toLowerCase()}`)}
             />
           </div>
-          <p className="text-muted-foreground flex items-start gap-2 text-sm">
+          <p className="text-muted-foreground text-copy-sm flex items-start gap-2">
             <MapPinIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
             <span>{branch.address}</span>
           </p>
@@ -59,7 +57,7 @@ export function BranchCard({
         />
       </CardHeader>
       <BranchCoverageMap radiusKm={branch.coverageRadiusKm} />
-      <CardContent className="grid gap-3 px-5 py-4 text-sm">
+      <CardContent className="text-copy-sm grid gap-3 px-5 py-4">
         <p className="flex items-center gap-2">
           <UserRoundIcon
             aria-hidden="true"

@@ -63,7 +63,7 @@ export function CorporateAccountsTable({
       key: "locations",
       header: t("columns.locations"),
       cell: (row) => (
-        <span className="text-sm tabular-nums">
+        <span className="text-copy-sm tabular-nums">
           {row.maxLocations === null
             ? t("locationsCellUnlimited", { active: row.activeLocations })
             : t("locationsCell", {
@@ -80,7 +80,7 @@ export function CorporateAccountsTable({
       ),
       className: "text-right",
       cell: (row) => (
-        <span className="font-mono text-sm font-medium tabular-nums">
+        <span className="text-copy-sm font-mono font-medium tabular-nums">
           {currency(row.monthSpendCents)}
         </span>
       ),

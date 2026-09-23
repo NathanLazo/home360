@@ -340,7 +340,7 @@ export function OrderDetailSheet({
                   <h4 className="text-copy-sm mb-1 font-medium">
                     {t("notesTitle")}
                   </h4>
-                  <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+                  <p className="text-muted-foreground text-copy-sm leading-relaxed whitespace-pre-wrap">
                     {order.workNotes ?? t("noNotes")}
                   </p>
                 </div>
@@ -363,7 +363,7 @@ export function OrderDetailSheet({
                         className="flex flex-col gap-1 p-3 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
+                          <p className="text-copy-sm truncate font-medium">
                             {material.name}
                           </p>
                           <p className="text-muted-foreground font-mono text-xs tabular-nums">
@@ -373,7 +373,7 @@ export function OrderDetailSheet({
                             })}
                           </p>
                         </div>
-                        <span className="font-mono text-sm font-semibold tabular-nums">
+                        <span className="text-copy-sm font-mono font-semibold tabular-nums">
                           {exactCurrency(
                             BigInt(material.quantity) *
                               BigInt(material.unitPriceCents),
@@ -419,7 +419,7 @@ export function OrderDetailSheet({
                         />
                       ))}
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="text-muted-foreground text-copy-sm leading-relaxed">
                       {order.review.comment ?? t("noReviewComment")}
                     </p>
                   </div>

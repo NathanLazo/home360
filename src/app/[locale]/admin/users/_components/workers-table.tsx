@@ -55,7 +55,7 @@ export function WorkersTable({
       key: "business",
       header: t("columns.business"),
       cell: (row) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-copy-sm">
           {row.businessName}
         </span>
       ),
@@ -64,7 +64,7 @@ export function WorkersTable({
       key: "branch",
       header: t("columns.branch"),
       cell: (row) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-copy-sm">
           {row.branchName ?? t("notAvailable")}
         </span>
       ),
@@ -73,7 +73,7 @@ export function WorkersTable({
       key: "specialty",
       header: t("columns.specialty"),
       cell: (row) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-copy-sm">
           {row.specialty ?? t("notAvailable")}
         </span>
       ),
@@ -95,7 +95,7 @@ export function WorkersTable({
       cell: (row) => (
         <time
           dateTime={row.createdAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-copy-sm"
           suppressHydrationWarning
         >
           {formatter.relativeTime(row.createdAt, now)}

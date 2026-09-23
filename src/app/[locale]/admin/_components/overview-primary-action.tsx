@@ -18,7 +18,7 @@ export function OverviewPrimaryAction({ urgent }: OverviewPrimaryActionProps) {
   return (
     <Button
       asChild
-      metal="bend"
+      metal="live"
       metalActive={urgent}
       className="min-h-11 sm:min-h-10"
     >

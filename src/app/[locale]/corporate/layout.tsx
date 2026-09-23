@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { AppShellContent } from "~/components/app-shell-content";
 import { CorporateHeader } from "./_components/corporate-header";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
 import { CorporateStatusBanner } from "./_components/corporate-status-banner";
@@ -65,7 +66,7 @@ export default async function CorporateLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <a
         href="#corporate-content"
-        className="bg-card text-foreground focus-visible:ring-ring shadow-float fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="bg-card text-foreground focus-visible:ring-ring shadow-float text-copy-sm fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
       >
         {t("header.skipToContent")}
       </a>
@@ -96,17 +97,14 @@ export default async function CorporateLayout({
           }}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />
-        <main
-          id="corporate-content"
-          className="flex flex-col gap-4 p-4 sm:p-6 lg:p-8"
-        >
+        <AppShellContent id="corporate-content">
           <CorporateStatusBanner
             status={account.status}
             statusReason={account.statusReason}
             locale={locale}
           />
           {children}
-        </main>
+        </AppShellContent>
       </SidebarInset>
     </SidebarProvider>
   );

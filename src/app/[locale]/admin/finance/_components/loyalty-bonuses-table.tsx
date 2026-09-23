@@ -63,7 +63,7 @@ export function LoyaltyBonusesTable({
       key: "origin",
       header: t("columns.origin"),
       cell: (row) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-copy-sm">
           {t("originValue", {
             amount: currency(row.payment.amountCents),
             pct: row.pctApplied,
@@ -77,7 +77,7 @@ export function LoyaltyBonusesTable({
       cell: (row) => (
         <time
           dateTime={row.createdAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-copy-sm"
           suppressHydrationWarning
         >
           {formatter.relativeTime(row.createdAt, now)}

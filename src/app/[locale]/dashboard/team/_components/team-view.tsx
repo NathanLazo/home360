@@ -99,6 +99,7 @@ export function TeamView() {
           <div className="flex flex-col items-start gap-1 sm:items-end">
             <Button
               metal="live"
+              metalActive={!sheetOpen}
               type="button"
               onClick={openCreate}
               disabled={!canCreate}
@@ -114,7 +115,7 @@ export function TeamView() {
             {createBlockedReason ? (
               <p
                 id="team-create-hint"
-                className="text-muted-foreground max-w-72 text-sm"
+                className="text-muted-foreground text-copy-sm max-w-72"
               >
                 {createBlockedReason}
               </p>
@@ -123,7 +124,7 @@ export function TeamView() {
         }
       />
 
-      <p className="text-muted-foreground text-sm tabular-nums">{usage}</p>
+      <p className="text-muted-foreground text-copy-sm tabular-nums">{usage}</p>
 
       <TeamTable
         workers={workers}

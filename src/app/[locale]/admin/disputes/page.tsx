@@ -10,9 +10,7 @@ type DisputesPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-export default async function AdminDisputesPage({
-  params,
-}: DisputesPageProps) {
+export default async function AdminDisputesPage({ params }: DisputesPageProps) {
   const { locale } = await params;
 
   if (!hasLocale(routing.locales, locale)) {

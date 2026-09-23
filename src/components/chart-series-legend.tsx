@@ -10,9 +10,14 @@ export type ChartSeriesLegendProps = {
   className?: string;
 };
 
-export function ChartSeriesLegend({ items, className }: ChartSeriesLegendProps) {
+export function ChartSeriesLegend({
+  items,
+  className,
+}: ChartSeriesLegendProps) {
   return (
-    <ul className={cn("flex flex-wrap items-center gap-x-4 gap-y-1", className)}>
+    <ul
+      className={cn("flex flex-wrap items-center gap-x-4 gap-y-1", className)}
+    >
       {items.map((item) => (
         <li
           key={item.label}

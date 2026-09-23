@@ -11,7 +11,7 @@ export function OverviewPrimaryAction() {
   const t = useTranslations("corporate.home");
 
   return (
-    <Button asChild metal="bend" className="min-h-11 sm:min-h-10">
+    <Button asChild metal="live" className="min-h-11 sm:min-h-10">
       <Link href="/corporate/orders">
         <ReceiptTextIcon aria-hidden="true" />
         {t("primaryAction")}

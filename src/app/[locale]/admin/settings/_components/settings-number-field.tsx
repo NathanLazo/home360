@@ -45,7 +45,7 @@ export function SettingsNumberField({
       <Label htmlFor={fieldId}>{label}</Label>
       <div className="flex items-center gap-2">
         {prefix ? (
-          <span className="text-muted-foreground font-mono text-sm">
+          <span className="text-muted-foreground text-copy-sm font-mono">
             {prefix}
           </span>
         ) : null}
@@ -62,11 +62,11 @@ export function SettingsNumberField({
           className="font-mono tabular-nums"
         />
         {suffix ? (
-          <span className="text-muted-foreground text-sm">{suffix}</span>
+          <span className="text-muted-foreground text-copy-sm">{suffix}</span>
         ) : null}
       </div>
       {error ? (
-        <p id={errorId} role="alert" className="text-error-deep text-sm">
+        <p id={errorId} role="alert" className="text-error-deep text-copy-sm">
           {error.message}
         </p>
       ) : hint ? (

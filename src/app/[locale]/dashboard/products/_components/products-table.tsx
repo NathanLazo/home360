@@ -57,7 +57,9 @@ export function ProductsTable({
       key: "sku",
       header: t("columns.sku"),
       cell: (product) => (
-        <span className="font-mono text-sm tabular-nums">{product.sku}</span>
+        <span className="text-copy-sm font-mono tabular-nums">
+          {product.sku}
+        </span>
       ),
     },
     {

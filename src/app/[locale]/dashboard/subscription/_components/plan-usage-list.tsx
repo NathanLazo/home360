@@ -23,7 +23,7 @@ export function PlanUsageList({ usage }: { usage: PlanUsageReport }) {
             <dt className="text-muted-foreground text-xs uppercase">
               {t(`usage.${resource}`)}
             </dt>
-            <dd className="font-mono text-sm font-medium">
+            <dd className="text-copy-sm font-mono font-medium">
               {max === null
                 ? t("usage.valueUnlimited", { used })
                 : t("usage.value", { used, max })}

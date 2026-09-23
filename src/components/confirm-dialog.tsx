@@ -23,6 +23,12 @@ export type ConfirmDialogProps = {
   destructive?: boolean;
   onConfirm: () => void;
   loading?: boolean;
+  /**
+   * The screen's decisive, money-moving confirmation (withdraw, approve):
+   * the action wears the live liquid-metal ring. Ignored when destructive.
+   * Counts toward the screen's live-metal budget (≤ 2).
+   */
+  decisive?: boolean;
 };
 
 export function ConfirmDialog({
@@ -35,6 +41,7 @@ export function ConfirmDialog({
   destructive = false,
   onConfirm,
   loading = false,
+  decisive = false,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -49,6 +56,7 @@ export function ConfirmDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             variant={destructive ? "destructive" : "default"}
+            metal={decisive && !destructive ? "live" : "static"}
             disabled={loading}
             aria-busy={loading || undefined}
             onClick={(event) => {

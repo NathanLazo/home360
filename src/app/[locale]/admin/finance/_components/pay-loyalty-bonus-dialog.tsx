@@ -128,6 +128,7 @@ export function PayLoyaltyBonusDialog({
           </Button>
           <Button
             type="button"
+            metal="live"
             className="min-h-11 sm:min-h-10"
             disabled={loading || bonus === null}
             onClick={() => {

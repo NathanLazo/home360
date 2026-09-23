@@ -38,15 +38,18 @@ export function LocationsView() {
 
   if (state.status === "pending") {
     return (
-      <div className="space-y-6" aria-busy="true" role="status">
+      <div className="flex flex-col gap-6" aria-busy="true" role="status">
         <span className="sr-only">{t("loading")}</span>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <PageHeader title={t("title")} subtitle={t("subtitle")} />
-          <div className="flex flex-col items-start gap-2 sm:items-end">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-11 w-44 rounded-md" />
-          </div>
-        </div>
+        <PageHeader
+          title={t("title")}
+          subtitle={t("subtitle")}
+          actions={
+            <div className="flex flex-col items-start gap-2 sm:items-end">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="rounded-pill h-11 w-44" />
+            </div>
+          }
+        />
         <Card className="overflow-hidden py-0">
           <CardContent className="px-0">
             <TableSkeleton columns={6} rows={6} />
@@ -58,11 +61,14 @@ export function LocationsView() {
 
   if (state.status === "error") {
     return (
-      <SectionError
-        title={t("queryErrorTitle")}
-        code={state.code}
-        onRetry={() => void query.refetch()}
-      />
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("title")} subtitle={t("subtitle")} />
+        <SectionError
+          title={t("queryErrorTitle")}
+          code={state.code}
+          onRetry={() => void query.refetch()}
+        />
+      </div>
     );
   }
 
@@ -95,6 +101,7 @@ export function LocationsView() {
     >
       <Button
         metal={createDisabled ? "static" : "live"}
+        metalActive={!sheetOpen}
         type="button"
         className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
         aria-disabled={createDisabled}
@@ -109,32 +116,38 @@ export function LocationsView() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <PageHeader title={t("title")} subtitle={t("subtitle")} />
-        <div className="flex flex-col items-start gap-2 sm:items-end">
-          <p className="text-muted-foreground text-copy-sm" aria-live="polite">
-            {data.limits.max === null
-              ? t("usageUnlimited", { used: data.limits.used })
-              : t("usage", { used: data.limits.used, max: data.limits.max })}
-          </p>
-          {createButton}
-          {atLimit && data.limits.max !== null ? (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          <div className="flex flex-col items-start gap-2 sm:items-end">
             <p
-              id="location-limit-help"
-              className="text-muted-foreground text-xs"
+              className="text-muted-foreground text-copy-sm"
+              aria-live="polite"
             >
-              {t("limitTooltip", { max: data.limits.max })}{" "}
-              <Link
-                href="/corporate/membership"
-                className="text-foreground font-medium underline underline-offset-4"
-              >
-                {t("limitCta")}
-              </Link>
+              {data.limits.max === null
+                ? t("usageUnlimited", { used: data.limits.used })
+                : t("usage", { used: data.limits.used, max: data.limits.max })}
             </p>
-          ) : null}
-        </div>
-      </div>
+            {createButton}
+            {atLimit && data.limits.max !== null ? (
+              <p
+                id="location-limit-help"
+                className="text-muted-foreground text-xs"
+              >
+                {t("limitTooltip", { max: data.limits.max })}{" "}
+                <Link
+                  href="/corporate/membership"
+                  className="text-link-deep font-medium underline underline-offset-4"
+                >
+                  {t("limitCta")}
+                </Link>
+              </p>
+            ) : null}
+          </div>
+        }
+      />
 
       <LocationsTable
         locations={data.items}
