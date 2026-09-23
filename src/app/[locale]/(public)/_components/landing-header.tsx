@@ -61,7 +61,8 @@ export function LandingHeader() {
               <Button
                 asChild
                 size="pill-sm"
-                metal={heroCtaInView ? "static" : "live"}
+                metal="live"
+                metalActive={!heroCtaInView}
               >
                 <Link href="/register">{t("cta")}</Link>
               </Button>

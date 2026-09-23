@@ -8,8 +8,9 @@ type MetalActionProps = {
   children: ReactNode;
   /**
    * Metal marks the action the screen is asking for. A disabled or blocked
-   * action renders bare: a live ring on something that cannot be pressed
-   * would point the eye at a dead end.
+   * action shows no ring: a live ring on something that cannot be pressed
+   * would point the eye at a dead end. The wrapper stays mounted either way
+   * so toggling never remounts the button (keeps focus and hover state).
    */
   active?: boolean;
   /** Liquid dent under the cursor: only for the single key CTA of a screen. */
@@ -27,15 +28,12 @@ export function MetalAction({
   strength = 0.6,
   className,
 }: MetalActionProps) {
-  if (!active) {
-    return <>{children}</>;
-  }
-
   return (
     <MetalRing
       preset="silver"
-      strength={strength}
-      bend={bend}
+      strength={active ? strength : 0}
+      bend={active && bend}
+      disableGlow={!active}
       className={className}
     >
       {children}

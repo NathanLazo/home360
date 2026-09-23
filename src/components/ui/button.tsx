@@ -76,6 +76,12 @@ type ButtonProps = React.ComponentProps<"button"> &
     metal?: ButtonMetal;
     /** Layout classes for the live ring wrapper (e.g. `w-full`, `flex-1`). */
     metalClassName?: string;
+    /**
+     * Dim a live ring without unmounting it (e.g. hand the live budget to
+     * another action on screen). Unlike switching `metal` to `"static"`,
+     * this never remounts the button, so keyboard focus survives.
+     */
+    metalActive?: boolean;
   };
 
 function Button({
@@ -85,6 +91,7 @@ function Button({
   asChild = false,
   metal = "static",
   metalClassName,
+  metalActive = true,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button";
@@ -105,7 +112,7 @@ function Button({
 
   return (
     <MetalAction
-      active={!props.disabled}
+      active={metalActive && !props.disabled}
       bend={metal === "bend"}
       className={metalClassName}
     >
