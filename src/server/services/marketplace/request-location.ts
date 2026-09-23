@@ -57,20 +57,26 @@ export async function resolveRequestLocation(
       corporateAccountId: input.corporateAccountId,
       isActive: true,
     },
-    select: { id: true, addressLine: true, city: true },
+    select: {
+      id: true,
+      addressLine: true,
+      city: true,
+      latitude: true,
+      longitude: true,
+    },
   });
 
   if (!location) {
     return svcFail("NOT_FOUND", "Corporate location not found");
   }
 
-  // CorporateLocation has no coordinates yet: the request carries the full
-  // textual address and no geo (radar falls back to category matching).
+  // Geo comes from the location when it was geocoded; without it the request
+  // keeps the full textual address but cannot match the radar radius.
   return svcOk({
     addressLine: `${location.addressLine}, ${location.city}`,
     neighborhood: null,
-    latitude: null,
-    longitude: null,
+    latitude: location.latitude,
+    longitude: location.longitude,
     corporateAccountId: input.corporateAccountId,
     corporateLocationId: location.id,
   });
