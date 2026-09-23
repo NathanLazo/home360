@@ -5,6 +5,7 @@ import { ExternalLinkIcon, FileTextIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
+import { CopyIdButton } from "../../_components/copy-id-button";
 import { DetailSheetSkeleton } from "../../_components/detail-sheet-skeleton";
 import { BusinessStatusBadge } from "./business-status-badge";
 import { GuaranteeBadge } from "./guarantee-badge";
@@ -28,6 +29,7 @@ import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
+import { UserAvatar } from "~/components/user-avatar";
 
 const documentStatusVariants: Record<
   BusinessDetail["documents"][number]["status"],
@@ -53,7 +55,7 @@ function DetailSection({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {title}
       </h3>
       {children}
@@ -88,7 +90,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-muted text-muted-foreground rounded-lg p-3 text-sm">
+        <p className="bg-canvas-soft text-muted-foreground rounded-md border p-3 text-sm">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
@@ -129,7 +131,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
             {detail.documents.map((document) => (
               <li
                 key={document.id}
-                className="flex items-center gap-3 rounded-lg border p-3"
+                className="flex items-center gap-3 rounded-md border p-3"
               >
                 <FileTextIcon
                   aria-hidden="true"
@@ -201,7 +203,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
             {detail.recentOrders.map((order) => (
               <li
                 key={order.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>
@@ -232,7 +234,7 @@ function DetailBody({ detail }: { detail: BusinessDetail }) {
                 <Link
                   href={`/admin/disputes?dispute=${dispute.id}`}
                   className={cn(
-                    "focus-visible:ring-ring flex items-center justify-between gap-3 rounded-lg border p-3 text-sm hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none",
+                    "focus-visible:ring-ring hover:bg-canvas-soft flex items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:ring-2 focus-visible:outline-none",
                     PRESS_SURFACE_CLASS,
                   )}
                 >
@@ -279,10 +281,30 @@ export function BusinessDetailSheet({
     >
       <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>
-            {state.status === "success" ? state.data.name : t("title")}
-          </SheetTitle>
-          <SheetDescription>{t("subtitle")}</SheetDescription>
+          <div className="flex items-center gap-3 pr-8">
+            {state.status === "success" ? (
+              <UserAvatar
+                seed={state.data.id}
+                name={state.data.name}
+                size={48}
+                state={
+                  state.data.derivedStatus === "suspended"
+                    ? "sleeping"
+                    : "default"
+                }
+                interactive
+              />
+            ) : null}
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <SheetTitle>
+                {state.status === "success" ? state.data.name : t("title")}
+              </SheetTitle>
+              <SheetDescription>{t("subtitle")}</SheetDescription>
+            </div>
+          </div>
+          {state.status === "success" ? (
+            <CopyIdButton value={state.data.id} className="-ml-2 self-start" />
+          ) : null}
         </SheetHeader>
 
         <div className="px-4 pb-6">

@@ -19,7 +19,7 @@ export function SectionHeading({
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 id={id} className="text-lg font-semibold tracking-tight">
+        <h2 id={id} className="text-display-sm text-balance">
           {title}
         </h2>
         {description ? (

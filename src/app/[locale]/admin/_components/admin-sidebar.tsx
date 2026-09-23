@@ -11,7 +11,9 @@ export type AdminSidebarProps = {
   mobileDescription: string;
   user: {
     name: string;
-    initials: string;
+    /** Stable user id: seeds the bot avatar when there is no photo. */
+    seed: string;
+    image: string | null;
   };
 };
 

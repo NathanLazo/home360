@@ -10,12 +10,13 @@ export type StatusBadgeProps<TStatus extends string> = {
   label: string;
 };
 
+// Token families from DESIGN.md §2: soft fill + deep text (AA ≥ 4.5:1).
 const variantClasses: Record<StatusBadgeVariant, string> = {
-  success: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  warning: "border-amber-200 bg-amber-50 text-amber-800",
-  info: "border-blue-200 bg-blue-50 text-blue-700",
-  muted: "border-zinc-200 bg-zinc-100 text-zinc-600",
-  destructive: "border-red-200 bg-red-50 text-red-700",
+  success: "border-transparent bg-success-soft text-success-deep",
+  warning: "border-transparent bg-warning-soft text-warning-deep",
+  info: "border-transparent bg-link-soft text-link-deep",
+  muted: "border-hairline bg-canvas-soft text-muted-foreground",
+  destructive: "border-transparent bg-error-soft text-error-deep",
 };
 
 export function StatusBadge<TStatus extends string>({

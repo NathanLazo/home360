@@ -23,10 +23,10 @@ export function MembershipView() {
         <span className="sr-only">{t("loading")}</span>
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="grid gap-4 xl:grid-cols-2">
-          <Skeleton className="h-64 rounded-xl" />
-          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-md" />
+          <Skeleton className="h-64 rounded-md" />
         </div>
-        <Skeleton className="h-72 rounded-xl" />
+        <Skeleton className="h-72 rounded-md" />
       </div>
     );
   }

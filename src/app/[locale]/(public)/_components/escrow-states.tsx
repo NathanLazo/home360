@@ -24,7 +24,7 @@ export function EscrowStates({ states }: EscrowStatesProps) {
             />
             <span
               className={cn(
-                "text-xs",
+                "text-copy-sm",
                 isFinal
                   ? "text-foreground font-medium"
                   : "text-muted-foreground",

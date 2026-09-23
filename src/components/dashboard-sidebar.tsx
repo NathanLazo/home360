@@ -18,7 +18,8 @@ export type DashboardSidebarProps = {
   user: {
     name: string;
     subtitle: string;
-    initials: string;
+    seed: string;
+    image: string | null;
   };
 };
 

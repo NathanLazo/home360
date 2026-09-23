@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "HOME360 — Servicios para el hogar. Con garantía real.",
+    "title": "HOME360 · Servicios para el hogar con garantía real",
     "description": "Servicios para el hogar. Con garantía real. Diagnóstico con IA, pagos protegidos y cinco modalidades de garantía respaldan cada visita a tu casa."
   },
   "header": {
@@ -47,7 +47,7 @@
     }
   },
   "features": {
-    "title": "Un servicio a domicilio que sí se puede *auditar*",
+    "title": "Un servicio a domicilio que sí se puede *auditar.*",
     "subtitle": "Tres piezas que cambian la conversación entre el cliente y el negocio: qué se va a hacer, cuánto cuesta y quién responde si algo sale mal.",
     "aiDiagnosis": {
       "title": "Diagnóstico con IA",
@@ -58,7 +58,8 @@
         "faultValue": "Fuga en la válvula de paso",
         "materials": "Materiales",
         "materialsValue": "Válvula de ½″ y cinta de teflón",
-        "range": "Rango de precio"
+        "range": "Rango de precio",
+        "rangeValue": "{min} a {max}"
       }
     },
     "protectedPayments": {
@@ -77,7 +78,7 @@
     }
   },
   "howItWorks": {
-    "title": "Cómo *funciona*",
+    "title": "Cómo *funciona.*",
     "subtitle": "Tres pasos, sin llamadas a ciegas ni presupuestos improvisados en la puerta.",
     "steps": {
       "1": {
@@ -95,7 +96,8 @@
     }
   },
   "metrics": {
-    "title": "El mercado que estamos *ordenando*",
+    "eyebrow": "Datos de mercado",
+    "title": "El mercado que estamos *ordenando.*",
     "subtitle": "Cifras del mercado mexicano de mantenimiento del hogar, no de nuestra propia operación.",
     "households": "hogares en México que necesitan mantenimiento cada año",
     "marketSize": "de mercado anual en servicios para el hogar",
@@ -109,7 +111,7 @@
     }
   },
   "guaranteeTypes": {
-    "title": "Cinco modalidades de *garantía*",
+    "title": "Cinco modalidades de *garantía.*",
     "subtitle": "Ningún competidor tiene una. Cada negocio elige la suya al registrarse y queda visible para el cliente.",
     "recording": {
       "title": "Grabación obligatoria del servicio",
@@ -141,7 +143,7 @@
     "listLabel": "Modalidades de garantía"
   },
   "pricing": {
-    "title": "Planes para *negocios*",
+    "title": "Planes para *negocios.*",
     "subtitle": "Suscripción mensual más una comisión por servicio que baja conforme crece tu operación.",
     "perMonth": "/mes",
     "commission": "{pct} % de comisión por servicio",

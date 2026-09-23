@@ -16,11 +16,7 @@ export default function AdminDisputesError({ reset }: { reset: () => void }) {
       title={t("errorTitle")}
       description={t("errorDescription")}
       action={
-        <Button
-          type="button"
-          onClick={reset}
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96]"
-        >
+        <Button type="button" onClick={reset} className="min-h-11">
           <RotateCcwIcon aria-hidden="true" />
           {commonT("retry")}
         </Button>

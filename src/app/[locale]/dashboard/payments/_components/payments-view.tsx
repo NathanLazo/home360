@@ -45,7 +45,7 @@ function SectionError({
       <CardContent className="flex flex-col items-start gap-3">
         <div className="flex flex-col gap-1">
           <p className="font-semibold">{title}</p>
-          <p className="text-muted-foreground text-sm">{description}</p>
+          <p className="text-muted-foreground text-copy-sm">{description}</p>
         </div>
         <Button
           type="button"
@@ -137,7 +137,7 @@ export function PaymentsView() {
       ) : null}
 
       <section className="flex flex-col gap-3" aria-label={t("transactions")}>
-        <h2 className="text-lg font-semibold">{t("transactions")}</h2>
+        <h2 className="text-display-sm">{t("transactions")}</h2>
 
         {transactionsQuery.isPending ? (
           <TransactionsLoadingState label={t("loadingTransactions")} />

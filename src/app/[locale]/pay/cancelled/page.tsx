@@ -22,10 +22,12 @@ export default async function PayCancelledPage({
   const t = await getTranslations("common.pay.cancelled");
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-6">
+    <main className="bg-canvas-soft flex min-h-dvh items-center justify-center p-6">
       <div className="flex max-w-md flex-col items-center gap-3 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
+        <h1 className="text-display-md text-balance">{t("title")}</h1>
+        <p className="text-muted-foreground text-copy text-pretty">
+          {t("description")}
+        </p>
       </div>
     </main>
   );

@@ -35,12 +35,12 @@ export function ProductStockFields({
       <legend className="mb-1 font-medium">{t("title")}</legend>
       <p className="text-muted-foreground -mt-2 text-sm">{t("description")}</p>
       {errors.stocks ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-error-deep text-copy-sm">
           {errors.stocks}
         </p>
       ) : null}
       {stocks.length === 0 ? (
-        <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+        <p className="text-muted-foreground text-copy-sm rounded-md border border-dashed p-4">
           {t("noBranches")}
         </p>
       ) : null}
@@ -55,7 +55,7 @@ export function ProductStockFields({
             key={stock.branchId}
             className={cn(
               "flex flex-col gap-4",
-              multiple && "rounded-xl border p-4",
+              multiple && "rounded-md border p-4",
             )}
           >
             <div className="flex items-center justify-between gap-4">
@@ -70,7 +70,7 @@ export function ProductStockFields({
                 ) : null}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground text-copy-sm">
                   {t("carriedHere")}
                 </span>
                 <Switch
@@ -125,14 +125,16 @@ export function ProductStockFields({
                   <p
                     id={`${stockId}-error`}
                     role="alert"
-                    className="text-destructive text-sm sm:col-span-2"
+                    className="text-error-deep text-copy-sm sm:col-span-2"
                   >
                     {rowError}
                   </p>
                 ) : null}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">{t("notCarried")}</p>
+              <p className="text-muted-foreground text-copy-sm">
+                {t("notCarried")}
+              </p>
             )}
           </div>
         );

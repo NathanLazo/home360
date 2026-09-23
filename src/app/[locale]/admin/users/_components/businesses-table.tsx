@@ -11,17 +11,7 @@ import { UserRowActions, type BusinessRowAction } from "./user-row-actions";
 import type { BusinessRow } from "./users.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-
-/** Initials are pure presentation, so they are derived in the UI. */
-function toInitials(name: string): string {
-  return name
-    .split(/\s+/u)
-    .filter((part) => part.length > 0)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
+import { UserAvatar } from "~/components/user-avatar";
 
 export type BusinessesTableProps = {
   businesses: BusinessRow[];
@@ -49,11 +39,12 @@ export function BusinessesTable({
       className: "min-w-56",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <Avatar className="size-9">
-            <AvatarFallback className="text-xs font-medium">
-              {toInitials(row.name)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            seed={row.id}
+            name={row.name}
+            size={36}
+            state={row.derivedStatus === "suspended" ? "sleeping" : "default"}
+          />
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-medium">{row.name}</span>
             <span className="text-muted-foreground truncate text-xs">

@@ -11,7 +11,6 @@ import type { CorporateLocationItem } from "../../_components/corporate.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { TableSkeleton } from "~/components/table-skeleton";
 import { Card, CardContent } from "~/components/ui/card";
@@ -94,19 +93,18 @@ export function LocationsView() {
             : undefined
       }
     >
-      <MetalAction active={!createDisabled}>
-        <Button
-          type="button"
-          className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-          aria-disabled={createDisabled}
-          aria-describedby={atLimit ? "location-limit-help" : undefined}
-          onClick={create}
-          disabled={!canMutate}
-        >
-          <PlusIcon aria-hidden="true" />
-          {t("new")}
-        </Button>
-      </MetalAction>
+      <Button
+        metal={createDisabled ? "static" : "live"}
+        type="button"
+        className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        aria-disabled={createDisabled}
+        aria-describedby={atLimit ? "location-limit-help" : undefined}
+        onClick={create}
+        disabled={!canMutate}
+      >
+        <PlusIcon aria-hidden="true" />
+        {t("new")}
+      </Button>
     </span>
   );
 
@@ -115,7 +113,7 @@ export function LocationsView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          <p className="text-muted-foreground text-sm" aria-live="polite">
+          <p className="text-muted-foreground text-copy-sm" aria-live="polite">
             {data.limits.max === null
               ? t("usageUnlimited", { used: data.limits.used })
               : t("usage", { used: data.limits.used, max: data.limits.max })}

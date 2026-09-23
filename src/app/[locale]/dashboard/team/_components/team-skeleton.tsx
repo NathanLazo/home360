@@ -29,6 +29,7 @@ export function TeamSkeleton() {
               key={row}
               className="flex h-[4.5rem] items-center gap-4 border-b px-4 last:border-b-0"
             >
+              <Skeleton className="size-8 shrink-0 rounded-full" />
               <div className="flex flex-1 flex-col gap-2">
                 <Skeleton className="h-4 w-40" />
                 <Skeleton className="h-3 w-24" />

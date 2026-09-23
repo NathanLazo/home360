@@ -14,10 +14,10 @@ export function DisputeDetailSkeleton({ label }: { label?: string }) {
       </div>
       <div className="flex flex-col gap-2" aria-hidden="true">
         <Skeleton className="h-3 w-24" />
-        <Skeleton className="aspect-video w-full rounded-xl" />
+        <Skeleton className="aspect-video w-full rounded-lg" />
       </div>
       <div
-        className="grid grid-cols-2 gap-4 rounded-xl border p-6 sm:grid-cols-4"
+        className="grid grid-cols-2 gap-4 rounded-md border p-6 sm:grid-cols-4"
         aria-hidden="true"
       >
         {Array.from({ length: 4 }, (_, index) => (
@@ -29,12 +29,12 @@ export function DisputeDetailSkeleton({ label }: { label?: string }) {
       </div>
       <div className="flex flex-col gap-3" aria-hidden="true">
         <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-16 w-full rounded-lg" />
-        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-md" />
+        <Skeleton className="h-16 w-full rounded-md" />
       </div>
       <div className="flex flex-wrap gap-2" aria-hidden="true">
         {["w-36", "w-40", "w-32", "w-44"].map((width) => (
-          <Skeleton key={width} className={`h-10 rounded-md ${width}`} />
+          <Skeleton key={width} className={`h-10 rounded-sm ${width}`} />
         ))}
       </div>
     </div>

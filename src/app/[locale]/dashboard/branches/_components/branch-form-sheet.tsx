@@ -18,6 +18,7 @@ import type {
 } from "./branch.types";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
+import { useErrorShake } from "~/components/motion";
 import {
   Sheet,
   SheetClose,
@@ -102,8 +103,11 @@ export function BranchFormSheet({
       );
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const common = {
       name: values.name,
       address: values.address,
@@ -118,6 +122,7 @@ export function BranchFormSheet({
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
+        shakeInvalid(formElement);
         return;
       }
       setErrors({});
@@ -131,6 +136,7 @@ export function BranchFormSheet({
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
+      shakeInvalid(formElement);
       return;
     }
     setErrors({});

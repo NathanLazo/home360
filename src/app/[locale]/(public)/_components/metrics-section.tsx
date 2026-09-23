@@ -4,6 +4,7 @@ import { LANDING_METRICS } from "./landing-data";
 import { formatMxnFromCents } from "./landing-money";
 import {
   containerClass,
+  inkSurfaceClass,
   LANDING_STAGGER_MS,
   sectionPaddingClass,
 } from "./landing-styles";
@@ -21,9 +22,11 @@ type Metric = {
 };
 
 /**
- * The dark band: the heaviest moment between two light sections, scoped with
- * `.dark` so it reuses the zinc dark tokens. Every figure is market data
- * (D8), never our own traction, and the source stays visible.
+ * The first ink band: the heaviest moment between two light sections. The
+ * fill is the light-scope ink and `.dark` scopes the tokens for its content.
+ * Every figure is market data (D8), never our own traction, and the source
+ * stays visible. Carries the landing's one section eyebrow (mono: it labels
+ * data).
  */
 export async function MetricsSection() {
   const t = await getTranslations("landing.metrics");
@@ -74,18 +77,19 @@ export async function MetricsSection() {
   return (
     <section
       aria-labelledby="metrics-title"
-      className="dark bg-background text-foreground w-full"
+      className={cn(inkSurfaceClass, "w-full")}
     >
       <div className={cn(containerClass, sectionPaddingClass)}>
         <SectionIntro
           titleId="metrics-title"
+          eyebrow={t("eyebrow")}
           title={t("title")}
           subtitle={t("subtitle")}
         />
 
-        <ul className="bg-border mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-xl border sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="bg-border mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-lg border sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
-            <li key={metric.key} className="bg-background">
+            <li key={metric.key} className="bg-[var(--landing-ink)]">
               <Reveal
                 className="h-full"
                 delayMs={(index + 1) * LANDING_STAGGER_MS}
@@ -97,7 +101,7 @@ export async function MetricsSection() {
         </ul>
 
         <Reveal delayMs={5 * LANDING_STAGGER_MS}>
-          <p className="text-muted-foreground mt-6 font-mono text-xs">
+          <p className="text-label text-muted-foreground mt-6 font-mono">
             {t("source")}
           </p>
         </Reveal>

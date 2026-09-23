@@ -22,13 +22,13 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
   }
 
   return (
-    <ul className="divide-border divide-y rounded-lg border">
+    <ul className="divide-hairline divide-y rounded-md border">
       {invoices.map((invoice) => (
         <li
           key={invoice.id}
           className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
         >
-          <span className="text-muted-foreground text-sm">
+          <span className="text-muted-foreground text-copy-sm">
             {format.dateTime(invoice.issuedAt, {
               day: "numeric",
               month: "long",

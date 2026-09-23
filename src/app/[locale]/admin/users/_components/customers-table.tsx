@@ -8,6 +8,7 @@ import { useState } from "react";
 import type { CustomerRow } from "./users.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
+import { UserAvatar } from "~/components/user-avatar";
 
 export function CustomersTable({
   customers,
@@ -26,7 +27,12 @@ export function CustomersTable({
       header: t("columns.customer"),
       className: "min-w-48",
       cell: (row) => (
-        <span className="font-medium">{row.name ?? t("unnamed")}</span>
+        <div className="flex items-center gap-3">
+          <UserAvatar seed={row.id} name={row.name ?? t("unnamed")} />
+          <span className="truncate font-medium">
+            {row.name ?? t("unnamed")}
+          </span>
+        </div>
       ),
     },
     {

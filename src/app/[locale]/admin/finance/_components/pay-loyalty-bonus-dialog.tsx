@@ -128,16 +128,14 @@ export function PayLoyaltyBonusDialog({
           </Button>
           <Button
             type="button"
-            className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+            className="min-h-11 sm:min-h-10"
             disabled={loading || bonus === null}
             onClick={() => {
               if (bonus) {
                 onConfirm({
                   bonusId: bonus.id,
                   method,
-                  ...(notes.trim().length > 0
-                    ? { notes: notes.trim() }
-                    : {}),
+                  ...(notes.trim().length > 0 ? { notes: notes.trim() } : {}),
                 });
               }
             }}

@@ -7,12 +7,12 @@ import { getSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { loginSchema } from "./login.schema";
-import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Link, useRouter } from "~/i18n/navigation";
 import { homeForRole, safeCallbackForRole } from "~/lib/auth/role-home";
+import { useErrorShake } from "~/components/motion";
 
 export type LoginFormProps = { callbackUrl?: string };
 type FieldErrors = { email: boolean; password: boolean };
@@ -27,8 +27,11 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
   const [formError, setFormError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
       const next = { email: false, password: false };
@@ -37,6 +40,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         if (issue.path[0] === "password") next.password = true;
       }
       setErrors(next);
+      shakeInvalid(formElement);
       setFormError(false);
       return;
     }
@@ -85,7 +89,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           disabled={isSubmitting}
         />
         {errors.email ? (
-          <p id="login-email-error" className="text-destructive text-sm">
+          <p id="login-email-error" className="text-error-deep text-copy-sm">
             {t("invalidCredentials")}
           </p>
         ) : null}
@@ -114,28 +118,32 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           disabled={isSubmitting}
         />
         {errors.password ? (
-          <p id="login-password-error" className="text-destructive text-sm">
+          <p id="login-password-error" className="text-error-deep text-copy-sm">
             {t("invalidCredentials")}
           </p>
         ) : null}
       </div>
       {formError ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-error-deep text-copy-sm">
           {t("invalidCredentials")}
         </p>
       ) : null}
-      <MetalRing bend className="w-full">
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <LoaderCircleIcon
-              data-icon="inline-start"
-              aria-hidden="true"
-              className="animate-spin"
-            />
-          ) : null}
-          {t("submit")}
-        </Button>
-      </MetalRing>
+      <Button
+        metal="bend"
+        metalClassName="w-full"
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full"
+      >
+        {isSubmitting ? (
+          <LoaderCircleIcon
+            data-icon="inline-start"
+            aria-hidden="true"
+            className="animate-spin"
+          />
+        ) : null}
+        {t("submit")}
+      </Button>
     </form>
   );
 }

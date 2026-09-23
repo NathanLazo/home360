@@ -17,7 +17,8 @@ export type CorporateSidebarProps = {
   user: {
     name: string;
     subtitle: string;
-    initials: string;
+    seed: string;
+    image: string | null;
   };
   tierChip: Omit<SidebarPlanChipProps, "href">;
 };

@@ -17,6 +17,8 @@ export type BusinessModerationDialogsProps = {
   pending: PendingModeration | null;
   onClose: () => void;
   mutations: UserMutations;
+  /** Success beat in progress: the open dialog shows its check. */
+  succeeded: boolean;
 };
 
 /**
@@ -27,8 +29,10 @@ export function BusinessModerationDialogs({
   pending,
   onClose,
   mutations,
+  succeeded,
 }: BusinessModerationDialogsProps) {
   const t = useTranslations("admin.users.moderation");
+  const doneT = useTranslations("admin.feedback.done");
   const businessId = pending?.businessId ?? null;
 
   return (
@@ -41,6 +45,7 @@ export function BusinessModerationDialogs({
           }
         }}
         loading={mutations.approve.pending}
+        succeeded={succeeded}
         onConfirm={mutations.approve.run}
       />
 
@@ -54,7 +59,9 @@ export function BusinessModerationDialogs({
         title={t("reject.title")}
         description={t("reject.description")}
         confirmLabel={t("reject.confirm")}
+        successLabel={doneT("rejected")}
         loading={mutations.reject.pending}
+        succeeded={succeeded}
         onConfirm={(reason) => {
           if (businessId) {
             mutations.reject.run({ businessId, reason });
@@ -72,7 +79,9 @@ export function BusinessModerationDialogs({
         title={t("suspend.title")}
         description={t("suspend.description")}
         confirmLabel={t("suspend.confirm")}
+        successLabel={doneT("suspended")}
         loading={mutations.suspend.pending}
+        succeeded={succeeded}
         onConfirm={(reason) => {
           if (businessId) {
             mutations.suspend.run({ businessId, reason });

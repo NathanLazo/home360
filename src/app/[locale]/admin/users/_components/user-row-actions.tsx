@@ -56,7 +56,7 @@ export function UserRowActions({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+          className="size-9"
           aria-label={t("open")}
           onClick={(event) => event.stopPropagation()}
         >

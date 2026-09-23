@@ -23,10 +23,12 @@ export function GuaranteeCard({
   return (
     <div
       className={cn(
-        "flex h-full w-[18rem] shrink-0 flex-col gap-4 rounded-xl border p-6 sm:w-[20rem]",
+        "flex h-full w-[18rem] shrink-0 flex-col gap-4 rounded-lg p-6 sm:w-[20rem]",
+        // The recommended option flips polarity to ink; its label says so in
+        // text, so the cue never rests on color alone.
         isRecommended
-          ? "border-foreground bg-foreground text-background"
-          : "bg-card text-card-foreground",
+          ? "bg-primary text-primary-foreground shadow-float"
+          : "bg-card text-card-foreground shadow-soft",
       )}
     >
       <div className="flex items-center justify-between gap-3">
@@ -35,7 +37,7 @@ export function GuaranteeCard({
           <span
             className={cn(
               dataLabelClass,
-              "border-background/30 rounded-full border px-2 py-0.5",
+              "border-primary-foreground/30 rounded-pill border px-2 py-0.5",
             )}
           >
             {recommendedLabel}
@@ -43,7 +45,9 @@ export function GuaranteeCard({
         ) : null}
       </div>
       <h3 className={subheadingClass}>{title}</h3>
-      <p className={cn(bodyClass, isRecommended && "text-background/75")}>
+      <p
+        className={cn(bodyClass, isRecommended && "text-primary-foreground/75")}
+      >
         {description}
       </p>
     </div>

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "HOME360 — Home services. With a real guarantee.",
+    "title": "HOME360 · Home services with a real guarantee",
     "description": "Home services. With a real guarantee. AI diagnosis, protected payments and five guarantee options back every visit to your home."
   },
   "header": {
@@ -47,7 +47,7 @@
     }
   },
   "features": {
-    "title": "Home service that can actually be *audited*",
+    "title": "Home service that can actually be *audited.*",
     "subtitle": "Three pieces that change the conversation between customer and business: what will be done, what it costs and who answers if something goes wrong.",
     "aiDiagnosis": {
       "title": "AI diagnosis",
@@ -58,7 +58,8 @@
         "faultValue": "Leaking shut-off valve",
         "materials": "Materials",
         "materialsValue": "½″ valve and PTFE tape",
-        "range": "Price range"
+        "range": "Price range",
+        "rangeValue": "{min} to {max}"
       }
     },
     "protectedPayments": {
@@ -77,7 +78,7 @@
     }
   },
   "howItWorks": {
-    "title": "How it *works*",
+    "title": "How it *works.*",
     "subtitle": "Three steps, with no blind phone calls and no quotes improvised at the door.",
     "steps": {
       "1": {
@@ -95,7 +96,8 @@
     }
   },
   "metrics": {
-    "title": "The market we are *organizing*",
+    "eyebrow": "Market data",
+    "title": "The market we are *organizing.*",
     "subtitle": "Figures from the Mexican home maintenance market, not from our own operation.",
     "households": "households in Mexico need maintenance every year",
     "marketSize": "annual market in home services",
@@ -109,7 +111,7 @@
     }
   },
   "guaranteeTypes": {
-    "title": "Five *guarantee* options",
+    "title": "Five *guarantee* options.",
     "subtitle": "No competitor has a single one. Every business picks its own at sign-up and it stays visible to the customer.",
     "recording": {
       "title": "Mandatory service recording",
@@ -141,7 +143,7 @@
     "listLabel": "Guarantee options"
   },
   "pricing": {
-    "title": "Plans for *businesses*",
+    "title": "Plans for *businesses.*",
     "subtitle": "A monthly subscription plus a per-service commission that drops as your operation grows.",
     "perMonth": "/month",
     "commission": "{pct} % commission per service",

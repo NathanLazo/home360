@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { updateOwnerSchema } from "./settings.schema";
@@ -9,6 +8,14 @@ import type { MutationOutcome } from "./use-settings-mutations";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  SubmitStatusIcon,
+  useErrorShake,
+  useTransientFlag,
+} from "~/components/motion";
+
+/** How long the save button holds its success check. */
+const SAVED_FEEDBACK_MS = 2000;
 
 /**
  * Independent submit from the commercial profile: the owner account stays
@@ -30,12 +37,17 @@ export function OwnerAccountForm({
   const [error, setError] = useState<string | null>(null);
   const isDirty = value !== ownerName;
 
+  const shakeInvalid = useErrorShake();
+  const [saved, flashSaved] = useTransientFlag(SAVED_FEEDBACK_MS);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const parsed = updateOwnerSchema.safeParse({ ownerName: value });
 
     if (!parsed.success) {
       setError(t("nameError"));
+      shakeInvalid(formElement);
       window.requestAnimationFrame(() =>
         document.getElementById("settings-owner-name")?.focus(),
       );
@@ -43,7 +55,8 @@ export function OwnerAccountForm({
     }
 
     setError(null);
-    await onSubmit(parsed.data);
+    const outcome = await onSubmit(parsed.data);
+    if (outcome.ok) flashSaved();
   }
 
   return (
@@ -65,14 +78,14 @@ export function OwnerAccountForm({
         {error ? (
           <p
             id="settings-owner-name-error"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {error}
           </p>
         ) : (
           <p
             id="settings-owner-email"
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground text-copy-sm"
           >
             {t("emailNote", { email: ownerEmail ?? t("emailUnavailable") })}
           </p>
@@ -85,12 +98,7 @@ export function OwnerAccountForm({
           disabled={saving || !isDirty}
           className="min-h-11 sm:min-h-10"
         >
-          {saving ? (
-            <LoaderCircleIcon
-              aria-hidden="true"
-              className="animate-spin motion-reduce:animate-none"
-            />
-          ) : null}
+          <SubmitStatusIcon pending={saving} succeeded={saved} />
           {t("save")}
         </Button>
       </div>

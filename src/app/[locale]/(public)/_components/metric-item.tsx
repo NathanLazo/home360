@@ -11,7 +11,7 @@ export function MetricItem({ figure, label }: MetricItemProps) {
   return (
     <div className="flex h-full flex-col gap-4 p-6 sm:p-8">
       <p className={cn(figureClass, "text-foreground")}>{figure}</p>
-      <p className="text-muted-foreground max-w-[28ch] text-[0.9375rem] leading-relaxed text-pretty">
+      <p className="text-copy text-muted-foreground max-w-[28ch] text-pretty">
         {label}
       </p>
     </div>

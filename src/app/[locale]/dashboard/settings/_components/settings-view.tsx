@@ -66,7 +66,7 @@ export function SettingsView() {
 
         <Card>
           <CardHeader>
-            <h2 className="leading-none font-semibold">{t("account.title")}</h2>
+            <h2 className="text-display-sm">{t("account.title")}</h2>
             <CardDescription>{t("account.description")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">

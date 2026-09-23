@@ -15,7 +15,7 @@ export default function AdminFinanceLoading() {
       <div className="flex flex-col gap-3">
         <div className="flex items-end justify-between gap-4">
           <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-10 w-48 rounded-md" />
+          <Skeleton className="h-10 w-48 rounded-sm" />
         </div>
         <TableSkeleton
           rows={5}

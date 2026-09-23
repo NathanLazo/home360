@@ -19,6 +19,7 @@ import type {
 import { WorkerFormFields } from "./worker-form-fields";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
+import { useErrorShake } from "~/components/motion";
 import {
   Sheet,
   SheetClose,
@@ -119,8 +120,11 @@ export function WorkerFormSheet({
     );
   }
 
+  const shakeInvalid = useErrorShake();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     const branchId = values.branchId === "" ? null : values.branchId;
     const specialty = values.specialty.trim();
 
@@ -133,6 +137,7 @@ export function WorkerFormSheet({
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
+        shakeInvalid(formElement);
         return;
       }
       setErrors({});
@@ -149,6 +154,7 @@ export function WorkerFormSheet({
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
+      shakeInvalid(formElement);
       return;
     }
     setErrors({});

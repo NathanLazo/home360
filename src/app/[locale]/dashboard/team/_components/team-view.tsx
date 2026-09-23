@@ -12,7 +12,6 @@ import { WorkerFormSheet } from "./worker-form-sheet";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -98,21 +97,20 @@ export function TeamView() {
         subtitle={t("subtitle")}
         actions={
           <div className="flex flex-col items-start gap-1 sm:items-end">
-            <MetalAction active={canCreate}>
-              <Button
-                type="button"
-                onClick={openCreate}
-                disabled={!canCreate}
-                title={createBlockedReason}
-                aria-describedby={
-                  createBlockedReason ? "team-create-hint" : undefined
-                }
-                className="min-h-11 sm:min-h-10"
-              >
-                <PlusIcon aria-hidden="true" />
-                {t("newWorker")}
-              </Button>
-            </MetalAction>
+            <Button
+              metal="live"
+              type="button"
+              onClick={openCreate}
+              disabled={!canCreate}
+              title={createBlockedReason}
+              aria-describedby={
+                createBlockedReason ? "team-create-hint" : undefined
+              }
+              className="min-h-11 sm:min-h-10"
+            >
+              <PlusIcon aria-hidden="true" />
+              {t("newWorker")}
+            </Button>
             {createBlockedReason ? (
               <p
                 id="team-create-hint"

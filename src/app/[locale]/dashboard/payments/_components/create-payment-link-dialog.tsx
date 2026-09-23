@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon, CopyIcon, LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,7 @@ import { parsePesosToCents } from "./payment-amount";
 import type { CreatedPaymentLink } from "./payment.types";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
+import { IconSwap, useErrorShake, useTransientFlag } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -40,6 +41,8 @@ const createPaymentLinkFormSchema = z.object({
 type CreatePaymentLinkFormValues = z.infer<typeof createPaymentLinkFormSchema>;
 
 const EMPTY_VALUES: CreatePaymentLinkFormValues = { concept: "", amount: "" };
+/** How long the copy button holds its check before offering copy again. */
+const COPIED_FEEDBACK_MS = 2000;
 
 export function CreatePaymentLinkDialog({
   open,
@@ -54,7 +57,9 @@ export function CreatePaymentLinkDialog({
   useCloseWhenReadOnly(open, onOpenChange);
   const { createPaymentLink, creatingPaymentLink } = usePaymentMutations();
   const [created, setCreated] = useState<CreatedPaymentLink | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useTransientFlag(COPIED_FEEDBACK_MS);
+  const shakeInvalid = useErrorShake();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<CreatePaymentLinkFormValues>({
     resolver: zodResolver(createPaymentLinkFormSchema),
@@ -68,32 +73,35 @@ export function CreatePaymentLinkDialog({
 
     form.reset(EMPTY_VALUES);
     setCreated(null);
-    setCopied(false);
   }, [form, open]);
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    const providerAmountCents = parsePesosToCents(values.amount);
+  const onSubmit = form.handleSubmit(
+    async (values) => {
+      const providerAmountCents = parsePesosToCents(values.amount);
 
-    if (providerAmountCents === null) {
-      form.setError("amount", { message: t("amountInvalid") });
-      return;
-    }
+      if (providerAmountCents === null) {
+        form.setError("amount", { message: t("amountInvalid") });
+        shakeInvalid(formRef.current);
+        return;
+      }
 
-    const link = await createPaymentLink({
-      concept: values.concept.trim(),
-      providerAmountCents,
-    });
+      const link = await createPaymentLink({
+        concept: values.concept.trim(),
+        providerAmountCents,
+      });
 
-    if (link) {
-      setCreated(link);
-      toast.success(t("success"));
-    }
-  });
+      if (link) {
+        setCreated(link);
+        toast.success(t("success"));
+      }
+    },
+    () => shakeInvalid(formRef.current),
+  );
 
   async function handleCopy(url: string) {
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
+      flashCopied();
       toast.success(t("copied"));
     } catch {
       // Clipboard access can be denied; the URL stays selectable on screen.
@@ -140,14 +148,14 @@ export function CreatePaymentLinkDialog({
                 aria-label={t("copy")}
                 onClick={() => void handleCopy(created.url)}
               >
-                {copied ? (
-                  <CheckIcon aria-hidden="true" />
-                ) : (
-                  <CopyIcon aria-hidden="true" />
-                )}
+                <IconSwap
+                  swapped={copied}
+                  from={<CopyIcon />}
+                  to={<CheckIcon />}
+                />
               </Button>
             </div>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-copy-sm">
               {t("singleUseHint")}
             </p>
             <DialogFooter>
@@ -161,7 +169,12 @@ export function CreatePaymentLinkDialog({
             </DialogFooter>
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+          <form
+            ref={formRef}
+            onSubmit={onSubmit}
+            className="flex flex-col gap-4"
+            noValidate
+          >
             <div className="flex flex-col gap-2">
               <Label htmlFor="payment-link-concept">{t("conceptLabel")}</Label>
               <Input
@@ -178,7 +191,7 @@ export function CreatePaymentLinkDialog({
                 <p
                   id="payment-link-concept-error"
                   role="alert"
-                  className="text-destructive text-sm"
+                  className="text-error-deep text-copy-sm"
                 >
                   {t("conceptInvalid")}
                 </p>
@@ -200,12 +213,12 @@ export function CreatePaymentLinkDialog({
               />
               <p
                 id="payment-link-amount-hint"
-                className="text-muted-foreground text-sm"
+                className="text-muted-foreground text-copy-sm"
               >
                 {t("amountHint")}
               </p>
               {amountError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p role="alert" className="text-error-deep text-copy-sm">
                   {amountError.message ?? t("amountInvalid")}
                 </p>
               ) : null}

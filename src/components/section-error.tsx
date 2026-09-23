@@ -27,11 +27,13 @@ export function SectionError({ title, code, onRetry }: SectionErrorProps) {
         <div className="flex items-start gap-3">
           <TriangleAlertIcon
             aria-hidden="true"
-            className="text-destructive mt-0.5 size-5 shrink-0"
+            className="text-error mt-0.5 size-5 shrink-0"
           />
           <div className="flex flex-col gap-1">
-            <p className="font-semibold">{title}</p>
-            <p className="text-muted-foreground text-sm">{errorsT(code)}</p>
+            <p className="text-copy-sm font-semibold">{title}</p>
+            <p className="text-muted-foreground text-copy-sm">
+              {errorsT(code)}
+            </p>
           </div>
         </div>
         <Button

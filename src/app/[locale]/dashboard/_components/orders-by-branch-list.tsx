@@ -68,7 +68,7 @@ export function OrdersByBranchList({ branchId }: OrdersByBranchListProps) {
         <CardContent className="flex flex-col items-start gap-3">
           <div className="flex flex-col gap-1">
             <p className="font-semibold">{t("queryErrorTitle")}</p>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-copy-sm">
               {response?.error
                 ? errors(response.error)
                 : t("queryErrorDescription")}

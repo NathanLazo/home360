@@ -6,7 +6,7 @@ function SectionSkeleton({ rows }: { rows: number }) {
     <div className="flex flex-col gap-3">
       <Skeleton className="h-3 w-24" />
       {Array.from({ length: rows }, (_, index) => (
-        <Skeleton key={index} className="h-12 w-full rounded-lg" />
+        <Skeleton key={index} className="h-12 w-full rounded-md" />
       ))}
     </div>
   );

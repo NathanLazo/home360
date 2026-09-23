@@ -2,7 +2,7 @@ export function BranchCoverageMap({ radiusKm }: { radiusKm: number }) {
   return (
     <div
       aria-hidden="true"
-      className="bg-muted/30 relative h-28 overflow-hidden border-y"
+      className="bg-canvas-soft relative h-28 overflow-hidden border-y"
     >
       <svg
         viewBox="0 0 320 112"
@@ -53,7 +53,7 @@ export function BranchCoverageMap({ radiusKm }: { radiusKm: number }) {
           stroke="none"
         />
       </svg>
-      <span className="bg-background/95 text-foreground absolute right-3 bottom-3 rounded-md border px-2 py-1 font-mono text-xs font-medium shadow-sm">
+      <span className="bg-canvas text-foreground shadow-subtle absolute right-3 bottom-3 rounded-sm px-2 py-1 font-mono text-xs font-medium tabular-nums">
         {radiusKm} km
       </span>
     </div>

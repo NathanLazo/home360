@@ -1,89 +1,106 @@
+import { MOTION_EASE } from "~/components/motion/motion-tokens";
+
 /**
  * Shared presentation tokens for the landing sections, so the type scale, the
  * container rhythm, the motion curve and the anchor offset live in one place
  * instead of being retyped per section.
  *
- * The landing speaks the same monochrome zinc language as the dashboard: every
- * color comes from the shadcn tokens (`--background`, `--foreground`,
- * `--muted-foreground`, `--border`, `--primary`…). Dark bands are the same
- * tokens scoped under `.dark`, never a parallel palette.
+ * The landing speaks the platform's single ink system (DESIGN.md): page on
+ * `canvas-soft`, cards on `canvas` lifted by stacked shadows, Geist display
+ * scale, Geist Mono for verifiable data. It only turns the intensity up.
  */
 
-/** Strong ease-out: entrances start fast and settle softly, overshoot 0. */
-export const LANDING_EASE: [number, number, number, number] = [
-  0.23, 1, 0.32, 1,
-];
+/**
+ * Normative ease-out (transitions.dev "smooth out", DESIGN.md §7) for
+ * motion/react. CSS lanes use Tailwind's `ease-out`, which is the same curve.
+ */
+export const LANDING_EASE = MOTION_EASE.smoothOut;
 
-/** Same curve for CSS arbitrary values. */
-export const landingEaseCss = "ease-[cubic-bezier(0.23,1,0.32,1)]";
-
-/** Duration palette in milliseconds. UI ≤ 300 ms, reveals ≤ 700 ms. */
+/** Duration palette in milliseconds. UI ≤ 300 ms, reveals ≤ 600 ms. */
 export const LANDING_DURATION = {
-  fast: 160,
-  standard: 300,
+  fast: 150,
+  standard: 250,
   reveal: 600,
-  slow: 700,
 } as const;
 
 /** Stagger between siblings: short enough that no section waits on itself. */
-export const LANDING_STAGGER_MS = 70;
+export const LANDING_STAGGER_MS = 60;
 
 /** Centered content column shared by every section. */
 export const containerClass = "mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8";
 
 /** Vertical rhythm of a regular section. */
-export const sectionPaddingClass = "py-24 lg:py-32";
+export const sectionPaddingClass = "py-20 lg:py-28";
 
-/** Clears the sticky 4rem header with room to spare (minimum 5rem). */
+/** Clears the floating 64 px glass nav (+12 px inset) with room to spare. */
 export const anchorOffsetClass = "scroll-mt-24";
 
-/** `h1`, hero only. Sans, tight, heavy; the accent phrase takes the serif. */
-export const displayTitleClass =
-  "text-[clamp(2.625rem,7vw,5.25rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-balance";
-
-/** `h2`, one per section. */
-export const displayHeadingClass =
-  "text-[clamp(2rem,4.2vw,3.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance";
+/**
+ * Captures the light-scope ink on the landing root so `.dark` descendants
+ * (whose `--ink` flips to near-white) can still paint the ink surface.
+ */
+export const inkCaptureClass = "[--landing-ink:var(--ink)]";
 
 /**
- * Serif accent inside a display heading (editorial contrast): Fraunces at its
- * soft, high optical size, upright — the layout loads no italic cut, and a
- * synthesized slant would look cheap.
+ * Ink band / ink surface: polarity-flipped block. `.dark` scopes the tokens
+ * for its content (ink text becomes near-white, hairlines white 10 %) while
+ * the fill stays the light-scope ink #171717.
  */
-export const accentClass =
-  "font-display font-light tracking-[-0.03em] [font-variation-settings:'SOFT'_100,'opsz'_144]";
+export const inkSurfaceClass = "dark bg-[var(--landing-ink)] text-foreground";
 
-/** `h3`, body face. */
-export const subheadingClass =
-  "text-lg leading-snug font-semibold tracking-[-0.015em]";
+/** `h1`, hero only. Display hero scale: weight 600, -0.05em tracking. */
+export const heroTitleClass = "text-display-hero text-balance";
 
-/** Data labels: mono only where the text is a verifiable datum. */
+/** `h2`, one per section (and the closing CTA). */
+export const displayHeadingClass =
+  "text-display-lg text-balance md:text-display-xl";
+
+/**
+ * Accent phrase inside a display heading: same family, contrast by ink —
+ * a lighter weight in the tertiary gray (≥ 3:1 at display sizes; `.dark`
+ * bands flip it through `--mute`). No serif, no gradient text.
+ */
+export const accentClass = "font-normal text-mute";
+
+/** `h3`, cards and steps. */
+export const subheadingClass = "text-display-sm";
+
+/** Technical labels and eyebrows: Geist Mono, verifiable data only. */
 export const dataLabelClass =
-  "font-mono text-xs font-medium tracking-[0.06em] uppercase";
+  "font-mono text-label font-medium tracking-wide uppercase";
 
 /** Figures: mono, tabular, never shifting while they animate. */
 export const figureClass =
-  "font-mono text-[clamp(2.5rem,5vw,3.75rem)] leading-none font-medium tracking-[-0.04em] tabular-nums";
+  "font-mono text-[2.5rem] leading-none font-medium tracking-[-0.04em] tabular-nums sm:text-5xl";
 
-/** Body copy capped near 65 characters. */
+/** Section lead, capped near 65 characters. */
 export const leadClass =
-  "max-w-[62ch] text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg";
+  "max-w-[62ch] text-copy text-pretty text-muted-foreground sm:text-lg sm:leading-7";
 
 /** Card/step body copy. */
-export const bodyClass =
-  "text-[0.9375rem] leading-relaxed text-pretty text-muted-foreground";
+export const bodyClass = "text-copy text-pretty text-muted-foreground";
 
 /**
- * Focus ring that reads on light and dark bands alike: it takes the section's
- * own `--ring`/`--background`, so `.dark` bands flip it automatically.
+ * Focus ring (DESIGN.md §9): blue `ring` with offset; the offset takes the
+ * scope's own `--background`, so `.dark` bands flip it automatically.
  */
 export const focusRingClass =
-  "focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 /**
- * Press feedback shared by every pressable element. Tailwind 4 scales through
- * the `scale` property, and the hover tint rides the same transition list, so
- * callers never stack two `transition-*` utilities.
+ * Press feedback for pressables that are not `Button` (nav links, text
+ * links). The hover tint rides the same transition list.
  */
 export const pressClass =
-  "transition-[scale,background-color,color,border-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:active:scale-100";
+  "transition-[scale,background-color,color] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100";
+
+/**
+ * Pixel radii for the border beam, which takes a number instead of a class.
+ * They mirror the radius scale in `globals.css`: `rounded-lg` = 12 px
+ * (pricing), `rounded-xl` = 16 px (hero console), a 48 px pill = 24 px.
+ */
+export const LANDING_BEAM_RADIUS = {
+  lg: 12,
+  xl: 16,
+  pill: 24,
+} as const;

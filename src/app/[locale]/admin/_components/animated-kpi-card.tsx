@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { Format } from "@number-flow/react";
 
+import { ADMIN_EYEBROW_CLASS, ADMIN_FIGURE_CLASS } from "./admin-surface";
 import { AnimatedNumber } from "./animated-number";
 import {
   Card,
@@ -24,8 +25,8 @@ export type AnimatedKpiCardProps = {
 };
 
 const deltaClasses: Record<KpiTrend, string> = {
-  up: "text-emerald-700",
-  down: "text-destructive",
+  up: "text-success-deep",
+  down: "text-error-deep",
   neutral: "text-muted-foreground",
 };
 
@@ -44,9 +45,7 @@ export function AnimatedKpiCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-muted-foreground text-sm font-medium">
-          {label}
-        </CardTitle>
+        <CardTitle className={ADMIN_EYEBROW_CLASS}>{label}</CardTitle>
         {Icon ? (
           <CardAction>
             <Icon aria-hidden="true" className="text-muted-foreground size-4" />
@@ -54,7 +53,7 @@ export function AnimatedKpiCard({
         ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <p className="font-mono text-2xl font-semibold tracking-tight">
+        <p className={cn(ADMIN_FIGURE_CLASS, "text-2xl leading-8")}>
           <AnimatedNumber value={value} format={format} />
         </p>
         {delta ? (

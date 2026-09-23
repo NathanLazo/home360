@@ -68,7 +68,7 @@ export function DataTable<TData>({
             tabIndex={onRowClick ? 0 : undefined}
             className={cn(
               onRowClick &&
-                "focus-visible:outline-ring focus-visible:bg-muted/50 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2",
+                "focus-visible:outline-ring focus-visible:bg-canvas-soft cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2",
             )}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             onKeyDown={

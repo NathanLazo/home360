@@ -3,6 +3,7 @@
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { ADMIN_EYEBROW_CLASS } from "./admin-surface";
 import type { AiConfigSummary } from "./overview.types";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,9 +22,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-muted-foreground text-sm font-medium">
-          {t("ai.title")}
-        </CardTitle>
+        <CardTitle className={ADMIN_EYEBROW_CLASS}>{t("ai.title")}</CardTitle>
         <CardAction>
           <SparklesIcon
             aria-hidden="true"
@@ -69,13 +68,13 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
         <Button
           asChild
           variant="outline"
-          className="group min-h-11 justify-between transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          className="group min-h-11 justify-between sm:min-h-10"
         >
           <Link href="/admin/settings">
             {t("ai.openSettings")}
             <ArrowRightIcon
               aria-hidden="true"
-              className="transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
+              className="transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
             />
           </Link>
         </Button>

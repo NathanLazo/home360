@@ -16,6 +16,11 @@ type SpotlightCardProps = {
   className?: string;
   /** Diameter of the light in px. */
   size?: number;
+  /**
+   * Hover lift on the card itself. Off when a frame around the card (the
+   * border beam) must lift with it, so the frame carries the lift instead.
+   */
+  lift?: boolean;
 };
 
 const SPOTLIGHT_SPRING = { stiffness: 380, damping: 40, mass: 0.6 };
@@ -33,6 +38,7 @@ export function SpotlightCard({
   children,
   className,
   size = 360,
+  lift = true,
 }: SpotlightCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useLandingReducedMotion();
@@ -65,12 +71,12 @@ export function SpotlightCard({
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       className={cn(
-        "group/spotlight bg-card text-card-foreground relative isolate rounded-xl border",
-        // Lift on `translate`, shadow on a pseudo-element's opacity: nothing
-        // here repaints layout. Tailwind 4 already gates `hover:` to devices
-        // that can hover.
-        "transition-[translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1",
-        "after:pointer-events-none after:absolute after:inset-0 after:-z-20 after:rounded-[inherit] after:opacity-0 after:shadow-[0_24px_48px_-28px_rgb(0_0_0/0.45)] after:transition-opacity after:duration-200 hover:after:opacity-100",
+        "group/spotlight bg-card text-card-foreground shadow-soft relative isolate rounded-lg",
+        // Lift on `translate`, elevation from L3 to L4 on hover: nothing here
+        // touches layout. Tailwind 4 already gates `hover:` to devices that
+        // can hover.
+        lift &&
+          "hover:shadow-float transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5",
         "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className,
       )}

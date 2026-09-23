@@ -11,4 +11,5 @@ Recordatorios específicos para Claude Code:
   `spec/DESIGN-DIRECTIVE.md`.
 - La unidad de trabajo son los tickets de `spec/tickets/`; verifica siempre con
   `pnpm typecheck`, `pnpm check` y `pnpm build` (no hay tests automatizados).
-- No cruces la frontera D7: tokens `--brand-*` solo en `src/app/[locale]/(public)/`.
+- No cruces la frontera D7: un solo sistema ink/zinc (sin `--brand-*` ni Fraunces);
+  mesh hero, beams y entradas por scroll solo en `src/app/[locale]/(public)/`.

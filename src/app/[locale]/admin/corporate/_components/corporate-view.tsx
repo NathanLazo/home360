@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
+import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
 import {
   TableSkeleton,
@@ -36,15 +37,14 @@ import { useCorporateUrlState } from "./use-corporate-url-state";
 import { useDebouncedValue } from "./use-debounced-value";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { MetalRing } from "~/components/metal";
-import { Button } from "~/components/ui/button";
+import { Button, type ButtonMetal } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tabs } from "~/components/ui/tabs";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 const TABLE_SKELETON_COLUMNS: TableSkeletonColumn[] = [
-  { width: "w-40" },
+  { width: "w-40", withAvatar: true },
   { width: "w-16" },
   { width: "w-16" },
   { width: "w-24", align: "end" },
@@ -121,10 +121,11 @@ export function CorporateView() {
     monthlyFeeCents: detail.monthlyFeeCents,
   });
 
-  const createButton = (
+  const renderCreateButton = (metal: ButtonMetal) => (
     <Button
       type="button"
-      className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+      metal={metal}
+      className="min-h-11 sm:min-h-10"
       onClick={() => setCreateOpen(true)}
     >
       <PlusIcon aria-hidden="true" />
@@ -138,9 +139,9 @@ export function CorporateView() {
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          // The page's one metal detail. The empty-state CTA below reuses the
-          // plain button so the screen never shows two rings.
-          <MetalRing strength={0.6}>{createButton}</MetalRing>
+          // The page's one live metal action. The empty-state CTA below keeps
+          // the static rim so the screen never shows two live rings.
+          renderCreateButton("live")
         }
       />
 
@@ -184,7 +185,7 @@ export function CorporateView() {
       ) : null}
 
       {query.state.status === "success" ? (
-        <Card className="overflow-hidden py-0">
+        <Card className={ADMIN_TABLE_CARD_CLASS}>
           <CardContent className="px-0">
             <CorporateAccountsTable
               accounts={query.state.items}
@@ -199,7 +200,7 @@ export function CorporateView() {
                     }}
                   />
                 ) : (
-                  createButton
+                  renderCreateButton("static")
                 )
               }
             />
@@ -209,7 +210,7 @@ export function CorporateView() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+                className="min-h-11 sm:min-h-10"
                 disabled={query.loadingMore}
                 onClick={query.loadMore}
               >

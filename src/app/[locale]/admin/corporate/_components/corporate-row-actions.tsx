@@ -13,11 +13,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 export type CorporateRowAction =
-  | "activate"
-  | "editTerms"
-  | "suspend"
-  | "reactivate"
-  | "reconcileBilling";
+  "activate" | "editTerms" | "suspend" | "reactivate" | "reconcileBilling";
 
 /**
  * Single source of truth for what each lifecycle state may offer. CANCELLED is
@@ -64,7 +60,7 @@ export function CorporateRowActions({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+          className="size-9"
           aria-label={t("open")}
           onClick={(event) => event.stopPropagation()}
         >

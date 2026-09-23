@@ -9,7 +9,7 @@ import { cn } from "~/lib/utils";
 type Word = { text: string; accent: boolean };
 
 /**
- * `*phrase*` in a message marks the serif accent. The markers are stripped;
+ * `*phrase*` in a message marks the ink accent (same Geist, lighter tone). The markers are stripped;
  * everything else is plain text, so translators only learn one convention.
  */
 function splitWords(text: string): Word[] {

@@ -59,7 +59,7 @@ export function DisputeList({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          className="min-h-11 sm:min-h-10"
           disabled={loadingMore}
           onClick={onLoadMore}
         >

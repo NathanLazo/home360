@@ -3,6 +3,11 @@
 import { useFormatter, useTranslations } from "next-intl";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
+import {
+  ADMIN_LINK_CARD_ACTIVE_CLASS,
+  ADMIN_LINK_CARD_CLASS,
+  ADMIN_TONE_CLASS,
+} from "../../_components/admin-surface";
 import type { DisputeListItem as DisputeListItemType } from "./disputes.types";
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
@@ -10,9 +15,9 @@ import { cn } from "~/lib/utils";
 type Tone = "urgent" | "review" | "resolved";
 
 const toneClasses: Record<Tone, string> = {
-  urgent: "border-red-200 bg-red-50 text-red-700",
-  review: "border-amber-200 bg-amber-50 text-amber-800",
-  resolved: "border-zinc-200 bg-zinc-100 text-zinc-600",
+  urgent: ADMIN_TONE_CLASS.error,
+  review: ADMIN_TONE_CLASS.warning,
+  resolved: ADMIN_TONE_CLASS.neutral,
 };
 
 function toTone(dispute: DisputeListItemType): Tone {
@@ -45,11 +50,9 @@ export function DisputeListItem({
       aria-current={active ? "true" : undefined}
       onClick={onSelect}
       className={cn(
-        "focus-visible:ring-ring flex w-full flex-col gap-2 rounded-xl border p-4 text-left focus-visible:ring-2 focus-visible:outline-none",
+        "focus-visible:ring-ring focus-visible:ring-offset-background flex w-full flex-col gap-2 p-4 text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         PRESS_SURFACE_CLASS,
-        active
-          ? "border-zinc-900 bg-zinc-50"
-          : "bg-card hover:border-zinc-300 hover:bg-zinc-50",
+        active ? ADMIN_LINK_CARD_ACTIVE_CLASS : ADMIN_LINK_CARD_CLASS,
       )}
     >
       <div className="flex items-start justify-between gap-3">

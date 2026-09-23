@@ -1,9 +1,9 @@
 "use client";
 
-import { LoaderCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 
+import { ConfirmButtonContent } from "../../_components/confirm-button-content";
 import {
   MIN_JUSTIFICATION_LENGTH,
   type ResolveDisputeInput,
@@ -39,6 +39,8 @@ export type ResolveDisputeDialogProps = {
   dispute: DisputeDetail;
   resolution: DisputeResolution | null;
   loading: boolean;
+  /** The server confirmed; the dialog holds briefly on the check. */
+  succeeded?: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (input: ResolveDisputeInput) => void;
 };
@@ -47,10 +49,13 @@ export function ResolveDisputeDialog({
   dispute,
   resolution,
   loading,
+  succeeded = false,
   onOpenChange,
   onConfirm,
 }: ResolveDisputeDialogProps) {
   const t = useTranslations("admin.disputes.resolveDialog");
+  const doneT = useTranslations("admin.feedback.done");
+  const busy = loading || succeeded;
   const resolutionsT = useTranslations("admin.disputes.resolutions");
   const formatter = useFormatter();
   const [providerRefund, setProviderRefund] = useState("");
@@ -176,7 +181,9 @@ export function ResolveDisputeDialog({
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor={`${fieldId}-fee`}>{t("serviceFeeRefund")}</Label>
+                <Label htmlFor={`${fieldId}-fee`}>
+                  {t("serviceFeeRefund")}
+                </Label>
                 <Input
                   id={`${fieldId}-fee`}
                   type="number"
@@ -217,20 +224,21 @@ export function ResolveDisputeDialog({
           ) : null}
 
           {summary ? (
-            <p className="bg-muted rounded-lg p-3 text-sm">{summary}</p>
+            <p className="bg-canvas-soft rounded-md border p-3 text-sm">
+              {summary}
+            </p>
           ) : null}
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>
-            {t("cancel")}
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={busy}>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={loading || !canConfirm}
+            aria-disabled={succeeded || undefined}
             onClick={(event) => {
               event.preventDefault();
 
-              if (resolution === null || !canConfirm) {
+              if (succeeded || resolution === null || !canConfirm) {
                 return;
               }
 
@@ -251,14 +259,12 @@ export function ResolveDisputeDialog({
               });
             }}
           >
-            {loading ? (
-              <LoaderCircleIcon
-                data-icon="inline-start"
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : null}
-            {t("confirm")}
+            <ConfirmButtonContent
+              loading={loading}
+              succeeded={succeeded}
+              label={t("confirm")}
+              successLabel={doneT("resolved")}
+            />
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

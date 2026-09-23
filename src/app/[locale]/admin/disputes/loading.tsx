@@ -7,7 +7,7 @@ export default function AdminDisputesLoading() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true">
       <PageHeaderSkeleton />
-      <Skeleton className="h-9 w-56 rounded-lg" />
+      <Skeleton className="h-9 w-56 rounded-md" />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <DisputeListSkeleton />
         <div className="hidden xl:block">

@@ -23,7 +23,7 @@ export function AiConfigCardSkeleton({ label }: { label?: string }) {
           ))}
         </div>
         <Skeleton className="h-3 w-44" />
-        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-10 w-full rounded-sm" />
       </CardContent>
     </Card>
   );

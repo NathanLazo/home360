@@ -97,7 +97,7 @@ export function TransactionsTable({
       cell: (transaction) => (
         <time
           dateTime={transaction.createdAt.toISOString()}
-          className="text-muted-foreground text-sm"
+          className="text-muted-foreground text-copy-sm"
           suppressHydrationWarning
         >
           {formatter.relativeTime(transaction.createdAt, now)}

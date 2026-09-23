@@ -5,7 +5,13 @@ import { motion, useReducedMotion } from "motion/react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ADMIN_DURATION, ADMIN_EASE_OUT } from "../../_components/admin-motion";
+import {
+  ADMIN_DURATION,
+  ADMIN_EASE_OUT,
+  ADMIN_SETTLE_PX,
+} from "../../_components/admin-motion";
+import { CopyIdButton } from "../../_components/copy-id-button";
+import { useSuccessBeat } from "../../_components/use-success-beat";
 import { DisputeAiSummary } from "./dispute-ai-summary";
 import { DisputeArguments } from "./dispute-arguments";
 import { DisputeDetailSkeleton } from "./dispute-detail-skeleton";
@@ -46,26 +52,36 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
       <CardContent>
         <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("escrow")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("escrow")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.amountCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("commission")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("commission")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.commissionCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("refunded")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("refunded")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.refundedCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("status")}</dt>
-            <dd className="font-medium">{paymentStatusT(payment.status)}</dd>
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("status")}
+            </dt>
+            <dd className="text-copy-sm font-medium">
+              {paymentStatusT(payment.status)}
+            </dd>
           </div>
         </dl>
       </CardContent>
@@ -83,8 +99,10 @@ export function DisputeDetail({
   const t = useTranslations("admin.disputes.detail");
   const reduceMotion = useReducedMotion();
   const [resolution, setResolution] = useState<DisputeResolution | null>(null);
+  const successBeat = useSuccessBeat();
   const mutations = useDisputeMutations({
-    onResolved: () => setResolution(null),
+    // The check lands on the confirm button before the dialog closes.
+    onResolved: () => successBeat.celebrate(() => setResolution(null)),
   });
 
   const query = api.admin.disputes.getById.useQuery(
@@ -128,7 +146,10 @@ export function DisputeDetail({
       initial={
         reduceMotion
           ? { opacity: 0 }
-          : { opacity: 0, transform: "translateY(4px)" }
+          : {
+              opacity: 0,
+              transform: `translateY(${ADMIN_SETTLE_PX}px)`,
+            }
       }
       animate={{ opacity: 1, transform: "translateY(0px)" }}
       transition={{ duration: ADMIN_DURATION.standard, ease: ADMIN_EASE_OUT }}
@@ -138,22 +159,21 @@ export function DisputeDetail({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 transition-transform duration-150 ease-out active:scale-[0.96] xl:hidden"
+          className="size-9 shrink-0 xl:hidden"
           aria-label={t("back")}
           onClick={onBack}
         >
           <ArrowLeftIcon aria-hidden="true" />
         </Button>
         <div className="min-w-0">
-          <h2 className="text-xl font-semibold tracking-tight text-balance">
-            {dispute.title}
-          </h2>
+          <h2 className="text-display-sm text-balance">{dispute.title}</h2>
           <p className="text-muted-foreground text-sm">
             {t("subtitle", {
               folio: dispute.order.folio,
               business: dispute.business.name,
             })}
           </p>
+          <CopyIdButton value={dispute.id} className="-ml-2" />
         </div>
       </div>
 
@@ -167,6 +187,8 @@ export function DisputeDetail({
       <PaymentSummary dispute={dispute} />
 
       <DisputeArguments
+        customer={dispute.customer}
+        business={dispute.business}
         customerArgument={dispute.customerArgument}
         businessArgument={dispute.businessArgument}
       />
@@ -175,7 +197,7 @@ export function DisputeDetail({
 
       {dispute.resolutionNotes ? (
         <section className="flex flex-col gap-2">
-          <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("resolutionNotes")}
           </h3>
           <p className="text-muted-foreground text-sm">
@@ -190,6 +212,7 @@ export function DisputeDetail({
         dispute={dispute}
         resolution={resolution}
         loading={mutations.pending}
+        succeeded={successBeat.succeeded}
         onOpenChange={(open) => {
           if (!open) {
             setResolution(null);

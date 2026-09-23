@@ -14,8 +14,8 @@ export default function DashboardLoading() {
       <KpiRowSkeleton />
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Skeleton className="h-80 rounded-xl xl:col-span-2" />
-        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-80 rounded-md xl:col-span-2" />
+        <Skeleton className="h-80 rounded-md" />
       </div>
 
       <Card className="overflow-hidden py-0">

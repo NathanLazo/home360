@@ -1,3 +1,7 @@
+import {
+  ADMIN_TABLE_CARD_CLASS,
+  ADMIN_TABLE_HEAD_STRIP_CLASS,
+} from "./admin-surface";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
@@ -28,11 +32,14 @@ export function TableSkeleton({
   };
 
   return (
-    <Card className="overflow-hidden py-0" aria-busy="true" role="status">
+    <Card className={ADMIN_TABLE_CARD_CLASS} aria-busy="true" role="status">
       {label ? <span className="sr-only">{label}</span> : null}
       <CardContent className="px-0" aria-hidden="true">
         <div
-          className="grid h-10 items-center gap-4 border-b px-2"
+          className={cn(
+            "grid h-10 items-center gap-4 px-3",
+            ADMIN_TABLE_HEAD_STRIP_CLASS,
+          )}
           style={template}
         >
           {columns.map((column, index) => (
@@ -48,7 +55,7 @@ export function TableSkeleton({
         {Array.from({ length: rows }, (_, rowIndex) => (
           <div
             key={rowIndex}
-            className="grid min-h-14 items-center gap-4 border-b px-2 py-2 last:border-0"
+            className="grid min-h-14 items-center gap-4 border-b px-3 py-2 last:border-0"
             style={template}
           >
             {columns.map((column, index) => (

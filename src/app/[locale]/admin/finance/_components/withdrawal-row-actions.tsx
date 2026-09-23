@@ -47,7 +47,10 @@ export function WithdrawalRowActions({
   }, [dialog]);
 
   // Only a REQUESTED withdrawal of a non-suspended business is actionable.
-  if (withdrawal.status !== "REQUESTED" || withdrawal.business.status === "SUSPENDED") {
+  if (
+    withdrawal.status !== "REQUESTED" ||
+    withdrawal.business.status === "SUSPENDED"
+  ) {
     return null;
   }
 
@@ -65,7 +68,7 @@ export function WithdrawalRowActions({
       <Button
         type="button"
         size="sm"
-        className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+        className="min-h-9"
         onClick={() => setDialog("approve")}
       >
         {t("approve")}
@@ -74,7 +77,7 @@ export function WithdrawalRowActions({
         type="button"
         size="sm"
         variant="outline"
-        className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+        className="min-h-9"
         onClick={() => setDialog("reject")}
       >
         {t("reject")}

@@ -30,7 +30,9 @@ export function RevenueBreakdownList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>
+          <h2 className="text-display-sm">{t("title")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {totals.platformGrossRevenueCents + totals.subscriptionCents > 0 ? (
@@ -73,7 +75,7 @@ export function RevenueBreakdownList({
             <dt className="text-muted-foreground text-sm">
               {t("loyaltyBonuses")}
             </dt>
-            <dd className="text-destructive font-mono font-semibold tabular-nums">
+            <dd className="text-error-deep font-mono font-semibold tabular-nums">
               −{currency(totals.loyaltyBonusPaidCents)}
             </dd>
           </div>
@@ -83,7 +85,7 @@ export function RevenueBreakdownList({
 
         <div className="flex items-baseline justify-between gap-4">
           <span className="font-medium">{t("net")}</span>
-          <span className="font-mono text-lg font-semibold">
+          <span className="font-mono text-lg font-semibold tabular-nums">
             <AnimatedNumber
               value={totals.netRevenueCents / 100}
               format={MXN_FORMAT}

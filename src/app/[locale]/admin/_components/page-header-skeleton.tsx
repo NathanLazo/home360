@@ -15,7 +15,7 @@ export function PageHeaderSkeleton({
         <Skeleton className="h-8 w-56 max-w-full" />
         <Skeleton className="h-4 w-80 max-w-full" />
       </div>
-      {withAction ? <Skeleton className="h-10 w-40 rounded-md" /> : null}
+      {withAction ? <Skeleton className="h-10 w-40 rounded-sm" /> : null}
     </div>
   );
 }

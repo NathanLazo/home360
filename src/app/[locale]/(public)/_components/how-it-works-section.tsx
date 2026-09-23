@@ -25,7 +25,7 @@ export async function HowItWorksSection() {
     <section
       id={LANDING_ANCHORS.howItWorks}
       aria-labelledby="how-it-works-title"
-      className={cn(anchorOffsetClass, "bg-card w-full border-t")}
+      className={cn(anchorOffsetClass, "bg-canvas w-full border-t")}
     >
       <div className={cn(containerClass, sectionPaddingClass)}>
         <SectionIntro
@@ -34,7 +34,7 @@ export async function HowItWorksSection() {
           subtitle={t("subtitle")}
         />
 
-        <div className="relative mt-16">
+        <div className="relative mt-14">
           <StepTrack />
           <ol className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-10">
             {LANDING_STEP_KEYS.map((step, index) => (
@@ -43,7 +43,7 @@ export async function HowItWorksSection() {
                   <div className="flex flex-col gap-4">
                     <span
                       aria-hidden="true"
-                      className="bg-card relative z-10 flex size-9 items-center justify-center rounded-full border font-mono text-sm font-medium tabular-nums"
+                      className="bg-canvas shadow-subtle relative z-10 flex size-9 items-center justify-center rounded-full font-mono text-sm font-medium tabular-nums"
                     >
                       {step}
                     </span>

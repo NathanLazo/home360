@@ -10,12 +10,7 @@ import {
   StackedCurrencyBarChart,
   type CurrencyBarSeries,
 } from "~/components/stacked-currency-bar-chart";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 type ChartPoint = RevenuePoint & { monthLabel: string };
 
@@ -75,7 +70,9 @@ export function PlatformRevenueChart({ series }: { series: RevenuePoint[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>
+          <h2 className="text-display-sm">{t("title")}</h2>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="h-64 min-w-0 sm:h-72">

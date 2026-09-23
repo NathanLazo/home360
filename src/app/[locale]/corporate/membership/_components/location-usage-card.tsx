@@ -27,8 +27,8 @@ export function LocationUsageCard({
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <p className="text-muted-foreground text-sm">{t("description")}</p>
-        <p className="font-mono text-2xl font-semibold tracking-tight tabular-nums">
+        <p className="text-muted-foreground text-copy-sm">{t("description")}</p>
+        <p className="text-display-md font-mono tabular-nums">
           {usage.max === null
             ? t("valueUnlimited", { used: usage.used })
             : t("value", { used: usage.used, max: usage.max })}
@@ -40,10 +40,10 @@ export function LocationUsageCard({
             aria-valuemin={0}
             aria-valuemax={usage.max}
             aria-valuenow={usage.used}
-            className="bg-muted h-2 w-full overflow-hidden rounded-full"
+            className="bg-canvas-soft-2 h-2 w-full overflow-hidden rounded-full"
           >
             <div
-              className="bg-primary h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+              className="bg-ink h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               style={{ transform: `translateX(-${100 - percent}%)` }}
             />
           </div>

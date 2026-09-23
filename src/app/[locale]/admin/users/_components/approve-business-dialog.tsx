@@ -1,9 +1,9 @@
 "use client";
 
-import { LoaderCircleIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { ConfirmButtonContent } from "../../_components/confirm-button-content";
 import { GuaranteeBadge } from "./guarantee-badge";
 import { SectionError } from "~/components/section-error";
 import { Badge } from "~/components/ui/badge";
@@ -35,6 +35,8 @@ export type ApproveBusinessDialogProps = {
   businessId: string | null;
   onOpenChange: (open: boolean) => void;
   loading: boolean;
+  /** The server confirmed; the dialog holds briefly on the check. */
+  succeeded?: boolean;
   onConfirm: (input: { businessId: string; planCode: PlanCode }) => void;
 };
 
@@ -46,6 +48,7 @@ export function ApproveBusinessDialog({
   businessId,
   onOpenChange,
   loading,
+  succeeded = false,
   onConfirm,
 }: ApproveBusinessDialogProps) {
   const open = businessId !== null;
@@ -56,6 +59,7 @@ export function ApproveBusinessDialog({
   const detail = unwrapEnvelope(detailQuery);
   const business = detail.status === "success" ? detail.data : null;
   const t = useTranslations("admin.users.approveDialog");
+  const doneT = useTranslations("admin.feedback.done");
   const documentTypeT = useTranslations("admin.documentTypes");
   const documentStatusT = useTranslations("admin.documentStatus");
   const formatter = useFormatter();
@@ -108,9 +112,9 @@ export function ApproveBusinessDialog({
 
         {detail.status === "pending" ? (
           <div className="flex flex-col gap-4" aria-busy="true">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-10 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-md" />
+            <Skeleton className="h-16 w-full rounded-md" />
+            <Skeleton className="h-10 w-full rounded-sm" />
           </div>
         ) : null}
 
@@ -125,7 +129,7 @@ export function ApproveBusinessDialog({
         {business ? (
           <div className="flex flex-col gap-5">
             <section className="flex flex-col gap-2">
-              <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
                 {t("guarantee")}
               </h3>
               <GuaranteeBadge guaranteeType={business.guaranteeType} />
@@ -137,7 +141,7 @@ export function ApproveBusinessDialog({
             </section>
 
             <section className="flex flex-col gap-2">
-              <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
                 {t("documents")}
               </h3>
               {business.documents.length === 0 ? (
@@ -161,7 +165,7 @@ export function ApproveBusinessDialog({
             <section className="flex flex-col gap-2">
               <Label htmlFor="approve-plan">{t("plan")}</Label>
               {plans.status === "pending" ? (
-                <Skeleton className="h-10 w-full rounded-lg" />
+                <Skeleton className="h-10 w-full rounded-sm" />
               ) : null}
               {plans.status === "error" ? (
                 <SectionError
@@ -207,28 +211,28 @@ export function ApproveBusinessDialog({
             type="button"
             variant="outline"
             className="min-h-11 sm:min-h-10"
-            disabled={loading}
+            disabled={loading || succeeded}
             onClick={() => onOpenChange(false)}
           >
             {t("cancel")}
           </Button>
           <Button
             type="button"
-            className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+            className="min-h-11 sm:min-h-10"
             disabled={loading || !business || planCode === null}
+            aria-disabled={succeeded || undefined}
             onClick={() => {
-              if (business && planCode !== null) {
+              if (!succeeded && business && planCode !== null) {
                 onConfirm({ businessId: business.id, planCode });
               }
             }}
           >
-            {loading ? (
-              <LoaderCircleIcon
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
-            ) : null}
-            {t("confirm")}
+            <ConfirmButtonContent
+              loading={loading}
+              succeeded={succeeded}
+              label={t("confirm")}
+              successLabel={doneT("approved")}
+            />
           </Button>
         </DialogFooter>
       </DialogContent>

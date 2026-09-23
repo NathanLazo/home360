@@ -32,7 +32,7 @@ export async function PricingSection() {
     <section
       id={LANDING_ANCHORS.pricing}
       aria-labelledby="pricing-title"
-      className={cn(anchorOffsetClass, "bg-card w-full border-t")}
+      className={cn(anchorOffsetClass, "bg-canvas w-full border-t")}
     >
       <div className={cn(containerClass, sectionPaddingClass)}>
         <SectionIntro
@@ -41,7 +41,7 @@ export async function PricingSection() {
           subtitle={t("subtitle")}
         />
 
-        <div className="mt-14 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
           {LANDING_PLANS.map((plan, index) => (
             <Reveal
               key={plan.code}

@@ -46,7 +46,7 @@ export function ProductsTable({
       className: "min-w-56",
       cell: (product) => (
         <span className="flex items-center gap-3 font-medium">
-          <span className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <span className="bg-canvas-soft shadow-hairline flex size-9 shrink-0 items-center justify-center rounded-sm">
             <BoxIcon aria-hidden="true" className="size-4" />
           </span>
           {product.name}

@@ -17,7 +17,6 @@ import { useBranchMutations } from "./use-branch-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -78,7 +77,7 @@ export function BranchesView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <PageHeader title={t("title")} subtitle={t("description")} />
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          <p className="text-muted-foreground text-sm" aria-live="polite">
+          <p className="text-muted-foreground text-copy-sm" aria-live="polite">
             {data.limits.max === null
               ? t("usageUnlimited", { used: data.limits.used })
               : t("usage", { used: data.limits.used, max: data.limits.max })}
@@ -92,19 +91,18 @@ export function BranchesView() {
                   : undefined
             }
           >
-            <MetalAction active={!isReadOnly && !atLimit}>
-              <Button
-                type="button"
-                className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-                aria-disabled={atLimit}
-                aria-describedby={atLimit ? "branch-limit-help" : undefined}
-                onClick={create}
-                disabled={isReadOnly}
-              >
-                <PlusIcon aria-hidden="true" />
-                {t("new")}
-              </Button>
-            </MetalAction>
+            <Button
+              metal={atLimit ? "static" : "live"}
+              type="button"
+              className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+              aria-disabled={atLimit}
+              aria-describedby={atLimit ? "branch-limit-help" : undefined}
+              onClick={create}
+              disabled={isReadOnly}
+            >
+              <PlusIcon aria-hidden="true" />
+              {t("new")}
+            </Button>
           </span>
           {atLimit ? (
             <span id="branch-limit-help" className="sr-only">

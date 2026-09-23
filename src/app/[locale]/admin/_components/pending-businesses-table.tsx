@@ -3,11 +3,13 @@
 import { BuildingIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { ADMIN_TABLE_CARD_CLASS } from "./admin-surface";
 import type { PendingBusinessRow } from "./overview.types";
 import { EmptyState } from "~/components/empty-state";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
 import { Link } from "~/i18n/navigation";
 
 /**
@@ -57,21 +59,12 @@ export function PendingBusinessesTable({
       className: "text-right",
       cell: (row) => (
         <div className="flex justify-end gap-2">
-          <Button
-            asChild
-            size="sm"
-            className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
-          >
+          <Button asChild size="sm" variant="secondary" className="min-h-9">
             <Link href={businessDetailHref(row.id)}>
               {t("pending.approve")}
             </Link>
           </Button>
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
-          >
+          <Button asChild size="sm" variant="ghost" className="min-h-9">
             <Link href={businessDetailHref(row.id)}>{t("pending.review")}</Link>
           </Button>
         </div>
@@ -79,26 +72,24 @@ export function PendingBusinessesTable({
     },
   ];
 
+  if (businesses.length === 0) {
+    return (
+      <EmptyState
+        icon={BuildingIcon}
+        title={t("pending.emptyTitle")}
+        description={t("pending.emptyDescription")}
+        action={
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-10">
+            <Link href="/admin/users">{t("pending.emptyCta")}</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
-    <DataTable
-      columns={columns}
-      data={businesses}
-      emptyState={
-        <EmptyState
-          icon={BuildingIcon}
-          title={t("pending.emptyTitle")}
-          description={t("pending.emptyDescription")}
-          action={
-            <Button
-              asChild
-              variant="outline"
-              className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
-            >
-              <Link href="/admin/users">{t("pending.emptyCta")}</Link>
-            </Button>
-          }
-        />
-      }
-    />
+    <Card className={ADMIN_TABLE_CARD_CLASS}>
+      <DataTable columns={columns} data={businesses} />
+    </Card>
   );
 }

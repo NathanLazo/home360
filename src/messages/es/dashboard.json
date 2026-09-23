@@ -111,7 +111,6 @@
   },
   "sidebar": {
     "placeholderName": "—",
-    "placeholderInitials": "PG",
     "brandLabel": "HOME360, ir al inicio del panel",
     "planLink": "Plan {plan}, ver suscripción"
   },
@@ -814,7 +813,8 @@
       "notesHint": "Opcional. Hasta 500 caracteres.",
       "notesError": "Las notas no pueden superar 500 caracteres.",
       "save": "Guardar cambios",
-      "notActiveNotice": "Tu negocio no está activo, así que el perfil comercial no se puede editar por ahora."
+      "notActiveNotice": "Tu negocio no está activo, así que el perfil comercial no se puede editar por ahora.",
+      "unsavedChanges": "Tienes cambios sin guardar."
     },
     "account": {
       "title": "Cuenta del dueño",

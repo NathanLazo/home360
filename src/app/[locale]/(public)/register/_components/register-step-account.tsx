@@ -51,13 +51,12 @@ export function RegisterStepAccount({
             errors.ownerName ? "register-owner-name-error" : undefined
           }
           disabled={disabled}
-          className="h-11"
         />
         {errors.ownerName ? (
           <p
             id="register-owner-name-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.ownerName}
           </p>
@@ -79,13 +78,12 @@ export function RegisterStepAccount({
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "register-email-error" : undefined}
           disabled={disabled}
-          className="h-11"
         />
         {errors.email ? (
           <p
             id="register-email-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.email}
           </p>
@@ -109,13 +107,12 @@ export function RegisterStepAccount({
             errors.password ? "register-password-error" : undefined
           }
           disabled={disabled}
-          className="h-11"
         />
         {errors.password ? (
           <p
             id="register-password-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.password}
           </p>

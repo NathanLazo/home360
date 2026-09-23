@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "~/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { UserAvatar } from "~/components/user-avatar";
 import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
@@ -38,7 +38,9 @@ export type AppSidebarProps = {
   user: {
     name: string;
     subtitle?: string;
-    initials: string;
+    /** Stable user id (or email) for the bot avatar; defaults to the name. */
+    seed?: string;
+    image?: string | null;
   };
   footerSlot?: ReactNode;
 };
@@ -85,11 +87,11 @@ export function AppSidebar({
               <Link href={homeHref} aria-label={brandLabel}>
                 <span
                   aria-hidden="true"
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
                 >
                   H
                 </span>
-                <span className="truncate text-sm font-bold tracking-tight">
+                <span className="truncate text-sm font-semibold tracking-tight">
                   HOME360
                 </span>
               </Link>
@@ -124,7 +126,7 @@ export function AppSidebar({
                       </Link>
                     </SidebarMenuButton>
                     {item.badgeCount !== undefined ? (
-                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full">
+                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full font-mono tabular-nums">
                         {item.badgeCount}
                       </SidebarMenuBadge>
                     ) : null}
@@ -145,11 +147,13 @@ export function AppSidebar({
               className="cursor-default hover:bg-transparent active:scale-100 active:bg-transparent"
             >
               <div>
-                <Avatar className="size-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg text-xs font-semibold">
-                    {user.initials}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  seed={user.seed ?? user.name}
+                  name={user.name}
+                  image={user.image}
+                  theme={variant}
+                  className="rounded-md"
+                />
                 <div className="grid min-w-0 flex-1 leading-tight">
                   <span className="truncate text-sm font-medium">
                     {user.name}

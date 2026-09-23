@@ -4,6 +4,7 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
 import { KpiGridSkeleton } from "../../_components/kpi-grid-skeleton";
 import { SectionHeading } from "../../_components/section-heading";
@@ -190,7 +191,7 @@ export function FinanceView() {
         ) : null}
 
         {!withdrawalsQuery.isPending && withdrawalsErrorCode === null ? (
-          <Card className="overflow-hidden py-0">
+          <Card className={ADMIN_TABLE_CARD_CLASS}>
             <CardContent className="px-0">
               <WithdrawalsTable
                 withdrawals={withdrawals}
@@ -211,7 +212,7 @@ export function FinanceView() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+                  className="min-h-11 sm:min-h-10"
                   disabled={withdrawalsQuery.isFetchingNextPage}
                   onClick={() => void withdrawalsQuery.fetchNextPage()}
                 >
@@ -256,7 +257,7 @@ export function FinanceView() {
         ) : null}
 
         {loyalty.status === "success" ? (
-          <Card className="overflow-hidden py-0">
+          <Card className={ADMIN_TABLE_CARD_CLASS}>
             <CardContent className="px-0">
               <LoyaltyBonusesTable
                 bonuses={loyalty.data.items}

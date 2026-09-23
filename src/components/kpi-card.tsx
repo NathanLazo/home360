@@ -38,8 +38,8 @@ const deltaClasses: Record<
   NonNullable<KpiCardProps["delta"]>["trend"],
   string
 > = {
-  up: "text-emerald-700",
-  down: "text-destructive",
+  up: "text-success-deep",
+  down: "text-error-deep",
   neutral: "text-muted-foreground",
 };
 
@@ -53,7 +53,9 @@ export function KpiCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-muted-foreground text-sm">{label}</CardTitle>
+        <CardTitle className="text-muted-foreground text-copy-sm font-medium">
+          {label}
+        </CardTitle>
         {Icon ? (
           <CardAction>
             <Icon aria-hidden="true" className="text-muted-foreground size-4" />
@@ -61,7 +63,7 @@ export function KpiCard({
         ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <p className="font-mono text-2xl font-semibold tracking-tight tabular-nums">
+        <p className="text-display-md font-mono tabular-nums">
           {numeric ? (
             <KpiValue value={numeric.value} format={numeric.format} />
           ) : (
@@ -71,7 +73,7 @@ export function KpiCard({
         {delta ? (
           <p
             className={cn(
-              "text-xs font-medium tabular-nums",
+              "text-label font-mono tabular-nums",
               deltaClasses[delta.trend],
             )}
           >

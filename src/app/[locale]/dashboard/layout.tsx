@@ -47,12 +47,6 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
   const userName = user.name ?? t("sidebar.placeholderName");
   const userEmail = user.email ?? common("emailUnavailable");
-  const initials = userName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
   const labels = {
     home: t("nav.home"),
     services: t("nav.services"),
@@ -69,7 +63,7 @@ export default async function DashboardLayout({
     <SidebarProvider defaultOpen={defaultOpen}>
       <a
         href="#dashboard-content"
-        className="bg-background text-foreground focus-visible:ring-ring fixed top-2 left-2 z-[60] -translate-y-16 rounded-md px-3 py-2 text-sm font-medium shadow-md focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+        className="bg-card text-foreground focus-visible:ring-ring shadow-float fixed top-2 left-2 z-[60] -translate-y-16 rounded-sm px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
       >
         {t("header.skipToContent")}
       </a>
@@ -82,12 +76,19 @@ export default async function DashboardLayout({
         user={{
           name: userName,
           subtitle: shell.business.name,
-          initials: initials || t("sidebar.placeholderInitials"),
+          seed: user.id,
+          image: user.image ?? null,
         }}
       />
       <SidebarInset className="min-w-0">
         <DashboardHeader
-          user={{ name: userName, email: userEmail, role: user.role }}
+          user={{
+            id: user.id,
+            name: userName,
+            email: userEmail,
+            image: user.image ?? null,
+            role: user.role,
+          }}
           branches={shell.branches}
           toggleSidebarLabel={t("header.toggleSidebar")}
         />

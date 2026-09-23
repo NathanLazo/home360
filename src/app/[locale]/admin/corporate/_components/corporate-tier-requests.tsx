@@ -47,7 +47,7 @@ export function CorporateTierRequests({
         {requests.map((request) => (
           <li
             key={request.id}
-            className="flex flex-col gap-3 rounded-lg border p-3 text-sm"
+            className="flex flex-col gap-3 rounded-md border p-3 text-sm"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="flex items-center gap-2">
@@ -73,7 +73,6 @@ export function CorporateTierRequests({
               <Button
                 type="button"
                 size="sm"
-                className="transition-transform duration-150 ease-out active:scale-[0.96]"
                 onClick={() => onApprove(request)}
               >
                 {t("approve")}
@@ -82,7 +81,6 @@ export function CorporateTierRequests({
                 type="button"
                 size="sm"
                 variant="outline"
-                className="transition-transform duration-150 ease-out active:scale-[0.96]"
                 onClick={() => setRejectTarget(request)}
               >
                 {t("reject")}

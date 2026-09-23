@@ -12,6 +12,7 @@ import {
   StatusBadge,
   type StatusBadgeVariant,
 } from "~/components/status-badge";
+import { UserAvatar } from "~/components/user-avatar";
 
 const availabilityVariants: Record<
   WorkerRow["availability"],
@@ -39,7 +40,16 @@ export function WorkersTable({
       key: "name",
       header: t("columns.worker"),
       className: "min-w-48",
-      cell: (row) => <span className="font-medium">{row.fullName}</span>,
+      cell: (row) => (
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            seed={row.id}
+            name={row.fullName}
+            state={row.availability === "OFF" ? "sleeping" : "default"}
+          />
+          <span className="truncate font-medium">{row.fullName}</span>
+        </div>
+      ),
     },
     {
       key: "business",

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import { AiSettingsSection } from "./ai-settings-section";
@@ -15,6 +15,7 @@ import { useSettingsMutations } from "./use-settings-mutations";
 import { settingsFormSchema, type SettingsFormValues } from "./settings.form";
 import { toFormValues, toSaveInput } from "./settings.mappers";
 import type { PlatformSettingsResult } from "./settings.types";
+import { useErrorShake } from "~/components/motion";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
@@ -34,16 +35,24 @@ function SettingsForm({ data }: { data: PlatformSettingsResult }) {
     form.reset(toFormValues(data));
   }, [data, form]);
 
-  const onSubmit = form.handleSubmit((values) => {
-    const input = toSaveInput(values, data);
+  const formRef = useRef<HTMLFormElement>(null);
+  const shakeInvalid = useErrorShake();
 
-    if (input) {
-      mutations.save(input);
-    }
-  });
+  // Invalid submit: react-hook-form focuses the first bad field and renders
+  // the messages; the shake points at every field that still needs fixing.
+  const onSubmit = form.handleSubmit(
+    (values) => {
+      const input = toSaveInput(values, data);
+
+      if (input) {
+        mutations.save(input);
+      }
+    },
+    () => shakeInvalid(formRef.current),
+  );
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-6">
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-6">
       <AiSettingsSection form={form} />
       <FeesSettingsSection form={form} />
       <EscrowSettingsSection form={form} />

@@ -81,7 +81,7 @@ export function ExpandableText({
         <div
           aria-hidden="true"
           className={cn(
-            "from-background pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent transition-opacity duration-200 ease-out",
+            "from-background pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             collapsed ? "opacity-100" : "opacity-0",
           )}
         />
@@ -95,7 +95,7 @@ export function ExpandableText({
             setExpanded((value) => !value);
           }}
           className={cn(
-            "text-foreground hover:bg-muted focus-visible:ring-ring -mx-2 inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none",
+            "text-foreground hover:bg-muted focus-visible:ring-ring -mx-2 inline-flex min-h-9 items-center gap-1 rounded-sm px-2 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none",
             PRESS_CONTROL_CLASS,
           )}
         >
@@ -103,7 +103,7 @@ export function ExpandableText({
           <ChevronDownIcon
             aria-hidden="true"
             className={cn(
-              "size-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+              "size-3.5 transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
               expanded && "rotate-180",
             )}
           />

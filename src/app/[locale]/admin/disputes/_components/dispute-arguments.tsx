@@ -2,12 +2,20 @@
 
 import { useTranslations } from "next-intl";
 
+import {
+  DisputePartyCaption,
+  type DisputeParty,
+} from "./dispute-party-caption";
 import { ExpandableText } from "./expandable-text";
 
 export function DisputeArguments({
+  customer,
+  business,
   customerArgument,
   businessArgument,
 }: {
+  customer: DisputeParty;
+  business: DisputeParty;
   customerArgument: string;
   businessArgument: string | null;
 }) {
@@ -15,14 +23,12 @@ export function DisputeArguments({
 
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
-      <figure className="border-l-2 border-zinc-900 pl-4">
-        <figcaption className="text-xs font-semibold tracking-wide uppercase">
-          {t("customer")}
-        </figcaption>
-        <blockquote className="mt-1">
+      <figure className="border-ink border-l-2 pl-4">
+        <DisputePartyCaption party={customer} role={t("customer")} />
+        <blockquote className="mt-2">
           <ExpandableText
             text={customerArgument}
             expandLabel={t("expand")}
@@ -31,11 +37,9 @@ export function DisputeArguments({
           />
         </blockquote>
       </figure>
-      <figure className="border-l-2 border-zinc-300 pl-4">
-        <figcaption className="text-xs font-semibold tracking-wide uppercase">
-          {t("business")}
-        </figcaption>
-        <blockquote className="mt-1">
+      <figure className="border-hairline-strong border-l-2 pl-4">
+        <DisputePartyCaption party={business} role={t("business")} />
+        <blockquote className="mt-2">
           {businessArgument === null ? (
             <p className="text-muted-foreground text-sm italic">
               {t("noBusinessAnswer")}
