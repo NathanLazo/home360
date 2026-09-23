@@ -85,8 +85,10 @@ export async function sendPushToUser(
   const deadTokens = new Set<string>();
   let sent = 0;
 
-  try {
-    for (const chunk of expo.chunkPushNotifications(messages)) {
+  // Each chunk is isolated so one failing request never discards the tickets
+  // already accepted by Expo nor skips the remaining chunks.
+  for (const chunk of expo.chunkPushNotifications(messages)) {
+    try {
       const tickets = await expo.sendPushNotificationsAsync(chunk);
 
       tickets.forEach((ticket, index) => {
@@ -104,11 +106,15 @@ export async function sendPushToUser(
           deadTokens.add(token);
         }
       });
+    } catch {
+      console.error("[push] EXPO_SEND_CHUNK_FAILED", { userId });
     }
+  }
 
-    const receiptIds = [...receiptTokens.keys()];
+  const receiptIds = [...receiptTokens.keys()];
 
-    for (const chunk of expo.chunkPushNotificationReceiptIds(receiptIds)) {
+  for (const chunk of expo.chunkPushNotificationReceiptIds(receiptIds)) {
+    try {
       const receipts = await expo.getPushNotificationReceiptsAsync(chunk);
 
       for (const [receiptId, receipt] of Object.entries(receipts)) {
@@ -118,12 +124,18 @@ export async function sendPushToUser(
           deadTokens.add(token);
         }
       }
+    } catch {
+      console.error("[push] EXPO_RECEIPT_CHUNK_FAILED", { userId });
     }
-  } catch {
-    console.error("[push] EXPO_DELIVERY_FAILED", { userId });
   }
 
-  const removed = await removeTokens(db, deadTokens);
+  let removed = 0;
+
+  try {
+    removed = await removeTokens(db, deadTokens);
+  } catch {
+    console.error("[push] PUSH_TOKEN_CLEANUP_FAILED", { userId });
+  }
 
   return { sent, removed };
 }
