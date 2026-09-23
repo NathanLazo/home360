@@ -14,7 +14,7 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 /**
- * Opening band over the brand mesh. One authored sequence, not scattered
+ * Opening band over a hairline grid. One authored sequence, not scattered
  * effects: announcement (0 ms) → headline rising word by word out of its
  * masks (80 ms) → subtitle blurring in (420 ms) → CTAs (560 ms) → the custody
  * console, which then comes forward with the scroll.

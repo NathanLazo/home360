@@ -1,15 +1,13 @@
 /**
- * The hero's atmosphere: the brand mesh (`bg-mesh-hero`, develop / preview /
- * ship stops) at hero scale, the page's only mesh (DESIGN.md §2). It fades
- * into `canvas-soft` toward the bottom so the console and the next section
- * sit on plain canvas. Static decoration, hidden from assistive tech; never
- * miniaturised onto chips, buttons or text.
+ * Hairline grid behind the hero, drawn from `--border` and faded out with a
+ * radial mask so it frames the headline without competing with it. Pure
+ * decoration: static, hidden from assistive tech.
  */
 export function HeroBackdrop() {
   return (
     <div
       aria-hidden="true"
-      className="bg-mesh-hero pointer-events-none absolute inset-x-0 top-0 -z-10 h-[52rem] [mask-image:linear-gradient(to_bottom,black_45%,transparent)]"
+      className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black_30%,transparent_100%)] bg-[size:56px_56px] bg-[position:center_top]"
     />
   );
 }
