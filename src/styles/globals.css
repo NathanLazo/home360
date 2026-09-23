@@ -14,6 +14,15 @@
   /* Display face: landing `h1`/`h2` only (see DESIGN-DIRECTIVE §2). */
   --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman",
     serif;
+  /*
+   * Motion tokens. `ease-ui` is the Corporate curve for dashboard/admin/
+   * corporate/auth (DESIGN-DIRECTIVE §7): decelerating, zero overshoot, so
+   * feedback lands immediately. `ease-brand` is the landing signature curve
+   * (§4). Both are exposed as `ease-ui` / `ease-brand` utilities and also feed
+   * tw-animate-css enter/exit keyframes through `--tw-ease`.
+   */
+  --ease-ui: cubic-bezier(0.2, 0, 0, 1);
+  --ease-brand: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @theme inline {
@@ -297,6 +306,27 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Reduced motion, every surface: overlays keep at most an opacity change and
+ * never travel, scale or blur. This is a safety net for primitives that do not
+ * opt out with `motion-reduce:animate-none` themselves (tw-animate-css reads
+ * these variables inside its enter/exit keyframes).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    --tw-enter-scale: 1 !important;
+    --tw-exit-scale: 1 !important;
+    --tw-enter-translate-x: 0 !important;
+    --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important;
+    --tw-exit-translate-y: 0 !important;
+    --tw-enter-blur: 0 !important;
+    --tw-exit-blur: 0 !important;
   }
 }
 

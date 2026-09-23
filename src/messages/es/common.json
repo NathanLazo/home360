@@ -28,5 +28,11 @@
       "title": "Pago cancelado",
       "description": "No se realizó ningún cargo. Puedes volver a intentarlo con el mismo link si sigue activo."
     }
+  },
+  "a11y": {
+    "skipToContent": "Saltar al contenido principal",
+    "close": "Cerrar",
+    "toggleSidebar": "Mostrar u ocultar la barra lateral",
+    "updating": "Actualizando cifras…"
   }
 }
