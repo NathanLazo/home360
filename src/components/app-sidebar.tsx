@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "~/components/ui/sidebar";
+import { SidebarActiveIndicator } from "~/components/sidebar-active-indicator";
 import { UserAvatar } from "~/components/user-avatar";
 import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
@@ -72,6 +73,7 @@ export function AppSidebar({
   footerSlot,
 }: AppSidebarProps) {
   const pathname = usePathname();
+  const indicatorId = useId();
 
   return (
     <Sidebar
@@ -87,7 +89,7 @@ export function AppSidebar({
               <Link href={homeHref} aria-label={brandLabel}>
                 <span
                   aria-hidden="true"
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
+                  className="metal-rim shadow-metal text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
                 >
                   H
                 </span>
@@ -112,6 +114,9 @@ export function AppSidebar({
 
                 return (
                   <SidebarMenuItem key={item.key}>
+                    {isActive ? (
+                      <SidebarActiveIndicator layoutId={indicatorId} />
+                    ) : null}
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
