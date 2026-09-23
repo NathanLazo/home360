@@ -161,13 +161,13 @@
       "source": "Jakubantalik/transitions.dev",
       "sourceType": "github",
       "skillPath": "skills/transitions-dev/SKILL.md",
-      "computedHash": "221aa2b675784d694578b547fa3ec32189d4d5ae23c3173f36e739d09eb7569f"
+      "computedHash": "17b82c492f4c08394388ab3d92a428e57e10ba30b8e72cffdca2e5399fe928c3"
     },
     "transitions-polish": {
       "source": "Jakubantalik/transitions.dev",
       "sourceType": "github",
       "skillPath": "skills/transitions-polish/SKILL.md",
-      "computedHash": "95aec18ac2c9fb2c545c2bf2e7419a8001b8e7f1fb640cdb89db0a543548d27f"
+      "computedHash": "f1dd8e76b5fb275447b5dcd2e24dcd8f9bcda7b93361163754ccdff957e30509"
     },
     "ui-typography": {
       "source": "bencium/bencium-marketplace",
