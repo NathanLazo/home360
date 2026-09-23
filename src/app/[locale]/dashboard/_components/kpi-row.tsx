@@ -6,6 +6,7 @@ import {
   LockKeyholeIcon,
   StarIcon,
 } from "lucide-react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { KpiCard } from "~/components/kpi-card";
@@ -20,9 +21,14 @@ export type KpiRowProps = {
 export function KpiRow({ branchId }: KpiRowProps) {
   const t = useTranslations("dashboard.home");
   const errors = useTranslations("errors");
+  const a11y = useTranslations("common.a11y");
   const formatter = useFormatter();
   const input = branchId ? { branchId } : {};
-  const query = api.dashboard.getKpis.useQuery(input);
+  // Keep the previous branch's figures on screen while the next ones load, so
+  // the cards stay put and the numbers roll to their new values.
+  const query = api.dashboard.getKpis.useQuery(input, {
+    placeholderData: keepPreviousData,
+  });
   const response = query.data;
 
   if (query.isPending) {
@@ -64,13 +70,14 @@ export function KpiRow({ branchId }: KpiRowProps) {
   }
 
   const data = response.result;
+  const currencyFormat = {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  } as const;
   const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    formatter.number(cents / 100, currencyFormat);
   const revenueDelta =
     data.revenueDeltaPct === null
       ? t("notAvailable")
@@ -84,12 +91,17 @@ export function KpiRow({ branchId }: KpiRowProps) {
 
   return (
     <section
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      className="ease-ui grid gap-4 transition-opacity duration-200 aria-busy:opacity-70 sm:grid-cols-2 xl:grid-cols-4"
       aria-label={t("kpisLabel")}
+      aria-busy={query.isPlaceholderData}
     >
+      <p role="status" className="sr-only">
+        {query.isPlaceholderData ? a11y("updating") : ""}
+      </p>
       <KpiCard
         label={t("revenue")}
         value={currency(data.revenueCents)}
+        numeric={{ value: data.revenueCents / 100, format: currencyFormat }}
         icon={BanknoteIcon}
         delta={{
           text: revenueDelta,
@@ -104,6 +116,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
       <KpiCard
         label={t("orders")}
         value={formatter.number(data.ordersCount)}
+        numeric={{ value: data.ordersCount, format: {} }}
         icon={InboxIcon}
         delta={{
           text: t("ordersBreakdown", {
@@ -116,6 +129,7 @@ export function KpiRow({ branchId }: KpiRowProps) {
       <KpiCard
         label={t("escrow")}
         value={currency(data.escrowCents)}
+        numeric={{ value: data.escrowCents / 100, format: currencyFormat }}
         icon={LockKeyholeIcon}
         delta={{
           text: t("escrowOrders", { count: data.escrowOrdersCount }),

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckIcon, CopyIcon, LoaderCircleIcon } from "lucide-react";
+import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { z } from "zod";
 import { parsePesosToCents } from "./payment-amount";
 import type { CreatedPaymentLink } from "./payment.types";
 import { usePaymentMutations } from "./use-payment-mutations";
+import { CopyStateIcon } from "~/components/copy-state-icon";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
@@ -90,6 +91,17 @@ export function CreatePaymentLinkDialog({
     }
   });
 
+  // The check mark confirms the copy, then returns to the copy icon so a second
+  // copy gets the same feedback.
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timeout);
+  }, [copied]);
+
   async function handleCopy(url: string) {
     try {
       await navigator.clipboard.writeText(url);
@@ -140,11 +152,7 @@ export function CreatePaymentLinkDialog({
                 aria-label={t("copy")}
                 onClick={() => void handleCopy(created.url)}
               >
-                {copied ? (
-                  <CheckIcon aria-hidden="true" />
-                ) : (
-                  <CopyIcon aria-hidden="true" />
-                )}
+                <CopyStateIcon copied={copied} />
               </Button>
             </div>
             <p className="text-muted-foreground text-sm">
@@ -195,7 +203,11 @@ export function CreatePaymentLinkDialog({
                 disabled={creatingPaymentLink}
                 className="font-mono tabular-nums"
                 aria-invalid={amountError ? true : undefined}
-                aria-describedby="payment-link-amount-hint"
+                aria-describedby={
+                  amountError
+                    ? "payment-link-amount-hint payment-link-amount-error"
+                    : "payment-link-amount-hint"
+                }
                 {...form.register("amount")}
               />
               <p
@@ -205,7 +217,11 @@ export function CreatePaymentLinkDialog({
                 {t("amountHint")}
               </p>
               {amountError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p
+                  id="payment-link-amount-error"
+                  role="alert"
+                  className="text-destructive text-sm"
+                >
                   {amountError.message ?? t("amountInvalid")}
                 </p>
               ) : null}
