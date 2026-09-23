@@ -217,7 +217,9 @@
       "disputeOpened": "Dispute opened. The payment stays on hold while we review it.",
       "disputeError": "We couldn't open the dispute. Try again.",
       "cancelled": "Order cancelled. The request is open for offers again.",
-      "cancelError": "We couldn't cancel the order. Try again."
+      "cancelError": "We couldn't cancel the order. Try again.",
+      "reworkRequested": "We asked the provider to fix the work. The payment stays held while they handle it.",
+      "reworkError": "We couldn't request the fix. Please try again."
     },
     "actions": {
       "open": "Actions for order #{folio}",
@@ -225,7 +227,8 @@
       "pay": "Pay",
       "confirm": "Confirm delivery",
       "dispute": "Open dispute",
-      "cancel": "Cancel order"
+      "cancel": "Cancel order",
+      "rework": "Request a fix"
     },
     "dispute": {
       "title": "Open a dispute",
@@ -259,6 +262,16 @@
       "description": "The order isn't paid yet. Cancelling it reopens your request for offers.",
       "confirm": "Cancel order",
       "cancel": "Go back"
+    },
+    "rework": {
+      "title": "Request a fix",
+      "description": "The provider will get your note to fix the work. The payment stays held and the automatic release is paused until they deliver again.",
+      "note": "What needs fixing",
+      "cancel": "Cancel",
+      "submit": "Request fix",
+      "validation": {
+        "note": "Describe what needs fixing ({min} to {max} characters)."
+      }
     }
   },
   "locations": {

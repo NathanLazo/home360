@@ -217,7 +217,9 @@
       "disputeOpened": "Disputa abierta. El pago queda retenido mientras la revisamos.",
       "disputeError": "No pudimos abrir la disputa. Inténtalo de nuevo.",
       "cancelled": "Orden cancelada. La solicitud vuelve a recibir ofertas.",
-      "cancelError": "No pudimos cancelar la orden. Inténtalo de nuevo."
+      "cancelError": "No pudimos cancelar la orden. Inténtalo de nuevo.",
+      "reworkRequested": "Solicitamos la corrección al proveedor. El pago sigue retenido mientras la atiende.",
+      "reworkError": "No pudimos solicitar la corrección. Inténtalo de nuevo."
     },
     "actions": {
       "open": "Acciones de la orden #{folio}",
@@ -225,7 +227,8 @@
       "pay": "Pagar",
       "confirm": "Confirmar entrega",
       "dispute": "Abrir disputa",
-      "cancel": "Cancelar orden"
+      "cancel": "Cancelar orden",
+      "rework": "Solicitar corrección"
     },
     "dispute": {
       "title": "Abrir una disputa",
@@ -259,6 +262,16 @@
       "description": "La orden aún no está pagada. Al cancelarla, tu solicitud vuelve a recibir ofertas.",
       "confirm": "Cancelar orden",
       "cancel": "Volver"
+    },
+    "rework": {
+      "title": "Solicitar corrección",
+      "description": "El proveedor recibirá tu nota para corregir el trabajo. El pago sigue retenido y la liberación automática se pausa hasta que vuelva a entregar.",
+      "note": "Qué hay que corregir",
+      "cancel": "Cancelar",
+      "submit": "Solicitar corrección",
+      "validation": {
+        "note": "Describe qué hay que corregir (de {min} a {max} caracteres)."
+      }
     }
   },
   "locations": {

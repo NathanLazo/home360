@@ -60,6 +60,7 @@ export type CorporateOrderDetailSheetProps = {
   onOpenChange: (open: boolean) => void;
   onPay: (orderId: string) => void;
   onConfirm: (orderId: string) => void;
+  onRework: (orderId: string) => void;
   onDispute: (orderId: string) => void;
   onCancel: (orderId: string) => void;
 };
@@ -75,6 +76,7 @@ export function CorporateOrderDetailSheet({
   onOpenChange,
   onPay,
   onConfirm,
+  onRework,
   onDispute,
   onCancel,
 }: CorporateOrderDetailSheetProps) {
@@ -183,6 +185,7 @@ export function CorporateOrderDetailSheet({
                 busy={busy}
                 onPay={() => onPay(state.data.id)}
                 onConfirm={() => onConfirm(state.data.id)}
+                onRework={() => onRework(state.data.id)}
                 onDispute={() => onDispute(state.data.id)}
                 onCancel={() => onCancel(state.data.id)}
               />

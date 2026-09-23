@@ -28,7 +28,9 @@ export type ResolvedRequestLocation = {
 export async function resolveRequestLocation(
   db: PrismaClient,
   input: RequestLocationInput,
-): Promise<ServiceResult<ResolvedRequestLocation>> {
+): Promise<
+  ServiceResult<ResolvedRequestLocation, "LOCATION_COORDINATES_REQUIRED">
+> {
   if (input.kind === "ADDRESS") {
     const address = await db.address.findFirst({
       where: { id: input.addressId, userId: input.customerId },
@@ -70,8 +72,16 @@ export async function resolveRequestLocation(
     return svcFail("NOT_FOUND", "Corporate location not found");
   }
 
-  // Geo comes from the location when it was geocoded; without it the request
-  // keeps the full textual address but cannot match the radar radius.
+  // The radar matches by Haversine radius: a corporate request without a
+  // point would be created but never reach any business, so it is rejected
+  // up front and the account is told to add coordinates to the location.
+  if (location.latitude === null || location.longitude === null) {
+    return svcFail(
+      "LOCATION_COORDINATES_REQUIRED",
+      "Corporate location has no coordinates",
+    );
+  }
+
   return svcOk({
     addressLine: `${location.addressLine}, ${location.city}`,
     neighborhood: null,

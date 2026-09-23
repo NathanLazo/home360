@@ -83,6 +83,11 @@ Todos reciben `stripe` y `db` por parámetro (inyección para tests):
 - **Auto-liberación**: `releaseDuePayments()` en `payments/escrow.ts` libera pagos con
   `escrowReleaseAt <= now`; se expone como route handler `api/cron/release-escrow`
   protegido por `CRON_SECRET` (header), invocable por Vercel Cron o manualmente.
+- **Recordatorio de calificación**: `sendDueRatingReminders()` en
+  `notifications/rating-reminders.ts` se expone como `api/cron/rating-reminders`
+  (GET o POST), con el mismo contrato de auth (`Authorization: Bearer CRON_SECRET`).
+  Programarlo **cada hora** junto al de liberación de escrow; es idempotente por
+  orden (`Order.ratingReminderSentAt`).
 
 ## 6. UI — W6 `/dashboard/payments`
 

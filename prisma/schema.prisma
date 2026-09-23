@@ -140,8 +140,9 @@ enum QuoteStatus {
   ACCEPTED
   REJECTED
   EXPIRED
-  // quote.withdraw (M5-W1). With @@unique([requestId, businessId]) a withdrawn
-  // quote blocks re-quoting the same request — deliberate (MA-16).
+  // quote.withdraw (M5-W1). @@unique([requestId, businessId]) keeps one row per
+  // pair: re-submitting a WITHDRAWN quote (quote.submit) reopens that same row
+  // as PENDING with the new terms (supersedes MA-16; see quote-business.ts).
   WITHDRAWN
 }
 

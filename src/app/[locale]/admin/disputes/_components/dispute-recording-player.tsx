@@ -31,7 +31,7 @@ export function DisputeRecordingPlayer({
   const seconds = durationSec === null ? null : Math.round(durationSec % 60);
 
   return (
-    <section className="flex flex-col gap-2">
+    <section id="recording" className="flex scroll-mt-24 flex-col gap-2">
       <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>

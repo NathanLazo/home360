@@ -49,6 +49,7 @@ const SERVICE_STATUSES: Record<string, number> = {
   AI_UNAVAILABLE: 503,
   INTERNAL_ERROR: 500,
   STRIPE_ERROR: 502,
+  LOCATION_COORDINATES_REQUIRED: 422,
 };
 
 function fromService<TData, TCode extends string>(

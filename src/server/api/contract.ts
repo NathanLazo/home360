@@ -45,6 +45,8 @@ export const DOMAIN_ERROR_CODES = [
   "ORDER_NOT_FOUND",
   "INVALID_TARGET",
   "CORPORATE_PRICING_NOT_AVAILABLE",
+  // Corporate request from a location without lat/lng (radar needs a point).
+  "LOCATION_COORDINATES_REQUIRED",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

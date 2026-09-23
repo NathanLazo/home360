@@ -88,6 +88,7 @@ const serviceErrorStatuses = {
   AI_UNAVAILABLE: 503,
   INTERNAL_ERROR: 500,
   STRIPE_ERROR: 502,
+  LOCATION_COORDINATES_REQUIRED: 422,
 } as const satisfies Record<string, number>;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;

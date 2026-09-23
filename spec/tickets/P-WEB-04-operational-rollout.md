@@ -8,6 +8,8 @@ Stripe CLI ni despliegues.
 - Aplicar el schema actual con el flujo aprobado del proyecto (`pnpm db:push`) y cargar el
   seed idempotente en un entorno no productivo.
 - Configurar Stripe, Pusher, Vercel Blob, AI Gateway, correo/SMS, cron y Expo Push.
+  Crons (ambos con `Authorization: Bearer CRON_SECRET`): `/api/cron/release-escrow` y
+  `/api/cron/rating-reminders` (cada hora); ver `spec/03-payments.md` §5.
 - Probar webhooks con firma real e idempotencia; confirmar reintentos.
 - Ejecutar los recorridos manuales: auth, negocio, admin, corporativo, pago/escrow/refund,
   suscripción, chat/tracking, worker y push.

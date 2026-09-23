@@ -3,6 +3,7 @@
 import {
   BadgeCheckIcon,
   CreditCardIcon,
+  RotateCcwIcon,
   ShieldAlertIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -17,6 +18,7 @@ export type CorporateOrderDetailActionsProps = {
   busy: boolean;
   onPay: () => void;
   onConfirm: () => void;
+  onRework: () => void;
   onDispute: () => void;
   onCancel: () => void;
 };
@@ -31,13 +33,18 @@ export function CorporateOrderDetailActions({
   busy,
   onPay,
   onConfirm,
+  onRework,
   onDispute,
   onCancel,
 }: CorporateOrderDetailActionsProps) {
   const t = useTranslations("corporate.orders.actions");
   const canPay = actions.canPay && canMutate;
   const hasAny =
-    canPay || actions.canConfirm || actions.canOpenDispute || actions.canCancel;
+    canPay ||
+    actions.canConfirm ||
+    actions.canRequestRework ||
+    actions.canOpenDispute ||
+    actions.canCancel;
 
   if (!hasAny) {
     return null;
@@ -55,6 +62,17 @@ export function CorporateOrderDetailActions({
         <Button type="button" disabled={busy} onClick={onConfirm}>
           <BadgeCheckIcon aria-hidden="true" />
           {t("confirm")}
+        </Button>
+      ) : null}
+      {actions.canRequestRework ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          onClick={onRework}
+        >
+          <RotateCcwIcon aria-hidden="true" />
+          {t("rework")}
         </Button>
       ) : null}
       {actions.canOpenDispute ? (

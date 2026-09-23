@@ -45,6 +45,7 @@
   "WITHDRAWAL_NOT_PENDING": "Este retiro ya no está pendiente.",
   "BUSINESS_SUSPENDED": "La cuenta del negocio está suspendida.",
   "SETTINGS_STALE": "Alguien más cambió la configuración. Vuelve a cargar la pantalla.",
-  "AI_UNAVAILABLE": "El diagnóstico inteligente no está disponible por ahora. Inténtalo de nuevo en unos minutos.",
+  "AI_UNAVAILABLE": "El asistente de IA no está disponible por ahora. Inténtalo de nuevo más tarde.",
+  "LOCATION_COORDINATES_REQUIRED": "Esta ubicación no tiene coordenadas, así que tu solicitud no llegaría a negocios cercanos. Agrega latitud y longitud en Ubicaciones.",
   "ADDRESS_LIMIT_REACHED": "Llegaste al límite de 10 direcciones guardadas. Elimina una para agregar otra."
 }

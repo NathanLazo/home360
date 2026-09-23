@@ -123,7 +123,10 @@ Retiro de negocio suspendido: fila deshabilitada con nota "Cuenta suspendida" (d
 |-----------|-------|--------|
 | `get` | — | `PlatformSettings` completo + `commissionsByPlan` (de `Plan`) |
 | `update` | `platformSettingsSchema` (parcial, rangos validados: umbral 50–99, margen 5–50, horas 1–336…) | settings actualizado |
-| `updatePlanCommissions` | `{ basic, standard, enterprise }` (0–30) | planes actualizados — afecta solo pagos futuros |
+| `save` | `{ expectedUpdatedAt, settings?, expectedCommissions?, commissions? }` — `commissions` = `{ basic, standard, enterprise }` (0–30), siempre junto con `expectedCommissions` (concurrencia optimista) | settings y/o comisiones de plan guardados en una sola transacción — las comisiones afectan solo pagos futuros |
+
+> `updatePlanCommissions` se retiró: las comisiones por plan se guardan con
+> `admin.settings.save` (mismo submit "Guardar cambios" del formulario).
 
 ### Módulo
 

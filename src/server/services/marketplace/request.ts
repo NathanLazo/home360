@@ -66,7 +66,10 @@ export type RequestListResult = {
 };
 
 type CreateRequestError =
-  "VALIDATION_ERROR" | "AI_UNAVAILABLE" | "INTERNAL_ERROR";
+  | "VALIDATION_ERROR"
+  | "AI_UNAVAILABLE"
+  | "INTERNAL_ERROR"
+  | "LOCATION_COORDINATES_REQUIRED";
 
 type ResolvedDiagnosis = {
   mediaPathnames: string[];

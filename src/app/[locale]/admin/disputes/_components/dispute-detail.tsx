@@ -21,6 +21,7 @@ import { DisputeResolutionActions } from "./dispute-resolution-actions";
 import { RequestEvidenceDialog } from "./request-evidence-dialog";
 import { ResolveDisputeDialog } from "./resolve-dispute-dialog";
 import { useDisputeMutations } from "./use-dispute-mutations";
+import { useScrollToHash } from "./use-scroll-to-hash";
 import type { DisputeDetail as DisputeDetailType } from "./disputes.types";
 import { DisputeResolution } from "@generated/prisma";
 import { EmptyState } from "~/components/empty-state";
@@ -116,6 +117,8 @@ export function DisputeDetail({
     { enabled: disputeId !== null },
   );
   const state = unwrapEnvelope(query);
+  // `#recording` / `#evidence` deep links from the admin overview.
+  useScrollToHash(state.status === "success" ? state.data.id : null);
 
   if (disputeId === null) {
     return (

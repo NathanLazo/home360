@@ -13,6 +13,7 @@ import { CorporateOrdersTable } from "./corporate-orders-table";
 import { CorporateRequestsSection } from "./corporate-requests-section";
 import { NewRequestSheet } from "./new-request-sheet";
 import { OpenDisputeDialog } from "./open-dispute-dialog";
+import { RequestReworkDialog } from "./request-rework-dialog";
 import { useCorporateOrderActions } from "./use-corporate-order-actions";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import { PageHeader } from "~/components/page-header";
@@ -48,6 +49,7 @@ export function CorporateOrdersView({
   const actions = useCorporateOrderActions();
   const [newRequestOpen, setNewRequestOpen] = useState(false);
   const [disputeOrderId, setDisputeOrderId] = useState<string | null>(null);
+  const [reworkOrderId, setReworkOrderId] = useState<string | null>(null);
   const [confirmOrderId, setConfirmOrderId] = useState<string | null>(null);
   const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
 
@@ -84,7 +86,8 @@ export function CorporateOrdersView({
     actions.paying ||
     actions.confirming ||
     actions.cancelling ||
-    actions.disputing;
+    actions.disputing ||
+    actions.reworking;
 
   function setOrderParam(nextOrderId: string | null) {
     const next = new URLSearchParams(searchParams.toString());
@@ -210,6 +213,7 @@ export function CorporateOrdersView({
         }}
         onPay={(id) => void actions.pay(id)}
         onConfirm={setConfirmOrderId}
+        onRework={setReworkOrderId}
         onDispute={setDisputeOrderId}
         onCancel={setCancelOrderId}
       />
@@ -221,6 +225,19 @@ export function CorporateOrdersView({
         submitting={actions.creatingRequest}
         onOpenChange={setNewRequestOpen}
         onSubmit={actions.createRequest}
+      />
+
+      <RequestReworkDialog
+        open={reworkOrderId !== null}
+        submitting={actions.reworking}
+        onOpenChange={(open) => {
+          if (!open) setReworkOrderId(null);
+        }}
+        onSubmit={(note) =>
+          reworkOrderId
+            ? actions.requestRework({ orderId: reworkOrderId, note })
+            : Promise.resolve(false)
+        }
       />
 
       <OpenDisputeDialog

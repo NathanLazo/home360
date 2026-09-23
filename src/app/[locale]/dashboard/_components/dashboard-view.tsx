@@ -34,7 +34,7 @@ export function DashboardView({ branchId, days }: DashboardViewProps) {
         />
         <OrdersByBranchList branchId={branchId} days={days} />
       </div>
-      <RecentOrdersTable branchId={branchId} />
+      <RecentOrdersTable branchId={branchId} days={days} />
     </div>
   );
 }

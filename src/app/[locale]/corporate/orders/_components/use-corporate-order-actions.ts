@@ -24,6 +24,7 @@ export function useCorporateOrderActions() {
   const checkoutMutation = api.corporate.createCheckoutSession.useMutation();
   const confirmMutation = api.corporate.confirmDelivery.useMutation();
   const disputeMutation = api.corporate.openDispute.useMutation();
+  const reworkMutation = api.corporate.requestRework.useMutation();
   const cancelMutation = api.corporate.cancelOrder.useMutation();
 
   async function refresh() {
@@ -123,6 +124,16 @@ export function useCorporateOrderActions() {
     return response !== null;
   }
 
+  /** Asks the provider to fix the work; pauses the escrow auto-release. */
+  async function requestRework(input: { orderId: string; note: string }) {
+    const response = await run(() => reworkMutation.mutateAsync(input), {
+      success: t("reworkRequested"),
+      error: t("reworkError"),
+    });
+
+    return response !== null;
+  }
+
   async function cancelOrder(orderId: string) {
     const response = await run(() => cancelMutation.mutateAsync({ orderId }), {
       success: t("cancelled"),
@@ -138,12 +149,14 @@ export function useCorporateOrderActions() {
     pay,
     confirmDelivery,
     openDispute,
+    requestRework,
     cancelOrder,
     creatingRequest: createRequestMutation.isPending,
     acceptingQuote: acceptQuoteMutation.isPending,
     paying: checkoutMutation.isPending,
     confirming: confirmMutation.isPending,
     disputing: disputeMutation.isPending,
+    reworking: reworkMutation.isPending,
     cancelling: cancelMutation.isPending,
   };
 }

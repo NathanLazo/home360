@@ -709,7 +709,7 @@ export async function recordCapturedOrderEscrow(
     },
   });
 
-  if (!order || order.status !== OrderStatus.PAID) {
+  if (order?.status !== OrderStatus.PAID) {
     return;
   }
 

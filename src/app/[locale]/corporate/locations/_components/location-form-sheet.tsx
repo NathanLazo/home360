@@ -5,6 +5,7 @@ import { LoaderCircleIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { CorporateLocationItem } from "../../_components/corporate.types";
+import { GeoCoordinateFields } from "~/components/geo-coordinate-fields";
 import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -18,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { coordinateToField, parseCoordinate } from "~/lib/geo-coordinates";
 import type {
   CorporateLocationCreateInput,
   CorporateLocationUpdateInput,
@@ -33,9 +35,12 @@ type LocationFormValues = {
   city: string;
   contactName: string;
   contactPhone: string;
+  latitude: string;
+  longitude: string;
 };
 
 type FieldKey = keyof LocationFormValues;
+type TextFieldKey = Exclude<FieldKey, "latitude" | "longitude">;
 
 type LocationFormErrors = Partial<Record<FieldKey, string>>;
 
@@ -45,6 +50,8 @@ const EMPTY_VALUES: LocationFormValues = {
   city: "",
   contactName: "",
   contactPhone: "",
+  latitude: "",
+  longitude: "",
 };
 
 const FIELD_IDS: Record<FieldKey, string> = {
@@ -53,6 +60,8 @@ const FIELD_IDS: Record<FieldKey, string> = {
   city: "location-city",
   contactName: "location-contact-name",
   contactPhone: "location-contact-phone",
+  latitude: "location-latitude",
+  longitude: "location-longitude",
 };
 
 function isFieldKey(key: PropertyKey): key is FieldKey {
@@ -61,7 +70,9 @@ function isFieldKey(key: PropertyKey): key is FieldKey {
     key === "addressLine" ||
     key === "city" ||
     key === "contactName" ||
-    key === "contactPhone"
+    key === "contactPhone" ||
+    key === "latitude" ||
+    key === "longitude"
   );
 }
 
@@ -81,6 +92,7 @@ export function LocationFormSheet({
   onUpdate: (input: CorporateLocationUpdateInput) => Promise<boolean>;
 }) {
   const t = useTranslations("corporate.locations.form");
+  const tGeo = useTranslations("common.geoLocation");
   const [values, setValues] = useState<LocationFormValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<LocationFormErrors>({});
 
@@ -95,6 +107,8 @@ export function LocationFormSheet({
             city: location.city,
             contactName: location.contactName ?? "",
             contactPhone: location.contactPhone ?? "",
+            latitude: coordinateToField(location.latitude),
+            longitude: coordinateToField(location.longitude),
           }
         : EMPTY_VALUES,
     );
@@ -107,7 +121,10 @@ export function LocationFormSheet({
     for (const issue of issues) {
       const key = issue.path[0];
       if (key !== undefined && isFieldKey(key)) {
-        next[key] = t(`validation.${key}`);
+        next[key] =
+          key === "latitude" || key === "longitude"
+            ? tGeo("invalid")
+            : t(`validation.${key}`);
       }
     }
     setErrors(next);
@@ -129,6 +146,8 @@ export function LocationFormSheet({
       addressLine: values.addressLine,
       city: values.city,
     };
+    const latitude = parseCoordinate(values.latitude);
+    const longitude = parseCoordinate(values.longitude);
 
     if (location) {
       const parsed = corporateLocationUpdateSchema.safeParse({
@@ -136,6 +155,8 @@ export function LocationFormSheet({
         ...common,
         contactName: values.contactName.trim() ? values.contactName : null,
         contactPhone: values.contactPhone.trim() ? values.contactPhone : null,
+        latitude,
+        longitude,
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
@@ -153,6 +174,8 @@ export function LocationFormSheet({
       ...(values.contactPhone.trim()
         ? { contactPhone: values.contactPhone }
         : {}),
+      ...(latitude !== null ? { latitude } : {}),
+      ...(longitude !== null ? { longitude } : {}),
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);
@@ -164,7 +187,7 @@ export function LocationFormSheet({
   }
 
   function field(
-    key: FieldKey,
+    key: TextFieldKey,
     options: { optional?: boolean; autoComplete?: string } = {},
   ) {
     const errorId = `${FIELD_IDS[key]}-error`;
@@ -244,6 +267,23 @@ export function LocationFormSheet({
             {field("city", { autoComplete: "address-level2" })}
             {field("contactName", { optional: true, autoComplete: "name" })}
             {field("contactPhone", { optional: true, autoComplete: "tel" })}
+            <div className="px-4">
+              <GeoCoordinateFields
+                idPrefix="location"
+                values={{
+                  latitude: values.latitude,
+                  longitude: values.longitude,
+                }}
+                errors={{
+                  latitude: errors.latitude,
+                  longitude: errors.longitude,
+                }}
+                disabled={submitting}
+                onChange={(coordinates) =>
+                  setValues((current) => ({ ...current, ...coordinates }))
+                }
+              />
+            </div>
           </div>
           <SheetFormDock>
             <SheetClose asChild>

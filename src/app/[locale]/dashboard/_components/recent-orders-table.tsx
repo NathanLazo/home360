@@ -16,10 +16,13 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Link, useRouter } from "~/i18n/navigation";
+import type { DashboardRangeDays } from "~/lib/search-params";
 import { api } from "~/trpc/react";
 
 export type RecentOrdersTableProps = {
   branchId?: string;
+  /** Header `?range=`: only orders created within the last `days`. */
+  days: DashboardRangeDays;
 };
 
 const statusVariantMap = {
@@ -32,13 +35,14 @@ const statusVariantMap = {
   DISPUTED: "destructive",
 } satisfies Record<RecentOrder["status"], StatusBadgeVariant>;
 
-export function RecentOrdersTable({ branchId }: RecentOrdersTableProps) {
+export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
   const t = useTranslations("dashboard.home");
   const status = useTranslations("dashboard.orderStatus");
   const errors = useTranslations("errors");
   const formatter = useFormatter();
   const router = useRouter();
-  const input = branchId ? { branchId } : {};
+  // Must match the server prefetch in `dashboard/page.tsx` exactly.
+  const input = branchId ? { branchId, days } : { days };
   const query = api.dashboard.getRecentOrders.useQuery(input, {
     placeholderData: keepPreviousData,
   });

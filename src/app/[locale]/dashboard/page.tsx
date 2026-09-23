@@ -45,7 +45,7 @@ export default async function DashboardPage({
       weeks: rangeToWeeks(days),
     }),
     api.dashboard.getOrdersByBranch.prefetch({ ...input, days }),
-    api.dashboard.getRecentOrders.prefetch(input),
+    api.dashboard.getRecentOrders.prefetch({ ...input, days }),
   ]);
 
   return (

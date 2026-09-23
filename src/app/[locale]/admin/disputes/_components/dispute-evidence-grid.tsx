@@ -31,7 +31,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
 
   if (urls.length === 0) {
     return (
-      <section className="flex flex-col gap-2">
+      <section id="evidence" className="flex scroll-mt-24 flex-col gap-2">
         <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
           {t("title")}
         </h3>
@@ -46,7 +46,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
   const hidden = urls.length - visible.length;
 
   return (
-    <section className="flex flex-col gap-2">
+    <section id="evidence" className="flex scroll-mt-24 flex-col gap-2">
       <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
