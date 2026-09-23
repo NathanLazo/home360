@@ -56,11 +56,12 @@ export const displayHeadingClass =
   "text-display-lg text-balance md:text-display-xl";
 
 /**
- * Serif accent inside a display heading (editorial contrast, owner's pick):
- * Fraunces at its softest, light and upright. Landing only.
+ * Accent phrase inside a display heading (owner's pick): Fraunces at its
+ * softest, light and upright, in the tertiary gray (≥ 3:1 at display sizes;
+ * `.dark` bands flip it through `--mute`). Landing only.
  */
 export const accentClass =
-  "font-display font-light tracking-[-0.03em] [font-variation-settings:'SOFT'_100,'opsz'_144]";
+  "font-display text-mute font-light tracking-[-0.03em] [font-variation-settings:'SOFT'_100,'opsz'_144]";
 
 /** `h3`, cards and steps. */
 export const subheadingClass = "text-display-sm";

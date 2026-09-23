@@ -117,9 +117,8 @@ la utilidad `bg-mesh-hero`. Es un fondo atmosférico a escala de hero, difuminad
 tenue. **Nunca** miniaturizado: ni en chips, iconos, botones, bordes ni texto
 (`background-clip: text` sigue prohibido).
 
-> Decisión del owner: el hero de la landing usa **retícula hairline + CTA liquid metal
-> `chromatic` a plena intensidad** (el momento firma), no el mesh. `bg-mesh-hero` queda
-> reservado; si vuelve, nunca compite en el mismo encuadre que el CTA chromatic.
+> Decisión del owner: el hero de la landing usa el mesh + CTA liquid metal `chromatic`
+> a plena intensidad, y las palabras de acento del título en Fraunces gris.
 
 ### Named Rules
 **La Regla del Color con Significado.** Un color, un significado. Azul = link/foco/info;
