@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { skipToken } from "@tanstack/react-query";
 import { MapPinIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
@@ -263,15 +264,16 @@ export function CorporateDetailSheet({
   actionsSlot,
 }: CorporateDetailSheetProps) {
   const t = useTranslations("admin.corporate.detail");
+  // skipToken (not `enabled`) so neither a retry `refetch()` nor an empty
+  // `?account=` param can ever send a placeholder id to the server.
   const query = api.admin.corporate.getById.useQuery(
-    { accountId: accountId ?? "" },
-    { enabled: accountId !== null },
+    accountId ? { accountId } : skipToken,
   );
   const state = unwrapEnvelope(query);
 
   return (
     <Sheet
-      open={accountId !== null}
+      open={Boolean(accountId)}
       onOpenChange={(open) => {
         if (!open) {
           onClose();

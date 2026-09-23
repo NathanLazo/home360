@@ -1,5 +1,6 @@
 "use client";
 
+import { skipToken } from "@tanstack/react-query";
 import { InfoIcon, LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId, useState } from "react";
@@ -539,8 +540,7 @@ export function CorporateTermsForm({
   const open = target !== null;
 
   const detailQuery = api.admin.corporate.getById.useQuery(
-    { accountId: target?.accountId ?? "" },
-    { enabled: open },
+    target ? { accountId: target.accountId } : skipToken,
   );
   const detail = unwrapEnvelope(detailQuery);
 
