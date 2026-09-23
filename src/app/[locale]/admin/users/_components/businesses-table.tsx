@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { BuildingIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -26,12 +27,14 @@ export type BusinessesTableProps = {
   businesses: BusinessRow[];
   onOpenBusiness: (businessId: string) => void;
   onAction?: (businessId: string, action: BusinessRowAction) => void;
+  emptyAction?: ReactNode;
 };
 
 export function BusinessesTable({
   businesses,
   onOpenBusiness,
   onAction,
+  emptyAction,
 }: BusinessesTableProps) {
   const t = useTranslations("admin.users");
   const typesT = useTranslations("admin.businessTypes");
@@ -101,9 +104,7 @@ export function BusinessesTable({
         <UserRowActions
           derivedStatus={row.derivedStatus}
           onViewDetail={() => onOpenBusiness(row.id)}
-          onAction={
-            onAction ? (action) => onAction(row.id, action) : undefined
-          }
+          onAction={onAction ? (action) => onAction(row.id, action) : undefined}
         />
       ),
     },
@@ -120,6 +121,7 @@ export function BusinessesTable({
             icon={BuildingIcon}
             title={t("empty.businesses.title")}
             description={t("empty.businesses.description")}
+            action={emptyAction}
           />
         </div>
       }

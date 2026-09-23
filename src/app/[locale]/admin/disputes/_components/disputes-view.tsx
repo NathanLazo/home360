@@ -4,13 +4,15 @@ import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { AnimatedTabsList } from "../../_components/animated-tabs-list";
 import { DisputeDetail } from "./dispute-detail";
 import { DisputeList } from "./dispute-list";
+import { DisputeListSkeleton } from "./dispute-list-skeleton";
 import { disputeFilterSchema, type DisputeFilter } from "./disputes.schema";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Button } from "~/components/ui/button";
+import { Tabs } from "~/components/ui/tabs";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -43,7 +45,9 @@ export function DisputesView() {
 
   const query = api.admin.disputes.list.useInfiniteQuery(
     { status: filter },
-    { getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined },
+    {
+      getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
+    },
   );
 
   const pages = query.data?.pages ?? [];
@@ -87,18 +91,25 @@ export function DisputesView() {
           })
         }
       >
-        <TabsList>
-          <TabsTrigger value="open">
-            {stats
-              ? t("tabs.openWithCount", { count: stats.openCount })
-              : t("tabs.open")}
-          </TabsTrigger>
-          <TabsTrigger value="resolved">
-            {stats
-              ? t("tabs.resolvedWithCount", { count: stats.resolvedThisMonth })
-              : t("tabs.resolved")}
-          </TabsTrigger>
-        </TabsList>
+        <AnimatedTabsList
+          value={filter}
+          items={[
+            {
+              value: "open",
+              label: stats
+                ? t("tabs.openWithCount", { count: stats.openCount })
+                : t("tabs.open"),
+            },
+            {
+              value: "resolved",
+              label: stats
+                ? t("tabs.resolvedWithCount", {
+                    count: stats.resolvedThisMonth,
+                  })
+                : t("tabs.resolved"),
+            },
+          ]}
+        />
       </Tabs>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -111,11 +122,7 @@ export function DisputesView() {
           )}
         >
           {query.isPending ? (
-            <div className="flex flex-col gap-2" aria-busy="true">
-              {Array.from({ length: 5 }, (_, index) => (
-                <Skeleton key={index} className="h-28 w-full rounded-xl" />
-              ))}
-            </div>
+            <DisputeListSkeleton label={t("loading")} />
           ) : null}
 
           {!query.isPending && errorCode !== null ? (
@@ -136,16 +143,30 @@ export function DisputesView() {
               onSelect={(disputeId) =>
                 replaceParams((params) => params.set("dispute", disputeId))
               }
+              emptyAction={
+                filter === "open" ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+                    onClick={() =>
+                      replaceParams((params) => {
+                        params.set("status", "resolved");
+                        params.delete("dispute");
+                      })
+                    }
+                  >
+                    {t("empty.showResolved")}
+                  </Button>
+                ) : undefined
+              }
             />
           ) : null}
         </section>
 
         <section
           aria-label={t("detailLabel")}
-          className={cn(
-            "min-w-0",
-            selectedId === null && "hidden xl:block",
-          )}
+          className={cn("min-w-0", selectedId === null && "hidden xl:block")}
         >
           <DisputeDetail
             disputeId={selectedId}

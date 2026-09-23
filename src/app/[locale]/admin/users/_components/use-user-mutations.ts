@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
+import { useMutationFeedback } from "../../_components/use-mutation-feedback";
 import type { ApproveBusinessInput } from "./users.schema";
 import type { ErrorCode } from "~/server/api/contract";
 import { toErrorCode } from "~/lib/trpc-errors";
@@ -30,6 +30,7 @@ export function useUserMutations(options?: {
   const t = useTranslations("admin.users.toasts");
   const errorsT = useTranslations("errors");
   const utils = api.useUtils();
+  const feedback = useMutationFeedback();
 
   const invalidate = async () => {
     await Promise.all([
@@ -39,44 +40,38 @@ export function useUserMutations(options?: {
     ]);
   };
 
-  const handleEnvelope = (
-    error: ErrorCode | null,
-    successKey: string,
-  ): boolean => {
-    if (error !== null) {
-      toast.error(errorsT(error));
-      return false;
-    }
+  type ToastKey = "approved" | "rejected" | "suspended" | "reactivated";
 
-    toast.success(t(successKey));
-    void invalidate();
-    options?.onSettledSuccess?.();
-    return true;
-  };
+  // Each mutation opens a loading toast on click and morphs it into the
+  // outcome, so the admin never wonders whether the request was sent.
+  const lifecycle = (key: ToastKey) => ({
+    onMutate: () => feedback.start(key, t(`pending.${key}`)),
+    onSuccess: (response: { error: ErrorCode | null }) => {
+      if (response.error !== null) {
+        feedback.error(key, errorsT(response.error));
+        return;
+      }
 
-  const onTransportError = (error: unknown) => {
-    toast.error(errorsT(toErrorCode(error)));
-  };
-
-  const approve = api.admin.users.approveBusiness.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "approved"),
-    onError: onTransportError,
+      feedback.success(key, t(key));
+      void invalidate();
+      options?.onSettledSuccess?.();
+    },
+    onError: (error: unknown) =>
+      feedback.error(key, errorsT(toErrorCode(error))),
   });
 
-  const reject = api.admin.users.rejectBusiness.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "rejected"),
-    onError: onTransportError,
-  });
-
-  const suspend = api.admin.users.suspendBusiness.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "suspended"),
-    onError: onTransportError,
-  });
-
-  const reactivate = api.admin.users.reactivateBusiness.useMutation({
-    onSuccess: (response) => handleEnvelope(response.error, "reactivated"),
-    onError: onTransportError,
-  });
+  const approve = api.admin.users.approveBusiness.useMutation(
+    lifecycle("approved"),
+  );
+  const reject = api.admin.users.rejectBusiness.useMutation(
+    lifecycle("rejected"),
+  );
+  const suspend = api.admin.users.suspendBusiness.useMutation(
+    lifecycle("suspended"),
+  );
+  const reactivate = api.admin.users.reactivateBusiness.useMutation(
+    lifecycle("reactivated"),
+  );
 
   return {
     approve: {

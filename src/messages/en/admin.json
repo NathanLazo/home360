@@ -133,7 +133,13 @@
       "approved": "Business approved.",
       "rejected": "Business rejected.",
       "suspended": "Business suspended.",
-      "reactivated": "Business reactivated."
+      "reactivated": "Business reactivated.",
+      "pending": {
+        "approved": "Approving business…",
+        "rejected": "Rejecting business…",
+        "suspended": "Suspending business…",
+        "reactivated": "Reactivating business…"
+      }
     },
     "reasonDialog": {
       "label": "Reason",
@@ -194,7 +200,8 @@
       "recentOrders": "Recent orders ({count} total)",
       "noOrders": "This business has no orders yet.",
       "disputes": "Disputes ({count} open)",
-      "noDisputes": "This business has no disputes."
+      "noDisputes": "This business has no disputes.",
+      "loading": "Loading business file…"
     }
   },
   "overview": {
@@ -229,7 +236,9 @@
         "type": "Type",
         "guarantee": "Guarantee",
         "actions": "Actions"
-      }
+      },
+      "viewAll": "View all businesses",
+      "emptyCta": "Go to businesses"
     },
     "disputes": {
       "title": "Open disputes",
@@ -238,7 +247,9 @@
       "emptyTitle": "No open disputes",
       "emptyDescription": "Customer and business disputes will show up here as soon as they are opened.",
       "parties": "{business} · {customer}",
-      "unknownParty": "Unnamed customer"
+      "unknownParty": "Unnamed customer",
+      "viewAll": "View all disputes",
+      "emptyCta": "View resolved disputes"
     },
     "ai": {
       "sectionTitle": "Artificial intelligence",
@@ -250,7 +261,8 @@
       "humanReviewOn": "On below threshold",
       "humanReviewOff": "Off",
       "updatedAt": "Configuration updated {when}",
-      "openSettings": "Go to settings"
+      "openSettings": "Go to settings",
+      "loading": "Loading AI settings…"
     }
   },
   "paymentStatus": {
@@ -286,7 +298,8 @@
     },
     "empty": {
       "title": "No disputes",
-      "description": "No disputes match the selected filter."
+      "description": "No disputes match the selected filter.",
+      "showResolved": "View resolved disputes"
     },
     "detail": {
       "back": "Back to the list",
@@ -294,7 +307,8 @@
       "noSelectionTitle": "Select a dispute",
       "noSelectionDescription": "Pick a dispute from the list to open its full file.",
       "errorTitle": "We could not load the file",
-      "resolutionNotes": "Recorded justification"
+      "resolutionNotes": "Recorded justification",
+      "loading": "Loading dispute file…"
     },
     "recording": {
       "title": "Service recording",
@@ -306,13 +320,16 @@
     "evidence": {
       "title": "Evidence",
       "itemAlt": "Evidence {index}",
-      "more": "+{count}"
+      "more": "+{count}",
+      "showAll": "Show all {count} pieces of evidence"
     },
     "arguments": {
       "title": "Arguments",
       "customer": "Customer",
       "business": "Business",
-      "noBusinessAnswer": "The business has not answered yet."
+      "noBusinessAnswer": "The business has not answered yet.",
+      "expand": "Read in full",
+      "collapse": "Show less"
     },
     "aiSummary": {
       "title": "AI summary"
@@ -354,8 +371,10 @@
       "confirm": "Confirm resolution"
     },
     "toasts": {
-      "resolved": "Dispute resolved."
-    }
+      "resolved": "Dispute resolved.",
+      "resolving": "Resolving dispute…"
+    },
+    "loading": "Loading disputes…"
   },
   "withdrawalStatus": {
     "REQUESTED": "Pending",
@@ -381,7 +400,8 @@
       "escrow": "In escrow",
       "escrowOrders": "{count, plural, =0 {No orders} one {# order} other {# orders}}",
       "pendingWithdrawals": "Pending withdrawals",
-      "pendingWithdrawalsCount": "{count, plural, =0 {No requests} one {# request} other {# requests}}"
+      "pendingWithdrawalsCount": "{count, plural, =0 {No requests} one {# request} other {# requests}}",
+      "loading": "Loading financial indicators…"
     },
     "chart": {
       "title": "Revenue by month",
@@ -398,7 +418,8 @@
       "loyaltyBonuses": "Loyalty bonuses paid",
       "net": "Net revenue",
       "chartCenterLabel": "Gross revenue",
-      "pendingBonuses": "Loyalty bonuses pending payment: {amount}"
+      "pendingBonuses": "Loyalty bonuses pending payment: {amount}",
+      "loading": "Loading revenue breakdown…"
     },
     "withdrawals": {
       "title": "Withdrawals",
@@ -418,7 +439,8 @@
       "empty": {
         "title": "No withdrawals",
         "description": "No withdrawal requests match the selected filter."
-      }
+      },
+      "loading": "Loading withdrawals…"
     },
     "actions": {
       "approve": "Approve",
@@ -433,7 +455,11 @@
     },
     "toasts": {
       "approved": "Withdrawal approved.",
-      "rejected": "Withdrawal rejected."
+      "rejected": "Withdrawal rejected.",
+      "pending": {
+        "approved": "Approving withdrawal…",
+        "rejected": "Rejecting withdrawal…"
+      }
     },
     "loyalty": {
       "title": "Loyalty bonuses",
@@ -469,7 +495,18 @@
       },
       "toasts": {
         "paid": "Bonus recorded as paid.",
-        "cancelled": "Bonus cancelled."
+        "cancelled": "Bonus cancelled.",
+        "pending": {
+          "paid": "Recording bonus payment…",
+          "cancelled": "Cancelling bonus…"
+        }
+      },
+      "loading": "Loading loyalty bonuses…",
+      "cancelDialog": {
+        "title": "Cancel this bonus?",
+        "description": "The bonus for {business} will be cancelled and can no longer be recorded as paid. This can’t be undone.",
+        "confirm": "Cancel bonus",
+        "dismiss": "Keep bonus"
       }
     }
   },
@@ -543,7 +580,16 @@
       "suspended": "Account suspended. Access and billing are paused.",
       "reactivated": "Account reactivated. Access and billing resumed.",
       "billingReconciled": "Billing reconciled. The account is aligned with Stripe.",
-      "requestRejected": "Tier change request rejected."
+      "requestRejected": "Tier change request rejected.",
+      "pending": {
+        "created": "Creating corporate account…",
+        "activated": "Activating account…",
+        "termsUpdated": "Updating terms…",
+        "suspended": "Suspending account…",
+        "reactivated": "Reactivating account…",
+        "billingReconciled": "Reconciling billing with Stripe…",
+        "requestRejected": "Rejecting request…"
+      }
     },
     "reasonDialog": {
       "label": "Reason",
@@ -694,7 +740,8 @@
       "noLocations": "This account has no locations yet.",
       "inactiveLocation": "Inactive",
       "recentOrders": "Recent orders ({count} total)",
-      "noOrders": "This account has no orders yet."
+      "noOrders": "This account has no orders yet.",
+      "loading": "Loading account file…"
     }
   },
   "settings": {
@@ -755,11 +802,14 @@
       "unsaved": "You have unsaved changes.",
       "upToDate": "Everything is saved.",
       "save": "Save changes",
-      "discard": "Discard"
+      "discard": "Discard",
+      "saving": "Saving…"
     },
     "toasts": {
-      "saved": "Settings saved."
-    }
+      "saved": "Settings saved.",
+      "saving": "Saving settings…"
+    },
+    "loading": "Loading settings…"
   },
   "loyaltyBonusStatus": {
     "PENDING": "Pending",
@@ -774,5 +824,8 @@
     "toggleSidebar": "Show or hide navigation",
     "navigationTitle": "Admin navigation",
     "navigationDescription": "Admin panel sections"
+  },
+  "filters": {
+    "clear": "Clear filters"
   }
 }

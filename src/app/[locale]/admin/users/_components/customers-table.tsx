@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { UsersIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -8,7 +9,13 @@ import type { CustomerRow } from "./users.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 
-export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
+export function CustomersTable({
+  customers,
+  emptyAction,
+}: {
+  customers: CustomerRow[];
+  emptyAction?: ReactNode;
+}) {
   const t = useTranslations("admin.users");
   const formatter = useFormatter();
   const [now] = useState(() => new Date());
@@ -66,6 +73,7 @@ export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
             icon={UsersIcon}
             title={t("empty.customers.title")}
             description={t("empty.customers.description")}
+            action={emptyAction}
           />
         </div>
       }

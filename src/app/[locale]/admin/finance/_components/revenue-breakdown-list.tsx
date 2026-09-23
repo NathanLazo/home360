@@ -2,14 +2,10 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
+import { AnimatedNumber, MXN_FORMAT } from "../../_components/animated-number";
 import type { RevenueBreakdown } from "./finance.types";
 import { DonutDistributionChart } from "~/components/donut-distribution-chart";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 
 export function RevenueBreakdownList({
@@ -87,8 +83,11 @@ export function RevenueBreakdownList({
 
         <div className="flex items-baseline justify-between gap-4">
           <span className="font-medium">{t("net")}</span>
-          <span className="font-mono text-lg font-semibold tabular-nums">
-            {currency(totals.netRevenueCents)}
+          <span className="font-mono text-lg font-semibold">
+            <AnimatedNumber
+              value={totals.netRevenueCents / 100}
+              format={MXN_FORMAT}
+            />
           </span>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { LoaderCircleIcon, ScaleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { DisputeListItem } from "./dispute-list-item";
 import type { DisputeListItem as DisputeListItemType } from "./disputes.types";
@@ -16,6 +16,7 @@ export function DisputeList({
   loadingMore,
   onLoadMore,
   onSelect,
+  emptyAction,
 }: {
   disputes: DisputeListItemType[];
   selectedId: string | null;
@@ -23,6 +24,7 @@ export function DisputeList({
   loadingMore: boolean;
   onLoadMore: () => void;
   onSelect: (disputeId: string) => void;
+  emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.disputes");
   // Frozen on mount so every relative date shares one reference instant.
@@ -34,6 +36,7 @@ export function DisputeList({
         icon={ScaleIcon}
         title={t("empty.title")}
         description={t("empty.description")}
+        action={emptyAction}
       />
     );
   }

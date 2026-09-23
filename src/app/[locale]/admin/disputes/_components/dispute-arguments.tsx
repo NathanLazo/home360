@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
+import { ExpandableText } from "./expandable-text";
+
 export function DisputeArguments({
   customerArgument,
   businessArgument,
@@ -20,16 +22,32 @@ export function DisputeArguments({
         <figcaption className="text-xs font-semibold tracking-wide uppercase">
           {t("customer")}
         </figcaption>
-        <blockquote className="text-muted-foreground mt-1 text-sm">
-          {customerArgument}
+        <blockquote className="mt-1">
+          <ExpandableText
+            text={customerArgument}
+            expandLabel={t("expand")}
+            collapseLabel={t("collapse")}
+            className="text-muted-foreground text-sm text-pretty"
+          />
         </blockquote>
       </figure>
       <figure className="border-l-2 border-zinc-300 pl-4">
         <figcaption className="text-xs font-semibold tracking-wide uppercase">
           {t("business")}
         </figcaption>
-        <blockquote className="text-muted-foreground mt-1 text-sm">
-          {businessArgument ?? t("noBusinessAnswer")}
+        <blockquote className="mt-1">
+          {businessArgument === null ? (
+            <p className="text-muted-foreground text-sm italic">
+              {t("noBusinessAnswer")}
+            </p>
+          ) : (
+            <ExpandableText
+              text={businessArgument}
+              expandLabel={t("expand")}
+              collapseLabel={t("collapse")}
+              className="text-muted-foreground text-sm text-pretty"
+            />
+          )}
         </blockquote>
       </figure>
     </section>

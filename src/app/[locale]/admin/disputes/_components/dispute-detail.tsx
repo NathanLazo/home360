@@ -1,11 +1,14 @@
 "use client";
 
 import { ArrowLeftIcon, ScaleIcon } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { ADMIN_DURATION, ADMIN_EASE_OUT } from "../../_components/admin-motion";
 import { DisputeAiSummary } from "./dispute-ai-summary";
 import { DisputeArguments } from "./dispute-arguments";
+import { DisputeDetailSkeleton } from "./dispute-detail-skeleton";
 import { DisputeEvidenceGrid } from "./dispute-evidence-grid";
 import { DisputeRecordingPlayer } from "./dispute-recording-player";
 import { DisputeResolutionActions } from "./dispute-resolution-actions";
@@ -17,7 +20,6 @@ import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
@@ -28,9 +30,7 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
   const payment = dispute.payment;
 
   if (!payment) {
-    return (
-      <p className="text-muted-foreground text-sm">{t("noPayment")}</p>
-    );
+    return <p className="text-muted-foreground text-sm">{t("noPayment")}</p>;
   }
 
   const currency = (cents: number) =>
@@ -81,6 +81,7 @@ export function DisputeDetail({
   onBack: () => void;
 }) {
   const t = useTranslations("admin.disputes.detail");
+  const reduceMotion = useReducedMotion();
   const [resolution, setResolution] = useState<DisputeResolution | null>(null);
   const mutations = useDisputeMutations({
     onResolved: () => setResolution(null),
@@ -103,14 +104,7 @@ export function DisputeDetail({
   }
 
   if (state.status === "pending") {
-    return (
-      <div className="flex flex-col gap-4" aria-busy="true">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-      </div>
-    );
+    return <DisputeDetailSkeleton label={t("loading")} />;
   }
 
   if (state.status === "error") {
@@ -125,8 +119,20 @@ export function DisputeDetail({
 
   const dispute = state.data;
 
+  // Switching files swaps the whole pane; a short fade (plus a 4 px settle
+  // when motion is allowed) keeps the swap from reading as a flash.
   return (
-    <div className="flex flex-col gap-6">
+    <motion.div
+      key={dispute.id}
+      className="flex flex-col gap-6"
+      initial={
+        reduceMotion
+          ? { opacity: 0 }
+          : { opacity: 0, transform: "translateY(4px)" }
+      }
+      animate={{ opacity: 1, transform: "translateY(0px)" }}
+      transition={{ duration: ADMIN_DURATION.standard, ease: ADMIN_EASE_OUT }}
+    >
       <div className="flex items-start gap-3">
         <Button
           type="button"
@@ -139,7 +145,7 @@ export function DisputeDetail({
           <ArrowLeftIcon aria-hidden="true" />
         </Button>
         <div className="min-w-0">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-semibold tracking-tight text-balance">
             {dispute.title}
           </h2>
           <p className="text-muted-foreground text-sm">
@@ -191,6 +197,6 @@ export function DisputeDetail({
         }}
         onConfirm={mutations.resolve}
       />
-    </div>
+    </motion.div>
   );
 }

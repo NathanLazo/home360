@@ -4,9 +4,17 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { ClearFiltersButton } from "../../_components/clear-filters-button";
+import { KpiGridSkeleton } from "../../_components/kpi-grid-skeleton";
+import { SectionHeading } from "../../_components/section-heading";
+import {
+  TableSkeleton,
+  type TableSkeletonColumn,
+} from "../../_components/table-skeleton";
 import { FinanceKpiRow } from "./finance-kpi-row";
 import { PlatformRevenueChart } from "./platform-revenue-chart";
 import { RevenueBreakdownList } from "./revenue-breakdown-list";
+import { RevenueBreakdownSkeleton } from "./revenue-breakdown-skeleton";
 import { LoyaltyBonusesTable } from "./loyalty-bonuses-table";
 import { PayLoyaltyBonusDialog } from "./pay-loyalty-bonus-dialog";
 import type { LoyaltyBonusRow } from "./finance.types";
@@ -18,6 +26,7 @@ import { WithdrawalsTable } from "./withdrawals-table";
 import { withdrawalStatusSchema } from "./finance.schema";
 import type { WithdrawalStatus } from "@generated/prisma";
 import { WithdrawalStatus as WithdrawalStatusEnum } from "@generated/prisma";
+import { ConfirmDialog } from "~/components/confirm-dialog";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
 import { Button } from "~/components/ui/button";
@@ -29,13 +38,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Skeleton } from "~/components/ui/skeleton";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
 const ALL_STATUSES = "all";
 const REVENUE_MONTHS = 6;
+
+const WITHDRAWAL_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { width: "w-36" },
+  { width: "w-24", align: "end" },
+  { width: "w-28" },
+  { width: "w-20" },
+  { width: "w-20" },
+  { width: "w-32", align: "end" },
+];
+
+const LOYALTY_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { width: "w-36" },
+  { width: "w-20", align: "end" },
+  { width: "w-40" },
+  { width: "w-20" },
+  { width: "w-16" },
+  { width: "w-36", align: "end" },
+];
 
 export function FinanceView() {
   const t = useTranslations("admin.finance");
@@ -48,7 +74,9 @@ export function FinanceView() {
   });
   const withdrawalsQuery = api.admin.finance.listWithdrawals.useInfiniteQuery(
     status ? { status } : {},
-    { getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined },
+    {
+      getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
+    },
   );
 
   const loyaltyQuery = api.admin.finance.listLoyaltyBonuses.useQuery({});
@@ -58,8 +86,13 @@ export function FinanceView() {
   const loyalty = unwrapEnvelope(loyaltyQuery);
   const mutations = useWithdrawalMutations();
   const [payingBonus, setPayingBonus] = useState<LoyaltyBonusRow | null>(null);
+  const [cancellingBonus, setCancellingBonus] =
+    useState<LoyaltyBonusRow | null>(null);
   const loyaltyMutations = useLoyaltyMutations({
-    onSettled: () => setPayingBonus(null),
+    onSettled: () => {
+      setPayingBonus(null);
+      setCancellingBonus(null);
+    },
   });
 
   const pages = withdrawalsQuery.data?.pages ?? [];
@@ -73,11 +106,7 @@ export function FinanceView() {
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
       {kpis.status === "pending" ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-busy="true">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-36 w-full rounded-xl" />
-          ))}
-        </div>
+        <KpiGridSkeleton label={t("kpis.loading")} />
       ) : null}
       {kpis.status === "error" ? (
         <SectionError
@@ -90,10 +119,7 @@ export function FinanceView() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {breakdown.status === "pending" ? (
-          <>
-            <Skeleton className="h-80 rounded-xl" />
-            <Skeleton className="h-80 rounded-xl" />
-          </>
+          <RevenueBreakdownSkeleton label={t("breakdown.loading")} />
         ) : null}
         {breakdown.status === "error" ? (
           <div className="xl:col-span-2">
@@ -114,42 +140,45 @@ export function FinanceView() {
 
       <section
         className="flex flex-col gap-3"
-        aria-label={t("withdrawals.title")}
+        aria-labelledby="admin-finance-withdrawals"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{t("withdrawals.title")}</h2>
-          <Select
-            value={status ?? ALL_STATUSES}
-            onValueChange={(value) =>
-              setStatus(
-                value === ALL_STATUSES
-                  ? null
-                  : withdrawalStatusSchema.parse(value),
-              )
-            }
-          >
-            <SelectTrigger className="min-h-11 w-48 sm:min-h-10">
-              <SelectValue aria-label={t("withdrawals.statusFilterLabel")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_STATUSES}>
-                {t("withdrawals.allStatuses")}
-              </SelectItem>
-              {Object.values(WithdrawalStatusEnum).map((option) => (
-                <SelectItem key={option} value={option}>
-                  {statusT(option)}
+        <SectionHeading
+          id="admin-finance-withdrawals"
+          title={t("withdrawals.title")}
+          action={
+            <Select
+              value={status ?? ALL_STATUSES}
+              onValueChange={(value) =>
+                setStatus(
+                  value === ALL_STATUSES
+                    ? null
+                    : withdrawalStatusSchema.parse(value),
+                )
+              }
+            >
+              <SelectTrigger className="min-h-11 w-48 sm:min-h-10">
+                <SelectValue aria-label={t("withdrawals.statusFilterLabel")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_STATUSES}>
+                  {t("withdrawals.allStatuses")}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                {Object.values(WithdrawalStatusEnum).map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {statusT(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
+        />
 
         {withdrawalsQuery.isPending ? (
-          <div className="flex flex-col gap-2" aria-busy="true">
-            {Array.from({ length: 5 }, (_, index) => (
-              <Skeleton key={index} className="h-14 w-full rounded-lg" />
-            ))}
-          </div>
+          <TableSkeleton
+            columns={WITHDRAWAL_SKELETON_COLUMNS}
+            rows={5}
+            label={t("withdrawals.loading")}
+          />
         ) : null}
 
         {!withdrawalsQuery.isPending && withdrawalsErrorCode !== null ? (
@@ -170,6 +199,11 @@ export function FinanceView() {
                   mutations.approve({ withdrawalId })
                 }
                 onReject={mutations.reject}
+                emptyAction={
+                  status !== null ? (
+                    <ClearFiltersButton onClear={() => setStatus(null)} />
+                  ) : undefined
+                }
               />
             </CardContent>
             {withdrawalsQuery.hasNextPage ? (
@@ -195,20 +229,22 @@ export function FinanceView() {
         ) : null}
       </section>
 
-      <section className="flex flex-col gap-3" aria-label={t("loyalty.title")}>
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold">{t("loyalty.title")}</h2>
-          <p className="text-muted-foreground text-sm">
-            {t("loyalty.description")}
-          </p>
-        </div>
+      <section
+        className="flex flex-col gap-3"
+        aria-labelledby="admin-finance-loyalty"
+      >
+        <SectionHeading
+          id="admin-finance-loyalty"
+          title={t("loyalty.title")}
+          description={t("loyalty.description")}
+        />
 
         {loyalty.status === "pending" ? (
-          <div className="flex flex-col gap-2" aria-busy="true">
-            {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="h-14 w-full rounded-lg" />
-            ))}
-          </div>
+          <TableSkeleton
+            columns={LOYALTY_SKELETON_COLUMNS}
+            rows={4}
+            label={t("loyalty.loading")}
+          />
         ) : null}
 
         {loyalty.status === "error" ? (
@@ -225,12 +261,7 @@ export function FinanceView() {
               <LoyaltyBonusesTable
                 bonuses={loyalty.data.items}
                 onPay={setPayingBonus}
-                onCancel={(bonus) =>
-                  loyaltyMutations.cancel({
-                    bonusId: bonus.id,
-                    reason: t("loyalty.cancelReason"),
-                  })
-                }
+                onCancel={setCancellingBonus}
               />
             </CardContent>
           </Card>
@@ -246,6 +277,33 @@ export function FinanceView() {
           }
         }}
         onConfirm={loyaltyMutations.pay}
+      />
+
+      {/* Writing a bonus off is irreversible, so it is confirmed like every
+          other money-moving action on this screen. */}
+      <ConfirmDialog
+        open={cancellingBonus !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCancellingBonus(null);
+          }
+        }}
+        title={t("loyalty.cancelDialog.title")}
+        description={t("loyalty.cancelDialog.description", {
+          business: cancellingBonus?.business.name ?? "",
+        })}
+        confirmLabel={t("loyalty.cancelDialog.confirm")}
+        cancelLabel={t("loyalty.cancelDialog.dismiss")}
+        destructive
+        loading={loyaltyMutations.pending}
+        onConfirm={() => {
+          if (cancellingBonus) {
+            loyaltyMutations.cancel({
+              bonusId: cancellingBonus.id,
+              reason: t("loyalty.cancelReason"),
+            });
+          }
+        }}
       />
     </div>
   );

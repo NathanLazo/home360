@@ -1,18 +1,26 @@
+import { PageHeaderSkeleton } from "../_components/page-header-skeleton";
+import { TableSkeleton } from "../_components/table-skeleton";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function AdminCorporateLoading() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-56 max-w-full" />
-          <Skeleton className="h-4 w-80 max-w-full" />
-        </div>
-        <Skeleton className="h-10 w-36 rounded-lg" />
+      <PageHeaderSkeleton withAction />
+      <Skeleton className="h-9 w-96 max-w-full rounded-lg" />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Skeleton className="h-10 flex-1 rounded-md" />
+        <Skeleton className="h-10 w-48 rounded-md" />
       </div>
-      <Skeleton className="h-10 w-96 max-w-full rounded-lg" />
-      <Skeleton className="h-11 w-full rounded-lg" />
-      <Skeleton className="h-96 w-full rounded-xl" />
+      <TableSkeleton
+        columns={[
+          { width: "w-40" },
+          { width: "w-16" },
+          { width: "w-16" },
+          { width: "w-24", align: "end" },
+          { width: "w-20" },
+          { width: "w-8", align: "end" },
+        ]}
+      />
     </div>
   );
 }

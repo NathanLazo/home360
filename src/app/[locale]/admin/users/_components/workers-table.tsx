@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { HardHatIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -21,7 +22,13 @@ const availabilityVariants: Record<
   OFF: "muted",
 };
 
-export function WorkersTable({ workers }: { workers: WorkerRow[] }) {
+export function WorkersTable({
+  workers,
+  emptyAction,
+}: {
+  workers: WorkerRow[];
+  emptyAction?: ReactNode;
+}) {
   const t = useTranslations("admin.users");
   const availabilityT = useTranslations("admin.workerAvailability");
   const formatter = useFormatter();
@@ -97,6 +104,7 @@ export function WorkersTable({ workers }: { workers: WorkerRow[] }) {
             icon={HardHatIcon}
             title={t("empty.workers.title")}
             description={t("empty.workers.description")}
+            action={emptyAction}
           />
         </div>
       }

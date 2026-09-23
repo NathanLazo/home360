@@ -21,11 +21,14 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-muted-foreground text-sm">
+        <CardTitle className="text-muted-foreground text-sm font-medium">
           {t("ai.title")}
         </CardTitle>
         <CardAction>
-          <SparklesIcon aria-hidden="true" className="text-muted-foreground" />
+          <SparklesIcon
+            aria-hidden="true"
+            className="text-muted-foreground size-4"
+          />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -34,7 +37,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
             <dt className="text-muted-foreground text-sm">
               {t("ai.threshold")}
             </dt>
-            <dd className="font-mono text-lg font-semibold">
+            <dd className="font-mono text-lg font-semibold tabular-nums">
               {formatter.number(config.confidenceThresholdPct / 100, {
                 style: "percent",
                 maximumFractionDigits: 0,
@@ -72,7 +75,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
             {t("ai.openSettings")}
             <ArrowRightIcon
               aria-hidden="true"
-              className="transition-transform duration-150 ease-out group-hover:translate-x-0.5"
+              className="transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5 motion-reduce:transition-none"
             />
           </Link>
         </Button>

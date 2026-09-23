@@ -45,7 +45,9 @@ export function SettingsNumberField({
       <Label htmlFor={fieldId}>{label}</Label>
       <div className="flex items-center gap-2">
         {prefix ? (
-          <span className="text-muted-foreground text-sm">{prefix}</span>
+          <span className="text-muted-foreground font-mono text-sm">
+            {prefix}
+          </span>
         ) : null}
         <Input
           {...registration}
@@ -57,6 +59,7 @@ export function SettingsNumberField({
           step={step}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
+          className="font-mono tabular-nums"
         />
         {suffix ? (
           <span className="text-muted-foreground text-sm">{suffix}</span>
