@@ -813,7 +813,8 @@
       "notesHint": "Optional. Up to 500 characters.",
       "notesError": "Notes can't be longer than 500 characters.",
       "save": "Save changes",
-      "notActiveNotice": "Your business isn't active, so the business profile can't be edited right now."
+      "notActiveNotice": "Your business isn't active, so the business profile can't be edited right now.",
+      "unsavedChanges": "You have unsaved changes."
     },
     "account": {
       "title": "Owner account",

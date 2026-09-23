@@ -49,7 +49,7 @@ export function WeeklyRevenueChart({
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <Skeleton className="h-9 w-56 self-start sm:self-end" />
-          <Skeleton className="mt-2 h-64 rounded-lg sm:h-72" />
+          <Skeleton className="mt-2 h-64 rounded-md sm:h-72" />
         </CardContent>
       </Card>
     );
@@ -66,7 +66,7 @@ export function WeeklyRevenueChart({
         <CardContent className="flex flex-col items-start gap-3">
           <div className="flex flex-col gap-1">
             <p className="font-semibold">{t("queryErrorTitle")}</p>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-copy-sm">
               {response?.error
                 ? errors(response.error)
                 : t("queryErrorDescription")}

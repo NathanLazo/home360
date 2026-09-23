@@ -14,7 +14,7 @@ export function ProductStockCell({
 
   if (!product.isCarried) {
     return (
-      <span className="text-muted-foreground text-sm">
+      <span className="text-muted-foreground text-copy-sm">
         {t(branchSelected ? "notAvailableHere" : "notCarried")}
       </span>
     );
@@ -34,7 +34,7 @@ export function ProductStockCell({
       </span>
       {product.isLowStock ? (
         <span
-          className="flex items-center gap-1 text-xs font-medium text-amber-700"
+          className="text-warning-deep flex items-center gap-1 text-xs font-medium"
           title={lowStockLabel}
         >
           <CircleAlertIcon aria-hidden="true" className="size-3.5" />

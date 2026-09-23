@@ -59,7 +59,7 @@ export function ServicesTable({
       className: "min-w-60",
       cell: (service) => (
         <span className="flex items-center gap-3 font-medium">
-          <span className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <span className="bg-canvas-soft shadow-hairline flex size-9 shrink-0 items-center justify-center rounded-sm">
             <WrenchIcon aria-hidden="true" className="size-4" />
           </span>
           {service.name}

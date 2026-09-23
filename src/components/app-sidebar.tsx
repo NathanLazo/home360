@@ -87,11 +87,11 @@ export function AppSidebar({
               <Link href={homeHref} aria-label={brandLabel}>
                 <span
                   aria-hidden="true"
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                  className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
                 >
                   H
                 </span>
-                <span className="truncate text-sm font-bold tracking-tight">
+                <span className="truncate text-sm font-semibold tracking-tight">
                   HOME360
                 </span>
               </Link>
@@ -126,7 +126,7 @@ export function AppSidebar({
                       </Link>
                     </SidebarMenuButton>
                     {item.badgeCount !== undefined ? (
-                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full">
+                      <SidebarMenuBadge className="bg-sidebar-foreground text-sidebar peer-hover/menu-button:text-sidebar peer-data-[active=true]/menu-button:text-sidebar rounded-full font-mono tabular-nums">
                         {item.badgeCount}
                       </SidebarMenuBadge>
                     ) : null}
@@ -152,7 +152,7 @@ export function AppSidebar({
                   name={user.name}
                   image={user.image}
                   theme={variant}
-                  className="rounded-lg"
+                  className="rounded-md"
                 />
                 <div className="grid min-w-0 flex-1 leading-tight">
                   <span className="truncate text-sm font-medium">

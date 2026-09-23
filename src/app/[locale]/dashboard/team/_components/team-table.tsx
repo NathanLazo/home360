@@ -52,7 +52,7 @@ export function TeamTable({
           <UserAvatar seed={worker.id} name={worker.fullName} />
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium">{worker.fullName}</span>
-            <span className="text-muted-foreground text-sm">
+            <span className="text-muted-foreground text-copy-sm">
               {worker.specialty ?? t("noSpecialty")}
             </span>
           </span>

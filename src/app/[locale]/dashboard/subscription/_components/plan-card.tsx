@@ -6,7 +6,6 @@ import { PlanFeatureList } from "./plan-feature-list";
 import type { PlanListItem } from "./subscription.types";
 import { useCurrencyFormatter } from "./use-currency-formatter";
 import { Badge } from "~/components/ui/badge";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -70,30 +69,26 @@ export function PlanCard({
     const actionable = canChangePlan && plan.isAvailable;
 
     return (
-      <MetalAction
-        active={recommended && isUpgrade && actionable}
-        bend
-        className="w-full"
+      <Button
+        metal={recommended && isUpgrade && actionable ? "bend" : "static"}
+        metalClassName="w-full"
+        type="button"
+        variant={isUpgrade ? "default" : "outline"}
+        className="min-h-11 w-full sm:min-h-10"
+        onClick={() => onSelectPlan(plan.code)}
+        disabled={!canChangePlan || !plan.isAvailable}
+        title={
+          !plan.isAvailable
+            ? t("actions.unavailableHint")
+            : canChangePlan
+              ? undefined
+              : t("readOnly.actionDisabled")
+        }
       >
-        <Button
-          type="button"
-          variant={isUpgrade ? "default" : "outline"}
-          className="min-h-11 w-full sm:min-h-10"
-          onClick={() => onSelectPlan(plan.code)}
-          disabled={!canChangePlan || !plan.isAvailable}
-          title={
-            !plan.isAvailable
-              ? t("actions.unavailableHint")
-              : canChangePlan
-                ? undefined
-                : t("readOnly.actionDisabled")
-          }
-        >
-          {isUpgrade
-            ? t("actions.upgrade")
-            : t("actions.switchTo", { plan: plan.name })}
-        </Button>
-      </MetalAction>
+        {isUpgrade
+          ? t("actions.upgrade")
+          : t("actions.switchTo", { plan: plan.name })}
+      </Button>
     );
   }
 
@@ -106,7 +101,7 @@ export function PlanCard({
           <CardTitle>{plan.name}</CardTitle>
           {plan.isCurrent ? <Badge>{t("currentPlanTag")}</Badge> : null}
         </div>
-        <CardDescription className="text-foreground text-2xl font-semibold tabular-nums">
+        <CardDescription className="text-foreground text-display-md font-mono tabular-nums">
           {currency(plan.priceCents)}
           <span className="text-muted-foreground ml-1 text-sm font-normal">
             {t("perMonth")}

@@ -19,7 +19,6 @@ import { useProductMutations } from "./use-product-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -136,21 +135,20 @@ export function ProductsView({ branchId }: { branchId?: string }) {
               <FileUpIcon aria-hidden="true" />
               {t("import.action")}
             </Button>
-            <MetalAction active={!isReadOnly}>
-              <Button
-                type="button"
-                onClick={() => {
-                  setEditing(null);
-                  setSheetOpen(true);
-                }}
-                className="min-h-11 sm:min-h-10"
-                disabled={isReadOnly}
-                title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
-              >
-                <PlusIcon aria-hidden="true" />
-                {t("newProduct")}
-              </Button>
-            </MetalAction>
+            <Button
+              metal="live"
+              type="button"
+              onClick={() => {
+                setEditing(null);
+                setSheetOpen(true);
+              }}
+              className="min-h-11 sm:min-h-10"
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            >
+              <PlusIcon aria-hidden="true" />
+              {t("newProduct")}
+            </Button>
           </div>
         }
       />

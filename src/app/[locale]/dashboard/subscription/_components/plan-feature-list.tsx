@@ -28,7 +28,7 @@ export function PlanFeatureList({ plan }: { plan: PlanListItem }) {
         <li key={feature} className="flex items-start gap-2">
           <CheckIcon
             aria-hidden="true"
-            className="mt-0.5 size-4 shrink-0 text-emerald-600"
+            className="text-success mt-0.5 size-4 shrink-0"
           />
           <span>{feature}</span>
         </li>

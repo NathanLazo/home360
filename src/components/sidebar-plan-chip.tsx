@@ -1,6 +1,3 @@
-"use client";
-
-import { MetalRing } from "~/components/metal";
 import { Link } from "~/i18n/navigation";
 
 export type SidebarPlanChipProps = {
@@ -12,9 +9,10 @@ export type SidebarPlanChipProps = {
 };
 
 /**
- * The account's plan as a quiet metal chip in the sidebar footer. It is the
- * shell's only metal instance, so each screen keeps room for one primary
- * action ring. Hidden when the sidebar collapses to icons.
+ * The account's plan as a quiet static-chrome chip (`bg-metal`) in the
+ * sidebar footer. Static on purpose: it is present on every screen, so it
+ * leaves the live-metal budget (≤ 1–2 per screen) to each screen's primary
+ * action. Hidden when the sidebar collapses to icons.
  */
 export function SidebarPlanChip({
   label,
@@ -23,15 +21,13 @@ export function SidebarPlanChip({
 }: SidebarPlanChipProps) {
   return (
     <div className="px-2 group-data-[collapsible=icon]:hidden">
-      <MetalRing strength={0.5} disableGlow>
-        <Link
-          href={href}
-          aria-label={ariaLabel}
-          className="bg-background text-foreground hover:bg-accent focus-visible:ring-ring/50 inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium tracking-tight whitespace-nowrap transition-[background-color,box-shadow] duration-150 outline-none focus-visible:ring-[3px]"
-        >
-          {label}
-        </Link>
-      </MetalRing>
+      <Link
+        href={href}
+        aria-label={ariaLabel}
+        className="bg-metal text-ink shadow-hairline focus-visible:ring-ring focus-visible:ring-offset-sidebar inline-flex h-6 items-center rounded-full px-2.5 text-xs font-medium tracking-tight whitespace-nowrap transition-[box-shadow,opacity] duration-150 ease-out outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 motion-reduce:transition-none"
+      >
+        {label}
+      </Link>
     </div>
   );
 }

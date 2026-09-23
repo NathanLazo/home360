@@ -281,7 +281,7 @@ export function ProductImportDialog({
             </Select>
             <p
               id="product-import-branch-help"
-              className="text-muted-foreground text-sm"
+              className="text-muted-foreground text-copy-sm"
             >
               {selectedBranch
                 ? t("branchSelectedHelp", { branch: selectedBranch.name })
@@ -294,9 +294,9 @@ export function ProductImportDialog({
           {phase === "upload" ? (
             <div
               className={cn(
-                "border-muted-foreground/30 flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-[border-color,background-color] motion-reduce:transition-none",
-                dragActive && canChooseFile && "border-primary bg-primary/5",
-                !canChooseFile && "bg-muted/40 opacity-70",
+                "border-hairline-strong flex min-h-64 flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-10 text-center transition-[border-color,background-color] duration-150 ease-out motion-reduce:transition-none",
+                dragActive && canChooseFile && "border-link bg-link-soft/40",
+                !canChooseFile && "bg-canvas-soft opacity-70",
               )}
               onDragEnter={(event) => {
                 event.preventDefault();
@@ -315,17 +315,17 @@ export function ProductImportDialog({
               {processingFile ? (
                 <LoaderCircleIcon
                   aria-hidden="true"
-                  className="text-primary size-8 animate-spin motion-reduce:animate-none"
+                  className="text-muted-foreground size-8 animate-spin motion-reduce:animate-none"
                 />
               ) : (
                 <FileSpreadsheetIcon
                   aria-hidden="true"
-                  className="text-primary size-9"
+                  className="text-muted-foreground size-9"
                   strokeWidth={1.5}
                 />
               )}
               <div className="space-y-1">
-                <h3 className="font-semibold">{t("dropTitle")}</h3>
+                <h3 className="text-display-sm">{t("dropTitle")}</h3>
                 <p className="text-muted-foreground max-w-md text-sm">
                   {t("dropDescription")}
                 </p>
@@ -385,7 +385,7 @@ export function ProductImportDialog({
                 >
                   {t("previewTitle")}
                 </h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-copy-sm">
                   {t("previewDescription", { file: fileName })}
                 </p>
                 <p className="text-sm font-medium" role="status">
@@ -397,7 +397,7 @@ export function ProductImportDialog({
               </div>
 
               {validRows.length > 0 ? (
-                <div className="overflow-hidden rounded-lg border">
+                <div className="overflow-hidden rounded-md border">
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -439,11 +439,11 @@ export function ProductImportDialog({
               ) : null}
 
               {rowErrors.length > 0 ? (
-                <div className="border-destructive/30 bg-destructive/5 rounded-lg border p-4">
+                <div className="bg-error-soft/60 rounded-md p-4">
                   <div className="mb-3 flex items-center gap-2 font-medium">
                     <TriangleAlertIcon
                       aria-hidden="true"
-                      className="text-destructive size-5"
+                      className="text-error size-5"
                     />
                     <h4>{t("errorsTitle")}</h4>
                   </div>
@@ -465,7 +465,7 @@ export function ProductImportDialog({
                   ref={requestErrorRef}
                   tabIndex={-1}
                   role="alert"
-                  className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm outline-none"
+                  className="bg-error-soft text-error-deep text-copy-sm rounded-md p-3 outline-none"
                 >
                   {requestError}
                 </div>
@@ -477,14 +477,14 @@ export function ProductImportDialog({
             <div className="flex min-h-64 flex-col items-center justify-center gap-4 py-8 text-center">
               <CheckCircle2Icon
                 aria-hidden="true"
-                className="text-primary size-12"
+                className="text-success size-12"
                 strokeWidth={1.5}
               />
               <div className="space-y-2">
                 <h3
                   ref={phaseHeadingRef}
                   tabIndex={-1}
-                  className="text-xl font-semibold outline-none"
+                  className="text-display-sm outline-none"
                 >
                   {t("resultTitle")}
                 </h3>
@@ -495,26 +495,28 @@ export function ProductImportDialog({
                 </p>
               </div>
               <div className="grid w-full max-w-sm grid-cols-2 gap-3">
-                <div className="bg-muted rounded-lg p-4">
-                  <p className="text-2xl font-semibold tabular-nums">
+                <div className="bg-canvas-soft rounded-md border p-4">
+                  <p className="text-display-md font-mono tabular-nums">
                     {result.created}
                   </p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-copy-sm">
                     {t("created")}
                   </p>
                 </div>
-                <div className="bg-muted rounded-lg p-4">
-                  <p className="text-2xl font-semibold tabular-nums">
+                <div className="bg-canvas-soft rounded-md border p-4">
+                  <p className="text-display-md font-mono tabular-nums">
                     {result.updated}
                   </p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-copy-sm">
                     {t("updated")}
                   </p>
                 </div>
               </div>
               {result.errors.length > 0 ? (
-                <div className="w-full max-w-lg rounded-lg border p-4 text-left">
-                  <h4 className="mb-2 font-medium">{t("resultErrors")}</h4>
+                <div className="w-full max-w-lg rounded-md border p-4 text-left">
+                  <h4 className="text-copy-sm mb-2 font-medium">
+                    {t("resultErrors")}
+                  </h4>
                   <ul className="space-y-1 text-sm">
                     {result.errors.map((error, index) => (
                       <li key={`${error.line}-${error.code}-${index}`}>

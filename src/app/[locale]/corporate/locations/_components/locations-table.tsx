@@ -117,7 +117,7 @@ export function LocationsTable({
               type="button"
               variant="ghost"
               size="sm"
-              className="text-destructive hover:text-destructive min-h-11 sm:min-h-9"
+              className="text-error-deep hover:text-error-deep min-h-11 sm:min-h-9"
               disabled={!canMutate || deactivating}
               title={canMutate ? undefined : notActiveTooltip}
               onClick={() => onDeactivate(location)}

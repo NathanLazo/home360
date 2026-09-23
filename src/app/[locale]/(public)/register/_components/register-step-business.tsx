@@ -68,13 +68,12 @@ export function RegisterStepBusiness({
             errors.businessName ? "register-business-name-error" : undefined
           }
           disabled={disabled}
-          className="h-11"
         />
         {errors.businessName ? (
           <p
             id="register-business-name-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.businessName}
           </p>
@@ -91,7 +90,7 @@ export function RegisterStepBusiness({
         >
           <SelectTrigger
             id="register-business-type"
-            className="h-11 w-full"
+            className="w-full"
             aria-invalid={Boolean(errors.businessType)}
             aria-describedby={
               errors.businessType ? "register-business-type-error" : undefined
@@ -109,7 +108,7 @@ export function RegisterStepBusiness({
           <p
             id="register-business-type-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.businessType}
           </p>

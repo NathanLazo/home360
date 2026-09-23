@@ -66,7 +66,7 @@ export function RegisterStepGuarantee({
         >
           <SelectTrigger
             id="register-guarantee-type"
-            className="h-11 w-full"
+            className="w-full"
             aria-invalid={Boolean(errors.guaranteeType)}
             aria-describedby={
               errors.guaranteeType ? "register-guarantee-type-error" : undefined
@@ -90,7 +90,7 @@ export function RegisterStepGuarantee({
           <p
             id="register-guarantee-type-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.guaranteeType}
           </p>
@@ -118,7 +118,7 @@ export function RegisterStepGuarantee({
           <p
             id="register-guarantee-notes-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.guaranteeNotes}
           </p>

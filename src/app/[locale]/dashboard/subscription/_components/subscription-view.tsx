@@ -19,7 +19,8 @@ import { api } from "~/trpc/react";
 export function SubscriptionView() {
   const t = useTranslations("dashboard.subscription");
   const errorsT = useTranslations("errors");
-  const { openBillingPortal, openingBillingPortal } = useSubscriptionMutations();
+  const { openBillingPortal, openingBillingPortal } =
+    useSubscriptionMutations();
 
   const [targetPlanCode, setTargetPlanCode] = useState<
     PlanListItem["code"] | null
@@ -38,7 +39,8 @@ export function SubscriptionView() {
     currentResponse?.error ?? (currentQuery.error ? "UNKNOWN_ERROR" : null);
 
   const plansResponse = plansQuery.data;
-  const plans = plansResponse?.error === null ? (plansResponse.result ?? []) : [];
+  const plans =
+    plansResponse?.error === null ? (plansResponse.result ?? []) : [];
   const plansError =
     plansResponse?.error ?? (plansQuery.error ? "UNKNOWN_ERROR" : null);
 
@@ -70,7 +72,7 @@ export function SubscriptionView() {
       />
 
       {currentQuery.isPending ? (
-        <Skeleton className="h-28 w-full rounded-xl" />
+        <Skeleton className="h-28 w-full rounded-md" />
       ) : null}
 
       {!currentQuery.isPending && currentError !== null ? (
@@ -106,7 +108,7 @@ export function SubscriptionView() {
       {plansQuery.isPending ? (
         <div className="grid gap-4 md:grid-cols-3" aria-busy="true">
           {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-80 w-full rounded-xl" />
+            <Skeleton key={index} className="h-80 w-full rounded-md" />
           ))}
         </div>
       ) : null}

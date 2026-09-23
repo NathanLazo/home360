@@ -37,7 +37,7 @@ function DetailRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3 text-sm">
+    <div className="text-copy-sm grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="min-w-0 text-right font-medium break-words">{children}</dd>
     </div>
@@ -47,10 +47,10 @@ function DetailRow({
 function DetailSkeleton() {
   return (
     <div className="space-y-6 p-5" aria-busy="true">
-      <Skeleton className="h-24 rounded-xl" />
-      <Skeleton className="h-40 rounded-xl" />
-      <Skeleton className="h-56 rounded-xl" />
-      <Skeleton className="h-40 rounded-xl" />
+      <Skeleton className="h-24 rounded-md" />
+      <Skeleton className="h-40 rounded-md" />
+      <Skeleton className="h-56 rounded-md" />
+      <Skeleton className="h-40 rounded-md" />
     </div>
   );
 }
@@ -118,7 +118,7 @@ export function OrderDetailSheet({
       >
         <SheetHeader className="border-b px-5 py-4 pr-16">
           <div className="flex flex-wrap items-center gap-2">
-            <SheetTitle className="font-mono text-lg tabular-nums">
+            <SheetTitle className="font-mono text-lg font-medium tracking-tight tabular-nums">
               {order ? `#${order.folio}` : t("title")}
             </SheetTitle>
             {order ? (
@@ -154,11 +154,11 @@ export function OrderDetailSheet({
             >
               <TriangleAlertIcon
                 aria-hidden="true"
-                className="text-destructive size-8"
+                className="text-error size-8"
               />
               <div className="space-y-1">
-                <p className="font-semibold">{t("loadErrorTitle")}</p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-display-sm">{t("loadErrorTitle")}</p>
+                <p className="text-muted-foreground text-copy-sm">
                   {responseError
                     ? errorsT(responseError)
                     : t("loadErrorDescription")}
@@ -181,7 +181,7 @@ export function OrderDetailSheet({
               <section aria-labelledby="order-overview-heading">
                 <h3
                   id="order-overview-heading"
-                  className="mb-4 text-sm font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-label mb-4 font-mono font-medium tracking-wide uppercase"
                 >
                   {t("overviewTitle")}
                 </h3>
@@ -229,7 +229,7 @@ export function OrderDetailSheet({
               <section aria-labelledby="order-payment-heading">
                 <h3
                   id="order-payment-heading"
-                  className="mb-4 text-sm font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-label mb-4 font-mono font-medium tracking-wide uppercase"
                 >
                   {t("paymentTitle")}
                 </h3>
@@ -267,7 +267,7 @@ export function OrderDetailSheet({
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <h3
                     id="order-evidence-heading"
-                    className="text-sm font-semibold tracking-wide uppercase"
+                    className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase"
                   >
                     {t("evidenceTitle")}
                   </h3>
@@ -275,8 +275,8 @@ export function OrderDetailSheet({
                     variant="outline"
                     className={
                       order.recordingComplete
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        : "border-amber-200 bg-amber-50 text-amber-800"
+                        ? "bg-success-soft text-success-deep border-transparent"
+                        : "bg-warning-soft text-warning-deep border-transparent"
                     }
                   >
                     {order.recordingComplete ? (
@@ -307,7 +307,7 @@ export function OrderDetailSheet({
                         href={order.recordingUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary inline-flex min-h-6 items-center gap-1 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                        className="text-link-deep inline-flex min-h-6 items-center gap-1 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
                       >
                         {t("openRecording")}
                         <ExternalLinkIcon
@@ -336,8 +336,8 @@ export function OrderDetailSheet({
                   />
                 </div>
 
-                <div className="bg-muted/50 mt-4 rounded-lg p-4">
-                  <h4 className="mb-1 text-sm font-medium">
+                <div className="bg-canvas-soft mt-4 rounded-md border p-4">
+                  <h4 className="text-copy-sm mb-1 font-medium">
                     {t("notesTitle")}
                   </h4>
                   <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
@@ -351,12 +351,12 @@ export function OrderDetailSheet({
               <section aria-labelledby="order-materials-heading">
                 <h3
                   id="order-materials-heading"
-                  className="mb-4 text-sm font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-label mb-4 font-mono font-medium tracking-wide uppercase"
                 >
                   {t("materialsTitle")}
                 </h3>
                 {order.materials.length > 0 ? (
-                  <ul className="divide-y rounded-lg border">
+                  <ul className="divide-hairline divide-y rounded-md border">
                     {order.materials.map((material) => (
                       <li
                         key={material.id}
@@ -383,7 +383,7 @@ export function OrderDetailSheet({
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-copy-sm">
                     {t("noMaterials")}
                   </p>
                 )}
@@ -394,14 +394,14 @@ export function OrderDetailSheet({
               <section aria-labelledby="order-review-heading">
                 <h3
                   id="order-review-heading"
-                  className="mb-4 text-sm font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-label mb-4 font-mono font-medium tracking-wide uppercase"
                 >
                   {t("reviewTitle")}
                 </h3>
                 {order.review ? (
-                  <div className="space-y-2 rounded-lg border p-4">
+                  <div className="space-y-2 rounded-md border p-4">
                     <div
-                      className="flex gap-1 text-amber-500"
+                      className="text-warning flex gap-1"
                       aria-label={t("ratingLabel", {
                         rating: order.review.rating,
                       })}
@@ -424,7 +424,7 @@ export function OrderDetailSheet({
                     </p>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-copy-sm">
                     {t("noReview")}
                   </p>
                 )}
@@ -435,7 +435,7 @@ export function OrderDetailSheet({
               <section aria-labelledby="order-timeline-heading">
                 <h3
                   id="order-timeline-heading"
-                  className="mb-4 text-sm font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-label mb-4 font-mono font-medium tracking-wide uppercase"
                 >
                   {t("timelineTitle")}
                 </h3>
@@ -462,7 +462,7 @@ function EvidenceGallery({
 }) {
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium">{title}</h4>
+      <h4 className="text-copy-sm font-medium">{title}</h4>
       {urls.length > 0 ? (
         <ul className="grid grid-cols-2 gap-2">
           {urls.map((url, index) => (
@@ -471,7 +471,7 @@ function EvidenceGallery({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-muted hover:bg-accent focus-visible:ring-ring flex min-h-20 flex-col items-center justify-center gap-2 rounded-lg border p-2 text-center text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
+                className="bg-canvas-soft hover:bg-canvas-soft-2 hover:border-hairline-strong focus-visible:ring-ring flex min-h-20 flex-col items-center justify-center gap-2 rounded-md border p-2 text-center text-xs font-medium transition-[background-color,border-color] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
               >
                 <ImageIcon
                   aria-hidden="true"
@@ -483,7 +483,7 @@ function EvidenceGallery({
           ))}
         </ul>
       ) : (
-        <p className="text-muted-foreground text-sm">{emptyLabel}</p>
+        <p className="text-muted-foreground text-copy-sm">{emptyLabel}</p>
       )}
     </div>
   );

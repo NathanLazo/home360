@@ -299,7 +299,7 @@ export function ProductFormSheet({
               className="text-destructive"
             />
             <p className="font-medium">{t("stock.loadErrorTitle")}</p>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-copy-sm">
               {stockResponseError
                 ? errorsT(stockResponseError)
                 : t("stock.loadErrorDescription")}

@@ -78,14 +78,14 @@ export function OwnerAccountForm({
         {error ? (
           <p
             id="settings-owner-name-error"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {error}
           </p>
         ) : (
           <p
             id="settings-owner-email"
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground text-copy-sm"
           >
             {t("emailNote", { email: ownerEmail ?? t("emailUnavailable") })}
           </p>

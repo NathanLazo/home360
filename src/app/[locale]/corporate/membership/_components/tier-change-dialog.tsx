@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 import { CorporateTier } from "@generated/prisma";
 import type { CorporateMembershipSummary } from "../../_components/corporate.types";
-import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -60,7 +59,7 @@ export function TierChangeDialog({
     return (
       <p
         role="status"
-        className="border-border bg-muted/50 text-muted-foreground rounded-lg border px-4 py-3 text-sm"
+        className="bg-canvas-soft text-muted-foreground text-copy-sm rounded-md border px-4 py-3"
       >
         {t("pendingNotice", {
           tier: tierT(membership.pendingRequest.requestedTier),
@@ -110,13 +109,11 @@ export function TierChangeDialog({
         if (nextOpen) setTier(membership.tier);
       }}
     >
-      <MetalAction bend>
-        <DialogTrigger asChild>
-          <Button type="button" variant="outline" className="min-h-11">
-            {t("button")}
-          </Button>
-        </DialogTrigger>
-      </MetalAction>
+      <DialogTrigger asChild>
+        <Button type="button" metal="bend" className="min-h-11">
+          {t("button")}
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>

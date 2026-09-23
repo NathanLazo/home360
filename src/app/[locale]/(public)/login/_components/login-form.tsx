@@ -7,7 +7,6 @@ import { getSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { loginSchema } from "./login.schema";
-import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -90,7 +89,7 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           disabled={isSubmitting}
         />
         {errors.email ? (
-          <p id="login-email-error" className="text-destructive text-sm">
+          <p id="login-email-error" className="text-error-deep text-copy-sm">
             {t("invalidCredentials")}
           </p>
         ) : null}
@@ -119,28 +118,32 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           disabled={isSubmitting}
         />
         {errors.password ? (
-          <p id="login-password-error" className="text-destructive text-sm">
+          <p id="login-password-error" className="text-error-deep text-copy-sm">
             {t("invalidCredentials")}
           </p>
         ) : null}
       </div>
       {formError ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-error-deep text-copy-sm">
           {t("invalidCredentials")}
         </p>
       ) : null}
-      <MetalRing bend className="w-full">
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <LoaderCircleIcon
-              data-icon="inline-start"
-              aria-hidden="true"
-              className="animate-spin"
-            />
-          ) : null}
-          {t("submit")}
-        </Button>
-      </MetalRing>
+      <Button
+        metal="bend"
+        metalClassName="w-full"
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full"
+      >
+        {isSubmitting ? (
+          <LoaderCircleIcon
+            data-icon="inline-start"
+            aria-hidden="true"
+            className="animate-spin"
+          />
+        ) : null}
+        {t("submit")}
+      </Button>
     </form>
   );
 }

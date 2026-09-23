@@ -43,7 +43,7 @@ export function BranchFormFields({
           <p
             id="branch-name-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.name}
           </p>
@@ -65,7 +65,7 @@ export function BranchFormFields({
           <p
             id="branch-address-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.address}
           </p>
@@ -87,14 +87,17 @@ export function BranchFormFields({
             onChange(field("managerName", event.target.value))
           }
         />
-        <p id="branch-manager-help" className="text-muted-foreground text-sm">
+        <p
+          id="branch-manager-help"
+          className="text-muted-foreground text-copy-sm"
+        >
           {t("managerOptional")}
         </p>
         {errors.managerName ? (
           <p
             id="branch-manager-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.managerName}
           </p>
@@ -131,14 +134,17 @@ export function BranchFormFields({
             km
           </span>
         </div>
-        <p id="branch-coverage-help" className="text-muted-foreground text-sm">
+        <p
+          id="branch-coverage-help"
+          className="text-muted-foreground text-copy-sm"
+        >
           {t("coverageHelp")}
         </p>
         {errors.coverageRadiusKm ? (
           <p
             id="branch-coverage-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.coverageRadiusKm}
           </p>

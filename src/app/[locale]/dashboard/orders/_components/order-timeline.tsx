@@ -38,11 +38,11 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
           className="flex gap-3"
         >
           <div className="flex flex-col items-center" aria-hidden="true">
-            <span className="bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full">
+            <span className="bg-ink text-on-ink flex size-6 shrink-0 items-center justify-center rounded-full">
               <CheckIcon className="size-3.5" strokeWidth={2} />
             </span>
             {index < items.length - 1 ? (
-              <span className="bg-border min-h-10 w-px flex-1" />
+              <span className="bg-hairline min-h-10 w-px flex-1" />
             ) : null}
           </div>
           <div className="min-w-0 pb-5">

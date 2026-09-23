@@ -5,7 +5,6 @@ import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -144,13 +143,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             errors.password ? "reset-password-password-error" : undefined
           }
           disabled={resetPassword.isPending}
-          className="h-11"
         />
         {errors.password ? (
           <p
             id="reset-password-password-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.password}
           </p>
@@ -177,30 +175,29 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               : undefined
           }
           disabled={resetPassword.isPending}
-          className="h-11"
         />
         {errors.confirmPassword ? (
           <p
             id="reset-password-confirm-password-error"
             role="alert"
-            className="text-destructive text-sm"
+            className="text-error-deep text-copy-sm"
           >
             {errors.confirmPassword}
           </p>
         ) : null}
       </div>
-      <MetalRing bend className="w-full">
-        <Button
-          type="submit"
-          className="h-11 w-full"
-          disabled={resetPassword.isPending}
-        >
-          {resetPassword.isPending ? (
-            <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
-          ) : null}
-          {resetPassword.isPending ? t("submitting") : t("submit")}
-        </Button>
-      </MetalRing>
+      <Button
+        metal="bend"
+        metalClassName="w-full"
+        type="submit"
+        className="h-11 w-full"
+        disabled={resetPassword.isPending}
+      >
+        {resetPassword.isPending ? (
+          <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
+        ) : null}
+        {resetPassword.isPending ? t("submitting") : t("submit")}
+      </Button>
       {resetPassword.isPending ? (
         <span className="sr-only" role="status">
           {t("submitting")}

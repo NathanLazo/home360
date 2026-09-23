@@ -32,7 +32,7 @@ export function SubscriptionStatusBanner({
 
   if (status === "PAST_DUE") {
     return (
-      <Alert className="border-amber-500/50 text-amber-900 dark:text-amber-200">
+      <Alert variant="warning">
         <AlertTriangle />
         <AlertTitle>{t("pastDue.title")}</AlertTitle>
         <AlertDescription className="flex flex-col gap-1">

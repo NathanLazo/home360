@@ -114,10 +114,10 @@ export function ProductFormFields({
         </Field>
       </div>
 
-      <div className="mx-4 flex items-center justify-between gap-4 rounded-xl border p-4">
+      <div className="bg-canvas-soft mx-4 flex items-center justify-between gap-4 rounded-md border p-4">
         <div>
           <Label htmlFor="product-published">{t("publishedLabel")}</Label>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-copy-sm">
             {t("publishedDescription")}
           </p>
         </div>
@@ -158,7 +158,7 @@ function Field({
         <p
           id={`${htmlFor}-error`}
           role="alert"
-          className="text-destructive text-sm"
+          className="text-error-deep text-copy-sm"
         >
           {error}
         </p>

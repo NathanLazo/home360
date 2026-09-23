@@ -141,7 +141,10 @@ export function WorkerFormFields({
           </SelectContent>
         </Select>
         {errors.branchId ? (
-          <p id="worker-branchId-error" className="text-destructive text-sm">
+          <p
+            id="worker-branchId-error"
+            className="text-error-deep text-copy-sm"
+          >
             {errors.branchId}
           </p>
         ) : null}
@@ -168,11 +171,14 @@ function Field({
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-destructive text-sm">
+        <p id={`${htmlFor}-error`} className="text-error-deep text-copy-sm">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${htmlFor}-hint`} className="text-muted-foreground text-sm">
+        <p
+          id={`${htmlFor}-hint`}
+          className="text-muted-foreground text-copy-sm"
+        >
           {hint}
         </p>
       ) : null}

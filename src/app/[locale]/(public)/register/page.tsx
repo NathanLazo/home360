@@ -25,25 +25,28 @@ export default async function RegisterPage({ params }: RegisterPageProps) {
   const t = await getTranslations({ locale, namespace: "auth.register" });
 
   return (
-    <main className="bg-muted flex min-h-dvh items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
+    <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
+      <Card className="bg-canvas-soft w-full max-w-md rounded-lg py-8 shadow-none">
         <CardHeader className="text-center">
-          <div className="bg-primary text-primary-foreground mx-auto flex size-12 items-center justify-center rounded-xl text-xl font-semibold">
+          <div
+            aria-hidden="true"
+            className="bg-ink text-on-ink text-display-sm mx-auto mb-2 flex size-10 items-center justify-center rounded-md"
+          >
             {t("logoMark")}
           </div>
           <CardTitle>
-            <h1 className="text-2xl">{t("title")}</h1>
+            <h1 className="text-display-md text-balance">{t("title")}</h1>
           </CardTitle>
           <CardDescription>{t("subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <RegisterForm />
         </CardContent>
-        <CardFooter className="text-muted-foreground justify-center gap-1 text-sm">
+        <CardFooter className="text-muted-foreground text-copy-sm justify-center gap-1">
           <span>{t("haveAccount")}</span>
           <Link
             href="/login"
-            className="text-foreground font-medium underline-offset-4 hover:underline"
+            className="text-link-deep font-medium underline-offset-4 hover:underline"
           >
             {t("loginCta")}
           </Link>

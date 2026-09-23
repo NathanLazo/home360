@@ -71,7 +71,9 @@ export function ChangePlanDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {targetPlanName ? t("title", { plan: targetPlanName }) : t("titleFallback")}
+            {targetPlanName
+              ? t("title", { plan: targetPlanName })
+              : t("titleFallback")}
           </DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
@@ -85,7 +87,7 @@ export function ChangePlanDialog({
         ) : null}
 
         {!previewQuery.isPending && previewError !== null ? (
-          <p className="text-destructive text-sm" role="alert">
+          <p className="text-error-deep text-copy-sm" role="alert">
             {errorsT(previewError)}
           </p>
         ) : null}

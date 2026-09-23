@@ -179,12 +179,12 @@ export function WithdrawDialog({
               />
               <p
                 id="withdraw-amount-hint"
-                className="text-muted-foreground text-sm"
+                className="text-muted-foreground text-copy-sm"
               >
                 {t("amountHint", { amount: currency(availableCents) })}
               </p>
               {amountError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p role="alert" className="text-error-deep text-copy-sm">
                   {amountError.message ?? t("amountInvalid")}
                 </p>
               ) : null}
@@ -200,7 +200,7 @@ export function WithdrawDialog({
                 {...form.register("bankName")}
               />
               {bankError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p role="alert" className="text-error-deep text-copy-sm">
                   {t("bankInvalid")}
                 </p>
               ) : null}
@@ -221,7 +221,7 @@ export function WithdrawDialog({
                 {...form.register("accountLast4")}
               />
               {last4Error ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p role="alert" className="text-error-deep text-copy-sm">
                   {t("last4Invalid")}
                 </p>
               ) : null}

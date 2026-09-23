@@ -53,7 +53,7 @@ export async function UserMenu({
         aria-label={t("open")}
         className={cn(
           "rounded-full",
-          variant === "dark" && "text-zinc-100 hover:bg-zinc-800",
+          variant === "dark" && "dark text-foreground",
         )}
       >
         <UserAvatar

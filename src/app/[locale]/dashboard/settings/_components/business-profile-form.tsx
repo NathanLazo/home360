@@ -17,6 +17,7 @@ import type {
 } from "./settings.types";
 import type { MutationOutcome } from "./use-settings-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import { GlassDock } from "~/components/glass";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -124,7 +125,7 @@ export function BusinessProfileForm({
   return (
     <Card>
       <CardHeader>
-        <h2 className="leading-none font-semibold">{t("title")}</h2>
+        <h2 className="text-display-sm">{t("title")}</h2>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -137,7 +138,7 @@ export function BusinessProfileForm({
             <p
               id="settings-profile-notice"
               role="status"
-              className="text-muted-foreground bg-muted flex items-start gap-2 rounded-lg p-3 text-sm"
+              className="text-muted-foreground bg-canvas-soft-2 text-copy-sm flex items-start gap-2 rounded-md p-3"
             >
               <InfoIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
               {notice}
@@ -163,7 +164,7 @@ export function BusinessProfileForm({
             {errors.businessName ? (
               <p
                 id="settings-business-name-error"
-                className="text-destructive text-sm"
+                className="text-error-deep text-copy-sm"
               >
                 {errors.businessName}
               </p>
@@ -226,30 +227,44 @@ export function BusinessProfileForm({
             {errors.guaranteeNotes ? (
               <p
                 id="settings-guarantee-notes-error"
-                className="text-destructive text-sm"
+                className="text-error-deep text-copy-sm"
               >
                 {errors.guaranteeNotes}
               </p>
             ) : (
               <p
                 id="settings-guarantee-notes-hint"
-                className="text-muted-foreground text-sm"
+                className="text-muted-foreground text-copy-sm"
               >
                 {t("notesHint")}
               </p>
             )}
           </div>
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={saving || !isDirty || isReadOnly}
-              className="min-h-11 sm:min-h-10"
+          {/* Sticky save bar: the screen's one glass + live-metal pairing.
+              The ring only wakes up once there is something to save. */}
+          <GlassDock
+            shape="panel"
+            className="sticky bottom-4 z-10 min-h-14 pl-4"
+            action={
+              <Button
+                type="submit"
+                metal="live"
+                disabled={saving || !isDirty || isReadOnly}
+                className="min-h-11 sm:min-h-10"
+              >
+                <SubmitStatusIcon pending={saving} succeeded={saved} />
+                {t("save")}
+              </Button>
+            }
+          >
+            <p
+              aria-live="polite"
+              className="text-muted-foreground text-copy-sm"
             >
-              <SubmitStatusIcon pending={saving} succeeded={saved} />
-              {t("save")}
-            </Button>
-          </div>
+              {isDirty && !isReadOnly ? t("unsavedChanges") : null}
+            </p>
+          </GlassDock>
         </form>
       </CardContent>
     </Card>

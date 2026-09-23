@@ -121,8 +121,8 @@ export function ChangePasswordForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-semibold">{t("title")}</h3>
-        <p className="text-muted-foreground text-sm">{t("description")}</p>
+        <h3 className="text-copy font-semibold">{t("title")}</h3>
+        <p className="text-muted-foreground text-copy-sm">{t("description")}</p>
       </div>
 
       <PasswordField
@@ -216,11 +216,11 @@ function PasswordField({
         disabled={disabled}
       />
       {error ? (
-        <p id={`${id}-error`} className="text-destructive text-sm">
+        <p id={`${id}-error`} className="text-error-deep text-copy-sm">
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-muted-foreground text-sm">
+        <p id={`${id}-hint`} className="text-muted-foreground text-copy-sm">
           {hint}
         </p>
       ) : null}

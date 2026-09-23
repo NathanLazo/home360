@@ -30,11 +30,11 @@ export async function CorporateStatusBanner({
   });
 
   return (
-    <Alert role="status" className="border-amber-200 bg-amber-50 text-amber-900">
+    <Alert role="status" variant="warning">
       <TriangleAlertIcon aria-hidden="true" className="size-4" />
       <AlertTitle>{t(status)}</AlertTitle>
       {statusReason ? (
-        <AlertDescription className="text-amber-900/80">
+        <AlertDescription>
           {t("reasonLabel")}: {statusReason}
         </AlertDescription>
       ) : null}

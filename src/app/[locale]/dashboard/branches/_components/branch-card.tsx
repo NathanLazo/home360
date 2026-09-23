@@ -31,11 +31,11 @@ export function BranchCard({
 }) {
   const t = useTranslations("dashboard.branches");
   return (
-    <Card className="hover:border-foreground/15 gap-0 overflow-hidden py-0 transition-[border-color,box-shadow] duration-150 ease-out hover:shadow-md motion-reduce:transition-none">
+    <Card className="hover:border-hairline-strong/60 gap-0 overflow-hidden py-0 transition-[border-color,box-shadow] duration-150 ease-out hover:shadow-md motion-reduce:transition-none">
       <CardHeader className="flex flex-row items-start justify-between gap-3 px-5 pt-5">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-foreground truncate text-base font-semibold">
+            <h2 className="text-foreground truncate text-base font-semibold tracking-tight">
               {branch.name}
             </h2>
             <StatusBadge

@@ -43,7 +43,7 @@ export function CorporateInvoicesSection() {
         <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <p className="text-muted-foreground text-sm">{t("description")}</p>
+        <p className="text-muted-foreground text-copy-sm">{t("description")}</p>
 
         {invoicesQuery.isPending ? (
           <div className="flex flex-col gap-3" aria-busy="true" role="status">

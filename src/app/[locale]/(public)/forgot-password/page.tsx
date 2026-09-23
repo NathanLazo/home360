@@ -25,14 +25,17 @@ export default async function ForgotPasswordPage({
   const t = await getTranslations({ locale, namespace: "auth.forgotPassword" });
 
   return (
-    <main className="bg-muted flex min-h-dvh items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
+    <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
+      <Card className="bg-canvas-soft w-full max-w-md rounded-lg py-8 shadow-none">
         <CardHeader className="text-center">
-          <div className="bg-primary text-primary-foreground mx-auto flex size-12 items-center justify-center rounded-xl text-xl font-semibold">
+          <div
+            aria-hidden="true"
+            className="bg-ink text-on-ink text-display-sm mx-auto mb-2 flex size-10 items-center justify-center rounded-md"
+          >
             {t("logoMark")}
           </div>
           <CardTitle>
-            <h1 className="text-2xl">{t("title")}</h1>
+            <h1 className="text-display-md text-balance">{t("title")}</h1>
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
@@ -42,7 +45,7 @@ export default async function ForgotPasswordPage({
         <CardFooter className="justify-center">
           <Link
             href="/login"
-            className="text-foreground min-h-11 py-3 text-sm font-medium underline-offset-4 hover:underline"
+            className="text-link-deep text-copy-sm min-h-11 py-3 font-medium underline-offset-4 hover:underline"
           >
             {t("backToLogin")}
           </Link>

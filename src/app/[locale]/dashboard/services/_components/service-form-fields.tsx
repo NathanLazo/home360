@@ -161,7 +161,7 @@ export function ServiceFormFields({
         <Label id="service-workers-label" htmlFor="service-workers-search">
           {t("workersLabel")}
         </Label>
-        <Command className="rounded-lg border">
+        <Command className="rounded-md border">
           <CommandInput
             id="service-workers-search"
             placeholder={t("workersSearchPlaceholder")}
@@ -192,7 +192,7 @@ export function ServiceFormFields({
                     className={cn(
                       "flex size-4 items-center justify-center rounded border",
                       selected
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? "bg-ink text-on-ink border-ink"
                         : "border-input",
                     )}
                   >
@@ -205,7 +205,10 @@ export function ServiceFormFields({
           </CommandList>
         </Command>
         {errors.workerIds ? (
-          <p id="service-workerIds-error" className="text-destructive text-sm">
+          <p
+            id="service-workerIds-error"
+            className="text-error-deep text-copy-sm"
+          >
             {errors.workerIds}
           </p>
         ) : null}
@@ -231,7 +234,7 @@ function Field({
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error ? (
-        <p id={errorId} className="text-destructive text-sm">
+        <p id={errorId} className="text-error-deep text-copy-sm">
           {error}
         </p>
       ) : null}

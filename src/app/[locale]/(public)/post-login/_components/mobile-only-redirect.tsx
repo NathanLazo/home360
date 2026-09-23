@@ -16,8 +16,8 @@ export function MobileOnlyRedirect() {
     router.replace("/");
   }, [router, t]);
   return (
-    <main className="bg-muted flex min-h-dvh items-center justify-center px-4">
-      <p role="status" className="text-muted-foreground text-sm">
+    <main className="bg-canvas-soft flex min-h-dvh items-center justify-center px-4">
+      <p role="status" className="text-muted-foreground text-copy-sm">
         {t("redirecting")}
       </p>
     </main>

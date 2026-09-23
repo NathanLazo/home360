@@ -155,7 +155,7 @@ export function CreatePaymentLinkDialog({
                 />
               </Button>
             </div>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-copy-sm">
               {t("singleUseHint")}
             </p>
             <DialogFooter>
@@ -191,7 +191,7 @@ export function CreatePaymentLinkDialog({
                 <p
                   id="payment-link-concept-error"
                   role="alert"
-                  className="text-destructive text-sm"
+                  className="text-error-deep text-copy-sm"
                 >
                   {t("conceptInvalid")}
                 </p>
@@ -213,12 +213,12 @@ export function CreatePaymentLinkDialog({
               />
               <p
                 id="payment-link-amount-hint"
-                className="text-muted-foreground text-sm"
+                className="text-muted-foreground text-copy-sm"
               >
                 {t("amountHint")}
               </p>
               {amountError ? (
-                <p role="alert" className="text-destructive text-sm">
+                <p role="alert" className="text-error-deep text-copy-sm">
                   {amountError.message ?? t("amountInvalid")}
                 </p>
               ) : null}

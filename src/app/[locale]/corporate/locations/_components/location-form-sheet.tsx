@@ -191,7 +191,7 @@ export function LocationFormSheet({
           }
         />
         {errors[key] !== undefined ? (
-          <p id={errorId} className="text-destructive text-xs">
+          <p id={errorId} className="text-error-deep text-xs">
             {errors[key]}
           </p>
         ) : null}
@@ -217,9 +217,7 @@ export function LocationFormSheet({
         }}
       >
         <SheetHeader className="border-b pr-14">
-          <SheetTitle>
-            {t(location ? "editTitle" : "createTitle")}
-          </SheetTitle>
+          <SheetTitle>{t(location ? "editTitle" : "createTitle")}</SheetTitle>
           <SheetDescription>
             {t(location ? "editDescription" : "createDescription")}
           </SheetDescription>

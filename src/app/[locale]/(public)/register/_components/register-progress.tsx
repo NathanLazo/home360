@@ -23,12 +23,12 @@ function ProgressStep({ index, currentStep, label }: ProgressStepProps) {
     >
       <span
         aria-hidden="true"
-        className={`h-1.5 rounded-full transition-colors motion-reduce:transition-none ${
-          isActive || isComplete ? "bg-primary" : "bg-border"
+        className={`h-1 rounded-full transition-[background-color] duration-150 ease-out motion-reduce:transition-none ${
+          isActive || isComplete ? "bg-ink" : "bg-hairline"
         }`}
       />
       <span
-        className={`truncate text-xs font-medium ${
+        className={`text-label truncate font-mono tracking-wide uppercase ${
           isActive ? "text-foreground" : "text-muted-foreground"
         }`}
       >
