@@ -28,6 +28,7 @@ import {
   type RegisterBusinessStep,
   type RegisterGuaranteeStep,
 } from "./register.schema";
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { useRouter } from "~/i18n/navigation";
 import type { AuthErrorCode } from "~/schemas/auth/auth-errors";
@@ -334,16 +335,18 @@ export function RegisterForm() {
             {t("back")}
           </Button>
         ) : null}
-        <Button
-          type="submit"
-          className="h-11 flex-1"
-          disabled={registerBusiness.isPending}
-        >
-          {registerBusiness.isPending ? (
-            <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
-          ) : null}
-          {step === 2 ? t("submit") : t("next")}
-        </Button>
+        <MetalRing bend className="flex-1">
+          <Button
+            type="submit"
+            className="h-11 w-full"
+            disabled={registerBusiness.isPending}
+          >
+            {registerBusiness.isPending ? (
+              <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
+            ) : null}
+            {step === 2 ? t("submit") : t("next")}
+          </Button>
+        </MetalRing>
       </div>
     </form>
   );

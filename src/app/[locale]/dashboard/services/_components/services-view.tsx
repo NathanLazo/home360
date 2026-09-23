@@ -13,6 +13,7 @@ import { useServiceMutations } from "./use-service-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -118,16 +119,18 @@ export function ServicesView() {
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <Button
-            type="button"
-            onClick={openCreate}
-            className="min-h-11 sm:min-h-10"
-            disabled={isReadOnly}
-            title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
-          >
-            <PlusIcon aria-hidden="true" />
-            {t("newService")}
-          </Button>
+          <MetalAction active={!isReadOnly}>
+            <Button
+              type="button"
+              onClick={openCreate}
+              className="min-h-11 sm:min-h-10"
+              disabled={isReadOnly}
+              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            >
+              <PlusIcon aria-hidden="true" />
+              {t("newService")}
+            </Button>
+          </MetalAction>
         }
       />
 

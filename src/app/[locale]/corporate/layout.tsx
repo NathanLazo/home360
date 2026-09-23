@@ -39,7 +39,7 @@ export default async function CorporateLayout({
   const [account, t, common, cookieStore] = await Promise.all([
     db.corporateAccount.findUnique({
       where: { ownerId: user.id },
-      select: { name: true, status: true, statusReason: true },
+      select: { name: true, status: true, statusReason: true, tier: true },
     }),
     getTranslations({ locale, namespace: "corporate" }),
     getTranslations({ locale, namespace: "common.userMenu" }),
@@ -84,6 +84,10 @@ export default async function CorporateLayout({
           name: userName,
           subtitle: account.name,
           initials: initials || t("sidebar.placeholderInitials"),
+        }}
+        tierChip={{
+          label: t(`tier.${account.tier}`),
+          ariaLabel: t("sidebar.tierLink", { tier: t(`tier.${account.tier}`) }),
         }}
       />
       <SidebarInset className="min-w-0">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { CorporateTier } from "@generated/prisma";
 import type { CorporateMembershipSummary } from "../../_components/corporate.types";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -109,11 +110,13 @@ export function TierChangeDialog({
         if (nextOpen) setTier(membership.tier);
       }}
     >
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline" className="min-h-11">
-          {t("button")}
-        </Button>
-      </DialogTrigger>
+      <MetalAction bend>
+        <DialogTrigger asChild>
+          <Button type="button" variant="outline" className="min-h-11">
+            {t("button")}
+          </Button>
+        </DialogTrigger>
+      </MetalAction>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
@@ -125,9 +128,7 @@ export function TierChangeDialog({
             <Select
               value={tier}
               onValueChange={(value) => {
-                const nextTier = TIERS.find(
-                  (candidate) => candidate === value,
-                );
+                const nextTier = TIERS.find((candidate) => candidate === value);
                 if (nextTier) setTier(nextTier);
               }}
             >

@@ -4,6 +4,10 @@ import { useSearchParams } from "next/navigation";
 
 import { CORPORATE_NAV, type CorporateNavKey } from "./corporate-nav";
 import { AppSidebar, type SidebarItem } from "~/components/app-sidebar";
+import {
+  SidebarPlanChip,
+  type SidebarPlanChipProps,
+} from "~/components/sidebar-plan-chip";
 
 export type CorporateSidebarProps = {
   labels: Record<CorporateNavKey, string>;
@@ -15,6 +19,7 @@ export type CorporateSidebarProps = {
     subtitle: string;
     initials: string;
   };
+  tierChip: Omit<SidebarPlanChipProps, "href">;
 };
 
 /**
@@ -28,6 +33,7 @@ export function CorporateSidebar({
   mobileTitle,
   mobileDescription,
   user,
+  tierChip,
 }: CorporateSidebarProps) {
   const searchParams = useSearchParams();
   const locationId = searchParams.get("location");
@@ -57,6 +63,9 @@ export function CorporateSidebar({
       mobileTitle={mobileTitle}
       mobileDescription={mobileDescription}
       user={user}
+      footerSlot={
+        <SidebarPlanChip {...tierChip} href="/corporate/membership" />
+      }
     />
   );
 }

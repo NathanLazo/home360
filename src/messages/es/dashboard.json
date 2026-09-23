@@ -112,7 +112,8 @@
   "sidebar": {
     "placeholderName": "—",
     "placeholderInitials": "PG",
-    "brandLabel": "HOME360, ir al inicio del panel"
+    "brandLabel": "HOME360, ir al inicio del panel",
+    "planLink": "Plan {plan}, ver suscripción"
   },
   "home": {
     "title": "Inicio",

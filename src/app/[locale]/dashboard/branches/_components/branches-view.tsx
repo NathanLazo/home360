@@ -17,6 +17,7 @@ import { useBranchMutations } from "./use-branch-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
+import { MetalAction } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
@@ -91,17 +92,19 @@ export function BranchesView() {
                   : undefined
             }
           >
-            <Button
-              type="button"
-              className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-              aria-disabled={atLimit}
-              aria-describedby={atLimit ? "branch-limit-help" : undefined}
-              onClick={create}
-              disabled={isReadOnly}
-            >
-              <PlusIcon aria-hidden="true" />
-              {t("new")}
-            </Button>
+            <MetalAction active={!isReadOnly && !atLimit}>
+              <Button
+                type="button"
+                className="min-h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                aria-disabled={atLimit}
+                aria-describedby={atLimit ? "branch-limit-help" : undefined}
+                onClick={create}
+                disabled={isReadOnly}
+              >
+                <PlusIcon aria-hidden="true" />
+                {t("new")}
+              </Button>
+            </MetalAction>
           </span>
           {atLimit ? (
             <span id="branch-limit-help" className="sr-only">

@@ -24,6 +24,18 @@ export function PlanCards({
   managing,
 }: PlanCardsProps) {
   const t = useTranslations("dashboard.subscription");
+  // The next tier up is the one upgrade the page recommends; it alone gets
+  // the metal ring, never every pricier card.
+  const recommendedCode =
+    currentPriceCents === null
+      ? null
+      : (plans
+          .filter((plan) => plan.priceCents > currentPriceCents)
+          .reduce<PlanListItem | null>(
+            (best, plan) =>
+              best === null || plan.priceCents < best.priceCents ? plan : best,
+            null,
+          )?.code ?? null);
 
   return (
     <section className="grid gap-4 md:grid-cols-3" aria-label={t("plansLabel")}>
@@ -31,6 +43,7 @@ export function PlanCards({
         <PlanCard
           key={plan.code}
           plan={plan}
+          recommended={plan.code === recommendedCode}
           currentPriceCents={currentPriceCents}
           canChangePlan={canChangePlan}
           onSelectPlan={onSelectPlan}

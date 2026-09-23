@@ -7,6 +7,7 @@ import { getSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { loginSchema } from "./login.schema";
+import { MetalRing } from "~/components/metal";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -123,16 +124,18 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
           {t("invalidCredentials")}
         </p>
       ) : null}
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? (
-          <LoaderCircleIcon
-            data-icon="inline-start"
-            aria-hidden="true"
-            className="animate-spin"
-          />
-        ) : null}
-        {t("submit")}
-      </Button>
+      <MetalRing bend className="w-full">
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? (
+            <LoaderCircleIcon
+              data-icon="inline-start"
+              aria-hidden="true"
+              className="animate-spin"
+            />
+          ) : null}
+          {t("submit")}
+        </Button>
+      </MetalRing>
     </form>
   );
 }

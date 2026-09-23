@@ -112,7 +112,8 @@
   "sidebar": {
     "placeholderName": "—",
     "placeholderInitials": "PG",
-    "brandLabel": "HOME360, go to dashboard home"
+    "brandLabel": "HOME360, go to dashboard home",
+    "planLink": "{plan} plan, view subscription"
   },
   "home": {
     "title": "Home",
