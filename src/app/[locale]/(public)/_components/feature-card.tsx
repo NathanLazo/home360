@@ -16,7 +16,7 @@ type FeatureCardProps = {
  */
 export function FeatureCard({ Icon, title, description }: FeatureCardProps) {
   return (
-    <div className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-[color-mix(in_srgb,var(--brand-navy)_12%,transparent)] bg-white p-6 shadow-[0_1px_2px_rgb(13_27_42/0.04)] transition-[box-shadow,border-color] duration-300 hover:border-[color-mix(in_srgb,var(--brand-gold)_70%,transparent)] hover:shadow-[0_12px_32px_-20px_rgb(13_27_42/0.45)]">
+    <div className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-[color-mix(in_srgb,var(--brand-navy)_12%,transparent)] bg-white p-6 shadow-[0_1px_2px_rgb(13_27_42/0.04)] transition-[box-shadow,border-color] duration-150 ease-brand hover:border-[color-mix(in_srgb,var(--brand-gold)_70%,transparent)] hover:shadow-[0_12px_32px_-20px_rgb(13_27_42/0.45)]">
       <span
         aria-hidden="true"
         className="flex size-11 items-center justify-center rounded-md bg-[var(--brand-navy)] text-[var(--brand-cream)]"
@@ -28,7 +28,7 @@ export function FeatureCard({ Icon, title, description }: FeatureCardProps) {
         {description}
       </p>
 
-      <div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+      <div className="pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-150 ease-brand group-hover:opacity-100">
         <BorderBeam
           size={64}
           duration={6}

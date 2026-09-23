@@ -230,7 +230,7 @@ export function BusinessProfileForm({
             <Button
               type="submit"
               disabled={saving || !isDirty || isReadOnly}
-              className="min-h-11 active:scale-[0.98] sm:min-h-10"
+              className="min-h-11 sm:min-h-10"
             >
               {saving ? (
                 <LoaderCircleIcon

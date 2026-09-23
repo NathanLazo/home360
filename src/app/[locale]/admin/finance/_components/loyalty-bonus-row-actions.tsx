@@ -26,7 +26,7 @@ export function LoyaltyBonusRowActions({
       <Button
         type="button"
         size="sm"
-        className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+        className="min-h-9"
         onClick={onPay}
       >
         {t("pay")}
@@ -35,7 +35,7 @@ export function LoyaltyBonusRowActions({
         type="button"
         size="sm"
         variant="outline"
-        className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+        className="min-h-9"
         onClick={onCancel}
       >
         {t("cancel")}

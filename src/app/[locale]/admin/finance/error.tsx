@@ -19,7 +19,7 @@ export default function AdminFinanceError({ reset }: { reset: () => void }) {
         <Button
           type="button"
           onClick={reset}
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96]"
+          className="min-h-11"
         >
           <RotateCcwIcon aria-hidden="true" />
           {commonT("retry")}

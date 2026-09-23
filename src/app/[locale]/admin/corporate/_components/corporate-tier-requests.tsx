@@ -73,7 +73,6 @@ export function CorporateTierRequests({
               <Button
                 type="button"
                 size="sm"
-                className="transition-transform duration-150 ease-out active:scale-[0.96]"
                 onClick={() => onApprove(request)}
               >
                 {t("approve")}
@@ -82,7 +81,6 @@ export function CorporateTierRequests({
                 type="button"
                 size="sm"
                 variant="outline"
-                className="transition-transform duration-150 ease-out active:scale-[0.96]"
                 onClick={() => setRejectTarget(request)}
               >
                 {t("reject")}

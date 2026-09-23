@@ -60,7 +60,7 @@ export function PendingBusinessesTable({
           <Button
             asChild
             size="sm"
-            className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+            className="min-h-9"
           >
             <Link href={businessDetailHref(row.id)}>
               {t("pending.approve")}
@@ -70,7 +70,7 @@ export function PendingBusinessesTable({
             asChild
             size="sm"
             variant="outline"
-            className="min-h-9 transition-transform duration-150 ease-out active:scale-[0.96]"
+            className="min-h-9"
           >
             <Link href={businessDetailHref(row.id)}>{t("pending.review")}</Link>
           </Button>

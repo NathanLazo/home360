@@ -66,7 +66,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
         <Button
           asChild
           variant="outline"
-          className="group min-h-11 justify-between transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          className="group min-h-11 justify-between sm:min-h-10"
         >
           <Link href="/admin/settings">
             {t("ai.openSettings")}
