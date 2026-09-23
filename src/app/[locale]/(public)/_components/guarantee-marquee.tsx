@@ -20,7 +20,7 @@ export function GuaranteeMarquee({ label, items }: GuaranteeMarqueeProps) {
 
   return (
     <div className="group/marquee relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)] motion-reduce:[mask-image:none]">
-      <div className="flex w-max animate-[landing-marquee_48s_linear_infinite] group-hover/marquee:[animation-play-state:paused] motion-reduce:w-full motion-reduce:animate-none">
+      <div className="flex w-max animate-[landing-marquee_48s_linear_infinite] py-3 group-hover/marquee:[animation-play-state:paused] motion-reduce:w-full motion-reduce:animate-none">
         <ul aria-label={label} className={listClass}>
           {items.map((item) => (
             <li key={item.key} className="flex">

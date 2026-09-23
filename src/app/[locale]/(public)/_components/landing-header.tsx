@@ -2,11 +2,13 @@
 
 import { MenuIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { LANDING_ANCHORS, LANDING_NAV_KEYS } from "./landing-data";
 import { focusRingClass, pressClass } from "./landing-styles";
-import { ScrollProgress } from "./scroll-progress";
+import { useHeroCtaInView } from "./use-hero-cta-in-view";
+import { GlassDock } from "~/components/glass";
+import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -18,24 +20,26 @@ import {
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
-const SCROLL_THRESHOLD_PX = 8;
-
+/**
+ * The landing's signature: a floating Liquid Glass dock carrying the nav and
+ * the liquid-metal "register" action (the one glass + metal pairing of the
+ * page, DESIGN.md §6).
+ *
+ * Metal budget rule (≤ 2 live per screen): the hero already shows a live
+ * `bend` CTA and the live "new" badge. While the hero CTA is on screen the
+ * nav action wears the static chrome rim; once it scrolls out, the nav action
+ * turns live. An IntersectionObserver decides (`useHeroCtaInView`), never a
+ * scroll listener. Reduced motion, no WebGL2 and the first paint keep the
+ * static rim regardless.
+ *
+ * Desktop (≥ lg): one 64 px line with brand, section links, sign in, register.
+ * Below lg the links collapse into a sheet; register stays in the dock from
+ * `sm` up and always in the sheet.
+ */
 export function LandingHeader() {
   const t = useTranslations("landing.header");
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    function handleScroll() {
-      setIsScrolled(window.scrollY > SCROLL_THRESHOLD_PX);
-    }
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+  const heroCtaInView = useHeroCtaInView();
 
   const navItems = LANDING_NAV_KEYS.map((key) => ({
     key,
@@ -48,43 +52,99 @@ export function LandingHeader() {
   }
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full border-b backdrop-blur-md transition-[background-color,border-color] duration-200",
-        isScrolled
-          ? "border-border bg-background/80"
-          : "bg-background/0 border-transparent",
-      )}
-    >
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <header className="pointer-events-none fixed inset-x-0 top-3 z-50 px-4 sm:px-6 lg:px-8">
+      <GlassDock
+        className="pointer-events-auto mx-auto h-16 w-full max-w-6xl gap-4 p-3 pl-5"
+        action={
+          <div className="flex items-center gap-1">
+            <span className="hidden sm:flex">
+              <Button
+                asChild
+                size="pill-sm"
+                metal={heroCtaInView ? "static" : "live"}
+              >
+                <Link href="/register">{t("cta")}</Link>
+              </Button>
+            </span>
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-10 rounded-full lg:hidden"
+                >
+                  <MenuIcon aria-hidden="true" className="size-5" />
+                  <span className="sr-only">{t("menuLabel")}</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle>{t("menuTitle")}</SheetTitle>
+                  <SheetDescription>{t("menuDescription")}</SheetDescription>
+                </SheetHeader>
+                <nav
+                  aria-label={t("navLabel")}
+                  className="flex flex-col gap-1 px-4 pb-4"
+                >
+                  {navItems.map((item) => (
+                    <a
+                      key={item.key}
+                      href={item.href}
+                      onClick={closeMenu}
+                      className={cn(
+                        "text-copy hover:bg-accent rounded-sm px-2 py-3 font-medium",
+                        focusRingClass,
+                      )}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                  <div className="mt-4 flex flex-col gap-2">
+                    <Button asChild variant="secondary" size="pill">
+                      <Link href="/login" onClick={closeMenu}>
+                        {t("login")}
+                      </Link>
+                    </Button>
+                    <Button asChild size="pill">
+                      <Link href="/register" onClick={closeMenu}>
+                        {t("cta")}
+                      </Link>
+                    </Button>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        }
+      >
         <Link
           href="/"
           className={cn(
-            "flex min-h-11 items-center gap-2.5 rounded-md",
+            "flex min-h-10 shrink-0 items-center gap-2.5 rounded-sm",
             focusRingClass,
           )}
         >
           <span
             aria-hidden="true"
-            className="bg-foreground text-background flex size-8 items-center justify-center rounded-md text-base font-semibold"
+            className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-sm text-sm font-semibold"
           >
             {t("logoMark")}
           </span>
-          <span className="text-base font-semibold tracking-[-0.02em]">
+          <span className="text-copy font-semibold tracking-[-0.02em]">
             {t("brand")}
           </span>
         </Link>
 
         <nav
           aria-label={t("navLabel")}
-          className="hidden items-center gap-1 lg:flex"
+          className="hidden flex-1 items-center justify-center gap-0.5 lg:flex"
         >
           {navItems.map((item) => (
             <a
               key={item.key}
               href={item.href}
               className={cn(
-                "text-muted-foreground hover:bg-foreground/5 hover:text-foreground rounded-full px-3 py-2 text-sm",
+                "text-copy-sm text-muted-foreground hover:bg-foreground/5 hover:text-foreground rounded-pill px-3 py-2 whitespace-nowrap",
                 pressClass,
                 focusRingClass,
               )}
@@ -94,94 +154,17 @@ export function LandingHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-1 lg:flex">
-          <Link
-            href="/login"
-            className={cn(
-              "hover:bg-foreground/5 inline-flex h-9 items-center rounded-full px-4 text-sm font-medium",
-              pressClass,
-              focusRingClass,
-            )}
-          >
-            {t("login")}
-          </Link>
-          <Link
-            href="/register"
-            className={cn(
-              "bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center rounded-full px-4 text-sm font-medium",
-              pressClass,
-              focusRingClass,
-            )}
-          >
-            {t("cta")}
-          </Link>
-        </div>
-
-        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetTrigger asChild>
-            <button
-              type="button"
-              className={cn(
-                "hover:bg-foreground/5 inline-flex size-11 items-center justify-center rounded-full lg:hidden",
-                pressClass,
-                focusRingClass,
-              )}
-            >
-              <MenuIcon aria-hidden="true" className="size-5" />
-              <span className="sr-only">{t("menuLabel")}</span>
-            </button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>{t("menuTitle")}</SheetTitle>
-              <SheetDescription>{t("menuDescription")}</SheetDescription>
-            </SheetHeader>
-            <nav
-              aria-label={t("navLabel")}
-              className="flex flex-col gap-1 px-4 pb-4"
-            >
-              {navItems.map((item) => (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  onClick={closeMenu}
-                  className={cn(
-                    "hover:bg-foreground/5 rounded-md px-2 py-3 text-base font-medium",
-                    focusRingClass,
-                  )}
-                >
-                  {item.label}
-                </a>
-              ))}
-              <div className="mt-4 flex flex-col gap-2">
-                <Link
-                  href="/login"
-                  onClick={closeMenu}
-                  className={cn(
-                    "hover:bg-foreground/5 inline-flex h-11 items-center justify-center rounded-full border text-base font-medium",
-                    pressClass,
-                    focusRingClass,
-                  )}
-                >
-                  {t("login")}
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={closeMenu}
-                  className={cn(
-                    "bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-11 items-center justify-center rounded-full text-base font-medium",
-                    pressClass,
-                    focusRingClass,
-                  )}
-                >
-                  {t("cta")}
-                </Link>
-              </div>
-            </nav>
-          </SheetContent>
-        </Sheet>
-      </div>
-      <ScrollProgress />
+        <Link
+          href="/login"
+          className={cn(
+            "text-copy-sm hover:bg-foreground/5 rounded-pill hidden h-10 shrink-0 items-center px-4 font-medium whitespace-nowrap lg:inline-flex",
+            pressClass,
+            focusRingClass,
+          )}
+        >
+          {t("login")}
+        </Link>
+      </GlassDock>
     </header>
   );
 }

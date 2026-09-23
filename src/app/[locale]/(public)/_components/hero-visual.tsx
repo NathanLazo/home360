@@ -13,7 +13,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { LANDING_SAMPLE_ORDER } from "./landing-data";
 import { formatMxnFromCents } from "./landing-money";
 import { LandingBeam } from "./landing-beam";
-import { dataLabelClass, LANDING_BEAM_RADIUS } from "./landing-styles";
+import {
+  dataLabelClass,
+  inkSurfaceClass,
+  LANDING_BEAM_RADIUS,
+} from "./landing-styles";
 import { MotionSafe } from "./motion-safe";
 import { AnimatedBeam } from "~/components/ui/animated-beam";
 import { cn } from "~/lib/utils";
@@ -24,12 +28,12 @@ import { cn } from "~/lib/utils";
  * beam around the frame are the hero's only looping motion; everything
  * inside the console is still.
  *
- * The console is framed by the page's signature spectral beam — the first and
- * brightest color on an otherwise monochrome page, kept off the metal CTA so
- * the two effects never stack on one element.
+ * The console is framed by the page's signature spectral beam, the brightest
+ * color below the hero mesh, kept off the metal CTA so the two effects never
+ * stack on one element.
  *
  * Client component because `AnimatedBeam` measures its endpoints through refs.
- * The `.dark` scope reuses the zinc dark tokens instead of a parallel palette.
+ * The ink surface scopes `.dark` tokens instead of a parallel palette.
  */
 export function HeroVisual() {
   const t = useTranslations("landing.heroVisual");
@@ -77,14 +81,17 @@ export function HeroVisual() {
       theme="dark"
       strength={0.6}
       duration={3.2}
-      borderRadius={LANDING_BEAM_RADIUS.twoXl}
+      borderRadius={LANDING_BEAM_RADIUS.xl}
       allowOverflow
     >
       <figure
         aria-label={t("alt")}
-        className="dark bg-background text-foreground relative w-full rounded-2xl border p-1.5 shadow-[0_40px_80px_-40px_rgb(0_0_0/0.55),0_12px_24px_-12px_rgb(0_0_0/0.25)]"
+        className={cn(
+          inkSurfaceClass,
+          "shadow-modal relative w-full rounded-xl p-1.5",
+        )}
       >
-        <div className="bg-card rounded-xl border">
+        <div className="bg-canvas rounded-lg border">
           {/* Title bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
             <p className={cn(dataLabelClass, "text-muted-foreground")}>
@@ -96,7 +103,7 @@ export function HeroVisual() {
                 #{LANDING_SAMPLE_ORDER.reference}
               </span>
             </p>
-            <p className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
+            <p className="rounded-pill inline-flex items-center gap-1.5 border px-2.5 py-1 text-xs font-medium">
               <LockIcon aria-hidden="true" className="size-3" />
               {t("status")}
             </p>

@@ -5,7 +5,7 @@ type LearnMoreChevronProps = {
 };
 
 const ARM_CLASS =
-  "origin-[10px_8px] transition-[transform] duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] [transform-box:view-box] [vector-effect:non-scaling-stroke] motion-reduce:transition-none";
+  "origin-[10px_8px] transition-[transform] duration-[350ms] ease-out [transform-box:view-box] [vector-effect:non-scaling-stroke] motion-reduce:transition-none";
 
 /**
  * Trailing chevron for "learn more" links (transitions.dev #24): on hover it
@@ -20,7 +20,7 @@ export function LearnMoreChevron({ className }: LearnMoreChevronProps) {
     <span
       aria-hidden="true"
       className={cn(
-        "inline-flex transition-transform duration-[350ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/learn:translate-x-0.5 motion-reduce:transition-none",
+        "inline-flex transition-transform duration-[350ms] ease-out group-hover/learn:translate-x-0.5 motion-reduce:transition-none",
         className,
       )}
     >

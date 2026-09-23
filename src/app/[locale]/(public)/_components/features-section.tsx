@@ -36,7 +36,10 @@ export async function FeaturesSection() {
   const [aiDiagnosis, protectedPayments, realGuarantees] = LANDING_FEATURES;
   if (!aiDiagnosis || !protectedPayments || !realGuarantees) return null;
 
-  const priceRange = `${formatMxnFromCents(locale, LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS.min)} – ${formatMxnFromCents(locale, LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS.max)}`;
+  const priceRange = t("aiDiagnosis.sample.rangeValue", {
+    min: formatMxnFromCents(locale, LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS.min),
+    max: formatMxnFromCents(locale, LANDING_SAMPLE_DIAGNOSIS_RANGE_CENTS.max),
+  });
 
   return (
     <section
@@ -51,7 +54,7 @@ export async function FeaturesSection() {
           subtitle={t("subtitle")}
         />
 
-        <BentoGrid className="mt-14 auto-rows-auto grid-cols-1 gap-4 lg:grid-cols-3">
+        <BentoGrid className="mt-12 auto-rows-auto grid-cols-1 gap-4 lg:grid-cols-3">
           <Reveal className="h-full lg:col-span-2" delayMs={LANDING_STAGGER_MS}>
             <BentoCard
               Icon={aiDiagnosis.icon}
@@ -109,7 +112,7 @@ export async function FeaturesSection() {
                   {LANDING_GUARANTEES.map((guarantee) => (
                     <li
                       key={guarantee.key}
-                      className="bg-background/60 text-foreground inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm"
+                      className="bg-canvas-soft text-copy-sm text-foreground rounded-pill inline-flex items-center gap-1.5 border px-3 py-1.5"
                     >
                       <guarantee.icon
                         aria-hidden="true"
@@ -122,7 +125,7 @@ export async function FeaturesSection() {
                 <a
                   href={`#${LANDING_ANCHORS.guarantees}`}
                   className={cn(
-                    "group/learn text-foreground inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md text-sm font-medium underline-offset-4 hover:underline",
+                    "group/learn text-copy-sm text-link-deep inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-sm font-medium underline-offset-4 hover:underline",
                     focusRingClass,
                   )}
                 >

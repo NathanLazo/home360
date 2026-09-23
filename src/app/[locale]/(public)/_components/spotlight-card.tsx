@@ -71,13 +71,12 @@ export function SpotlightCard({
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       className={cn(
-        "group/spotlight bg-card text-card-foreground relative isolate rounded-xl border",
-        // Lift on `translate`, shadow on a pseudo-element's opacity: nothing
-        // here repaints layout. Tailwind 4 already gates `hover:` to devices
-        // that can hover.
+        "group/spotlight bg-card text-card-foreground shadow-soft relative isolate rounded-lg",
+        // Lift on `translate`, elevation from L3 to L4 on hover: nothing here
+        // touches layout. Tailwind 4 already gates `hover:` to devices that
+        // can hover.
         lift &&
-          "transition-[translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1",
-        "after:pointer-events-none after:absolute after:inset-0 after:-z-20 after:rounded-[inherit] after:opacity-0 after:shadow-[0_24px_48px_-28px_rgb(0_0_0/0.45)] after:transition-opacity after:duration-200 hover:after:opacity-100",
+          "hover:shadow-float transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5",
         "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className,
       )}

@@ -5,23 +5,21 @@ import { HeroSubtitle } from "./hero-subtitle";
 import { HeroVisual } from "./hero-visual";
 import { HeroVisualStage } from "./hero-visual-stage";
 import { LANDING_ANCHORS } from "./landing-data";
-import {
-  containerClass,
-  displayTitleClass,
-  focusRingClass,
-  pressClass,
-} from "./landing-styles";
+import { containerClass, heroTitleClass } from "./landing-styles";
 import { MetalCta } from "./metal-cta";
 import { MetalNewBadge } from "./metal-new-badge";
 import { Reveal } from "./reveal";
 import { SplitHeading } from "./split-heading";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 /**
- * Opening band. One authored sequence, not scattered effects: announcement
- * (0 ms) → headline rising word by word out of its masks (80 ms) → subtitle
- * blurring in (420 ms) → CTAs (560 ms) → the custody console, which then
- * comes forward with the scroll.
+ * Opening band over the brand mesh. One authored sequence, not scattered
+ * effects: announcement (0 ms) → headline rising word by word out of its
+ * masks (80 ms) → subtitle blurring in (420 ms) → CTAs (560 ms) → the custody
+ * console, which then comes forward with the scroll.
+ *
+ * The top padding clears the floating glass nav (12 px inset + 64 px dock).
  */
 export async function HeroSection() {
   const t = await getTranslations("landing.hero");
@@ -33,11 +31,11 @@ export async function HeroSection() {
       <div
         className={cn(
           containerClass,
-          "flex flex-col items-center pt-20 text-center sm:pt-24 lg:pt-32",
+          "flex flex-col items-center pt-32 text-center sm:pt-36 lg:pt-44",
         )}
       >
         <Reveal durationMs={500}>
-          <p className="bg-card/80 text-muted-foreground inline-flex items-center gap-3 rounded-full border py-1 pr-4 pl-1 text-sm shadow-[0_1px_2px_rgb(0_0_0/0.04)] backdrop-blur-sm">
+          <p className="bg-canvas/80 text-copy-sm text-muted-foreground rounded-pill shadow-subtle inline-flex items-center gap-3 py-1 pr-4 pl-1">
             <MetalNewBadge label={t("badgeNew")} />
             {t("badge")}
           </p>
@@ -47,30 +45,23 @@ export async function HeroSection() {
           as="h1"
           text={t("title")}
           delayMs={80}
-          className={cn(displayTitleClass, "mt-8 max-w-[17ch] sm:max-w-5xl")}
+          className={cn(heroTitleClass, "mt-8 max-w-[17ch] sm:max-w-4xl")}
         />
 
-        <HeroSubtitle text={t("subtitle")} className="mx-auto mt-7" />
+        <HeroSubtitle text={t("subtitle")} className="mx-auto mt-6" />
 
         <Reveal delayMs={560} durationMs={500}>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
             <MetalCta href="/register" label={t("ctaPrimary")} />
-            <a
-              href={`#${LANDING_ANCHORS.howItWorks}`}
-              className={cn(
-                "text-foreground hover:bg-foreground/5 inline-flex h-12 items-center rounded-full px-6 text-base font-medium",
-                pressClass,
-                focusRingClass,
-              )}
-            >
-              {t("ctaSecondary")}
-            </a>
+            <Button asChild variant="secondary" size="pill">
+              <a href={`#${LANDING_ANCHORS.howItWorks}`}>{t("ctaSecondary")}</a>
+            </Button>
           </div>
         </Reveal>
       </div>
 
-      <div className={cn(containerClass, "mt-16 pb-24 sm:mt-20 lg:pb-32")}>
-        <Reveal delayMs={700} durationMs={700}>
+      <div className={cn(containerClass, "mt-16 pb-20 sm:mt-20 lg:pb-28")}>
+        <Reveal delayMs={700} durationMs={600}>
           <HeroVisualStage>
             <div className="mx-auto max-w-5xl">
               <HeroVisual />

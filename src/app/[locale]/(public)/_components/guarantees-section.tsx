@@ -50,10 +50,10 @@ export async function GuaranteesSection() {
             subtitle={t("subtitle")}
           />
           <Reveal delayMs={200}>
-            <div className="bg-card flex gap-4 rounded-xl border p-5">
+            <div className="bg-canvas shadow-soft flex gap-4 rounded-lg p-5">
               <span
                 aria-hidden="true"
-                className="bg-foreground text-background flex size-10 shrink-0 items-center justify-center rounded-full"
+                className="bg-primary text-primary-foreground flex size-10 shrink-0 items-center justify-center rounded-full"
               >
                 <VideoIcon className="size-[1.125rem]" />
               </span>

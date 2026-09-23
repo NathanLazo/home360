@@ -3,13 +3,13 @@ import { CheckIcon } from "lucide-react";
 import { LandingBeam } from "./landing-beam";
 import {
   dataLabelClass,
+  inkSurfaceClass,
   LANDING_BEAM_RADIUS,
-  focusRingClass,
-  pressClass,
   subheadingClass,
 } from "./landing-styles";
 import { MetalRecommendedPill } from "./metal-recommended-pill";
 import { SpotlightCard } from "./spotlight-card";
+import { Button } from "~/components/ui/button";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
@@ -27,8 +27,9 @@ type PricingCardProps = {
 };
 
 /**
- * A plan. The recommended one is the same card inverted through `.dark` — the
- * zinc dark tokens, not a special palette — and wears the silver ring on its
+ * A plan: canvas card on stacked shadows, 12 px radius. The recommended one
+ * is polarity-flipped to ink (the light-scope ink with `.dark` tokens for its
+ * content), carries the white CTA and wears the live silver ring on its
  * label. A quiet mono beam frames the whole card: the metal marks the label,
  * the beam marks the card, and neither ever wraps the other's element.
  */
@@ -47,9 +48,7 @@ export function PricingCard({
       lift={!highlighted}
       className={cn(
         "flex h-full flex-col gap-8 p-7",
-        highlighted
-          ? "dark border-foreground/20 bg-background"
-          : "bg-background",
+        highlighted && cn(inkSurfaceClass, "shadow-float"),
       )}
     >
       <div className="flex flex-col gap-5">
@@ -64,7 +63,7 @@ export function PricingCard({
           <span className="font-mono text-5xl font-medium tracking-[-0.04em] tabular-nums">
             {price}
           </span>
-          <span className="text-muted-foreground text-sm">{perMonth}</span>
+          <span className="text-copy-sm text-muted-foreground">{perMonth}</span>
         </p>
 
         <p className={cn(dataLabelClass, "text-muted-foreground")}>
@@ -76,7 +75,7 @@ export function PricingCard({
         {features.map((feature) => (
           <li
             key={feature}
-            className="text-foreground/85 flex items-start gap-2.5 text-[0.9375rem] leading-relaxed"
+            className="text-copy text-foreground/85 flex items-start gap-2.5"
           >
             <CheckIcon
               aria-hidden="true"
@@ -87,21 +86,24 @@ export function PricingCard({
         ))}
       </ul>
 
-      <Link
-        href="/register"
+      <Button
+        asChild
+        variant="secondary"
+        size="pill"
         className={cn(
-          "inline-flex h-12 items-center justify-center rounded-full px-6 text-base font-medium",
-          pressClass,
-          focusRingClass,
-          highlighted
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "bg-card text-foreground hover:bg-foreground/5 border",
+          "w-full",
+          // White CTA on the ink card: `foreground` is near-white inside the
+          // `.dark` scope, `background` near-black (≥ 15:1).
+          highlighted &&
+            "bg-foreground text-background hover:bg-foreground/90 hover:text-background border-transparent",
         )}
       >
-        {ctaLabel}
-        {/* Three identical CTAs would be ambiguous out of context. */}
-        <span className="sr-only"> {name}</span>
-      </Link>
+        <Link href="/register">
+          {ctaLabel}
+          {/* Three identical CTAs would be ambiguous out of context. */}
+          <span className="sr-only"> {name}</span>
+        </Link>
+      </Button>
     </SpotlightCard>
   );
 
@@ -114,10 +116,10 @@ export function PricingCard({
       theme="dark"
       strength={0.7}
       duration={4.2}
-      borderRadius={LANDING_BEAM_RADIUS.xl}
+      borderRadius={LANDING_BEAM_RADIUS.lg}
       allowOverflow
       // The frame lifts with the card so the beam never slides off its edge.
-      className="h-full transition-[translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="h-full transition-[translate] duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {card}
     </LandingBeam>
