@@ -93,8 +93,8 @@ home360/
 
 - **Un solo sistema** (Vercel-inspired, `DESIGN.md`): tokens ink/zinc, Geist (pesos
   ≤600), elevación apilada, primary de **metal líquido** y **Liquid Glass**. Por decisión
-  del owner la paleta `--brand-*` (navy/gold/cream/gray) y Fraunces están **retiradas**:
-  no se reintroducen en ningún sitio.
+  del owner la paleta `--brand-*` (navy/gold/cream/gray) está **retirada**; Fraunces
+  solo como acento editorial en headings de la landing.
 - `src/app/[locale]/(public)/**` → personalidad **Premium**: exclusivos `bg-mesh-hero`
   (solo hero), `text-display-hero`, `LandingBeam`, Magic UI, entradas por scroll.
 - `dashboard/**`, `admin/**`, `corporate/**`, auth → personalidad **Corporate**, sin
@@ -134,5 +134,5 @@ pnpm build
 - Foco visible, navegación completa por teclado, contraste AA verificado.
 - `prefers-reduced-motion` respetado sin pérdida de contenido ni layout.
 - Loading (skeleton con forma real), empty (CTA), error (reintento) y éxito implementados.
-- Frontera D7 intacta (sin `--brand-*` ni Fraunces; budgets de metal/glass); `pnpm typecheck`,
+- Frontera D7 intacta (sin `--brand-*`, Fraunces solo en acentos de landing; budgets de metal/glass); `pnpm typecheck`,
   `pnpm check` y `pnpm build` en verde.

@@ -67,7 +67,7 @@ neutra hay **un giro propio**: el primary es **metal líquido** (tinta con aro d
 cromo), y en los momentos firma el metal se sienta dentro de **Liquid Glass**.
 
 **Una sola personalidad, dos intensidades.** Por decisión del product owner la paleta
-de marca navy/gold/cream y Fraunces quedan **retiradas**. Landing, dashboard, admin,
+de marca navy/gold/cream queda **retirada**; Fraunces solo como acento editorial de la landing (palabras `*acento*` de headings display, `accentClass`). Landing, dashboard, admin,
 corporate y auth comparten los mismos tokens ink/zinc. La landing sube la intensidad
 (tipografía display grande, mesh gradient atmosférico solo en el hero, CTAs pill,
 beams) pero no tiene paleta propia.
@@ -117,6 +117,9 @@ la utilidad `bg-mesh-hero`. Es un fondo atmosférico a escala de hero, difuminad
 tenue. **Nunca** miniaturizado: ni en chips, iconos, botones, bordes ni texto
 (`background-clip: text` sigue prohibido).
 
+> Decisión del owner: el hero de la landing usa el mesh + CTA liquid metal `chromatic`
+> a plena intensidad, y las palabras de acento del título en Fraunces gris.
+
 ### Named Rules
 **La Regla del Color con Significado.** Un color, un significado. Azul = link/foco/info;
 rojo = error/destructivo; ámbar = advertencia; verde = éxito. Ninguno decora.
@@ -127,7 +130,7 @@ de cuerpo. El copy secundario usa `muted-foreground` (= `body`).
 ## 3. Typography
 
 **Una sola familia: Geist.** Geist Sans para todo; Geist Mono para etiquetas técnicas,
-eyebrows, código y cifras verificables. **Fraunces está prohibida** (y cualquier serif).
+eyebrows, código y cifras verificables. Excepción (decisión del owner): Fraunces solo como acento editorial de la landing (palabras `*acento*` de headings display, `accentClass`); fuera de la landing ninguna serif.
 Pesos 400 / 500 / 600 — **600 es el techo**; `font-bold`, `font-extrabold` y
 `font-black` están remapeados a 600 en `@theme` y `<b>/<strong>` renderizan 600.
 Sentence case siempre.
@@ -299,7 +302,7 @@ Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintent
 ## 10. Frontera D7 (actualizada)
 
 La frontera de **paletas** se cierra: por decisión del owner, `--brand-*`
-(navy/gold/cream/gray) y Fraunces quedan retirados y **la landing comparte el sistema
+(navy/gold/cream/gray) queda retirado y **la landing comparte el sistema
 ink/zinc**. Lo que sigue siendo exclusivo de `src/app/[locale]/(public)/**`: el mesh
 gradient (`bg-mesh-hero`), `text-display-hero`, `LandingBeam`, Magic UI y las entradas
 por scroll. Dashboard/admin/corporate/auth no los usan.
@@ -310,7 +313,7 @@ por scroll. Dashboard/admin/corporate/auth no los usan.
 valores sueltos · componer cifras en Geist Mono con `tabular-nums` · dar a cada
 pantalla una sola acción de metal decisiva · respetar los fallbacks de glass.
 
-**Don't:** Fraunces o cualquier serif · peso 700 · `--brand-*` · mesh gradient fuera
+**Don't:** serif fuera de los acentos de la landing · peso 700 · `--brand-*` · mesh gradient fuera
 del hero · glass sobre tablas/cards o glass sobre glass · más de 2 metales vivos ·
 `bg-*` sobre `metal-rim` · `mute` para copy esencial de 14 px · `transition: all` ·
 strings hardcodeados.

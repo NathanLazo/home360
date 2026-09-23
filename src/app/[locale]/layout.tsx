@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -11,8 +11,8 @@ import { routing } from "~/i18n/routing";
 import { TRPCReactProvider } from "~/trpc/react";
 
 /**
- * Geist is the only family (DESIGN.md §3): sans for everything, mono for
- * technical labels, eyebrows and verifiable figures. No display serif.
+ * Geist carries the product (DESIGN.md §3): sans for everything, mono for
+ * technical labels, eyebrows and verifiable figures.
  */
 const geist = Geist({
   subsets: ["latin"],
@@ -22,6 +22,18 @@ const geist = Geist({
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+});
+
+/**
+ * Editorial accent for the public landing only (owner's pick): the `*accent*`
+ * words inside display headings. Exposed as `--font-display`; product
+ * surfaces never use it.
+ */
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  axes: ["SOFT", "opsz"],
 });
 
 type LocaleLayoutProps = Readonly<{
@@ -63,7 +75,10 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${geist.variable} ${geistMono.variable}`}>
+    <html
+      lang={locale}
+      className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`}
+    >
       <body className="antialiased">
         <NextIntlClientProvider>
           <TRPCReactProvider>

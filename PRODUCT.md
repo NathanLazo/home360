@@ -4,7 +4,7 @@
 
 product
 
-> Excepción por superficie: `src/app/[locale]/(public)/**` (landing W1) opera en registro **brand** con mayor intensidad (display grande, mesh gradient solo en el hero, beams, CTAs pill), pero **sobre el mismo sistema ink/zinc** que la herramienta. Por decisión del product owner la paleta navy/gold/cream/gray y Fraunces están retiradas; D7 se reinterpreta en `DESIGN.md` §10.
+> Excepción por superficie: `src/app/[locale]/(public)/**` (landing W1) opera en registro **brand** con mayor intensidad (display grande, mesh gradient solo en el hero, beams, CTAs pill), pero **sobre el mismo sistema ink/zinc** que la herramienta. Por decisión del product owner la paleta navy/gold/cream/gray está retirada (Fraunces queda como acento editorial de la landing); D7 se reinterpreta en `DESIGN.md` §10.
 
 ## Users
 

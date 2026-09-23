@@ -160,7 +160,8 @@
     "loadingKpis": "Cargando indicadores…",
     "loadingChart": "Cargando gráfica de ingresos…",
     "loadingBranches": "Cargando órdenes por sucursal…",
-    "loadingOrders": "Cargando órdenes recientes…"
+    "loadingOrders": "Cargando órdenes recientes…",
+    "primaryAction": "Crear link de cobro"
   },
   "orderStatus": {
     "PENDING": "Pendiente",

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BanknoteArrowDownIcon, LinkIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { CreatePaymentLinkDialog } from "./create-payment-link-dialog";
 import { WithdrawDialog } from "./withdraw-dialog";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
+import { usePathname, useRouter } from "~/i18n/navigation";
 import { api } from "~/trpc/react";
 
 export function PaymentsHeaderActions({
@@ -21,6 +23,17 @@ export function PaymentsHeaderActions({
   const formatter = useFormatter();
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Deep link from the home's key action: open the create dialog once, then
+  // drop the param so a refresh or back navigation doesn't reopen it.
+  useEffect(() => {
+    if (searchParams.get("create") !== "link") return;
+    if (!isReadOnly) setLinkDialogOpen(true);
+    router.replace(pathname);
+  }, [searchParams, isReadOnly, router, pathname]);
 
   const connectQuery = api.payment.getConnectStatus.useQuery();
   const connectStatus =

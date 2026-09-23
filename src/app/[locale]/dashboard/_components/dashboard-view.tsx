@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { HomePrimaryAction } from "./home-primary-action";
 import { KpiRow } from "./kpi-row";
 import { OrdersByBranchList } from "./orders-by-branch-list";
 import { RecentOrdersTable } from "./recent-orders-table";
@@ -17,7 +18,11 @@ export function DashboardView({ branchId }: DashboardViewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={<HomePrimaryAction />}
+      />
       <KpiRow branchId={branchId} />
       <div className="grid items-stretch gap-4 xl:grid-cols-3">
         <WeeklyRevenueChart branchId={branchId} className="xl:col-span-2" />

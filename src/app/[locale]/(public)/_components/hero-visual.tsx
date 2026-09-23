@@ -29,7 +29,7 @@ import { cn } from "~/lib/utils";
  * inside the console is still.
  *
  * The console is framed by the page's signature spectral beam, the brightest
- * color below the hero mesh, kept off the metal CTA so the two effects never
+ * color below the hero, kept off the metal CTA so the two effects never
  * stack on one element.
  *
  * Client component because `AnimatedBeam` measures its endpoints through refs.

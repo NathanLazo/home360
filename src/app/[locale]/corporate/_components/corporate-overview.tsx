@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { CorporateKpiRow } from "./corporate-kpi-row";
+import { OverviewPrimaryAction } from "./overview-primary-action";
 import { RecentCorporateOrders } from "./recent-corporate-orders";
 import { PageHeader } from "~/components/page-header";
 
@@ -20,7 +21,11 @@ export function CorporateOverview({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={<OverviewPrimaryAction />}
+      />
       <CorporateKpiRow month={month} />
       <RecentCorporateOrders limit={recentLimit} />
     </div>
