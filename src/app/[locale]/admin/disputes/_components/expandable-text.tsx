@@ -95,7 +95,7 @@ export function ExpandableText({
             setExpanded((value) => !value);
           }}
           className={cn(
-            "text-foreground hover:bg-muted focus-visible:ring-ring -mx-2 inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none",
+            "text-foreground hover:bg-muted focus-visible:ring-ring -mx-2 inline-flex min-h-9 items-center gap-1 rounded-sm px-2 text-xs font-medium focus-visible:ring-2 focus-visible:outline-none",
             PRESS_CONTROL_CLASS,
           )}
         >

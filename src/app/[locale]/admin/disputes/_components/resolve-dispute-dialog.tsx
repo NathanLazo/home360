@@ -224,7 +224,9 @@ export function ResolveDisputeDialog({
           ) : null}
 
           {summary ? (
-            <p className="bg-muted rounded-lg p-3 text-sm">{summary}</p>
+            <p className="bg-canvas-soft rounded-md border p-3 text-sm">
+              {summary}
+            </p>
           ) : null}
         </div>
 

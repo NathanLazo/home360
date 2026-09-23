@@ -107,7 +107,7 @@ function EconomicsRow({
     <div
       className={
         highlighted
-          ? "grid grid-cols-4 gap-2 rounded-md bg-zinc-100 px-2 py-1.5 font-medium transition-colors duration-200 ease-out"
+          ? "bg-canvas-soft-2 grid grid-cols-4 gap-2 rounded-sm px-2 py-1.5 font-medium transition-colors duration-200 ease-out"
           : "grid grid-cols-4 gap-2 px-2 py-1.5 transition-colors duration-200 ease-out"
       }
     >
@@ -218,8 +218,7 @@ function TermsFormBody({
           tier,
           commissionPct,
           monthlyFeeCents,
-          maxLocations:
-            maxLocations.trim() === "" ? null : maxLocationsValue,
+          maxLocations: maxLocations.trim() === "" ? null : maxLocationsValue,
           accountManagerId: managerId === NO_MANAGER ? null : managerId,
           ...(request ? { requestId: request.id } : {}),
         })
@@ -244,7 +243,7 @@ function TermsFormBody({
     <>
       <div className="flex flex-col gap-4">
         {request ? (
-          <p className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm">
+          <p className="bg-canvas-soft flex items-center gap-2 rounded-md border p-3 text-sm">
             <InfoIcon
               aria-hidden="true"
               className="text-muted-foreground size-4 shrink-0"
@@ -266,7 +265,10 @@ function TermsFormBody({
                 applyTier(corporateTierSchema.parse(value))
               }
             >
-              <SelectTrigger id={`${baseId}-tier`} className="min-h-11 sm:min-h-10">
+              <SelectTrigger
+                id={`${baseId}-tier`}
+                className="min-h-11 sm:min-h-10"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -435,9 +437,9 @@ function TermsFormBody({
           aria-label={t("example.title", {
             ticket: currency(EXAMPLE_TICKET_CENTS),
           })}
-          className="flex flex-col gap-2 rounded-lg border p-3"
+          className="flex flex-col gap-2 rounded-md border p-3"
         >
-          <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("example.title", { ticket: currency(EXAMPLE_TICKET_CENTS) })}
           </h3>
           <div className="text-sm">
@@ -473,11 +475,11 @@ function TermsFormBody({
 
         <p
           role="note"
-          className="flex items-start gap-2 rounded-lg bg-zinc-100 p-3 text-sm text-zinc-700"
+          className="bg-canvas-soft-2 text-body flex items-start gap-2 rounded-md p-3 text-sm"
         >
           <InfoIcon
             aria-hidden="true"
-            className="mt-0.5 size-4 shrink-0 text-zinc-500"
+            className="text-muted-foreground mt-0.5 size-4 shrink-0"
           />
           {t("scopeNote")}
         </p>
@@ -495,7 +497,7 @@ function TermsFormBody({
         </Button>
         <Button
           type="button"
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          className="min-h-11 sm:min-h-10"
           disabled={loading || (submitted && !canSubmit)}
           onClick={() => {
             setSubmitted(true);
@@ -584,9 +586,9 @@ export function CorporateTermsForm({
 
         {!ready && !failed ? (
           <div className="flex flex-col gap-4" aria-busy="true">
-            <Skeleton className="h-10 w-full rounded-lg" />
-            <Skeleton className="h-24 w-full rounded-lg" />
-            <Skeleton className="h-32 w-full rounded-lg" />
+            <Skeleton className="h-10 w-full rounded-sm" />
+            <Skeleton className="h-24 w-full rounded-md" />
+            <Skeleton className="h-32 w-full rounded-md" />
           </div>
         ) : null}
 

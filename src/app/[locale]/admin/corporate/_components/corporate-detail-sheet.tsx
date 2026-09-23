@@ -48,7 +48,7 @@ function DetailSection({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {title}
       </h3>
       {children}
@@ -77,7 +77,7 @@ function DetailBody({
       </div>
 
       {detail.statusReason ? (
-        <p className="bg-muted text-muted-foreground rounded-lg p-3 text-sm">
+        <p className="bg-canvas-soft text-muted-foreground rounded-md border p-3 text-sm">
           {t("statusReason", { reason: detail.statusReason })}
         </p>
       ) : null}
@@ -183,7 +183,7 @@ function DetailBody({
             {detail.locations.map((location) => (
               <li
                 key={location.id}
-                className="flex items-center gap-3 rounded-lg border p-3 text-sm"
+                className="flex items-center gap-3 rounded-md border p-3 text-sm"
               >
                 <MapPinIcon
                   aria-hidden="true"
@@ -217,7 +217,7 @@ function DetailBody({
             {detail.orders.map((order) => (
               <li
                 key={order.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm"
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate font-medium">{order.title}</span>

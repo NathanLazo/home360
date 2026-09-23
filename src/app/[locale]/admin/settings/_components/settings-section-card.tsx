@@ -25,7 +25,9 @@ export function SettingsSectionCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>
+          <h2 className="text-display-sm">{title}</h2>
+        </CardTitle>
         <CardAction>
           <Icon aria-hidden="true" className="text-muted-foreground" />
         </CardAction>

@@ -90,7 +90,9 @@ export default async function AdminLayout({
           toggleSidebarLabel={t("header.toggleSidebar")}
           roleLabel={t("header.roleBadge")}
         />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <div className="bg-canvas-soft flex-1 p-4 sm:p-6 lg:p-8">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

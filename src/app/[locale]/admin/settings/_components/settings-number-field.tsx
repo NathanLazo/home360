@@ -66,7 +66,7 @@ export function SettingsNumberField({
         ) : null}
       </div>
       {error ? (
-        <p id={errorId} role="alert" className="text-destructive text-sm">
+        <p id={errorId} role="alert" className="text-error-deep text-sm">
           {error.message}
         </p>
       ) : hint ? (

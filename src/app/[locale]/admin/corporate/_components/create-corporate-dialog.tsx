@@ -249,10 +249,10 @@ function CreateFormBody({
           </div>
         </div>
 
-        <p className="flex items-start gap-2 rounded-lg bg-zinc-100 p-3 text-sm text-zinc-700">
+        <p className="bg-canvas-soft-2 text-body flex items-start gap-2 rounded-md p-3 text-sm">
           <MailIcon
             aria-hidden="true"
-            className="mt-0.5 size-4 shrink-0 text-zinc-500"
+            className="text-muted-foreground mt-0.5 size-4 shrink-0"
           />
           {t("invitationNote")}
         </p>
@@ -473,7 +473,7 @@ function CreateFormBody({
         </Button>
         <Button
           type="button"
-          className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+          className="min-h-11 sm:min-h-10"
           disabled={loading || (submitted && !canSubmit)}
           onClick={() => {
             setSubmitted(true);
@@ -540,9 +540,9 @@ export function CreateCorporateDialog({
 
         {tiers.status === "pending" || managers.status === "pending" ? (
           <div className="flex flex-col gap-4" aria-busy="true">
-            <Skeleton className="h-10 w-full rounded-lg" />
-            <Skeleton className="h-10 w-full rounded-lg" />
-            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-10 w-full rounded-sm" />
+            <Skeleton className="h-10 w-full rounded-sm" />
+            <Skeleton className="h-24 w-full rounded-md" />
           </div>
         ) : null}
 

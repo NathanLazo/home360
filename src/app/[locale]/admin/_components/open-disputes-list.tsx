@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import type { OpenDisputeItem } from "./overview.types";
 import { PRESS_SURFACE_CLASS } from "./admin-motion";
+import { ADMIN_LINK_CARD_CLASS, ADMIN_TONE_CLASS } from "./admin-surface";
 import { useCurrencyFormatter } from "./use-currency-formatter";
 import { EmptyState } from "~/components/empty-state";
 import { Badge } from "~/components/ui/badge";
@@ -13,8 +14,8 @@ import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
 const urgencyClasses = {
-  URGENT: "border-red-200 bg-red-50 text-red-700",
-  NORMAL: "border-amber-200 bg-amber-50 text-amber-800",
+  URGENT: ADMIN_TONE_CLASS.error,
+  NORMAL: ADMIN_TONE_CLASS.warning,
 } as const;
 
 export function OpenDisputesList({
@@ -34,11 +35,7 @@ export function OpenDisputesList({
         title={t("disputes.emptyTitle")}
         description={t("disputes.emptyDescription")}
         action={
-          <Button
-            asChild
-            variant="outline"
-            className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
-          >
+          <Button asChild variant="outline" className="min-h-11 sm:min-h-10">
             <Link href="/admin/disputes?status=resolved">
               {t("disputes.emptyCta")}
             </Link>
@@ -55,8 +52,9 @@ export function OpenDisputesList({
           <Link
             href={`/admin/disputes?dispute=${dispute.id}`}
             className={cn(
-              "bg-card focus-visible:ring-ring group flex items-center gap-4 rounded-xl border p-4 hover:border-zinc-300 hover:bg-zinc-50 focus-visible:ring-2 focus-visible:outline-none",
+              "focus-visible:ring-ring group focus-visible:ring-offset-background flex items-center gap-4 p-4 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
               PRESS_SURFACE_CLASS,
+              ADMIN_LINK_CARD_CLASS,
             )}
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1">

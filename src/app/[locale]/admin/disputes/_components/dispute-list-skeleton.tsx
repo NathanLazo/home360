@@ -15,7 +15,7 @@ export function DisputeListSkeleton({
         <div
           key={index}
           aria-hidden="true"
-          className="bg-card flex flex-col gap-2.5 rounded-xl border p-4"
+          className="bg-card shadow-subtle flex flex-col gap-2.5 rounded-md p-4"
         >
           <div className="flex items-center justify-between gap-3">
             <Skeleton className="h-4 w-40 max-w-full" />

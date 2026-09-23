@@ -18,7 +18,7 @@ export function CorporateTierBadge({ tier }: { tier: CorporateTierValue }) {
       variant="outline"
       className={cn(
         "font-normal",
-        tier === "CUSTOM" && "border-zinc-300 bg-zinc-100 text-zinc-800",
+        tier === "CUSTOM" && "bg-canvas-soft-2 text-ink border-hairline-strong",
       )}
     >
       {t(tier)}

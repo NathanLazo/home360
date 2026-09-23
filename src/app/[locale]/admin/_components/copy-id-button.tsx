@@ -39,7 +39,7 @@ export function CopyIdButton({
         aria-label={t("copyId")}
         title={t("copyId")}
         className={cn(
-          "text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 font-mono text-xs tabular-nums focus-visible:ring-2 focus-visible:outline-none",
+          "text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-ring inline-flex min-h-9 items-center gap-1.5 rounded-sm px-2 font-mono text-xs tabular-nums focus-visible:ring-2 focus-visible:outline-none",
           PRESS_CONTROL_CLASS,
           className,
         )}
@@ -47,7 +47,7 @@ export function CopyIdButton({
         <IconSwap
           swapped={copied}
           from={<CopyIcon className="size-3.5" />}
-          to={<CheckIcon className="size-3.5 text-emerald-600" />}
+          to={<CheckIcon className="text-success-deep size-3.5" />}
         />
         <span className="max-w-32 truncate">{value}</span>
       </button>

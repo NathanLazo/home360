@@ -23,10 +23,10 @@ export function DisputeArguments({
 
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
-      <figure className="border-l-2 border-zinc-900 pl-4">
+      <figure className="border-ink border-l-2 pl-4">
         <DisputePartyCaption party={customer} role={t("customer")} />
         <blockquote className="mt-2">
           <ExpandableText
@@ -37,7 +37,7 @@ export function DisputeArguments({
           />
         </blockquote>
       </figure>
-      <figure className="border-l-2 border-zinc-300 pl-4">
+      <figure className="border-hairline-strong border-l-2 pl-4">
         <DisputePartyCaption party={business} role={t("business")} />
         <blockquote className="mt-2">
           {businessArgument === null ? (

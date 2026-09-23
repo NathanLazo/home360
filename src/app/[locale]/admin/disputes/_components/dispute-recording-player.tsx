@@ -35,12 +35,11 @@ export function DisputeRecordingPlayer({
   }
 
   const minutes = durationSec === null ? null : Math.floor(durationSec / 60);
-  const seconds =
-    durationSec === null ? null : Math.round(durationSec % 60);
+  const seconds = durationSec === null ? null : Math.round(durationSec % 60);
 
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
       {/* A user-generated service recording has no caption track available. */}
@@ -48,7 +47,7 @@ export function DisputeRecordingPlayer({
         controls
         preload="metadata"
         src={recordingUrl}
-        className="w-full rounded-xl outline outline-black/10"
+        className="bg-ink w-full rounded-lg outline outline-black/10"
         onLoadedMetadata={(event) =>
           setDurationSec(event.currentTarget.duration)
         }

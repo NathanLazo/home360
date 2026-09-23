@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AnimatedTabsList } from "../../_components/animated-tabs-list";
+import { ADMIN_TABLE_CARD_CLASS } from "../../_components/admin-surface";
 import { ClearFiltersButton } from "../../_components/clear-filters-button";
 import { useSuccessBeat } from "../../_components/use-success-beat";
 import { BusinessDetailActions } from "./business-detail-actions";
@@ -128,7 +129,7 @@ export function UsersView() {
       ) : null}
 
       {query.state.status === "success" ? (
-        <Card className="overflow-hidden py-0">
+        <Card className={ADMIN_TABLE_CARD_CLASS}>
           <CardContent className="px-0">
             {query.state.page.tab === "businesses" ? (
               <BusinessesTable
@@ -158,7 +159,7 @@ export function UsersView() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+                className="min-h-11 sm:min-h-10"
                 disabled={query.loadingMore}
                 onClick={query.loadMore}
               >

@@ -14,7 +14,7 @@ export function SettingsSkeleton({ label }: { label?: string }) {
       {SECTION_FIELD_COUNTS.map((fields, sectionIndex) => (
         <Card key={sectionIndex} aria-hidden="true">
           <CardHeader className="grid-cols-[1fr_auto]">
-            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-5 w-40" />
             <Skeleton className="col-start-2 row-span-2 row-start-1 size-4 rounded" />
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
@@ -23,7 +23,7 @@ export function SettingsSkeleton({ label }: { label?: string }) {
               {Array.from({ length: fields }, (_, fieldIndex) => (
                 <div key={fieldIndex} className="flex flex-col gap-2">
                   <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-9 w-full rounded-md" />
+                  <Skeleton className="h-10 w-full rounded-sm" />
                   <Skeleton className="h-3 w-40" />
                 </div>
               ))}
@@ -32,13 +32,13 @@ export function SettingsSkeleton({ label }: { label?: string }) {
         </Card>
       ))}
       <div
-        className="flex items-center justify-between gap-3 border-t py-4"
+        className="bg-card shadow-float flex items-center justify-between gap-3 rounded-lg p-3"
         aria-hidden="true"
       >
         <Skeleton className="h-4 w-36" />
         <div className="flex gap-2">
-          <Skeleton className="h-10 w-24 rounded-md" />
-          <Skeleton className="h-10 w-36 rounded-md" />
+          <Skeleton className="h-10 w-24 rounded-sm" />
+          <Skeleton className="h-10 w-36 rounded-sm" />
         </div>
       </div>
     </div>

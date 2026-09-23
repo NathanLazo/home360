@@ -19,7 +19,7 @@ export function DisputePartyCaption({
   return (
     <figcaption className="flex items-center gap-2">
       <UserAvatar seed={party.id} name={name} size={24} />
-      <span className="text-xs font-semibold tracking-wide uppercase">
+      <span className="text-label font-mono font-medium tracking-wide uppercase">
         {role}
       </span>
       <span className="text-muted-foreground min-w-0 truncate text-xs">

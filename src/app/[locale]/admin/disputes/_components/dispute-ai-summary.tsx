@@ -13,17 +13,17 @@ export function DisputeAiSummary({ summary }: { summary: string | null }) {
   }
 
   return (
-    <Card className="border-zinc-900/20 bg-zinc-50">
+    <Card className="bg-link-soft/40 border-link-soft">
       <CardContent className="flex gap-3">
         <SparklesIcon
           aria-hidden="true"
-          className="text-muted-foreground mt-0.5 size-4 shrink-0"
+          className="text-link-deep mt-0.5 size-4 shrink-0"
         />
         <div className="flex flex-col gap-1">
-          <p className="text-xs font-semibold tracking-wide uppercase">
+          <p className="text-link-deep text-label font-mono font-medium tracking-wide uppercase">
             {t("title")}
           </p>
-          <p className="text-muted-foreground text-sm">{summary}</p>
+          <p className="text-body text-sm text-pretty">{summary}</p>
         </div>
       </CardContent>
     </Card>

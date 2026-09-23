@@ -52,26 +52,36 @@ function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
       <CardContent>
         <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("escrow")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("escrow")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.amountCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("commission")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("commission")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.commissionCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("refunded")}</dt>
-            <dd className="font-mono font-semibold tabular-nums">
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("refunded")}
+            </dt>
+            <dd className="font-mono text-sm font-semibold tabular-nums">
               {currency(payment.refundedCents)}
             </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground text-xs">{t("status")}</dt>
-            <dd className="font-medium">{paymentStatusT(payment.status)}</dd>
+            <dt className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+              {t("status")}
+            </dt>
+            <dd className="text-copy-sm font-medium">
+              {paymentStatusT(payment.status)}
+            </dd>
           </div>
         </dl>
       </CardContent>
@@ -149,16 +159,14 @@ export function DisputeDetail({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0 transition-transform duration-150 ease-out active:scale-[0.96] xl:hidden"
+          className="size-9 shrink-0 xl:hidden"
           aria-label={t("back")}
           onClick={onBack}
         >
           <ArrowLeftIcon aria-hidden="true" />
         </Button>
         <div className="min-w-0">
-          <h2 className="text-xl font-semibold tracking-tight text-balance">
-            {dispute.title}
-          </h2>
+          <h2 className="text-display-sm text-balance">{dispute.title}</h2>
           <p className="text-muted-foreground text-sm">
             {t("subtitle", {
               folio: dispute.order.folio,
@@ -189,7 +197,7 @@ export function DisputeDetail({
 
       {dispute.resolutionNotes ? (
         <section className="flex flex-col gap-2">
-          <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
             {t("resolutionNotes")}
           </h3>
           <p className="text-muted-foreground text-sm">

@@ -13,7 +13,7 @@ export function RevenueBreakdownSkeleton({ label }: { label?: string }) {
       <Card aria-busy="true" role="status">
         {label ? <span className="sr-only">{label}</span> : null}
         <CardHeader aria-hidden="true">
-          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent className="flex flex-col gap-3" aria-hidden="true">
           <div className="flex h-64 items-end justify-between gap-3 border-b pb-2 sm:h-72">
@@ -29,7 +29,7 @@ export function RevenueBreakdownSkeleton({ label }: { label?: string }) {
       </Card>
       <Card aria-hidden="true">
         <CardHeader>
-          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-5 w-32" />
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Skeleton className="mx-auto aspect-square w-full max-w-52 rounded-full" />

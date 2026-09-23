@@ -37,7 +37,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
 
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+      <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
         {t("title")}
       </h3>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -68,7 +68,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="focus-visible:ring-ring group block overflow-hidden rounded-lg outline outline-black/10 focus-visible:ring-2 focus-visible:outline-none"
+                className="focus-visible:ring-ring group block overflow-hidden rounded-md outline outline-black/10 focus-visible:ring-2 focus-visible:outline-none"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element -- evidence
                     lives on arbitrary external hosts, outside the image loader. */}
@@ -89,7 +89,7 @@ export function DisputeEvidenceGrid({ urls }: { urls: string[] }) {
               aria-label={t("showAll", { count: urls.length })}
               onClick={() => setExpanded(true)}
               className={cn(
-                "bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring flex aspect-square w-full items-center justify-center rounded-lg font-mono text-sm font-medium tabular-nums hover:bg-zinc-200/70 focus-visible:ring-2 focus-visible:outline-none",
+                "bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-ring hover:bg-canvas-soft-2 flex aspect-square w-full items-center justify-center rounded-md font-mono text-sm font-medium tabular-nums focus-visible:ring-2 focus-visible:outline-none",
                 PRESS_CONTROL_CLASS,
               )}
             >

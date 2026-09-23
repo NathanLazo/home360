@@ -112,9 +112,9 @@ export function ApproveBusinessDialog({
 
         {detail.status === "pending" ? (
           <div className="flex flex-col gap-4" aria-busy="true">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-10 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-md" />
+            <Skeleton className="h-16 w-full rounded-md" />
+            <Skeleton className="h-10 w-full rounded-sm" />
           </div>
         ) : null}
 
@@ -129,7 +129,7 @@ export function ApproveBusinessDialog({
         {business ? (
           <div className="flex flex-col gap-5">
             <section className="flex flex-col gap-2">
-              <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
                 {t("guarantee")}
               </h3>
               <GuaranteeBadge guaranteeType={business.guaranteeType} />
@@ -141,7 +141,7 @@ export function ApproveBusinessDialog({
             </section>
 
             <section className="flex flex-col gap-2">
-              <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              <h3 className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
                 {t("documents")}
               </h3>
               {business.documents.length === 0 ? (
@@ -165,7 +165,7 @@ export function ApproveBusinessDialog({
             <section className="flex flex-col gap-2">
               <Label htmlFor="approve-plan">{t("plan")}</Label>
               {plans.status === "pending" ? (
-                <Skeleton className="h-10 w-full rounded-lg" />
+                <Skeleton className="h-10 w-full rounded-sm" />
               ) : null}
               {plans.status === "error" ? (
                 <SectionError
@@ -218,7 +218,7 @@ export function ApproveBusinessDialog({
           </Button>
           <Button
             type="button"
-            className="min-h-11 transition-transform duration-150 ease-out active:scale-[0.96] sm:min-h-10"
+            className="min-h-11 sm:min-h-10"
             disabled={loading || !business || planCode === null}
             aria-disabled={succeeded || undefined}
             onClick={() => {
