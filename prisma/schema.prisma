@@ -773,6 +773,11 @@ model CorporateLocation {
   city               String
   contactName        String?
   contactPhone       String?
+  // CorporateLocation geo (workstream D): requests raised from a location
+  // copy these so the radar (Haversine) can match nearby providers. Null
+  // until geocoded; such requests are not visible on the radar.
+  latitude           Float?
+  longitude          Float?
   isActive           Boolean          @default(true)
   orders             Order[]
   serviceRequests    ServiceRequest[]
