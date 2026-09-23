@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 
 /**
  * Shared contract for `admin.corporate` (F7-03/F7-04): the router validates
@@ -49,7 +50,7 @@ export const CORPORATE_TAB_STATUS: Record<
   cancelled: "CANCELLED",
 };
 
-const accountIdSchema = z.string().cuid();
+const accountIdSchema = recordIdSchema;
 const commissionPctSchema = z.number().int().min(0).max(100);
 const monthlyFeeCentsSchema = z.number().int().min(0);
 const maxLocationsSchema = z.number().int().positive().nullable();
@@ -63,7 +64,7 @@ export const listCorporateAccountsSchema = z
     status: corporateStatusSchema.optional(),
     tier: corporateTierSchema.optional(),
     search: z.string().trim().max(100).optional(),
-    cursor: z.string().cuid().optional(),
+    cursor: recordIdSchema.optional(),
     direction: infiniteQueryDirectionSchema,
   })
   .strict();
@@ -87,7 +88,7 @@ export const createCorporateAccountSchema = z
     commissionPct: commissionPctSchema.optional(),
     monthlyFeeCents: monthlyFeeCentsSchema.optional(),
     maxLocations: maxLocationsSchema.optional(),
-    accountManagerId: z.string().cuid().optional(),
+    accountManagerId: recordIdSchema.optional(),
     locale: emailLocaleSchema,
   })
   .strict();
@@ -107,9 +108,9 @@ export const updateCorporateTermsSchema = z
     commissionPct: commissionPctSchema,
     monthlyFeeCents: monthlyFeeCentsSchema,
     maxLocations: maxLocationsSchema,
-    accountManagerId: z.string().cuid().nullish(),
+    accountManagerId: recordIdSchema.nullish(),
     /** Present when the change approves a pending tier-change request. */
-    requestId: z.string().cuid().optional(),
+    requestId: recordIdSchema.optional(),
   })
   .strict();
 
@@ -131,7 +132,7 @@ export const reactivateCorporateAccountSchema = z
 export const rejectTierChangeSchema = z
   .object({
     accountId: accountIdSchema,
-    requestId: z.string().cuid(),
+    requestId: recordIdSchema,
     reason: corporateReasonSchema,
   })
   .strict();
