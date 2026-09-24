@@ -30,6 +30,18 @@ import {
 } from "~/app/[locale]/admin/finance/_components/finance.schema";
 import { listCampaignsSchema } from "~/app/[locale]/admin/settings/_components/campaigns.schema";
 import {
+  adminListBusinessTransactionsSchema,
+  getBusinessFinanceSchema,
+  getWithdrawalSchema,
+} from "~/schemas/admin/business-finance.schema";
+import {
+  getPayoutReceiptUrlSchema,
+  listPayoutReceiptsSchema,
+  PAYOUT_RECEIPT_CONTENT_TYPES,
+  PAYOUT_RECEIPT_MAX_FILES,
+  type PayoutReceiptContentType,
+} from "~/schemas/admin/payout-receipt.schema";
+import {
   approveBusinessSchema,
   getBusinessDetailSchema,
   getCustomerDetailSchema,
@@ -42,14 +54,65 @@ import {
   suspendBusinessSchema,
   suspendUserSchema,
 } from "~/app/[locale]/admin/users/_components/users.schema";
-import { runTool, type AgentCaller } from "../tool-runtime";
+import type { AgentAttachmentStore } from "../agent-attachments";
+import {
+  runTool,
+  type AgentCaller,
+  type AgentToolFailure,
+} from "../tool-runtime";
+
+const registerPaymentReceiptsSchema = z.object({
+  withdrawalId: z
+    .string()
+    .cuid()
+    .optional()
+    .describe("Withdrawal the receipts prove; exclusive with loyaltyBonusId"),
+  loyaltyBonusId: z
+    .string()
+    .cuid()
+    .optional()
+    .describe("Loyalty bonus the receipts prove; exclusive with withdrawalId"),
+  filenames: z
+    .array(z.string().trim().min(1).max(200))
+    .min(1)
+    .max(PAYOUT_RECEIPT_MAX_FILES)
+    .describe("Exact filenames of attachments in this conversation"),
+  notes: z.string().trim().max(500).optional(),
+});
+
+function isReceiptContentType(
+  value: string,
+): value is PayoutReceiptContentType {
+  return (PAYOUT_RECEIPT_CONTENT_TYPES as readonly string[]).includes(value);
+}
+
+function attachmentFailure(
+  missing: string[],
+  available: string[],
+): AgentToolFailure {
+  return {
+    result: null,
+    error: "ATTACHMENT_NOT_FOUND",
+    status: 404,
+    message: `No attachment named: ${missing.join(", ")}. Available in this conversation: ${
+      available.length > 0 ? available.join(", ") : "none"
+    }. Ask the user to attach the receipt files.`,
+  };
+}
 
 /**
  * Platform admin catalog. Every write is already audited by the admin
  * services (`writeAdminAudit`). Impersonation, platform settings, campaigns
  * and CSV exports are intentionally excluded: they stay in the UI.
+ *
+ * `attachments` are the files the admin attached in the chat, keyed by
+ * filename; only the receipt tools read them, and their base64 body never
+ * enters the model context.
  */
-export function createAdminTools(caller: AgentCaller) {
+export function createAdminTools(
+  caller: AgentCaller,
+  attachments: AgentAttachmentStore,
+) {
   return {
     // Overview
     getPlatformKpis: tool({
@@ -228,6 +291,27 @@ export function createAdminTools(caller: AgentCaller) {
       execute: (input) =>
         runTool(() => caller.admin.finance.rejectWithdrawal(input)),
     }),
+    getBusinessFinance: tool({
+      description:
+        "Full financial file of one business: available balance (what the platform owes it), escrow held, month sales and commission, Stripe payout readiness, pending withdrawal requests with bank and last-4 destination, and its last approved payout. Start here for 'how is this business doing' or 'how much do we owe them'.",
+      inputSchema: getBusinessFinanceSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.finance.getBusinessFinance(input)),
+    }),
+    getWithdrawal: tool({
+      description:
+        "One withdrawal request in full: amount, destination bank account (name and last 4 digits), Stripe payout account and payout id, status, business payout readiness and the payment receipts already registered against it.",
+      inputSchema: getWithdrawalSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.finance.getWithdrawal(input)),
+    }),
+    listBusinessSales: tool({
+      description:
+        "Paginated sales ledger (payments) of one business, newest first, with status and method filters: gross, provider net, commission, refunds and escrow release dates per payment.",
+      inputSchema: adminListBusinessTransactionsSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.finance.listBusinessTransactions(input)),
+    }),
     listLoyaltyBonuses: tool({
       description: "Loyalty bonuses per business with status filter.",
       inputSchema: listLoyaltyBonusesSchema,
@@ -246,6 +330,103 @@ export function createAdminTools(caller: AgentCaller) {
       inputSchema: cancelLoyaltyBonusSchema,
       execute: (input) =>
         runTool(() => caller.admin.finance.cancelLoyaltyBonus(input)),
+    }),
+
+    // Payment receipts
+    listChatAttachments: tool({
+      description:
+        "Files the admin attached in this conversation (name, type, size). Use it to pick the exact filenames before registering payment receipts.",
+      inputSchema: z.object({}),
+      execute: () =>
+        runTool(() =>
+          Promise.resolve({
+            result: {
+              attachments: [...attachments.values()].map(
+                ({ filename, mediaType, sizeBytes }) => ({
+                  filename,
+                  mediaType,
+                  sizeBytes,
+                }),
+              ),
+            },
+            error: null,
+            status: 200,
+            message: "Conversation attachments listed",
+          }),
+        ),
+    }),
+    registerPaymentReceipts: tool({
+      description:
+        "Register payment receipt files (JPEG, PNG, WebP or PDF) attached in this conversation as proof of a transfer, against exactly one withdrawal or loyalty bonus. Pass the exact attachment filenames. Files are stored privately and linked to the payout; the action is audited. Confirm target and files with the user first.",
+      inputSchema: registerPaymentReceiptsSchema,
+      execute: (input) => {
+        const missing = input.filenames.filter(
+          (filename) => !attachments.has(filename),
+        );
+
+        if (missing.length > 0) {
+          return Promise.resolve(
+            attachmentFailure(missing, [...attachments.keys()]),
+          );
+        }
+
+        const files: Array<{
+          filename: string;
+          contentType: PayoutReceiptContentType;
+          dataBase64: string;
+        }> = [];
+        const unsupported: string[] = [];
+
+        for (const filename of input.filenames) {
+          const attachment = attachments.get(filename);
+
+          if (!attachment) {
+            continue;
+          }
+
+          if (isReceiptContentType(attachment.mediaType)) {
+            files.push({
+              filename: attachment.filename,
+              contentType: attachment.mediaType,
+              dataBase64: attachment.dataBase64,
+            });
+          } else {
+            unsupported.push(filename);
+          }
+        }
+
+        if (unsupported.length > 0) {
+          return Promise.resolve({
+            result: null,
+            error: "UNSUPPORTED_RECEIPT_TYPE",
+            status: 400,
+            message: `Only JPEG, PNG, WebP and PDF receipts are accepted. Rejected: ${unsupported.join(", ")}.`,
+          } satisfies AgentToolFailure);
+        }
+
+        return runTool(() =>
+          caller.admin.finance.registerPayoutReceipts({
+            withdrawalId: input.withdrawalId,
+            loyaltyBonusId: input.loyaltyBonusId,
+            notes: input.notes,
+            files,
+          }),
+        );
+      },
+    }),
+    listPaymentReceipts: tool({
+      description:
+        "Registered payment receipts, newest first, filterable by withdrawal, loyalty bonus or business.",
+      inputSchema: listPayoutReceiptsSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.finance.listPayoutReceipts(input)),
+    }),
+    getReceiptDownloadUrl: tool({
+      description:
+        "Short-lived signed download URL for one registered payment receipt.",
+      inputSchema: getPayoutReceiptUrlSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.finance.getPayoutReceiptUrl(input)),
     }),
 
     // Corporate accounts
