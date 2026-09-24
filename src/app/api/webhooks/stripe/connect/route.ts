@@ -5,7 +5,10 @@ import { handleStripeWebhook } from "~/server/services/stripe/webhook-route";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Platform-account events: checkout, escrow, refunds, Billing invoices. */
+/**
+ * Connected-account events (Express onboarding `account.updated`, payouts).
+ * Stripe signs them with the Connect endpoint secret, not the platform one.
+ */
 export async function POST(req: Request): Promise<Response> {
-  return handleStripeWebhook(req, env.STRIPE_WEBHOOK_SECRET, "platform");
+  return handleStripeWebhook(req, env.STRIPE_CONNECT_WEBHOOK_SECRET, "connect");
 }

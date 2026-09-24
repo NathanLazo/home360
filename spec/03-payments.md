@@ -69,7 +69,14 @@ Todos reciben `stripe` y `db` por parámetro (inyección para tests):
 
 ## 5. Webhooks — `src/app/api/webhooks/stripe/route.ts`
 
-- Verificación de firma con `STRIPE_WEBHOOK_SECRET` sobre el raw body.
+- Dos endpoints en Stripe, un secreto por endpoint, mismo dispatcher
+  (`services/stripe/webhook-route.ts`):
+  - `/api/webhooks/stripe` — eventos de la cuenta plataforma, firma con
+    `STRIPE_WEBHOOK_SECRET`.
+  - `/api/webhooks/stripe/connect` — eventos de cuentas conectadas (endpoint
+    `connect: true`: `account.updated`, `payout.failed`, `payout.canceled`), firma con
+    `STRIPE_CONNECT_WEBHOOK_SECRET`.
+- Verificación de firma sobre el raw body.
 - Handlers **idempotentes** (cada uno re-consulta estado antes de escribir; los eventos
   duplicados no dobletean):
   - `payment_intent.succeeded` → `capturePayment` (crea/actualiza Payment IN_ESCROW,
