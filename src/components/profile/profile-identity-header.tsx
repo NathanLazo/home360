@@ -32,7 +32,7 @@ export function ProfileIdentityHeader({
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p className="text-display-md truncate">{name}</p>
-          <span className="bg-metal text-ink rounded-pill px-2.5 py-0.5 text-xs font-medium">
+          <span className="bg-metal text-on-metal rounded-pill px-2.5 py-0.5 text-xs font-medium">
             {roles(profile.role)}
           </span>
         </div>

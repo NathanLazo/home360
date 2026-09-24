@@ -48,7 +48,7 @@ export function AdminHeader({
       }
     >
       <AppShellBreadcrumb {...breadcrumb} />
-      <span className="bg-metal text-ink shadow-hairline ml-1 inline-flex h-5 shrink-0 items-center rounded-full px-2 text-[11px] leading-none font-medium tracking-tight">
+      <span className="bg-metal text-on-metal shadow-hairline ml-1 inline-flex h-5 shrink-0 items-center rounded-full px-2 text-[11px] leading-none font-medium tracking-tight">
         {roleLabel}
       </span>
     </AppShellHeader>
