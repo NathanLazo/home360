@@ -13,11 +13,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LANDING_SAMPLE_ORDER } from "./landing-data";
 import { formatMxnFromCents } from "./landing-money";
 import { LandingBeam } from "./landing-beam";
-import {
-  dataLabelClass,
-  inkSurfaceClass,
-  LANDING_BEAM_RADIUS,
-} from "./landing-styles";
+import { dataLabelClass, inkSurfaceClass } from "./landing-styles";
 import { MotionSafe } from "./motion-safe";
 import { AnimatedBeam } from "~/components/ui/animated-beam";
 import { cn } from "~/lib/utils";
@@ -28,9 +24,10 @@ import { cn } from "~/lib/utils";
  * beam around the frame are the hero's only looping motion; everything
  * inside the console is still.
  *
- * The console is framed by the page's signature spectral beam, the brightest
- * color below the hero, kept off the metal CTA so the two effects never
- * stack on one element.
+ * The console is framed by the page's signature beam in the action tint
+ * (sky → lime), the brightest color below the hero, kept off the metal CTA
+ * so the two effects never stack on one element. The path beams inside
+ * carry the same two stops.
  *
  * Client component because `AnimatedBeam` measures its endpoints through refs.
  * The ink surface scopes `.dark` tokens instead of a parallel palette.
@@ -64,8 +61,8 @@ export function HeroVisual() {
     containerRef,
     pathColor: "var(--foreground)",
     pathOpacity: 0.14,
-    gradientStartColor: "var(--foreground)",
-    gradientStopColor: "var(--muted-foreground)",
+    gradientStartColor: "var(--tint-sky)",
+    gradientStopColor: "var(--tint-lime)",
     duration: 4,
     // The beam measures with `getBoundingClientRect`, which includes the
     // stage's scroll-linked scale. Stretching the SVG to its container maps
@@ -76,13 +73,10 @@ export function HeroVisual() {
 
   return (
     <LandingBeam
-      size="md"
-      colorVariant="colorful"
-      theme="dark"
-      strength={0.6}
-      duration={3.2}
-      borderRadius={LANDING_BEAM_RADIUS.xl}
-      allowOverflow
+      size="lg"
+      strength={0.75}
+      duration={5}
+      className="flex w-full rounded-xl"
     >
       <figure
         aria-label={t("alt")}

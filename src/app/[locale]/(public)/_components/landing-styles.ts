@@ -94,14 +94,3 @@ export const focusRingClass =
  */
 export const pressClass =
   "transition-[scale,background-color,color] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100";
-
-/**
- * Pixel radii for the border beam, which takes a number instead of a class.
- * They mirror the radius scale in `globals.css`: `rounded-lg` = 12 px
- * (pricing), `rounded-xl` = 16 px (hero console), a 48 px pill = 24 px.
- */
-export const LANDING_BEAM_RADIUS = {
-  lg: 12,
-  xl: 16,
-  pill: 24,
-} as const;

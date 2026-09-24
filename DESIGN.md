@@ -104,6 +104,7 @@ color (`bg-canvas`, `text-body`, `border-hairline`, `text-link-deep`…).
 | Warning | `warning` | #f5a623 / soft #ffefcf / deep #ab570a | `warning` solo como relleno/icono; texto en `warning-deep` |
 | Success | `success` | #1a9b50 / soft #d9f2e3 / deep #0f7b3f | Estados liberado/pagado; texto en `success-deep` |
 | Selección | `selection-bg/fg` | #171717 / #f2f2f2 | `::selection` global |
+| Tinte de acción | `tint-sky` / `tint-sky-soft` / `tint-lime` / `tint-lime-soft` / `tint-deep` | #4f9fd8 / #dceffc / #a8d96c / ≈#eef7de / #263b4a | **Paleta "Azul + Limón suave" (owner).** El único acento cromático del producto: beams (`BeamFrame`), barras de progreso (fill sky sobre track sky-soft), notch activo del sidebar, glint del aro de metal, lavado `bg-tint-wash`. `tint-deep` es el texto sobre los tonos soft. Nunca como color de texto de cuerpo ni como estado |
 
 **Decisión success:** el sistema Vercel usa azul para éxito, pero la app ya distingue
 `info` (azul) de `success` en badges de estado del escrow. Para no dar dos significados
@@ -111,18 +112,23 @@ a un mismo tono, **success se queda verde** (familia `success-*`) y **info usa l
 familia `link-*`**. `StatusBadge` puede migrar de `emerald-*/amber-*/red-*/blue-*` a
 `success-*/warning-*/error-*/link-*` (soft = fondo, deep = texto).
 
-**Mesh gradient (solo hero de landing).** `--mesh-develop-*` (#007cf0→#00dfd8),
-`--mesh-preview-*` (#7928ca→#ff0080), `--mesh-ship-*` (#ff4d4d→#f9cb28), compuestos en
-la utilidad `bg-mesh-hero`. Es un fondo atmosférico a escala de hero, difuminado y
-tenue. **Nunca** miniaturizado: ni en chips, iconos, botones, bordes ni texto
-(`background-clip: text` sigue prohibido).
+**Mesh gradient (solo hero de landing).** `--mesh-sky-*` (#4f9fd8 → sky claro) y
+`--mesh-lime-*` (#a8d96c → limón claro), el tinte de acción llevado a atmósfera,
+compuestos en la utilidad `bg-mesh-hero`. Es un fondo atmosférico a escala de hero,
+difuminado y tenue. **Nunca** miniaturizado: ni en chips, iconos, botones, bordes ni
+texto (`background-clip: text` sigue prohibido). Su hermano de producto es
+`bg-tint-wash`: el mismo par sky/lime por debajo del 15 %, bajo la cabecera de cada
+página del panel y en los `EmptyState`.
 
 > Decisión del owner: el hero de la landing usa el mesh + CTA liquid metal `chromatic`
 > a plena intensidad, y las palabras de acento del título en Fraunces gris.
 
 ### Named Rules
 **La Regla del Color con Significado.** Un color, un significado. Azul = link/foco/info;
-rojo = error/destructivo; ámbar = advertencia; verde = éxito. Ninguno decora.
+rojo = error/destructivo; ámbar = advertencia; verde = éxito. Ninguno decora. El tinte
+de acción (sky/lime) tiene un solo significado propio: **"por aquí sigue el flujo"**
+(la acción de entrada de una pantalla, el progreso, la sección activa). Nunca marca un
+estado ni sustituye a `link-*`.
 
 **La Regla del Gris Terciario.** `mute` (#888) no porta información esencial en tamaño
 de cuerpo. El copy secundario usa `muted-foreground` (= `body`).
@@ -293,11 +299,20 @@ portan `aria-current` / foco. Sin material → solo el filo de metal.
 `prefers-contrast: more` → la misma caja en canvas sólido + hairline (sin layout
 shift). Reduced motion → sin refracción (solo frost + tinte). La óptica nunca se anima.
 
-### Border beam y bot avatars
-- `LandingBeam` (`border-beam`, solo landing): la única fuente de color espectral en
-  movimiento. Presupuesto: consola del hero, plan recomendado y CTA final — no más.
-  Inactivo en el primer render y bajo reduced motion. Radios en `LANDING_BEAM_RADIUS`
-  (xl 16, 2xl 20, pill 24).
+### Beam frame y bot avatars
+- `BeamFrame` (`~/components/beam`): el tinte de acción en movimiento — una luz cónica
+  sky → lime que orbita el borde de un elemento (`orbit`) o respira como halo
+  (`pulse`). CSS puro (`@property --beam-angle`), sin WebGL y fuera del presupuesto de
+  metal vivo. Tamaños `sm` (botones), `md` (cards), `lg` (marcos hero); `strength`,
+  `duration`, `active`. El radio se pasa por `className` (`rounded-pill`,
+  `rounded-xl`…). Estados: `live`, `still` (reduced motion: aro fijo, sin glow) y
+  `off`. Primer render siempre `still`.
+- `Button beam`: la acción de entrada del flujo principal de una pantalla (nuevo
+  producto, retirar, la acción clave del overview) lleva el beam en vez del aro vivo;
+  `beamActive={false}` lo apaga mientras un diálogo toma el relevo. Nunca se apila con
+  `metal="live"`.
+- `LandingBeam` (solo landing): alias de `BeamFrame`. Presupuesto: consola del hero,
+  plan recomendado y CTA final — no más.
 - `UserBotAvatar` (`bot-avatars`): avatar determinista por seed para usuarios sin foto.
   `interactive` solo fuera de listas densas; tamaños 24–40 px.
 
@@ -330,7 +345,9 @@ Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintent
 | Superficies glass en total | 2 (p. ej. nav + popover) |
 | Lentes de selección (`GlassLens`) | 1 por lista (sidebar, menú abierto); no cuentan como superficie |
 | `LandingBeam` | 3 en toda la landing |
+| `BeamFrame` / `Button beam` en producto | 1 por pantalla (la acción de entrada del flujo) |
 | Mesh gradient | 1, solo hero de landing |
+| `bg-tint-wash` | cabecera del panel (shell) + `EmptyState`; nunca en cards de datos |
 
 ## 9. Accesibilidad y preferencias
 
@@ -347,8 +364,14 @@ Loading (skeleton con forma real), empty (`EmptyState` con CTA), error (reintent
 La frontera de **paletas** se cierra: por decisión del owner, `--brand-*`
 (navy/gold/cream/gray) queda retirado y **la landing comparte el sistema
 ink/zinc**. Lo que sigue siendo exclusivo de `src/app/[locale]/(public)/**`: el mesh
-gradient (`bg-mesh-hero`), `text-display-hero`, `LandingBeam`, Magic UI y las entradas
-por scroll. Dashboard/admin/corporate/auth no los usan.
+gradient (`bg-mesh-hero`), `text-display-hero`, Magic UI y las entradas por scroll.
+Dashboard/admin/corporate/auth no los usan.
+
+El **tinte de acción** (`tint-sky`/`tint-lime`, decisión del owner) cruza la frontera a
+propósito: es el mismo par en el mesh del hero, en los `LandingBeam`, en `Button beam`
+del panel, en el progreso y en el lavado `bg-tint-wash`. Lo que cambia entre superficies
+es la intensidad (atmósfera en la landing, 1 beam y un lavado <15 % en el panel), no la
+paleta.
 
 ## 11. Do's and Don'ts
 

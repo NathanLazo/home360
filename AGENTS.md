@@ -96,9 +96,12 @@ home360/
   del owner la paleta `--brand-*` (navy/gold/cream/gray) está **retirada**; Fraunces
   solo como acento editorial en headings de la landing.
 - `src/app/[locale]/(public)/**` → personalidad **Premium**: exclusivos `bg-mesh-hero`
-  (solo hero), `text-display-hero`, `LandingBeam`, Magic UI, entradas por scroll.
+  (solo hero), `text-display-hero`, Magic UI, entradas por scroll; hasta 3 `LandingBeam`.
 - `dashboard/**`, `admin/**`, `corporate/**`, auth → personalidad **Corporate**, sin
-  animaciones de entrada por scroll, sin mesh ni beams.
+  animaciones de entrada por scroll, sin mesh; 1 `Button beam` por pantalla.
+- **Tinte de acción** (`tint-sky` #4f9fd8 / `tint-lime` #a8d96c, `DESIGN.md` §2): el único
+  acento cromático, compartido por landing y panel (mesh, `BeamFrame`, progreso, notch
+  del sidebar, `bg-tint-wash`). Significa "por aquí sigue el flujo"; nunca es un estado.
 - Budgets por pantalla: ≤2 metales vivos, 1 firma glass + metal. Detalle completo en
   `DESIGN.md` y `spec/DESIGN-DIRECTIVE.md`.
 

@@ -115,8 +115,8 @@ export function CorporateOrdersView({
   const newRequestButton = canMutate ? (
     <Button
       type="button"
-      metal="live"
-      metalActive={!newRequestOpen}
+      beam
+      beamActive={!newRequestOpen}
       className="min-h-11 sm:min-h-10"
       disabled={activeLocations.length === 0}
       title={activeLocations.length === 0 ? t("needLocation") : undefined}

@@ -42,10 +42,10 @@ export function LocationUsageCard({
             aria-valuemin={0}
             aria-valuemax={usage.max}
             aria-valuenow={usage.used}
-            className="bg-canvas-soft-2 h-2 w-full overflow-hidden rounded-full"
+            className="bg-tint-sky-soft h-2 w-full overflow-hidden rounded-full"
           >
             <div
-              className="bg-ink h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+              className="bg-tint-sky h-full w-full rounded-full transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               style={{ transform: `translateX(-${100 - percent}%)` }}
             />
           </div>

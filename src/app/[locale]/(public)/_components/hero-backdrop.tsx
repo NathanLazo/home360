@@ -1,6 +1,6 @@
 /**
- * The hero's atmosphere: the brand mesh (`bg-mesh-hero`, develop / preview /
- * ship stops) at hero scale, the page's only mesh (DESIGN.md §2). It fades
+ * The hero's atmosphere: the action tint as a mesh (`bg-mesh-hero`, sky /
+ * lime stops) at hero scale, the page's only mesh (DESIGN.md §2). It fades
  * into `canvas-soft` toward the bottom so the console and the next section
  * sit on plain canvas. Static decoration, hidden from assistive tech; never
  * miniaturised onto chips, buttons or text.

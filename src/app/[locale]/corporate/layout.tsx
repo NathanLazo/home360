@@ -10,6 +10,11 @@ import {
   AppShellFooter,
   AppShellInset,
 } from "~/components/app-shell";
+import {
+  AgentDockBar,
+  AgentDockBubbles,
+  AgentDockProvider,
+} from "~/components/agent-dock";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { ThemeToggle } from "~/components/theme-toggle";
@@ -19,6 +24,7 @@ import { CORPORATE_NAV } from "./_components/corporate-nav";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
 import { CorporateStatusBanner } from "./_components/corporate-status-banner";
 import { SidebarProvider } from "~/components/ui/sidebar";
+import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
 import { db } from "~/server/db";
@@ -106,38 +112,40 @@ export default async function CorporateLayout({
         }}
       />
       <AppShellInset>
-        <CorporateHeader
-          user={{
-            id: user.id,
-            name: userName,
-            email: userEmail,
-            image: user.image ?? null,
-            role: user.role,
-          }}
-          toggleSidebarLabel={t("header.toggleSidebar")}
-          breadcrumb={breadcrumb}
-        />
-        <SessionGuard />
-        <AppShellContent id="corporate-content">
-          {user.impersonator ? (
-            <ImpersonationBanner subjectName={account.name} />
-          ) : null}
-          <CorporateStatusBanner
-            status={account.status}
-            statusReason={account.statusReason}
-            locale={locale}
+        <AgentDockProvider
+          area="corporate"
+          readOnly={user.impersonator != null}
+          available={Boolean(env.AI_GATEWAY_API_KEY)}
+        >
+          <CorporateHeader
+            user={{
+              id: user.id,
+              name: userName,
+              email: userEmail,
+              image: user.image ?? null,
+              role: user.role,
+            }}
+            toggleSidebarLabel={t("header.toggleSidebar")}
+            breadcrumb={breadcrumb}
           />
-          {children}
-        </AppShellContent>
-        <AppShellFooter
-          label={common("shell.footer")}
-          end={
-            <>
-              <ThemeToggle />
-              <LocaleSwitcher />
-            </>
-          }
-        />
+          <SessionGuard />
+          <AppShellContent id="corporate-content">
+            {user.impersonator ? (
+              <ImpersonationBanner subjectName={account.name} />
+            ) : null}
+            <CorporateStatusBanner
+              status={account.status}
+              statusReason={account.statusReason}
+              locale={locale}
+            />
+            {children}
+          </AppShellContent>
+          <AgentDockBubbles />
+          <AppShellFooter label={common("shell.footer")} end={<AgentDockBar />}>
+            <ThemeToggle />
+            <LocaleSwitcher />
+          </AppShellFooter>
+        </AgentDockProvider>
       </AppShellInset>
     </SidebarProvider>
   );

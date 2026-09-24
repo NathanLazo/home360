@@ -126,8 +126,8 @@ export function ServicesView() {
         subtitle={t("subtitle")}
         actions={
           <Button
-            metal="live"
-            metalActive={!sheetOpen}
+            beam
+            beamActive={!sheetOpen}
             type="button"
             onClick={openCreate}
             disabled={isReadOnly}

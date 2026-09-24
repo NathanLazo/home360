@@ -101,8 +101,8 @@ export function TeamView() {
         actions={
           <div className="flex flex-col items-start gap-1 sm:items-end">
             <Button
-              metal="live"
-              metalActive={!sheetOpen}
+              beam
+              beamActive={!sheetOpen}
               type="button"
               onClick={openCreate}
               disabled={!canCreate}

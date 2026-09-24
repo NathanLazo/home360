@@ -6,7 +6,6 @@ import {
   containerClass,
   displayHeadingClass,
   inkSurfaceClass,
-  LANDING_BEAM_RADIUS,
   leadClass,
 } from "./landing-styles";
 import { Magnetic } from "./magnetic";
@@ -55,12 +54,10 @@ export async function CtaSection() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <Magnetic>
               <LandingBeam
-                size="pulse-outside"
-                colorVariant="colorful"
-                theme="dark"
-                strength={0.8}
-                borderRadius={LANDING_BEAM_RADIUS.pill}
-                className="rounded-pill inline-flex"
+                variant="pulse"
+                size="md"
+                strength={0.85}
+                className="rounded-pill"
               >
                 <Button asChild size="pill">
                   <Link href="/register" className="group/cta">

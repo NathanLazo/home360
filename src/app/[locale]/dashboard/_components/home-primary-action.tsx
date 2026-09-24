@@ -14,7 +14,7 @@ export function HomePrimaryAction() {
   const t = useTranslations("dashboard.home");
 
   return (
-    <Button asChild metal="bend">
+    <Button asChild beam>
       <Link href="/dashboard/payments?create=link">
         <LinkIcon aria-hidden="true" />
         {t("primaryAction")}

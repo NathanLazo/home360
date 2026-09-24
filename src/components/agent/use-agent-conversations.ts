@@ -26,7 +26,15 @@ export function deriveConversationTitle(
     }
   }
 
-  const text = texts.join(" ").trim();
+  return truncateConversationTitle(texts.join(" "), fallback);
+}
+
+/** Menu-friendly title from free text (first prompt of a thread). */
+export function truncateConversationTitle(
+  value: string,
+  fallback: string,
+): string {
+  const text = value.trim();
 
   if (!text) {
     return fallback;

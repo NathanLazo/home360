@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Link } from "~/i18n/navigation";
 
 type OverviewPrimaryActionProps = {
-  /** Live metal only while there are open disputes waiting on a verdict. */
+  /** The beam lights only while there are open disputes waiting on a verdict. */
   urgent: boolean;
 };
 
@@ -18,8 +18,8 @@ export function OverviewPrimaryAction({ urgent }: OverviewPrimaryActionProps) {
   return (
     <Button
       asChild
-      metal="live"
-      metalActive={urgent}
+      beam
+      beamActive={urgent}
     >
       <Link href="/admin/disputes">
         <ScaleIcon aria-hidden="true" />

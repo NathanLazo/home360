@@ -12,6 +12,11 @@ import {
   AppShellFooter,
   AppShellInset,
 } from "~/components/app-shell";
+import {
+  AgentDockBar,
+  AgentDockBubbles,
+  AgentDockProvider,
+} from "~/components/agent-dock";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { ThemeToggle } from "~/components/theme-toggle";
@@ -19,6 +24,7 @@ import { SessionGuard } from "~/components/session-guard";
 import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
+import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { DASHBOARD_NAV } from "~/lib/dashboard-nav";
 import { requireRole } from "~/server/auth/require-role";
@@ -100,42 +106,44 @@ export default async function DashboardLayout({
         }}
       />
       <AppShellInset>
-        <DashboardHeader
-          user={{
-            id: user.id,
-            name: userName,
-            email: userEmail,
-            image: user.image ?? null,
-            role: user.role,
-          }}
-          branches={shell.branches}
-          toggleSidebarLabel={t("header.toggleSidebar")}
-          breadcrumb={breadcrumb}
-        />
-        <SessionGuard />
-        <AppShellContent id="dashboard-content">
-          <SubscriptionAccessProvider
-            initialStatus={shell.subscription?.status ?? null}
-          >
-            {user.impersonator ? (
-              <ImpersonationBanner subjectName={shell.business.name} />
-            ) : null}
-            <SubscriptionStatusBanner
-              status={shell.subscription?.status ?? null}
-              renewsAt={shell.subscription?.renewsAt ?? null}
-            />
-            {children}
-          </SubscriptionAccessProvider>
-        </AppShellContent>
-        <AppShellFooter
-          label={common("shell.footer")}
-          end={
-            <>
-              <ThemeToggle />
-              <LocaleSwitcher />
-            </>
-          }
-        />
+        <AgentDockProvider
+          area="business"
+          readOnly={user.impersonator != null}
+          available={Boolean(env.AI_GATEWAY_API_KEY)}
+        >
+          <DashboardHeader
+            user={{
+              id: user.id,
+              name: userName,
+              email: userEmail,
+              image: user.image ?? null,
+              role: user.role,
+            }}
+            branches={shell.branches}
+            toggleSidebarLabel={t("header.toggleSidebar")}
+            breadcrumb={breadcrumb}
+          />
+          <SessionGuard />
+          <AppShellContent id="dashboard-content">
+            <SubscriptionAccessProvider
+              initialStatus={shell.subscription?.status ?? null}
+            >
+              {user.impersonator ? (
+                <ImpersonationBanner subjectName={shell.business.name} />
+              ) : null}
+              <SubscriptionStatusBanner
+                status={shell.subscription?.status ?? null}
+                renewsAt={shell.subscription?.renewsAt ?? null}
+              />
+              {children}
+            </SubscriptionAccessProvider>
+          </AppShellContent>
+          <AgentDockBubbles />
+          <AppShellFooter label={common("shell.footer")} end={<AgentDockBar />}>
+            <ThemeToggle />
+            <LocaleSwitcher />
+          </AppShellFooter>
+        </AgentDockProvider>
       </AppShellInset>
     </SidebarProvider>
   );

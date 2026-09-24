@@ -40,8 +40,13 @@ elevación, metal líquido y Liquid Glass (`DESIGN.md`). Lo que D7 sigue separan
 
 | Superficie | Exclusivo | Personalidad |
 |---|---|---|
-| `src/app/[locale]/(public)/**` (landing W1) | `bg-mesh-hero` (solo hero), `text-display-hero`, `LandingBeam`, Magic UI, entradas por scroll, CTAs `size="pill"` | Premium |
-| `dashboard/**`, `admin/**`, `corporate/**`, auth | — (sin entradas por scroll, sin mesh, sin beams) | Corporate |
+| `src/app/[locale]/(public)/**` (landing W1) | `bg-mesh-hero` (solo hero), `text-display-hero`, Magic UI, entradas por scroll, CTAs `size="pill"`, hasta 3 `LandingBeam` | Premium |
+| `dashboard/**`, `admin/**`, `corporate/**`, auth | — (sin entradas por scroll, sin mesh); 1 `Button beam` por pantalla y el lavado `bg-tint-wash` del shell | Corporate |
+
+El **tinte de acción** (`tint-sky` #4f9fd8 / `tint-lime` #a8d96c, `DESIGN.md` §2) es
+compartido: la landing lo lleva a atmósfera (mesh, beams del hero); el panel lo deja en
+un beam por pantalla, el progreso, el notch activo del sidebar y un lavado por debajo
+del 15 %.
 
 Los tokens `--brand-*` **no existen** en ningún sitio: no se reintroducen. Los tokens
 compartidos no se reescriben para una sola superficie; si la landing necesita otra
@@ -89,8 +94,13 @@ español mexicano: usa comillas dobles curvas “ ”; guion largo — para inci
 - **Color con significado**: azul `link-*` (link, foco, info), rojo `error-*`, ámbar
   `warning-*` (texto en `warning-deep`), verde `success-*` (liberado/pagado). Nada
   decora.
-- **Mesh gradient** (develop/preview/ship): solo como fondo atmosférico del hero de
-  landing (`bg-mesh-hero`), jamás miniaturizado.
+- **Mesh gradient** (sky/lime del tinte de acción): solo como fondo atmosférico del hero
+  de landing (`bg-mesh-hero`), jamás miniaturizado.
+- **Tinte de acción** (`tint-sky`/`tint-lime`): un solo significado, "por aquí sigue el
+  flujo". `Button beam` en la acción de entrada de la pantalla, fill de progreso sobre
+  `tint-sky-soft`, notch activo del sidebar, `bg-tint-wash` bajo la cabecera y en
+  `EmptyState`. Nunca como texto de cuerpo ni como estado (eso sigue siendo `link-*`,
+  `success-*`, `warning-*`, `error-*`).
 - **Ritmo de la landing**: secciones `canvas-soft`/`canvas` con bandas `.dark` (ink) para
   hero o CTA final si el ritmo lo pide; nunca dos bandas oscuras consecutivas.
 - **Contraste (WCAG AA, verificado)**: ink/canvas-soft 17.2:1 ✓, body/canvas-soft 8.1:1 ✓,

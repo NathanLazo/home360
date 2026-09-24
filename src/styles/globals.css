@@ -131,6 +131,11 @@
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-success-deep: var(--success-deep);
+  --color-tint-sky: var(--tint-sky);
+  --color-tint-sky-soft: var(--tint-sky-soft);
+  --color-tint-lime: var(--tint-lime);
+  --color-tint-lime-soft: var(--tint-lime-soft);
+  --color-tint-deep: var(--tint-deep);
 
   /*
    * Elevation = stacked soft shadows (+ inset hairline on the named levels).
@@ -278,19 +283,32 @@
   --selection-fg: oklch(0.961 0 0); /* #f2f2f2 */
 
   /*
-   * Brand mesh stops — HERO-SCALE ONLY (landing atmospheric backdrop via
-   * `bg-mesh-hero`). Never on chips, icons, buttons or text.
+   * Action tint — "Azul + Limón suave" (owner's palette, DESIGN.md §2). The
+   * only chromatic accent of the product: sky marks the main flow (beams,
+   * progress, active nav), lime is its glint / reward stop. The soft tones
+   * are fills only; `tint-deep` is the text that sits on them.
    */
-  --mesh-develop-from: oklch(0.596 0.197 255.092); /* #007cf0 */
-  --mesh-develop-to: oklch(0.816 0.141 190.74); /* #00dfd8 */
-  --mesh-preview-from: oklch(0.491 0.228 300.447); /* #7928ca */
-  --mesh-preview-to: oklch(0.645 0.26 2.471); /* #ff0080 */
-  --mesh-ship-from: oklch(0.673 0.215 25.04); /* #ff4d4d */
-  --mesh-ship-to: oklch(0.858 0.167 91.187); /* #f9cb28 */
+  --tint-sky: oklch(0.676 0.115 242.2); /* #4f9fd8 */
+  --tint-sky-soft: oklch(0.942 0.027 237.6); /* #dceffc */
+  --tint-lime: oklch(0.827 0.148 129.2); /* #a8d96c */
+  --tint-lime-soft: oklch(0.955 0.05 129); /* ≈ #eef7de */
+  --tint-deep: oklch(0.341 0.038 240.3); /* #263b4a — text on soft tints */
+
+  /*
+   * Mesh stops — HERO-SCALE ONLY (landing atmospheric backdrop via
+   * `bg-mesh-hero`): the action tint blown up to atmosphere. Never on chips,
+   * icons, buttons or text.
+   */
+  --mesh-sky-from: var(--tint-sky);
+  --mesh-sky-to: oklch(0.82 0.08 236); /* lighter sky */
+  --mesh-lime-from: var(--tint-lime);
+  --mesh-lime-to: oklch(0.9 0.1 124); /* lighter lime */
 
   /*
    * Liquid metal (static chrome). Silver stops for rims, pills and active
-   * indicators; the live WebGL ring lives in `~/components/metal`.
+   * indicators; the live WebGL ring lives in `~/components/metal`. Two rim
+   * stops carry a faint sky / lime glint so every primary button hints the
+   * action tint without leaving the silver.
    */
   --metal-1: oklch(0.985 0.002 250); /* specular */
   --metal-2: oklch(0.88 0.004 250);
@@ -300,9 +318,9 @@
   --metal-rim: linear-gradient(
     160deg,
     var(--metal-1) 0%,
-    var(--metal-3) 26%,
+    color-mix(in oklch, var(--metal-3) 70%, var(--tint-sky)) 26%,
     var(--metal-4) 48%,
-    var(--metal-5) 72%,
+    color-mix(in oklch, var(--metal-5) 76%, var(--tint-lime)) 72%,
     var(--metal-2) 100%
   );
   /* Light chrome fill: ink text on it stays ≥ 8:1 at the darkest stop. */
@@ -381,6 +399,13 @@
   --success-deep: oklch(0.8 0.14 151);
   --selection-bg: oklch(0.946 0 0);
   --selection-fg: oklch(0.145 0 0);
+  --tint-sky: oklch(0.72 0.11 242);
+  --tint-sky-soft: oklch(0.27 0.045 242);
+  --tint-lime: oklch(0.8 0.14 129);
+  --tint-lime-soft: oklch(0.28 0.05 129);
+  --tint-deep: oklch(0.9 0.02 240);
+  --mesh-sky-to: oklch(0.55 0.09 236);
+  --mesh-lime-to: oklch(0.6 0.1 124);
   --metal-gloss: linear-gradient(
     180deg,
     oklch(1 0 0 / 0.4) 0%,
@@ -495,39 +520,155 @@
   background-image: var(--metal-gloss), var(--metal-fill);
 }
 
-/* Landing hero backdrop only: the three brand meshes, blurred and faint. */
+/* Landing hero backdrop only: the action tint as atmosphere, blurred and faint. */
 @utility bg-mesh-hero {
   background-image:
     radial-gradient(
       40% 50% at 18% 30%,
-      color-mix(in oklch, var(--mesh-develop-from) 38%, transparent),
+      color-mix(in oklch, var(--mesh-sky-from) 34%, transparent),
       transparent 70%
     ),
     radial-gradient(
       36% 46% at 30% 70%,
-      color-mix(in oklch, var(--mesh-develop-to) 30%, transparent),
+      color-mix(in oklch, var(--mesh-lime-to) 30%, transparent),
       transparent 70%
     ),
     radial-gradient(
       38% 50% at 55% 35%,
-      color-mix(in oklch, var(--mesh-preview-from) 30%, transparent),
+      color-mix(in oklch, var(--mesh-sky-to) 34%, transparent),
       transparent 70%
     ),
     radial-gradient(
       34% 44% at 68% 65%,
-      color-mix(in oklch, var(--mesh-preview-to) 26%, transparent),
+      color-mix(in oklch, var(--mesh-lime-from) 26%, transparent),
       transparent 70%
     ),
     radial-gradient(
       36% 46% at 85% 32%,
-      color-mix(in oklch, var(--mesh-ship-from) 28%, transparent),
+      color-mix(in oklch, var(--mesh-sky-from) 26%, transparent),
       transparent 70%
     ),
     radial-gradient(
       32% 42% at 88% 72%,
-      color-mix(in oklch, var(--mesh-ship-to) 30%, transparent),
+      color-mix(in oklch, var(--mesh-lime-to) 28%, transparent),
       transparent 70%
     );
+}
+
+/*
+ * Faint action-tint wash for product surfaces (panel top, empty states):
+ * sky from the top-left, lime from the bottom-right, both under 15 %.
+ */
+@utility bg-tint-wash {
+  background-image:
+    radial-gradient(
+      60% 70% at 10% 0%,
+      color-mix(in oklch, var(--tint-sky) 13%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 60% at 100% 100%,
+      color-mix(in oklch, var(--tint-lime) 11%, transparent),
+      transparent 70%
+    );
+}
+
+/*
+ * Beam frame (`~/components/beam`): the action tint in motion. A registered
+ * `--beam-angle` spins a conic sky → lime light on two layers of one frame:
+ * the ring (masked to the border box, over the child) and the glow (blurred,
+ * behind the child). `pulse` swaps the orbit for a breathing full ring. The
+ * component sets width, glow reach, strength and duration as custom
+ * properties; `data-state` is `live`, `still` (reduced motion) or `off`.
+ */
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes beam-orbit {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+@keyframes beam-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+[data-beam-layer] {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  --beam-angle: 200deg;
+  /* Declared on the layer itself so `var(--beam-angle)` reads the animated value. */
+  --beam-paint: conic-gradient(
+    from var(--beam-angle),
+    transparent 0%,
+    transparent 50%,
+    color-mix(in oklch, var(--tint-sky) 0%, transparent) 56%,
+    var(--tint-sky) 74%,
+    var(--tint-lime) 84%,
+    color-mix(in oklch, var(--tint-lime) 45%, white) 87%,
+    transparent 95%
+  );
+  background: var(--beam-paint);
+  transition: opacity 300ms ease-out;
+}
+
+[data-beam-frame][data-variant="pulse"] [data-beam-layer] {
+  --beam-paint: linear-gradient(
+    135deg,
+    var(--tint-sky),
+    var(--tint-lime) 55%,
+    var(--tint-sky)
+  );
+}
+
+[data-beam-layer="ring"] {
+  z-index: 1;
+  padding: var(--beam-width, 1.5px);
+  opacity: var(--beam-strength, 1);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+[data-beam-layer="glow"] {
+  z-index: -1;
+  inset: calc(-0.5 * var(--beam-glow, 12px));
+  filter: blur(var(--beam-glow, 12px));
+  opacity: calc(var(--beam-strength, 1) * 0.5);
+}
+
+[data-beam-frame][data-state="live"] [data-beam-layer] {
+  animation: beam-orbit var(--beam-duration, 4s) linear infinite;
+}
+
+[data-beam-frame][data-state="live"][data-variant="pulse"] [data-beam-layer] {
+  animation: beam-pulse var(--beam-duration, 2.8s) ease-in-out infinite;
+}
+
+/* Reduced motion: the light stays, as a still ring; the glow goes. */
+[data-beam-frame][data-state="still"] [data-beam-layer="ring"] {
+  opacity: calc(var(--beam-strength, 1) * 0.7);
+}
+
+[data-beam-frame][data-state="still"] [data-beam-layer="glow"],
+[data-beam-frame][data-state="off"] [data-beam-layer] {
+  opacity: 0;
 }
 
 /*

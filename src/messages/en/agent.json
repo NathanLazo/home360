@@ -1,5 +1,16 @@
 {
   "pageTitle": "Assistant",
+  "dock": {
+    "label": "Quick assistant",
+    "chats": "Open chats",
+    "open": "Agent",
+    "newChat": "New chat",
+    "history": "Conversation history",
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "collapse": "Shrink",
+    "close": "Close chat"
+  },
   "welcome": {
     "business": {
       "title": "How can I help today?",

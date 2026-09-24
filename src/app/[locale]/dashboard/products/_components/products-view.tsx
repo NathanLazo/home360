@@ -141,8 +141,8 @@ export function ProductsView({ branchId }: { branchId?: string }) {
               {t("import.action")}
             </Button>
             <Button
-              metal="live"
-              metalActive={!sheetOpen && !importOpen}
+              beam
+              beamActive={!sheetOpen && !importOpen}
               type="button"
               onClick={() => {
                 setEditing(null);

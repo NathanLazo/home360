@@ -24,7 +24,7 @@ function ProgressStep({ index, currentStep, label }: ProgressStepProps) {
       <span
         aria-hidden="true"
         className={`h-1 rounded-full transition-[background-color] duration-150 ease-out motion-reduce:transition-none ${
-          isActive || isComplete ? "bg-ink" : "bg-hairline"
+          isActive ? "bg-tint-sky" : isComplete ? "bg-ink" : "bg-hairline"
         }`}
       />
       <span

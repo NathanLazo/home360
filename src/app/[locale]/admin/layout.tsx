@@ -10,6 +10,11 @@ import {
   AppShellFooter,
   AppShellInset,
 } from "~/components/app-shell";
+import {
+  AgentDockBar,
+  AgentDockBubbles,
+  AgentDockProvider,
+} from "~/components/agent-dock";
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { ThemeToggle } from "~/components/theme-toggle";
 import { SessionGuard } from "~/components/session-guard";
@@ -17,6 +22,7 @@ import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
 import { AdminSidebar } from "./_components/admin-sidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
+import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
 import { api } from "~/trpc/server";
@@ -101,29 +107,31 @@ export default async function AdminLayout({
         }}
       />
       <AppShellInset>
-        <AdminHeader
-          user={{
-            id: user.id,
-            name: userName,
-            email: userEmail,
-            image: user.image ?? null,
-            role: user.role,
-          }}
-          toggleSidebarLabel={t("header.toggleSidebar")}
-          roleLabel={t("header.roleBadge")}
-          breadcrumb={breadcrumb}
-        />
-        <SessionGuard />
-        <AppShellContent id="admin-content">{children}</AppShellContent>
-        <AppShellFooter
-          label={common("shell.footer")}
-          end={
-            <>
-              <ThemeToggle />
-              <LocaleSwitcher />
-            </>
-          }
-        />
+        <AgentDockProvider
+          area="admin"
+          readOnly={false}
+          available={Boolean(env.AI_GATEWAY_API_KEY)}
+        >
+          <AdminHeader
+            user={{
+              id: user.id,
+              name: userName,
+              email: userEmail,
+              image: user.image ?? null,
+              role: user.role,
+            }}
+            toggleSidebarLabel={t("header.toggleSidebar")}
+            roleLabel={t("header.roleBadge")}
+            breadcrumb={breadcrumb}
+          />
+          <SessionGuard />
+          <AppShellContent id="admin-content">{children}</AppShellContent>
+          <AgentDockBubbles />
+          <AppShellFooter label={common("shell.footer")} end={<AgentDockBar />}>
+            <ThemeToggle />
+            <LocaleSwitcher />
+          </AppShellFooter>
+        </AgentDockProvider>
       </AppShellInset>
     </SidebarProvider>
   );

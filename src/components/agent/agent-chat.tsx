@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { MessageSquarePlusIcon } from "lucide-react";
@@ -51,6 +51,7 @@ import { AgentMessage, AgentPendingMessage } from "./agent-message";
 import { deriveAgentOrbState } from "./agent-orb-state";
 import {
   deriveConversationTitle,
+  truncateConversationTitle,
   useAgentConversations,
 } from "./use-agent-conversations";
 
@@ -92,22 +93,47 @@ export type AgentChatProps = {
   readOnly: boolean;
   /** False when the gateway key is missing: the composer explains it. */
   available: boolean;
+  /**
+   * `page` fills the assistant route and mirrors the thread in the URL;
+   * `dock` fits a floating bubble: fixed header row, no URL writes.
+   */
+  variant?: "page" | "dock";
+  /** Dock only: the bubble mirrors the conversation title in its pill. */
+  onTitleChange?: (title: string) => void;
+  /** Dock only: leading content of the header row (the bubble title). */
+  headerStart?: ReactNode;
+  /** Dock only: trailing controls of the header row (minimize, close…). */
+  headerEnd?: ReactNode;
 };
 
-export function AgentChat({ area, readOnly, available }: AgentChatProps) {
+export function AgentChat({
+  area,
+  readOnly,
+  available,
+  variant = "page",
+  onTitleChange,
+  headerStart,
+  headerEnd,
+}: AgentChatProps) {
   const t = useTranslations("agent");
   const locale = useLocale();
   const reduce = useReducedMotion() ?? false;
   const searchParams = useSearchParams();
   const threads = useAgentConversations();
+  const isDock = variant === "dock";
   const [input, setInput] = useState("");
   // The server renders the default; the stored preference applies on mount.
   const [model, setModel] = useState<AgentModelId>(DEFAULT_AGENT_MODEL_ID);
   const [attachments, setAttachments] = useState<AttachmentUploadItem[]>([]);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(() =>
-    searchParams.get(THREAD_PARAM),
+    isDock ? null : searchParams.get(THREAD_PARAM),
   );
+  const syncThreadParam = (id: string | null) => {
+    if (!isDock) {
+      writeThreadParam(id);
+    }
+  };
   const [transport] = useState(
     () => new DefaultChatTransport({ api: "/api/agent/chat" }),
   );
@@ -150,7 +176,7 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
       } else {
         activeIdRef.current = null;
         setActiveId(null);
-        writeThreadParam(null);
+        syncThreadParam(null);
       }
     });
 
@@ -183,15 +209,17 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
       const currentId = activeIdRef.current;
 
       if (!currentId) {
-        const createdId = await threads.create(
-          deriveConversationTitle(finished, newConversationTitle),
+        const derivedTitle = deriveConversationTitle(
           finished,
+          newConversationTitle,
         );
+        const createdId = await threads.create(derivedTitle, finished);
 
         if (createdId) {
           activeIdRef.current = createdId;
           setActiveId(createdId);
-          writeThreadParam(createdId);
+          syncThreadParam(createdId);
+          onTitleChange?.(derivedTitle);
         }
       } else {
         await threads.update(currentId, finished);
@@ -244,6 +272,10 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
     setAttachments([]);
     setAttachmentsOpen(false);
 
+    if (messages.length === 0) {
+      onTitleChange?.(truncateConversationTitle(text, newConversationTitle));
+    }
+
     void (async () => {
       const files =
         pendingAttachments.length > 0
@@ -264,7 +296,8 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
     setAttachmentsOpen(false);
     setActiveId(null);
     activeIdRef.current = null;
-    writeThreadParam(null);
+    syncThreadParam(null);
+    onTitleChange?.(newConversationTitle);
   };
 
   const selectConversation = (id: string) => {
@@ -280,10 +313,15 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
       setMessages(loaded);
       setActiveId(id);
       activeIdRef.current = id;
-      writeThreadParam(id);
+      syncThreadParam(id);
       setInput("");
       setAttachments([]);
       setAttachmentsOpen(false);
+      const selected = threads.conversations.find((item) => item.id === id);
+
+      if (selected) {
+        onTitleChange?.(selected.title);
+      }
     });
   };
 
@@ -303,61 +341,79 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
 
   return (
     // overflow-visible keeps the model dropdown from being clipped.
-    <ChatApp className="flex h-[calc(100dvh-7.5rem)] min-h-[28rem] flex-col overflow-visible rounded-none border-0 bg-transparent sm:h-[calc(100dvh-8.5rem)] lg:h-[calc(100dvh-9.5rem)]">
+    <ChatApp
+      className={cn(
+        "flex flex-col overflow-visible rounded-none border-0 bg-transparent",
+        isDock
+          ? "h-full min-h-0"
+          : "h-[calc(100dvh-7.5rem)] min-h-[28rem] sm:h-[calc(100dvh-8.5rem)] lg:h-[calc(100dvh-9.5rem)]",
+      )}
+    >
       <LayoutGroup>
         <div
           className={cn(
             "relative flex h-full min-h-0 flex-1 flex-col",
-            !hasConversation && "justify-center pt-16 md:pt-24",
+            !hasConversation && !isDock && "justify-center pt-16 md:pt-24",
           )}
         >
-          <div className="absolute top-0 right-0 z-10 flex items-center gap-2">
-            <AgentConversationMenu
-              conversations={threads.conversations}
-              activeId={activeId}
-              disabled={isBusy}
-              onNewConversation={resetConversation}
-              onSelect={selectConversation}
-              onDelete={removeConversation}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              aria-label={newConversationTitle}
-              title={newConversationTitle}
-              onClick={resetConversation}
-              disabled={!hasConversation || isBusy}
-            >
-              <MessageSquarePlusIcon className="size-4" />
-            </Button>
-            {usage ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={t("contextUsage")}
-                    title={t("contextUsage")}
-                  >
-                    <UsageRing usage={usage} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-72 p-3">
-                  <UsageMeter
-                    usage={usage}
-                    className="max-w-none"
-                    labels={{
-                      title: t("usage.title"),
-                      meter: t("usage.meter"),
-                      prompt: t("usage.prompt"),
-                      completion: t("usage.completion"),
-                    }}
-                  />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
+          <div
+            className={cn(
+              "z-10 flex items-center gap-2",
+              isDock
+                ? "border-border h-10 shrink-0 justify-between border-b pr-1.5 pl-3 [&_[data-slot=button]]:size-7"
+                : "absolute top-0 right-0",
+            )}
+          >
+            {headerStart}
+            <div className="flex shrink-0 items-center gap-0.5">
+              <AgentConversationMenu
+                conversations={threads.conversations}
+                activeId={activeId}
+                disabled={isBusy}
+                onNewConversation={resetConversation}
+                onSelect={selectConversation}
+                onDelete={removeConversation}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={newConversationTitle}
+                title={newConversationTitle}
+                onClick={resetConversation}
+                disabled={!hasConversation || isBusy}
+              >
+                <MessageSquarePlusIcon className="size-4" />
+              </Button>
+              {usage ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      aria-label={t("contextUsage")}
+                      title={t("contextUsage")}
+                    >
+                      <UsageRing usage={usage} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-72 p-3">
+                    <UsageMeter
+                      usage={usage}
+                      className="max-w-none"
+                      labels={{
+                        title: t("usage.title"),
+                        meter: t("usage.meter"),
+                        prompt: t("usage.prompt"),
+                        completion: t("usage.completion"),
+                      }}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+              {headerEnd}
+            </div>
           </div>
 
           <AnimatePresence initial={false} mode="popLayout">
@@ -383,8 +439,11 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
                   className="from-background pointer-events-none absolute inset-x-0 top-0 z-[1] h-20 bg-gradient-to-b from-25% to-transparent"
                 />
                 <MessageScroller
-                  className="h-full min-h-0 pr-12 pb-4 sm:pr-16"
-                  contentClassName="pt-16"
+                  className={cn(
+                    "h-full min-h-0 pb-4",
+                    isDock ? "px-3" : "pr-12 sm:pr-16",
+                  )}
+                  contentClassName={isDock ? "pt-4" : "pt-16"}
                   busy={isBusy}
                   navigation="rail"
                   label={t("threadLabel")}
@@ -427,11 +486,14 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
                     : { opacity: 0, transform: "translateY(-8px)" }
                 }
                 transition={reduce ? { duration: 0 } : FADE_TRANSITION}
-                className="mx-auto mb-4 flex w-full max-w-3xl flex-col items-center gap-4 px-4 text-center"
+                className={cn(
+                  "mx-auto mb-4 flex w-full max-w-3xl flex-col items-center gap-4 px-4 text-center",
+                  isDock && "my-auto",
+                )}
               >
                 <ThinkingOrbGlyph
                   state="breathing"
-                  size={64}
+                  size={isDock ? 40 : 64}
                   speed={0.7}
                   decorative
                   className="opacity-80"
@@ -464,7 +526,10 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
           <motion.div
             layout={reduce ? false : "position"}
             transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
-            className="relative z-20 mx-auto w-full max-w-3xl pt-2"
+            className={cn(
+              "relative z-20 mx-auto w-full max-w-3xl pt-2",
+              isDock && "px-3 pb-3",
+            )}
           >
             {readOnly ? (
               <p className="text-muted-foreground mb-2 text-center text-xs">

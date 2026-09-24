@@ -2,6 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
+import { BeamFrame } from "~/components/beam";
 import { MetalAction } from "~/components/metal";
 import { cn } from "~/lib/utils";
 
@@ -14,6 +15,10 @@ import { cn } from "~/lib/utils";
  * The decisive action of a screen (≤ 1–2 per screen) upgrades with
  * `metal="live"` (or `metal="bend"` for the single key CTA) to the landing
  * hero's button: ink pill + full-strength chromatic WebGL ring.
+ *
+ * `beam` frames the button with the action tint (sky → lime, `BeamFrame`):
+ * the marker of a screen's main-flow entry. Pure CSS, outside the live-metal
+ * budget, and never stacked with a live ring.
  */
 const buttonVariants = cva(
   "relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-pill text-[0.8125rem] leading-none font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow,opacity,scale] duration-150 ease-out active:scale-[0.97] motion-reduce:active:scale-100 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 pointer-coarse:after:content-['']",
@@ -76,7 +81,7 @@ type ButtonProps = React.ComponentProps<"button"> &
      * reduced motion; a disabled button never wears the live ring.
      */
     metal?: ButtonMetal;
-    /** Layout classes for the live ring wrapper (e.g. `w-full`, `flex-1`). */
+    /** Layout classes for the live ring / beam wrapper (e.g. `w-full`, `flex-1`). */
     metalClassName?: string;
     /**
      * Dim a live ring without unmounting it (e.g. hand the live budget to
@@ -84,6 +89,18 @@ type ButtonProps = React.ComponentProps<"button"> &
      * this never remounts the button, so keyboard focus survives.
      */
     metalActive?: boolean;
+    /**
+     * Frame the button with the action-tint beam (`BeamFrame`): the marker of
+     * a screen's main-flow entry (new order, withdraw, the overview's key
+     * action). Only honored on `variant="default"`; the static rim stays and
+     * `metal` is ignored so two lights never stack on one pill.
+     */
+    beam?: boolean;
+    /**
+     * Dim the beam without unmounting the button (same contract as
+     * `metalActive`): hand the marker to an open dialog's confirm.
+     */
+    beamActive?: boolean;
   };
 
 function Button({
@@ -94,6 +111,8 @@ function Button({
   metal = "static",
   metalClassName,
   metalActive = true,
+  beam = false,
+  beamActive = true,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot.Root : "button";
@@ -103,6 +122,7 @@ function Button({
   // wearing the full-strength chromatic ring.
   const underLiveRing =
     variant === "default" &&
+    !beam &&
     metal !== "static" &&
     metalActive &&
     !props.disabled;
@@ -121,6 +141,18 @@ function Button({
       {...props}
     />
   );
+
+  if (variant === "default" && beam) {
+    return (
+      <BeamFrame
+        size="sm"
+        active={beamActive && !props.disabled}
+        className={cn("rounded-pill", metalClassName)}
+      >
+        {button}
+      </BeamFrame>
+    );
+  }
 
   if (variant !== "default" || metal === "static") {
     return button;

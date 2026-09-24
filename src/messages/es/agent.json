@@ -1,5 +1,16 @@
 {
   "pageTitle": "Asistente",
+  "dock": {
+    "label": "Asistente rápido",
+    "chats": "Chats abiertos",
+    "open": "Agente",
+    "newChat": "Nuevo chat",
+    "history": "Historial de conversaciones",
+    "minimize": "Minimizar",
+    "expand": "Expandir",
+    "collapse": "Reducir",
+    "close": "Cerrar chat"
+  },
   "welcome": {
     "business": {
       "title": "¿En qué te ayudo hoy?",

@@ -4,7 +4,6 @@ import { LandingBeam } from "./landing-beam";
 import {
   dataLabelClass,
   inkSurfaceClass,
-  LANDING_BEAM_RADIUS,
   subheadingClass,
 } from "./landing-styles";
 import { MetalRecommendedPill } from "./metal-recommended-pill";
@@ -112,14 +111,10 @@ export function PricingCard({
   return (
     <LandingBeam
       size="md"
-      colorVariant="mono"
-      theme="dark"
-      strength={0.7}
-      duration={4.2}
-      borderRadius={LANDING_BEAM_RADIUS.lg}
-      allowOverflow
+      strength={0.65}
+      duration={5}
       // The frame lifts with the card so the beam never slides off its edge.
-      className="h-full transition-[translate] duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="flex h-full rounded-lg transition-[translate] duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {card}
     </LandingBeam>

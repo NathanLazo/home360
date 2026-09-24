@@ -12,4 +12,5 @@ Recordatorios específicos para Claude Code:
 - La unidad de trabajo son los tickets de `spec/tickets/`; verifica siempre con
   `pnpm typecheck`, `pnpm check` y `pnpm build` (no hay tests automatizados).
 - No cruces la frontera D7: un solo sistema ink/zinc (sin `--brand-*`; Fraunces solo como acento de la landing);
-  mesh hero, beams y entradas por scroll solo en `src/app/[locale]/(public)/`.
+  mesh hero y entradas por scroll solo en `src/app/[locale]/(public)/`. El tinte de acción
+  (`tint-sky`/`tint-lime`) y `BeamFrame` son compartidos: 1 `Button beam` por pantalla del panel.
