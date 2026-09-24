@@ -588,8 +588,13 @@
 }
 
 @keyframes beam-orbit {
+  from {
+    --beam-angle: 200deg;
+  }
   to {
-    --beam-angle: 360deg;
+    /* One full turn from the resting angle (560 ≡ 200 mod 360): the last
+       frame paints exactly like the first, so the infinite loop is seamless. */
+    --beam-angle: 560deg;
   }
 }
 
