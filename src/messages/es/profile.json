@@ -1,0 +1,190 @@
+{
+  "title": "Perfil",
+  "subtitle": "Tu cuenta, seguridad y consumo del asistente.",
+  "loading": "Cargando tu perfil",
+  "queryErrorTitle": "No pudimos cargar tu perfil",
+  "errorTitle": "No pudimos abrir tu perfil",
+  "errorDescription": "Ocurrió un problema al abrir esta pantalla. Reintenta para volver a cargarla.",
+  "retry": "Reintentar",
+  "readOnlyNotice": "Sesión de solo lectura: estás viendo este panel en modo impersonación. Los cambios están desactivados.",
+  "notConfigured": "El asistente no está configurado en este entorno: falta la clave del AI Gateway.",
+  "nav": {
+    "label": "Secciones del perfil",
+    "account": "Cuenta",
+    "security": "Seguridad",
+    "devices": "Dispositivos",
+    "assistant": "Asistente",
+    "billing": "Facturación IA",
+    "workspace": "Espacio de trabajo"
+  },
+  "identity": {
+    "memberSince": "Miembro desde {date}",
+    "nameFallback": "Sin nombre",
+    "emailUnavailable": "Correo no disponible"
+  },
+  "account": {
+    "title": "Cuenta",
+    "description": "Cómo apareces en la plataforma y en qué idioma la usas.",
+    "nameLabel": "Nombre",
+    "nameError": "Escribe un nombre de 2 a 80 caracteres.",
+    "emailLabel": "Correo",
+    "emailReadOnly": "Es tu identificador de acceso; no se puede cambiar desde aquí.",
+    "localeLabel": "Idioma preferido",
+    "localeHint": "También cambia el idioma de los correos que te enviamos.",
+    "roleLabel": "Rol",
+    "save": "Guardar cambios",
+    "unsaved": "Cambios sin guardar",
+    "upToDate": "Todo guardado"
+  },
+  "security": {
+    "title": "Seguridad",
+    "description": "Contraseña, cuentas vinculadas y sesiones activas.",
+    "password": {
+      "changeTitle": "Cambiar contraseña",
+      "createTitle": "Crear contraseña",
+      "changeDescription": "Al cambiarla cerraremos todas tus sesiones y tendrás que iniciar de nuevo.",
+      "createDescription": "Entras con Google. Crea una contraseña para entrar también con tu correo; al hacerlo cerraremos todas tus sesiones.",
+      "currentLabel": "Contraseña actual",
+      "currentError": "Escribe tu contraseña actual.",
+      "currentInvalid": "La contraseña actual no es válida. Vuelve a escribirla.",
+      "newLabel": "Contraseña nueva",
+      "newHint": "De 8 a 72 caracteres.",
+      "newError": "Usa de 8 a 72 caracteres.",
+      "sameAsCurrentError": "La contraseña nueva debe ser distinta de la actual.",
+      "confirmLabel": "Confirma la contraseña nueva",
+      "confirmError": "Las contraseñas no coinciden.",
+      "change": "Cambiar contraseña",
+      "create": "Crear contraseña",
+      "redirecting": "Cerrando sesión"
+    },
+    "linked": {
+      "title": "Cuentas vinculadas",
+      "google": "Google",
+      "connected": "Conectada",
+      "notConnected": "No conectada",
+      "note": "Vincular o desvincular cuentas no está disponible desde aquí."
+    },
+    "signOutEverywhere": {
+      "title": "Cerrar sesión en todos los dispositivos",
+      "description": "Termina la sesión web y la de la app móvil en todos tus dispositivos, incluido este.",
+      "action": "Cerrar todas las sesiones",
+      "confirmTitle": "¿Cerrar todas las sesiones?",
+      "confirmDescription": "Tendrás que volver a iniciar sesión en cada dispositivo, incluido este.",
+      "confirm": "Cerrar sesiones",
+      "cancel": "Cancelar"
+    }
+  },
+  "devices": {
+    "title": "Dispositivos",
+    "description": "Dispositivos de la app móvil que reciben tus notificaciones.",
+    "empty": "Aún no has iniciado sesión en la app móvil.",
+    "remove": "Quitar",
+    "removeLabel": "Quitar {name}",
+    "lastSeen": "Último uso {date}",
+    "unnamed": "Dispositivo sin nombre",
+    "platform": {
+      "IOS": "iOS",
+      "ANDROID": "Android"
+    }
+  },
+  "assistant": {
+    "title": "Asistente",
+    "description": "Modelo con el que abre el asistente y lo que llevas consumido este mes.",
+    "defaultModel": "Modelo por defecto",
+    "free": "Gratis",
+    "pricePerMillion": "{input} entrada · {output} salida por millón de tokens",
+    "contextWindow": "Contexto {tokens} tokens",
+    "noTools": "Sin herramientas",
+    "save": "Guardar modelo",
+    "unsaved": "Cambios sin guardar",
+    "upToDate": "Todo guardado",
+    "usageThisMonth": "Uso del mes",
+    "usageEmpty": "El asistente aún no ha generado consumo este mes.",
+    "usageTurns": "{turns, plural, one {# turno} other {# turnos}}",
+    "usageTokens": "{input} entrada · {output} salida"
+  },
+  "billing": {
+    "title": "Facturación IA",
+    "description": "Saldo prepagado del asistente y ledger de consumo, con cada cargo verificable.",
+    "balance": "Saldo prepagado",
+    "balanceHint": "Se descuenta por turno al precio del modelo. Los modelos gratis no consumen saldo.",
+    "balanceEmpty": "Tu saldo está en cero: los modelos de pago no responderán hasta que compres tokens.",
+    "buy": "Comprar tokens",
+    "internalNoCharge": "Uso interno, sin cargo",
+    "internalDescription": "El consumo del equipo HOME360 no se cobra; el ledger queda para auditoría.",
+    "queryErrorTitle": "No pudimos cargar la facturación",
+    "ledgerErrorTitle": "No pudimos cargar el consumo",
+    "purchasesErrorTitle": "No pudimos cargar las compras",
+    "packs": {
+      "title": "Elige un paquete",
+      "description": "El paquete acredita exactamente lo que cuesta, sin bonos. El pago se procesa en Stripe.",
+      "group": "Paquetes de tokens",
+      "label": "Paquete {code}",
+      "credit": "Acredita {amount} de saldo",
+      "lineItem": "HOME360 · Tokens del asistente · Paquete {code}",
+      "pay": "Pagar {amount}",
+      "cancel": "Cancelar",
+      "redirecting": "Abriendo Stripe…"
+    },
+    "ledger": {
+      "title": "Consumo",
+      "empty": "El asistente aún no ha generado cargos.",
+      "loadMore": "Cargar más",
+      "loadingMore": "Cargando…",
+      "columns": {
+        "date": "Fecha",
+        "model": "Modelo",
+        "tokens": "Tokens",
+        "cost": "Costo",
+        "origin": "Origen"
+      },
+      "tokens": "{input} entrada · {output} salida"
+    },
+    "origin": {
+      "PREPAID": "Saldo",
+      "FREE": "Gratis",
+      "INTERNAL": "Interno"
+    },
+    "purchases": {
+      "title": "Compras",
+      "empty": "Aún no has comprado tokens.",
+      "row": "Paquete {code}",
+      "status": {
+        "PENDING": "Pendiente",
+        "PAID": "Pagada",
+        "FAILED": "Fallida"
+      }
+    },
+    "invoicesLink": "Ver facturas del plan",
+    "checkout": {
+      "success": "Compra completada. Tu saldo se actualizó.",
+      "cancelled": "Compra cancelada. No se realizó ningún cargo."
+    }
+  },
+  "workspace": {
+    "title": "Espacio de trabajo",
+    "description": "Lo que pertenece al negocio o a la plataforma vive en su propia pantalla.",
+    "business": {
+      "settings": "Ajustes del negocio",
+      "subscription": "Suscripción",
+      "branches": "Sucursales"
+    },
+    "corporate": {
+      "settings": "Empresa",
+      "membership": "Membresía",
+      "locations": "Ubicaciones"
+    },
+    "admin": {
+      "settings": "Ajustes de plataforma"
+    }
+  },
+  "feedback": {
+    "identityUpdated": "Cuenta actualizada.",
+    "passwordUpdated": "Contraseña actualizada.",
+    "passwordCreated": "Contraseña creada.",
+    "assistantUpdated": "Modelo por defecto actualizado.",
+    "deviceRemoved": "Dispositivo quitado.",
+    "sessionsRevoked": "Sesiones cerradas.",
+    "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+  }
+}

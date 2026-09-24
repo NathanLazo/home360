@@ -10,7 +10,9 @@
   la pestaña Facturación consume sus procedures; sin F8-05 la sección se entrega en estado
   "no disponible", nunca a medias).
 - **Tamaño:** L
-- **Estado:** planeado; pendiente de confirmación del owner sobre las decisiones abiertas D1–D5.
+- **Estado:** implementado (2026-09-24) salvo avatar (D2) y retiro de las formas de contraseña
+  de settings (D4). D1 cerrada: ruta `/{panel}/settings/profile`. D5 cerrada: admin ve
+  "uso interno, sin cargo" con ledger.
 
 ## Brief (shape)
 
@@ -263,16 +265,28 @@ mantiene `localStorage` solo como override de sesión.
 - [ ] Presupuesto: 1 `Button beam` (Comprar tokens), 1 metal vivo (pagar), 0 glass, sin mesh.
 - [ ] `pnpm typecheck` y `pnpm check` en verde; `pnpm build` y `pnpm db:push` los corre Roger.
 
+## Entregado (2026-09-24)
+
+- Módulo compartido `src/components/profile/` (28 archivos) y páginas delgadas en
+  `dashboard`, `corporate` y `admin` bajo `settings/profile` (+ `loading.tsx`, `error.tsx`).
+- Copy `profile.json` es/en al 100 %; secciones: cuenta, seguridad (cambiar/crear
+  contraseña, cuentas vinculadas, cerrar sesión en todos lados), dispositivos, asistente
+  (modelo por defecto + uso del mes), facturación IA (saldo, comprar tokens → Stripe,
+  ledger paginado, compras, facturas del plan) y espacio de trabajo.
+- Dinero del asistente en **USD** (F8-05: micro-dólares); el ticket hablaba de MXN.
+- Sin `key`/barra global: cada formulario guarda por separado con `SubmitStatusIcon`,
+  punto "cambios sin guardar" y `useErrorShake`; radio-cards nativas (`has-checked`).
+- Presupuesto cumplido: 1 `Button beam` (Comprar tokens, cede con `beamActive`), 1 metal
+  vivo (Pagar en el diálogo), 0 glass.
+
 ## Decisiones abiertas (bloquean solo su sección)
 
-- **D1. Ruta:** `/{panel}/profile` (propuesto) vs. `/{panel}/settings/profile`. Propuesto:
-  ruta propia; settings sigue siendo del tenant.
-- **D2. Avatar:** subida directa a Vercel Blob sin recorte (propuesto, reutiliza
-  `media/blob.ts`) vs. recorte en cliente. Requiere `BLOB_READ_WRITE_TOKEN` (pendiente).
+- **D1. Ruta:** cerrada → `/{panel}/settings/profile` (`AGENT_PROFILE_PATH`).
+- **D2. Avatar:** pendiente de `BLOB_READ_WRITE_TOKEN`; la card muestra el avatar
+  (foto de Google o bot) en solo lectura, sin subir/quitar ni `profile.updateAvatar`.
 - **D3. Notificaciones por usuario:** hoy solo existen flags de plataforma. Propuesto:
   fuera de F9-01; ticket F9-02 si se quiere `emailOrderUpdates`, `emailPaymentRelease`,
   `emailAssistantReceipts`.
-- **D4. Contraseña en settings de negocio/corporativo:** retirarla de ahí al cerrar F9-01
-  (propuesto) o mantener duplicada.
-- **D5. Admin y billing:** propuesto "uso interno, sin cargo" con ledger visible para
-  auditoría; alternativa: ocultar la card por completo.
+- **D4. Contraseña en settings de negocio/corporativo:** sigue duplicada hasta que el
+  owner confirme retirarla (propuesto).
+- **D5. Admin y billing:** cerrada → "uso interno, sin cargo" con ledger visible.
