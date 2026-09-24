@@ -48,15 +48,17 @@ export const AGENT_MODELS = [
     gatewayPricing: { inputUsdPerMillion: 0.1, outputUsdPerMillion: 0.5 },
   },
   {
-    id: "typesafe-ai/jev",
-    label: "Jev",
-    contextWindow: 32_000,
+    // Replaces `typesafe-ai/jev`: the gateway rejects Jev outright as an
+    // evaluation model (400 on every chat turn, seen in production). Ling
+    // supports tool use; the gateway serves it free until 2026-10-04 —
+    // re-verify the list price after that date.
+    id: "inclusionai/ling-3.0-flash-sante",
+    label: "Ling 3.0 Flash Sante",
+    contextWindow: 262_144,
     tier: "free",
     free: true,
-    // The gateway lists Jev as an evaluation model without tool use; it is
-    // kept in the catalog by owner decision and flagged in F8-05.
-    supportsTools: false,
-    gatewayPricing: { inputUsdPerMillion: 0.042, outputUsdPerMillion: 0 },
+    supportsTools: true,
+    gatewayPricing: { inputUsdPerMillion: 0, outputUsdPerMillion: 0 },
   },
 ] as const satisfies readonly AgentModelOption[];
 
