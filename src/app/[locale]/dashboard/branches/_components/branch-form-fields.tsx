@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import type { BranchFormErrors, BranchFormValues } from "./branch.types";
+import { FormSection, FormSectionDivider } from "~/components/form-section";
 import { GeoCoordinateFields } from "~/components/geo-coordinate-fields";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -28,137 +29,153 @@ export function BranchFormFields({
   }
 
   return (
-    <div className="grid gap-5 px-4">
-      <div className="grid gap-2">
-        <Label htmlFor="branch-name">{t("name")}</Label>
-        <Input
-          id="branch-name"
-          autoComplete="organization"
-          value={values.name}
-          disabled={disabled}
-          aria-invalid={Boolean(errors.name)}
-          aria-describedby={errors.name ? "branch-name-error" : undefined}
-          onChange={(event) => onChange(field("name", event.target.value))}
-        />
-        {errors.name ? (
-          <p
-            id="branch-name-error"
-            role="alert"
-            className="text-error-deep text-copy-sm"
-          >
-            {errors.name}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="branch-address">{t("address")}</Label>
-        <Input
-          id="branch-address"
-          autoComplete="street-address"
-          value={values.address}
-          disabled={disabled}
-          aria-invalid={Boolean(errors.address)}
-          aria-describedby={errors.address ? "branch-address-error" : undefined}
-          onChange={(event) => onChange(field("address", event.target.value))}
-        />
-        {errors.address ? (
-          <p
-            id="branch-address-error"
-            role="alert"
-            className="text-error-deep text-copy-sm"
-          >
-            {errors.address}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="branch-manager">{t("manager")}</Label>
-        <Input
-          id="branch-manager"
-          autoComplete="name"
-          value={values.managerName}
-          disabled={disabled}
-          aria-invalid={Boolean(errors.managerName)}
-          aria-describedby={
-            errors.managerName ? "branch-manager-error" : "branch-manager-help"
-          }
-          onChange={(event) =>
-            onChange(field("managerName", event.target.value))
-          }
-        />
-        <p
-          id="branch-manager-help"
-          className="text-muted-foreground text-copy-sm"
-        >
-          {t("managerOptional")}
-        </p>
-        {errors.managerName ? (
-          <p
-            id="branch-manager-error"
-            role="alert"
-            className="text-error-deep text-copy-sm"
-          >
-            {errors.managerName}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="branch-coverage">{t("coverage")}</Label>
-        <div className="relative">
+    <div className="flex flex-col gap-6">
+      <FormSection
+        title={t("sections.identity")}
+        description={t("sections.identityDescription")}
+      >
+        <div className="grid gap-2">
+          <Label htmlFor="branch-name">{t("name")}</Label>
           <Input
-            id="branch-coverage"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={100}
-            step={1}
-            value={values.coverageRadiusKm}
+            id="branch-name"
+            autoComplete="organization"
+            value={values.name}
             disabled={disabled}
-            className="pr-12"
-            aria-invalid={Boolean(errors.coverageRadiusKm)}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "branch-name-error" : undefined}
+            onChange={(event) => onChange(field("name", event.target.value))}
+          />
+          {errors.name ? (
+            <p
+              id="branch-name-error"
+              role="alert"
+              className="text-error-deep text-copy-sm"
+            >
+              {errors.name}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="branch-address">{t("address")}</Label>
+          <Input
+            id="branch-address"
+            autoComplete="street-address"
+            value={values.address}
+            disabled={disabled}
+            aria-invalid={Boolean(errors.address)}
             aria-describedby={
-              errors.coverageRadiusKm
-                ? "branch-coverage-error"
-                : "branch-coverage-help"
+              errors.address ? "branch-address-error" : undefined
+            }
+            onChange={(event) => onChange(field("address", event.target.value))}
+          />
+          {errors.address ? (
+            <p
+              id="branch-address-error"
+              role="alert"
+              className="text-error-deep text-copy-sm"
+            >
+              {errors.address}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="branch-manager">{t("manager")}</Label>
+          <Input
+            id="branch-manager"
+            autoComplete="name"
+            value={values.managerName}
+            disabled={disabled}
+            aria-invalid={Boolean(errors.managerName)}
+            aria-describedby={
+              errors.managerName
+                ? "branch-manager-error"
+                : "branch-manager-help"
             }
             onChange={(event) =>
-              onChange(field("coverageRadiusKm", event.target.value))
+              onChange(field("managerName", event.target.value))
             }
           />
-          <span
-            aria-hidden="true"
-            className="text-muted-foreground text-copy-sm pointer-events-none absolute inset-y-0 right-3 flex items-center"
-          >
-            km
-          </span>
-        </div>
-        <p
-          id="branch-coverage-help"
-          className="text-muted-foreground text-copy-sm"
-        >
-          {t("coverageHelp")}
-        </p>
-        {errors.coverageRadiusKm ? (
           <p
-            id="branch-coverage-error"
-            role="alert"
-            className="text-error-deep text-copy-sm"
+            id="branch-manager-help"
+            className="text-muted-foreground text-copy-sm"
           >
-            {errors.coverageRadiusKm}
+            {t("managerOptional")}
           </p>
-        ) : null}
-      </div>
+          {errors.managerName ? (
+            <p
+              id="branch-manager-error"
+              role="alert"
+              className="text-error-deep text-copy-sm"
+            >
+              {errors.managerName}
+            </p>
+          ) : null}
+        </div>
+      </FormSection>
 
-      <GeoCoordinateFields
-        idPrefix="branch"
-        values={{ latitude: values.latitude, longitude: values.longitude }}
-        errors={{ latitude: errors.latitude, longitude: errors.longitude }}
-        disabled={disabled}
-        onChange={(location) => onChange({ ...values, ...location })}
-      />
+      <FormSectionDivider />
+
+      <FormSection
+        title={t("sections.coverage")}
+        description={t("sections.coverageDescription")}
+      >
+        <div className="grid gap-2">
+          <Label htmlFor="branch-coverage">{t("coverage")}</Label>
+          <div className="relative">
+            <Input
+              id="branch-coverage"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={100}
+              step={1}
+              value={values.coverageRadiusKm}
+              disabled={disabled}
+              className="pr-12 font-mono tabular-nums"
+              aria-invalid={Boolean(errors.coverageRadiusKm)}
+              aria-describedby={
+                errors.coverageRadiusKm
+                  ? "branch-coverage-error"
+                  : "branch-coverage-help"
+              }
+              onChange={(event) =>
+                onChange(field("coverageRadiusKm", event.target.value))
+              }
+            />
+            <span
+              aria-hidden="true"
+              className="text-muted-foreground text-copy-sm pointer-events-none absolute inset-y-0 right-3 flex items-center"
+            >
+              km
+            </span>
+          </div>
+          <p
+            id="branch-coverage-help"
+            className="text-muted-foreground text-copy-sm"
+          >
+            {t("coverageHelp")}
+          </p>
+          {errors.coverageRadiusKm ? (
+            <p
+              id="branch-coverage-error"
+              role="alert"
+              className="text-error-deep text-copy-sm"
+            >
+              {errors.coverageRadiusKm}
+            </p>
+          ) : null}
+        </div>
+
+        <GeoCoordinateFields
+          idPrefix="branch"
+          values={{ latitude: values.latitude, longitude: values.longitude }}
+          errors={{ latitude: errors.latitude, longitude: errors.longitude }}
+          disabled={disabled}
+          onChange={(location) => onChange({ ...values, ...location })}
+        />
+      </FormSection>
     </div>
   );
 }

@@ -50,5 +50,13 @@
     "description": "You are viewing {name}'s panel exactly as its owner sees it. Changes are disabled.",
     "exit": "Back to admin",
     "exiting": "Going back…"
+  },
+  "filters": {
+    "title": "Filters",
+    "description": "Results update as you change them.",
+    "open": "Filters",
+    "openWithCount": "Filters, {count} active",
+    "clear": "Clear",
+    "done": "Done"
   }
 }

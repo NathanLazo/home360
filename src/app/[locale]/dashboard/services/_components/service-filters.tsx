@@ -45,6 +45,11 @@ export function ServiceFilters({
       searchValue={searchDraft}
       onSearchChange={setSearchDraft}
       searchPlaceholder={t("filters.searchPlaceholder")}
+      activeCount={
+        [filters.category, filters.status].filter((value) => value !== "")
+          .length
+      }
+      onClearFilters={() => onChange({ ...filters, category: "", status: "" })}
     >
       <Select
         value={filters.category || ALL}

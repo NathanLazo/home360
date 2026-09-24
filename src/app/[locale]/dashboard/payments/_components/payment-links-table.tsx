@@ -35,12 +35,14 @@ export function PaymentLinksTable({
   const columns: Array<DataTableColumn<PaymentLinkListItem>> = [
     {
       key: "concept",
+      mobile: "title",
       header: t("columns.concept"),
       className: "min-w-56",
       cell: (link) => <span className="font-medium">{link.concept}</span>,
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (link) => (
@@ -56,6 +58,7 @@ export function PaymentLinksTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (link) => (
         <PaymentLinkStatusBadge
@@ -66,6 +69,7 @@ export function PaymentLinksTable({
     },
     {
       key: "created",
+      mobile: "meta",
       header: t("columns.created"),
       className: "min-w-36",
       cell: (link) => (
@@ -79,6 +83,7 @@ export function PaymentLinksTable({
     },
     {
       key: "paid",
+      mobile: "meta",
       header: t("columns.paid"),
       className: "min-w-36",
       cell: (link) =>
@@ -97,6 +102,7 @@ export function PaymentLinksTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (link) => <PaymentLinkRowActions paymentLink={link} />,

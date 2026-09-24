@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { parsePesosToCents } from "./payment-amount";
 import type { CreatedPaymentLink } from "./payment.types";
+import { useMoneyFormat } from "./use-money-format";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { IconSwap, useErrorShake, useTransientFlag } from "~/components/motion";
@@ -56,6 +57,7 @@ export function CreatePaymentLinkDialog({
   // user finish something the server will reject.
   useCloseWhenReadOnly(open, onOpenChange);
   const { createPaymentLink, creatingPaymentLink } = usePaymentMutations();
+  const { currency } = useMoneyFormat();
   const [created, setCreated] = useState<CreatedPaymentLink | null>(null);
   const [copied, flashCopied] = useTransientFlag(COPIED_FEEDBACK_MS);
   const shakeInvalid = useErrorShake();
@@ -130,9 +132,20 @@ export function CreatePaymentLinkDialog({
         </DialogHeader>
 
         {created ? (
-          <div className="flex flex-col gap-3">
-            <Label htmlFor="payment-link-url">{t("urlLabel")}</Label>
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4">
+            <div className="bg-canvas-soft flex flex-col gap-1 rounded-xl border p-4">
+              <span className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase">
+                {t("summaryLabel")}
+              </span>
+              <span className="text-copy font-medium">
+                {form.getValues("concept").trim()}
+              </span>
+              <span className="font-mono text-lg leading-tight font-semibold tabular-nums">
+                {currency(parsePesosToCents(form.getValues("amount")) ?? 0)}
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="payment-link-url">{t("urlLabel")}</Label>
               <Input
                 id="payment-link-url"
                 readOnly
@@ -140,12 +153,21 @@ export function CreatePaymentLinkDialog({
                 className="font-mono text-xs"
                 onFocus={(event) => event.currentTarget.select()}
               />
+              <p className="text-muted-foreground text-copy-sm">
+                {t("singleUseHint")}
+              </p>
+            </div>
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
-                size="icon"
-                className="shrink-0"
-                aria-label={t("copy")}
+                onClick={() => onOpenChange(false)}
+              >
+                {t("done")}
+              </Button>
+              <Button
+                type="button"
+                metal="live"
                 onClick={() => void handleCopy(created.url)}
               >
                 <IconSwap
@@ -153,17 +175,7 @@ export function CreatePaymentLinkDialog({
                   from={<CopyIcon />}
                   to={<CheckIcon />}
                 />
-              </Button>
-            </div>
-            <p className="text-muted-foreground text-copy-sm">
-              {t("singleUseHint")}
-            </p>
-            <DialogFooter>
-              <Button
-                type="button"
-                onClick={() => onOpenChange(false)}
-              >
-                {t("done")}
+                {t(copied ? "copied" : "copy")}
               </Button>
             </DialogFooter>
           </div>
@@ -199,17 +211,25 @@ export function CreatePaymentLinkDialog({
 
             <div className="flex flex-col gap-2">
               <Label htmlFor="payment-link-amount">{t("amountLabel")}</Label>
-              <Input
-                id="payment-link-amount"
-                inputMode="decimal"
-                autoComplete="off"
-                placeholder="0.00"
-                disabled={creatingPaymentLink}
-                className="font-mono tabular-nums"
-                aria-invalid={amountError ? true : undefined}
-                aria-describedby="payment-link-amount-hint"
-                {...form.register("amount")}
-              />
+              <div className="relative">
+                <span
+                  aria-hidden="true"
+                  className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+                >
+                  $
+                </span>
+                <Input
+                  id="payment-link-amount"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  placeholder="0.00"
+                  disabled={creatingPaymentLink}
+                  className="pl-7 font-mono tabular-nums"
+                  aria-invalid={amountError ? true : undefined}
+                  aria-describedby="payment-link-amount-hint"
+                  {...form.register("amount")}
+                />
+              </div>
               <p
                 id="payment-link-amount-hint"
                 className="text-muted-foreground text-copy-sm"
@@ -232,10 +252,7 @@ export function CreatePaymentLinkDialog({
               >
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                disabled={creatingPaymentLink}
-              >
+              <Button type="submit" metal="live" disabled={creatingPaymentLink}>
                 {creatingPaymentLink ? (
                   <LoaderCircleIcon
                     aria-hidden="true"

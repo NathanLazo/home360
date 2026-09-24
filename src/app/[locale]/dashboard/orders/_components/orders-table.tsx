@@ -46,6 +46,7 @@ export function OrdersTable({
   const columns: Array<DataTableColumn<OrderListItem>> = [
     {
       key: "folio",
+      mobile: "meta",
       header: t("columns.folio"),
       className: "w-24",
       cell: (order) => (
@@ -56,6 +57,7 @@ export function OrdersTable({
     },
     {
       key: "title",
+      mobile: "title",
       header: t("columns.order"),
       className: "min-w-56",
       cell: (order) => <span className="font-medium">{order.title}</span>,
@@ -76,6 +78,7 @@ export function OrdersTable({
     },
     {
       key: "customer",
+      mobile: "meta",
       header: t("columns.customer"),
       className: "min-w-40",
       cell: (order) => (
@@ -106,6 +109,7 @@ export function OrdersTable({
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (order) => (
@@ -116,6 +120,7 @@ export function OrdersTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (order) => (
         <OrderStatusBadge status={order.status} label={statusT(order.status)} />
@@ -123,6 +128,7 @@ export function OrdersTable({
     },
     {
       key: "date",
+      mobile: "meta",
       header: t("columns.date"),
       className: "min-w-32",
       cell: (order) => (

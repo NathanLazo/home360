@@ -46,6 +46,7 @@ export function TeamTable({
   const columns: Array<DataTableColumn<WorkerListItem>> = [
     {
       key: "worker",
+      mobile: "title",
       header: t("columns.worker"),
       className: "min-w-56",
       cell: (worker) => (
@@ -62,6 +63,7 @@ export function TeamTable({
     },
     {
       key: "services",
+      mobile: "subtitle",
       header: t("columns.services"),
       className: "min-w-48 max-w-72",
       cell: (worker) =>
@@ -81,12 +83,14 @@ export function TeamTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       className: "min-w-40",
       cell: (worker) => <WorkerStatusCell worker={worker} />,
     },
     {
       key: "branch",
+      mobile: "meta",
       header: t("columns.branch"),
       cell: (worker) => (
         <span className="text-muted-foreground">
@@ -96,6 +100,7 @@ export function TeamTable({
     },
     {
       key: "invitation",
+      mobile: "meta",
       header: t("columns.invitation"),
       className: "min-w-48",
       cell: (worker) => (
@@ -113,6 +118,7 @@ export function TeamTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (worker) => (

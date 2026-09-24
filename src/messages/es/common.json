@@ -50,5 +50,13 @@
     "description": "Estás viendo el panel de {name} tal como lo ve su dueño. Los cambios están desactivados.",
     "exit": "Volver al admin",
     "exiting": "Volviendo…"
+  },
+  "filters": {
+    "title": "Filtros",
+    "description": "Los resultados se actualizan al instante.",
+    "open": "Filtros",
+    "openWithCount": "Filtros, {count} activos",
+    "clear": "Limpiar",
+    "done": "Listo"
   }
 }

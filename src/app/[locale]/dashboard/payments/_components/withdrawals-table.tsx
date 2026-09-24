@@ -29,6 +29,7 @@ export function WithdrawalsTable({
   const columns: Array<DataTableColumn<WithdrawalListItem>> = [
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (withdrawal) => (
@@ -39,6 +40,7 @@ export function WithdrawalsTable({
     },
     {
       key: "destination",
+      mobile: "title",
       header: t("columns.destination"),
       className: "min-w-44",
       cell: (withdrawal) => (
@@ -52,6 +54,7 @@ export function WithdrawalsTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       className: "min-w-44",
       cell: (withdrawal) => (
@@ -70,6 +73,7 @@ export function WithdrawalsTable({
     },
     {
       key: "requested",
+      mobile: "meta",
       header: t("columns.requested"),
       className: "min-w-36",
       cell: (withdrawal) => (
@@ -83,6 +87,7 @@ export function WithdrawalsTable({
     },
     {
       key: "processed",
+      mobile: "meta",
       header: t("columns.processed"),
       className: "min-w-36",
       cell: (withdrawal) =>

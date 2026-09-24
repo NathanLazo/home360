@@ -45,6 +45,7 @@ export function TransactionsTable({
   const columns: Array<DataTableColumn<TransactionListItem>> = [
     {
       key: "customer",
+      mobile: "title",
       header: t("columns.customer"),
       className: "min-w-40",
       cell: (transaction) => (
@@ -55,6 +56,7 @@ export function TransactionsTable({
     },
     {
       key: "concept",
+      mobile: "subtitle",
       header: t("columns.concept"),
       className: "min-w-56",
       cell: (transaction) => (
@@ -67,6 +69,7 @@ export function TransactionsTable({
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (transaction) => (
@@ -77,6 +80,7 @@ export function TransactionsTable({
     },
     {
       key: "method",
+      mobile: "meta",
       header: t("columns.method"),
       cell: (transaction) => (
         <Badge variant="secondary">{methodT(transaction.method)}</Badge>
@@ -84,6 +88,7 @@ export function TransactionsTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (transaction) => (
         <PaymentStatusBadge
@@ -94,6 +99,7 @@ export function TransactionsTable({
     },
     {
       key: "date",
+      mobile: "meta",
       header: t("columns.date"),
       className: "min-w-32",
       cell: (transaction) => (
@@ -108,6 +114,7 @@ export function TransactionsTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (transaction) => (

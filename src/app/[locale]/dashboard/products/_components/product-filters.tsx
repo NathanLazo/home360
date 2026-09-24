@@ -42,6 +42,13 @@ export function ProductFilters({
       searchValue={searchDraft}
       onSearchChange={setSearchDraft}
       searchPlaceholder={t("searchPlaceholder")}
+      activeCount={
+        [filters.category, filters.status].filter((value) => value !== "")
+          .length + (filters.lowStockOnly ? 1 : 0)
+      }
+      onClearFilters={() =>
+        onChange({ ...filters, category: "", status: "", lowStockOnly: false })
+      }
     >
       <Select
         value={filters.category || ALL}
@@ -73,10 +80,7 @@ export function ProductFilters({
           })
         }
       >
-        <SelectTrigger
-          className="w-full sm:w-40"
-          aria-label={t("statusLabel")}
-        >
+        <SelectTrigger className="w-full sm:w-40" aria-label={t("statusLabel")}>
           <SelectValue placeholder={t("allStatuses")} />
         </SelectTrigger>
         <SelectContent>

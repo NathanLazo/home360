@@ -29,6 +29,7 @@ export function LoyaltyBonusesTable({
   const columns: Array<DataTableColumn<LoyaltyBonusListItem>> = [
     {
       key: "concept",
+      mobile: "title",
       header: t("columns.concept"),
       className: "min-w-56",
       cell: (bonus) => (
@@ -44,6 +45,7 @@ export function LoyaltyBonusesTable({
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (bonus) => (
@@ -59,6 +61,7 @@ export function LoyaltyBonusesTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (bonus) => (
         <LoyaltyBonusStatusBadge
@@ -69,6 +72,7 @@ export function LoyaltyBonusesTable({
     },
     {
       key: "earned",
+      mobile: "meta",
       header: t("columns.earned"),
       className: "min-w-36",
       cell: (bonus) => (
@@ -82,6 +86,7 @@ export function LoyaltyBonusesTable({
     },
     {
       key: "paid",
+      mobile: "meta",
       header: t("columns.paid"),
       className: "min-w-40",
       cell: (bonus) =>
