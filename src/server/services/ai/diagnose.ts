@@ -70,6 +70,13 @@ type DiagnosisSettings = {
   aiPricingModel: string;
 };
 
+/** Schema defaults of `PlatformSettings`, used when the row was never seeded. */
+const DEFAULT_SETTINGS: DiagnosisSettings = {
+  aiConfidenceThresholdPct: 85,
+  aiPriceMarginPct: 25,
+  aiPricingModel: "v3.2",
+};
+
 /**
  * System prompt built per call from `PlatformSettings` so pricing margins and
  * confidence thresholds stay admin-tunable. Never returned to the client.
@@ -153,18 +160,17 @@ export async function diagnoseProblem(
     return svcFail("INTERNAL_ERROR", "Diagnosis requires at least one media");
   }
 
-  const settings = await db.platformSettings.findUnique({
-    where: { id: PLATFORM_SETTINGS_ID },
-    select: {
-      aiConfidenceThresholdPct: true,
-      aiPriceMarginPct: true,
-      aiPricingModel: true,
-    },
-  });
-
-  if (!settings) {
-    return svcFail("INTERNAL_ERROR", "Platform settings are missing");
-  }
+  // Same rule as `settings/platform-policies.ts`: an unseeded singleton
+  // falls back to the schema defaults instead of failing the diagnosis.
+  const settings =
+    (await db.platformSettings.findUnique({
+      where: { id: PLATFORM_SETTINGS_ID },
+      select: {
+        aiConfidenceThresholdPct: true,
+        aiPriceMarginPct: true,
+        aiPricingModel: true,
+      },
+    })) ?? DEFAULT_SETTINGS;
 
   try {
     const { object } = await generateObject({

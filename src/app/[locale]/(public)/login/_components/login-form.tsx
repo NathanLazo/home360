@@ -8,6 +8,10 @@ import { toast } from "sonner";
 
 import { ActiveSessionDialog } from "./active-session-dialog";
 import { loginSchema } from "./login.schema";
+import {
+  CREDENTIALS_SIGN_IN_REDIRECT_TO,
+  classifySignInResponse,
+} from "./sign-in-outcome";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -17,7 +21,6 @@ import {
   type SignInSessionIntent,
 } from "~/lib/auth/prepare-sign-in";
 import { homeForRole, safeCallbackForRole } from "~/lib/auth/role-home";
-import { ACTIVE_SESSION_EXISTS_CODE } from "~/lib/auth/session-errors";
 import { useErrorShake } from "~/components/motion";
 
 export type LoginFormProps = { callbackUrl?: string };
@@ -57,6 +60,16 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
     await attemptSignIn("keep");
   }
 
+  function failSignIn(reason: "invalidCredentials" | "unexpected") {
+    setConflictOpen(false);
+    setFormError(reason === "invalidCredentials");
+    toast.error(
+      reason === "invalidCredentials"
+        ? t("invalidCredentials")
+        : t("unexpectedError"),
+    );
+  }
+
   async function attemptSignIn(sessionIntent: SignInSessionIntent) {
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) return;
@@ -68,15 +81,25 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         ...parsed.data,
         sessionIntent,
         redirect: false,
+        redirectTo: CREDENTIALS_SIGN_IN_REDIRECT_TO,
       });
-      if (response?.code === ACTIVE_SESSION_EXISTS_CODE) {
+      const outcome = classifySignInResponse(response);
+      if (outcome === "activeSession") {
+        // Also reachable during a "replace" (e.g. the intent got lost on the
+        // way): keeping the dialog open lets the user retry.
         setConflictOpen(true);
         return;
       }
-      if (response?.error) throw new Error();
+      if (outcome !== "success") {
+        failSignIn(outcome);
+        return;
+      }
       setConflictOpen(false);
       const role = (await getSession())?.user.role;
-      if (!role) throw new Error();
+      if (!role) {
+        failSignIn("unexpected");
+        return;
+      }
       if (role === "CUSTOMER" || role === "WORKER") {
         toast(t("mobileOnly"));
         router.push("/");
@@ -86,9 +109,8 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
         safeCallbackForRole(role, callbackUrl) ?? homeForRole(role),
       );
     } catch {
-      setConflictOpen(false);
-      setFormError(true);
-      toast.error(t("invalidCredentials"));
+      // `prepareSignIn` refused or the network failed: not a password problem.
+      failSignIn("unexpected");
     } finally {
       setIsSubmitting(false);
     }
