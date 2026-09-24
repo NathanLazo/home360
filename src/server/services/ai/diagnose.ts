@@ -5,15 +5,17 @@ import { z } from "zod";
 
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
+import type { AgentModelId } from "~/lib/agent/agent-models";
 import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 /**
- * Latest Sonnet in the Vercel AI Gateway catalog. The plain string routes the
- * call through the Gateway (authenticated by `AI_GATEWAY_API_KEY`, which the
- * AI SDK reads from `process.env` on its own) — no provider package needed.
+ * Same Grok the assistant defaults to (`agent-models.ts`), so the vision
+ * diagnosis and the agent share one catalog. The plain string routes the call
+ * through the Vercel AI Gateway (authenticated by `AI_GATEWAY_API_KEY`, which
+ * the AI SDK reads from `process.env` on its own) — no provider package needed.
  */
-export const DIAGNOSIS_MODEL = "anthropic/claude-sonnet-5";
+export const DIAGNOSIS_MODEL: AgentModelId = "spacexai/grok-4.7";
 
 export {
   REQUEST_CATEGORIES,
