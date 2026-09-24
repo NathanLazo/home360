@@ -53,8 +53,9 @@ Integración en `agent-chat.tsx`: `boundsRef` (contenedor relativo del chat) y
 - **Nunca sobre el composer**: la altura del composer se resta del área de arrastre.
 - **Magnético**: al soltar, desliza al lado izquierdo o derecho más cercano; si queda
   a menos de 32 px del borde superior, también se pega a él. A menos de 32 px del borde
-  superior del composer se acopla a ese borde conservando su offset horizontal (posición
-  persistida como `{side: "composer", left}`).
+  superior del composer se acopla al ras del borde del input
+  (sin gap, pasando el padding del wrapper) conservando su offset horizontal
+  (posición persistida como `{side: "composer", left}`).
 - **Reduced motion**: frame 0 estático, sin parpadeo, snap instantáneo, sin escala.
 - **Accesibilidad**: `aria-hidden` en todo el widget; el estado lo anuncia el composer.
 - **D7**: personalidad Corporate; sin mesh, beams ni metal/glass; único acento de color
