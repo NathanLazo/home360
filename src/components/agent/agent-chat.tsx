@@ -493,7 +493,7 @@ export function AgentChat({
               >
                 <ThinkingOrbGlyph
                   state="breathing"
-                  size={isDock ? 40 : 64}
+                  size={isDock ? 32 : 64}
                   speed={0.7}
                   decorative
                   className="opacity-80"

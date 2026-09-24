@@ -16,11 +16,7 @@ export function OverviewPrimaryAction({ urgent }: OverviewPrimaryActionProps) {
   const t = useTranslations("admin.overview");
 
   return (
-    <Button
-      asChild
-      beam
-      beamActive={urgent}
-    >
+    <Button asChild beam beamActive={urgent}>
       <Link href="/admin/disputes">
         <ScaleIcon aria-hidden="true" />
         {t("primaryAction")}

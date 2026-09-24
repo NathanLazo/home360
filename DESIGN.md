@@ -266,11 +266,17 @@ Sin glass, nunca.
   (40 px en desktop, 44 en móvil; canvas al 92 % + blur, sin glass) con trigger,
   hairline vertical y `AppShellBreadcrumb` "Workspace › Sección" (la hoja hace
   crossfade de 150 ms smooth-out al navegar; instantáneo con reduced motion). Abajo
-  `AppShellFooter` (36 px, solo desktop, `rounded-b-xl`): carril izquierdo para accesos
-  rápidos/burbujas de mensajes, derecha idioma y el slot `data-slot="agent-dock"`
-  reservado para el agente de IA. En móvil el panel es full-bleed, sin footer, y el
-  idioma sube al header. Identidad: las tres áreas usan el sidebar claro; admin se
-  distingue por su chip de rol (`bg-metal`) junto al breadcrumb.
+  `AppShellFooter` (36 px, solo desktop, `rounded-b-xl`): a la izquierda utilidades
+  (tema, idioma); a la derecha el **dock del asistente** (`src/components/agent-dock/`):
+  una píldora por chat abierto (punto `bg-metal` en el activo; click alterna
+  burbuja/minimizado), el botón "Agente" y el enlace al historial (`/…/assistant`).
+  Las píldoras entran con `SPRING_LAYOUT`; cada chat vive en una **burbuja**
+  (`AgentDockBubble`: `absolute` dentro del panel, esquina inferior derecha,
+  `rounded-lg` + hairline + `shadow-lg`, 26×32 rem o expandida) que reutiliza
+  `AgentChat variant="dock"` y permanece montada al minimizar para no perder el
+  stream. En móvil el panel es full-bleed, sin footer ni dock (la ruta `/assistant`
+  es la entrada), y el idioma sube al header. Identidad: las tres áreas usan el
+  sidebar claro; admin se distingue por su chip de rol (`bg-metal`) junto al breadcrumb.
 - Sidebar: notch activo de metal **estático** (`SidebarActiveIndicator`, `bg-metal`)
   que se desliza entre ítems (250 ms smooth-out, instantáneo con reduced motion);
   sobre el ítem activo viaja además un **lente de selección** (`SidebarActiveLens`
