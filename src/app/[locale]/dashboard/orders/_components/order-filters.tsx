@@ -44,92 +44,103 @@ export function OrderFilters({
   const t = useTranslations("dashboard.orders.filters");
   const statusT = useTranslations("dashboard.orderStatus");
 
+  const activeCount = [
+    filters.status,
+    filters.type,
+    filters.workerId,
+    filters.from,
+    filters.to,
+  ].filter((value) => value !== "").length;
+
   return (
-    <div className="flex flex-col gap-3">
-      <SearchFilterBar
-        searchValue={searchDraft}
-        onSearchChange={onSearchChange}
-        searchPlaceholder={t("searchPlaceholder")}
+    <SearchFilterBar
+      searchValue={searchDraft}
+      onSearchChange={onSearchChange}
+      searchPlaceholder={t("searchPlaceholder")}
+      activeCount={activeCount}
+      onClearFilters={() =>
+        onChange({
+          ...filters,
+          status: "",
+          type: "",
+          workerId: "",
+          from: "",
+          to: "",
+        })
+      }
+    >
+      <Select
+        value={filters.status === "" ? ALL : filters.status}
+        onValueChange={(value) =>
+          onChange({
+            ...filters,
+            status: ORDER_STATUSES.find((status) => status === value) ?? "",
+          })
+        }
       >
+        <SelectTrigger className="w-full sm:w-44" aria-label={t("statusLabel")}>
+          <SelectValue placeholder={t("allStatuses")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>{t("allStatuses")}</SelectItem>
+          {ORDER_STATUSES.map((status) => (
+            <SelectItem key={status} value={status}>
+              {statusT(status)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.type === "" ? ALL : filters.type}
+        onValueChange={(value) =>
+          onChange({
+            ...filters,
+            type: value === "SERVICE" || value === "PRODUCT" ? value : "",
+          })
+        }
+      >
+        <SelectTrigger className="w-full sm:w-40" aria-label={t("typeLabel")}>
+          <SelectValue placeholder={t("allTypes")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
+          <SelectItem value="SERVICE">{t("service")}</SelectItem>
+          <SelectItem value="PRODUCT">{t("product")}</SelectItem>
+        </SelectContent>
+      </Select>
+      {workers.length > 0 ? (
         <Select
-          value={filters.status === "" ? ALL : filters.status}
+          value={filters.workerId === "" ? ALL : filters.workerId}
           onValueChange={(value) =>
             onChange({
               ...filters,
-              status: ORDER_STATUSES.find((status) => status === value) ?? "",
+              workerId: workers.some((worker) => worker.id === value)
+                ? value
+                : "",
             })
           }
         >
           <SelectTrigger
-            className="w-full sm:w-44"
-            aria-label={t("statusLabel")}
+            className="w-full sm:w-48"
+            aria-label={t("workerLabel")}
           >
-            <SelectValue placeholder={t("allStatuses")} />
+            <SelectValue placeholder={t("allWorkers")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t("allStatuses")}</SelectItem>
-            {ORDER_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {statusT(status)}
+            <SelectItem value={ALL}>{t("allWorkers")}</SelectItem>
+            {workers.map((worker) => (
+              <SelectItem key={worker.id} value={worker.id}>
+                {worker.fullName}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select
-          value={filters.type === "" ? ALL : filters.type}
-          onValueChange={(value) =>
-            onChange({
-              ...filters,
-              type: value === "SERVICE" || value === "PRODUCT" ? value : "",
-            })
-          }
-        >
-          <SelectTrigger
-            className="w-full sm:w-40"
-            aria-label={t("typeLabel")}
-          >
-            <SelectValue placeholder={t("allTypes")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
-            <SelectItem value="SERVICE">{t("service")}</SelectItem>
-            <SelectItem value="PRODUCT">{t("product")}</SelectItem>
-          </SelectContent>
-        </Select>
-        {workers.length > 0 ? (
-          <Select
-            value={filters.workerId === "" ? ALL : filters.workerId}
-            onValueChange={(value) =>
-              onChange({
-                ...filters,
-                workerId: workers.some((worker) => worker.id === value)
-                  ? value
-                  : "",
-              })
-            }
-          >
-            <SelectTrigger
-              className="w-full sm:w-48"
-              aria-label={t("workerLabel")}
-            >
-              <SelectValue placeholder={t("allWorkers")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>{t("allWorkers")}</SelectItem>
-              {workers.map((worker) => (
-                <SelectItem key={worker.id} value={worker.id}>
-                  {worker.fullName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : null}
-      </SearchFilterBar>
+      ) : null}
       <OrderDateFilter
         from={filters.from}
         to={filters.to}
         onChange={(range) => onChange({ ...filters, ...range })}
       />
-    </div>
+    </SearchFilterBar>
   );
 }

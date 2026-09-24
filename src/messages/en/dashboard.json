@@ -490,7 +490,8 @@
       "submit": "Create link",
       "cancel": "Cancel",
       "done": "Done",
-      "success": "Payment link created"
+      "success": "Payment link created",
+      "summaryLabel": "Charge summary"
     },
     "withdraw": {
       "title": "Request withdrawal",
@@ -508,7 +509,10 @@
       "confirmTitle": "Confirm withdrawal",
       "confirmDescription": "You are requesting a withdrawal of {amount} to {bank} ****{last4}. An administrator must approve it.",
       "confirmSubmit": "Request withdrawal",
-      "success": "Withdrawal requested. It is pending approval."
+      "success": "Withdrawal requested. It is pending approval.",
+      "availableLabel": "Available",
+      "withdrawAll": "Withdraw all",
+      "destinationTitle": "Destination account"
     },
     "onboarding": {
       "title": "Connect your account to receive your money",
@@ -735,7 +739,17 @@
       "close": "Close form",
       "cancel": "Cancel",
       "create": "Create service",
-      "save": "Save changes"
+      "save": "Save changes",
+      "sections": {
+        "basics": "Service",
+        "basicsDescription": "How it appears in the catalog and on the radar.",
+        "pricing": "Price and time",
+        "pricingDescription": "Base price and estimated visit length.",
+        "team": "Technicians",
+        "teamDescription": "Who can take this service."
+      },
+      "minutesUnit": "min",
+      "workersSelected": "{count, plural, =0 {None selected} one {# selected} other {# selected}}"
     },
     "feedback": {
       "created": "Service created.",
@@ -804,7 +818,13 @@
       "close": "Close form",
       "cancel": "Cancel",
       "save": "Save changes",
-      "create": "Create branch"
+      "create": "Create branch",
+      "sections": {
+        "identity": "Branch",
+        "identityDescription": "What customers and your team will see.",
+        "coverage": "Coverage",
+        "coverageDescription": "Set how far you take requests from."
+      }
     },
     "feedback": {
       "planLimit": "You've reached your plan's branch limit.",
@@ -922,7 +942,8 @@
       "notAvailableHere": "Not available here",
       "notCarried": "No inventory assigned",
       "lowStock": "Low inventory",
-      "lowAcrossBranches": "Low in {low} of {total} branches"
+      "lowAcrossBranches": "Low in {low} of {total} branches",
+      "inline": "Stock: {count}"
     },
     "actions": {
       "open": "Actions for {name}",
@@ -985,6 +1006,13 @@
         "placeholder": "https://…/product.jpg",
         "help": "Optional. Use a public https link; it is shown in your catalog.",
         "previewError": "We couldn’t load the preview; make sure the link is a public image."
+      },
+      "sections": {
+        "basics": "Product",
+        "basicsDescription": "Name, SKU and the price customers see.",
+        "media": "Image",
+        "mediaDescription": "A clear photo sells more than the description.",
+        "visibility": "Publishing"
       }
     },
     "feedback": {
@@ -1074,7 +1102,15 @@
       "branchLabel": "Branch",
       "branchNone": "No branch",
       "invalidField": "Check this field.",
-      "invalidEmail": "Enter a valid email, for example ana@example.com."
+      "invalidEmail": "Enter a valid email, for example ana@example.com.",
+      "sections": {
+        "profile": "Worker",
+        "profileDescription": "Name and specialty shown to the customer.",
+        "assignment": "Assignment",
+        "assignmentDescription": "Branch they work from.",
+        "access": "App access",
+        "accessDescription": "Invite them by email to use the technician app."
+      }
     },
     "feedback": {
       "created": "Worker created.",

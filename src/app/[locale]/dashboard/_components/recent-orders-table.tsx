@@ -110,6 +110,7 @@ export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
   const columns: Array<DataTableColumn<RecentOrder>> = [
     {
       key: "folio",
+      mobile: "meta",
       header: t("folioColumn"),
       className: "w-24",
       cell: (row) => (
@@ -124,12 +125,14 @@ export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
     },
     {
       key: "title",
+      mobile: "title",
       header: t("orderColumn"),
       className: "min-w-52",
       cell: (row) => <span className="font-medium">{row.title}</span>,
     },
     {
       key: "customer",
+      mobile: "meta",
       header: t("customerColumn"),
       className: "min-w-40",
       cell: (row) => (
@@ -150,6 +153,7 @@ export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("amountColumn"),
       className: "text-right",
       cell: (row) => (
@@ -160,6 +164,7 @@ export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
     },
     {
       key: "status",
+      mobile: "status",
       header: t("statusColumn"),
       cell: (row) => (
         <StatusBadge

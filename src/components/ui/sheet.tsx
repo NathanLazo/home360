@@ -4,11 +4,45 @@ import * as React from "react";
 import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { useTranslations } from "next-intl";
+import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "~/lib/utils";
+import { DrawerHandle } from "~/components/ui/drawer";
+import { useIsMobileViewport } from "~/hooks/use-media-query";
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />;
+type SheetMode = "side" | "drawer";
+
+const SheetModeContext = React.createContext<SheetMode>("side");
+
+/**
+ * Side panel on `sm+`. On phones it becomes a draggable bottom sheet (vaul)
+ * that nearly fills the screen: the natural mobile home for a form or a
+ * detail view. Navigation drawers keep the side slide-in with
+ * `mobile="side"`.
+ */
+function Sheet({
+  mobile = "drawer",
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Root> & {
+  /** How the sheet presents under the `sm` breakpoint. */
+  mobile?: SheetMode;
+}) {
+  const isMobile = useIsMobileViewport();
+  const mode: SheetMode = isMobile && mobile === "drawer" ? "drawer" : "side";
+
+  if (mode === "drawer") {
+    return (
+      <SheetModeContext value="drawer">
+        <DrawerPrimitive.Root data-slot="sheet" autoFocus {...props} />
+      </SheetModeContext>
+    );
+  }
+
+  return (
+    <SheetModeContext value="side">
+      <SheetPrimitive.Root data-slot="sheet" {...props} />
+    </SheetModeContext>
+  );
 }
 
 function SheetTrigger({
@@ -56,12 +90,45 @@ function SheetContent({
   showCloseButton?: boolean;
 }) {
   const t = useTranslations("common");
+  const mode = React.useContext(SheetModeContext);
+
+  const closeButton = showCloseButton ? (
+    <SheetPrimitive.Close className="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity duration-150 after:absolute after:-inset-2.5 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none motion-reduce:transition-none">
+      <XIcon className="size-4" />
+      <span className="sr-only">{t("close")}</span>
+    </SheetPrimitive.Close>
+  ) : null;
+
+  if (mode === "drawer") {
+    return (
+      <DrawerPrimitive.Portal>
+        <DrawerPrimitive.Overlay
+          data-slot="sheet-overlay"
+          className="bg-ink/40 fixed inset-0 z-50"
+        />
+        <DrawerPrimitive.Content
+          data-slot="sheet-content"
+          data-mode="drawer"
+          className={cn(
+            "bg-card text-card-foreground shadow-modal fixed inset-x-0 bottom-0 z-50 flex h-[94dvh] max-h-[94dvh] flex-col gap-4 rounded-t-3xl outline-none",
+            className,
+          )}
+          {...props}
+        >
+          <DrawerHandle className="-mb-4" />
+          {children}
+          {closeButton}
+        </DrawerPrimitive.Content>
+      </DrawerPrimitive.Portal>
+    );
+  }
 
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        data-mode="side"
         className={cn(
           "bg-card text-card-foreground data-[state=closed]:animate-out data-[state=open]:animate-in shadow-modal fixed z-50 flex flex-col gap-4 ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-300 motion-reduce:animate-none motion-reduce:transition-none",
           side === "right" &&
@@ -77,12 +144,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        {showCloseButton && (
-          <SheetPrimitive.Close className="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity duration-150 after:absolute after:-inset-2.5 hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none motion-reduce:transition-none">
-            <XIcon className="size-4" />
-            <span className="sr-only">{t("close")}</span>
-          </SheetPrimitive.Close>
-        )}
+        {closeButton}
       </SheetPrimitive.Content>
     </SheetPortal>
   );
@@ -102,7 +164,10 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+      className={cn(
+        "mt-auto flex flex-col gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]",
+        className,
+      )}
       {...props}
     />
   );

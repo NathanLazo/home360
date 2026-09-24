@@ -61,6 +61,7 @@ export function ServicesTable({
   const columns: Array<DataTableColumn<ServiceListItem>> = [
     {
       key: "name",
+      mobile: "title",
       header: t("columns.service"),
       className: "min-w-60",
       cell: (service) => (
@@ -74,6 +75,7 @@ export function ServicesTable({
     },
     {
       key: "category",
+      mobile: "meta",
       header: t("columns.category"),
       cell: (service) => (
         <span className="text-muted-foreground">{service.category}</span>
@@ -81,6 +83,7 @@ export function ServicesTable({
     },
     {
       key: "price",
+      mobile: "trailing",
       header: t("columns.price"),
       className: "text-right",
       cell: (service) => (
@@ -91,6 +94,7 @@ export function ServicesTable({
     },
     {
       key: "duration",
+      mobile: "meta",
       header: t("columns.duration"),
       cell: (service) => (
         <span className="text-muted-foreground whitespace-nowrap">
@@ -100,6 +104,7 @@ export function ServicesTable({
     },
     {
       key: "workers",
+      mobile: "subtitle",
       header: t("columns.workers"),
       className: "min-w-48 max-w-72",
       cell: (service) =>
@@ -115,6 +120,7 @@ export function ServicesTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (service) => (
         <ServiceStatusBadge
@@ -125,6 +131,7 @@ export function ServicesTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (service) => (

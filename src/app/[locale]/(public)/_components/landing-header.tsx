@@ -67,7 +67,7 @@ export function LandingHeader() {
                 <Link href="/register">{t("cta")}</Link>
               </Button>
             </span>
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen} mobile="side">
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"

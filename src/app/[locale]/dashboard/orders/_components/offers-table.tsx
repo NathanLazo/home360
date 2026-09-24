@@ -40,6 +40,7 @@ export function OffersTable({
   const columns: Array<DataTableColumn<MyQuoteItem>> = [
     {
       key: "request",
+      mobile: "title",
       header: t("columns.request"),
       className: "min-w-56",
       cell: (quote) => (
@@ -53,6 +54,7 @@ export function OffersTable({
     },
     {
       key: "amount",
+      mobile: "trailing",
       header: t("columns.amount"),
       className: "text-right",
       cell: (quote) => (
@@ -63,6 +65,7 @@ export function OffersTable({
     },
     {
       key: "scheduled",
+      mobile: "meta",
       header: t("columns.scheduled"),
       className: "min-w-40",
       cell: (quote) =>
@@ -82,6 +85,7 @@ export function OffersTable({
     },
     {
       key: "worker",
+      mobile: "meta",
       header: t("columns.worker"),
       className: "min-w-36",
       cell: (quote) => (
@@ -92,6 +96,7 @@ export function OffersTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (quote) => (
         <OfferStatusBadge status={quote.status} label={statusT(quote.status)} />
@@ -99,6 +104,7 @@ export function OffersTable({
     },
     {
       key: "updated",
+      mobile: "meta",
       header: t("columns.updated"),
       className: "min-w-32",
       cell: (quote) => (
@@ -112,6 +118,7 @@ export function OffersTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (quote) => (

@@ -42,7 +42,7 @@ export function ProductImageField({
   }, [previewUrl]);
 
   return (
-    <div className="flex items-start gap-4 px-4">
+    <div className="flex items-start gap-4">
       <div
         className="bg-canvas-soft shadow-hairline flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md"
         aria-hidden="true"

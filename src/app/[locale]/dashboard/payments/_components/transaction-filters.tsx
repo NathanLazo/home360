@@ -1,6 +1,6 @@
 "use client";
 
-import { XIcon } from "lucide-react";
+import { SlidersHorizontalIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type {
@@ -8,6 +8,7 @@ import type {
   PaymentStatusValue,
   TransactionFiltersState,
 } from "./payment.types";
+import { FilterDrawer } from "~/components/filter-drawer";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -48,12 +49,16 @@ export function TransactionFilters({
   onChange: (filters: TransactionFiltersState) => void;
 }) {
   const t = useTranslations("dashboard.payments.filters");
+  const commonT = useTranslations("common.filters");
   const statusT = useTranslations("dashboard.payments.status");
   const methodT = useTranslations("dashboard.payments.methods");
-  const active = filters.status !== "" || filters.method !== "";
+  const activeCount = [filters.status, filters.method].filter(
+    (value) => value !== "",
+  ).length;
+  const active = activeCount > 0;
 
-  return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+  const controls = (
+    <>
       <Select
         value={filters.status === "" ? ALL : filters.status}
         onValueChange={(value) =>
@@ -63,10 +68,7 @@ export function TransactionFilters({
           })
         }
       >
-        <SelectTrigger
-          className="w-full sm:w-48"
-          aria-label={t("statusLabel")}
-        >
+        <SelectTrigger className="w-full sm:w-48" aria-label={t("statusLabel")}>
           <SelectValue placeholder={t("allStatuses")} />
         </SelectTrigger>
         <SelectContent>
@@ -88,10 +90,7 @@ export function TransactionFilters({
           })
         }
       >
-        <SelectTrigger
-          className="w-full sm:w-44"
-          aria-label={t("methodLabel")}
-        >
+        <SelectTrigger className="w-full sm:w-44" aria-label={t("methodLabel")}>
           <SelectValue placeholder={t("allMethods")} />
         </SelectTrigger>
         <SelectContent>
@@ -103,18 +102,33 @@ export function TransactionFilters({
           ))}
         </SelectContent>
       </Select>
+    </>
+  );
 
-      {active ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className="self-start sm:self-auto"
-          onClick={() => onChange(EMPTY_TRANSACTION_FILTERS)}
-        >
-          <XIcon aria-hidden="true" />
-          {t("clear")}
-        </Button>
-      ) : null}
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <FilterDrawer
+        activeCount={activeCount}
+        onClear={() => onChange(EMPTY_TRANSACTION_FILTERS)}
+        triggerClassName="sm:hidden"
+        triggerIcon={<SlidersHorizontalIcon aria-hidden="true" />}
+        triggerLabel={commonT("open")}
+      >
+        {controls}
+      </FilterDrawer>
+      <div className="hidden flex-wrap items-center gap-2 sm:flex">
+        {controls}
+        {active ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onChange(EMPTY_TRANSACTION_FILTERS)}
+          >
+            <XIcon aria-hidden="true" />
+            {t("clear")}
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 }

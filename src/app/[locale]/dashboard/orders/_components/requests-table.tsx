@@ -30,6 +30,7 @@ export function RequestsTable({
   const columns: Array<DataTableColumn<RadarRequestItem>> = [
     {
       key: "title",
+      mobile: "title",
       header: t("columns.request"),
       className: "min-w-64",
       cell: (request) => (
@@ -43,11 +44,13 @@ export function RequestsTable({
     },
     {
       key: "category",
+      mobile: "meta",
       header: t("columns.category"),
       cell: (request) => <Badge variant="secondary">{request.category}</Badge>,
     },
     {
       key: "zone",
+      mobile: "meta",
       header: t("columns.zone"),
       className: "min-w-36",
       cell: (request) => (
@@ -58,6 +61,7 @@ export function RequestsTable({
     },
     {
       key: "distance",
+      mobile: "trailing",
       header: t("columns.distance"),
       className: "text-right",
       cell: (request) => (
@@ -72,6 +76,7 @@ export function RequestsTable({
     },
     {
       key: "range",
+      mobile: "subtitle",
       header: t("columns.priceRange"),
       className: "min-w-40 text-right",
       cell: (request) =>
@@ -94,6 +99,7 @@ export function RequestsTable({
     },
     {
       key: "urgency",
+      mobile: "status",
       header: t("columns.urgency"),
       cell: (request) =>
         request.aiUrgency ? (
@@ -113,6 +119,7 @@ export function RequestsTable({
     },
     {
       key: "date",
+      mobile: "meta",
       header: t("columns.date"),
       className: "min-w-32",
       cell: (request) => (

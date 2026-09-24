@@ -47,6 +47,7 @@ export function ProductsTable({
   const columns: Array<DataTableColumn<ProductListItem>> = [
     {
       key: "name",
+      mobile: "title",
       header: t("columns.product"),
       className: "min-w-56",
       cell: (product) => (
@@ -70,6 +71,7 @@ export function ProductsTable({
     },
     {
       key: "sku",
+      mobile: "meta",
       header: t("columns.sku"),
       cell: (product) => (
         <span className="text-copy-sm font-mono tabular-nums">
@@ -79,6 +81,7 @@ export function ProductsTable({
     },
     {
       key: "category",
+      mobile: "meta",
       header: t("columns.category"),
       cell: (product) => (
         <span className="text-muted-foreground">{product.category}</span>
@@ -86,6 +89,7 @@ export function ProductsTable({
     },
     {
       key: "price",
+      mobile: "trailing",
       header: t("columns.price"),
       className: "text-right",
       cell: (product) => (
@@ -101,6 +105,14 @@ export function ProductsTable({
     },
     {
       key: "stock",
+      mobile: "subtitle",
+      mobileCell: (product) => (
+        <ProductStockCell
+          product={product}
+          branchSelected={branchSelected}
+          compact
+        />
+      ),
       header: t(branchSelected ? "columns.branchStock" : "columns.totalStock"),
       className: "min-w-40",
       cell: (product) => (
@@ -109,6 +121,7 @@ export function ProductsTable({
     },
     {
       key: "status",
+      mobile: "status",
       header: t("columns.status"),
       cell: (product) => (
         <ProductStatusBadge
@@ -119,6 +132,7 @@ export function ProductsTable({
     },
     {
       key: "actions",
+      mobile: "actions",
       header: <span className="sr-only">{t("columns.actions")}</span>,
       className: "w-14 text-right",
       cell: (product) => (

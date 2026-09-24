@@ -31,9 +31,11 @@ export function ProductStockFields({
   }
 
   return (
-    <fieldset className="flex flex-col gap-3 px-4">
-      <legend className="mb-1 font-medium">{t("title")}</legend>
-      <p className="text-muted-foreground text-copy-sm -mt-2">
+    <fieldset className="flex flex-col gap-4 px-4">
+      <legend className="text-muted-foreground text-label mb-1 font-mono font-medium tracking-wide uppercase">
+        {t("title")}
+      </legend>
+      <p className="text-muted-foreground text-copy-sm text-pretty">
         {t("description")}
       </p>
       {errors.stocks ? (
@@ -57,7 +59,7 @@ export function ProductStockFields({
             key={stock.branchId}
             className={cn(
               "flex flex-col gap-4",
-              multiple && "rounded-xl border p-4",
+              multiple && "bg-canvas-soft rounded-xl border p-4",
             )}
           >
             <div className="flex items-center justify-between gap-4">
@@ -86,7 +88,7 @@ export function ProductStockFields({
               </div>
             </div>
             {stock.isCarried ? (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor={stockId}>{t("stockLabel")}</Label>
                   <Input
