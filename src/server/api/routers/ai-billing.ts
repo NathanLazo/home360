@@ -232,7 +232,12 @@ export const aiBillingRouter = createTRPCRouter({
             }
           }
 
-          return ok(checkout.data, "Checkout Session created", 201);
+          return {
+            result: checkout.data,
+            error: null,
+            status: 201,
+            message: "Checkout Session created",
+          };
         } catch (error: unknown) {
           const normalized = normalizeError(error);
           return checkoutFail(

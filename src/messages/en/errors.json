@@ -50,5 +50,7 @@
   "ADDRESS_LIMIT_REACHED": "You reached the limit of 10 saved addresses. Delete one to add another.",
   "IMPERSONATION_READ_ONLY": "You are viewing this panel as an admin in read-only mode: changes are disabled.",
   "AI_CREDIT_REQUIRED": "The assistant needs token credit to use this model. Buy tokens in your profile or switch to a free model.",
-  "AI_WALLET_LIMIT": "Your token balance is already at the allowed maximum."
+  "AI_WALLET_LIMIT": "Your token balance is already at the allowed maximum.",
+  "PASSWORD_ALREADY_SET": "This account already has a password. Use the change password option.",
+  "DEVICE_NOT_FOUND": "That device is no longer linked to your account."
 }

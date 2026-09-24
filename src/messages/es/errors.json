@@ -50,5 +50,7 @@
   "ADDRESS_LIMIT_REACHED": "Llegaste al límite de 10 direcciones guardadas. Elimina una para agregar otra.",
   "IMPERSONATION_READ_ONLY": "Estás viendo este panel como administrador en modo solo lectura: no puedes hacer cambios.",
   "AI_CREDIT_REQUIRED": "El asistente necesita saldo de tokens para usar este modelo. Compra tokens en tu perfil o cambia a un modelo gratuito.",
-  "AI_WALLET_LIMIT": "Tu saldo de tokens ya está en el máximo permitido."
+  "AI_WALLET_LIMIT": "Tu saldo de tokens ya está en el máximo permitido.",
+  "PASSWORD_ALREADY_SET": "Esta cuenta ya tiene contraseña. Usa la opción de cambiar contraseña.",
+  "DEVICE_NOT_FOUND": "Ese dispositivo ya no está vinculado a tu cuenta."
 }

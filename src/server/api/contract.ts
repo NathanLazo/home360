@@ -51,6 +51,10 @@ export const DOMAIN_ERROR_CODES = [
   // F8-05 assistant wallet: paid model without prepaid balance / wallet ceiling.
   "AI_CREDIT_REQUIRED",
   "AI_WALLET_LIMIT",
+  // F9-01 profile.
+  "CURRENT_PASSWORD_INVALID",
+  "PASSWORD_ALREADY_SET",
+  "DEVICE_NOT_FOUND",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];
