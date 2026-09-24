@@ -19,7 +19,7 @@ expo-tailwind-setup, expo-dev-client, eas-*.
 |---|---|
 | Realtime (chat + tracking) | **Pusher** (Channels) desde M4 para el chat humano cliente↔negocio/técnico; push nativas **APNs/FCM vía expo-notifications** como complemento en background. **No hay chatbot IA**: la IA solo corre en el backend analizando la imagen para el diagnóstico |
 | Media (fotos, evidencia, grabaciones) | **Vercel Blob** (privado) con URLs de subida directa desde la app |
-| IA visión (diagnóstico C2/C3) | **Claude Sonnet** vía Vercel AI SDK a través del **Vercel AI Gateway** (model string "anthropic/claude-sonnet-..." + `AI_GATEWAY_API_KEY`, sin paquetes de provider; `generateObject` + schema Zod), config desde `PlatformSettings` |
+| IA visión (diagnóstico C2/C3) | **Grok 4.7** (`spacexai/grok-4.7`, mismo catálogo que el asistente) vía Vercel AI SDK a través del **Vercel AI Gateway** (model string + `AI_GATEWAY_API_KEY`, sin paquetes de provider; `generateObject` + schema Zod), config desde `PlatformSettings` |
 | Styling móvil | **NativeWind + Tailwind** (skill `expo-tailwind-setup`), tokens zinc del diseño |
 | Auth móvil | Endpoints `POST /api/mobile/auth/*` que emiten el **mismo JWT de NextAuth** (`next-auth/jwt` encode, mismo `AUTH_SECRET`); la app lo guarda en `expo-secure-store` y lo manda como `Authorization: Bearer`. `createTRPCContext` hace fallback de cookie → Bearer respetando `authInvalidated`. Google nativo vía `expo-auth-session` → `id_token` verificado en `/api/mobile/auth/google` |
 | Tipos compartidos | Repos separados; alias type-only `@home360/api` → `../home360/src/server/api/root.ts` solo para `type AppRouter`/`TrpcResponse` (Metro nunca lo resuelve; EAS no depende del repo hermano) |
