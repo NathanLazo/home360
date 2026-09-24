@@ -106,6 +106,7 @@
     "source": "Source: 2025 partner deck · CONAPO 2025",
     "units": {
       "million": "M",
+      "billion": "B",
       "percent": "%",
       "plus": "+"
     }

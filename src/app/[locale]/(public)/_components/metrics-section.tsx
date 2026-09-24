@@ -1,7 +1,6 @@
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { LANDING_METRICS } from "./landing-data";
-import { formatMxnFromCents } from "./landing-money";
 import {
   containerClass,
   inkSurfaceClass,
@@ -30,17 +29,18 @@ type Metric = {
  */
 export async function MetricsSection() {
   const t = await getTranslations("landing.metrics");
-  const locale = await getLocale();
 
-  function ticker(value: number, suffix: string, index: number) {
+  /** Unit set at half size so wide units ("mil M") never overflow a column. */
+  function ticker(value: number, suffix: string, index: number, prefix = "") {
     return (
       <>
+        {prefix}
         <NumberTicker
           value={value}
           delay={0.2 + (index * LANDING_STAGGER_MS) / 1000}
           className="tracking-[-0.04em]"
         />
-        {suffix}
+        <span className="text-[0.5em] tracking-normal">{suffix}</span>
       </>
     );
   }
@@ -57,9 +57,12 @@ export async function MetricsSection() {
     },
     {
       key: "marketSize",
-      figure: formatMxnFromCents(locale, LANDING_METRICS.marketSizeCents, {
-        compact: true,
-      }),
+      figure: ticker(
+        LANDING_METRICS.marketSizeCents / 100 / 1_000_000_000,
+        t("units.billion"),
+        1,
+        "$",
+      ),
       label: t("marketSize"),
     },
     {
