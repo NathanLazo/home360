@@ -243,6 +243,7 @@
     "tier": {
       "free": "Gratis por ahora",
       "low": "Bajo consumo",
+      "medium": "Consumo medio",
       "high": "Alto consumo"
     }
   },

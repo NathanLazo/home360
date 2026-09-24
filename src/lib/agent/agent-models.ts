@@ -9,7 +9,7 @@
  * price applied to tenants is derived in `agent-pricing.ts` (owner decision:
  * gateway price × 2; `free` models are absorbed by the platform).
  */
-export type AgentModelTier = "free" | "low" | "high";
+export type AgentModelTier = "free" | "low" | "medium" | "high";
 
 export type AgentModelOption = {
   id: string;
@@ -42,21 +42,32 @@ export const AGENT_MODELS = [
     id: "openai/gpt-6-luna",
     label: "GPT-6 Luna",
     contextWindow: 1_050_000,
-    tier: "low",
+    tier: "medium",
     free: false,
     supportsTools: true,
     gatewayPricing: { inputUsdPerMillion: 0.1, outputUsdPerMillion: 0.5 },
   },
   {
-    id: "typesafe-ai/jev",
-    label: "Jev",
-    contextWindow: 32_000,
+    id: "nvidia/nemotron-3.5-lightning",
+    label: "Nemotron 3.5 Lightning",
+    contextWindow: 262_144,
+    tier: "low",
+    free: false,
+    supportsTools: true,
+    gatewayPricing: { inputUsdPerMillion: 0.065, outputUsdPerMillion: 0.18 },
+  },
+  {
+    // Replaces `typesafe-ai/jev`: the gateway rejects Jev outright as an
+    // evaluation model (400 on every chat turn, seen in production). Ling
+    // supports tool use; the gateway serves it free until 2026-10-04 —
+    // re-verify the list price after that date.
+    id: "inclusionai/ling-3.0-flash-sante",
+    label: "Ling 3.0 Flash Sante",
+    contextWindow: 262_144,
     tier: "free",
     free: true,
-    // The gateway lists Jev as an evaluation model without tool use; it is
-    // kept in the catalog by owner decision and flagged in F8-05.
-    supportsTools: false,
-    gatewayPricing: { inputUsdPerMillion: 0.042, outputUsdPerMillion: 0 },
+    supportsTools: true,
+    gatewayPricing: { inputUsdPerMillion: 0, outputUsdPerMillion: 0 },
   },
 ] as const satisfies readonly AgentModelOption[];
 
