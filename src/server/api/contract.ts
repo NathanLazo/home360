@@ -48,6 +48,9 @@ export const DOMAIN_ERROR_CODES = [
   "CORPORATE_PRICING_NOT_AVAILABLE",
   // Corporate request from a location without lat/lng (radar needs a point).
   "LOCATION_COORDINATES_REQUIRED",
+  // F8-05 assistant wallet: paid model without prepaid balance / wallet ceiling.
+  "AI_CREDIT_REQUIRED",
+  "AI_WALLET_LIMIT",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

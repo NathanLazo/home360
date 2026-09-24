@@ -62,6 +62,8 @@ export const paymentIntentMetadataSchema = z.object({
 export const checkoutSessionMetadataSchema = z.object({
   paymentLinkId: identifierSchema.optional(),
   businessId: identifierSchema.optional(),
+  // F8-05: prepaid assistant token pack.
+  aiCreditPurchaseId: identifierSchema.optional(),
 });
 
 export const refundMetadataSchema = z.object({
