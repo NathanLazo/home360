@@ -31,6 +31,8 @@ const AREA_HINTS: Record<AgentArea, string> = {
 - Los ids de ubicación salen de listLocations; los de solicitud y cotización de listRequests y listRequestQuotes.
 - Confirmar entrega libera el escrow al negocio y aceptar una cotización crea la orden y el cobro: ambas requieren confirmación explícita del usuario en un turno anterior.`,
   admin: `- Para desempeño empieza por getPlatformKpis y getFinanceKpis; para colas de trabajo usa getSidebarStats, getPendingBusinesses, getOpenDisputes y listWithdrawals con view pending.
+- Para un negocio concreto usa getBusinessFinance: su saldo disponible es lo que la plataforma le debe hoy; listBusinessSales detalla sus pagos. getWithdrawal muestra la cuenta destino (banco y últimos 4) y el estado del payout de Stripe de un retiro.
+- Comprobantes de pago: el admin adjunta los archivos (imagen o PDF) en este chat; revísalos con listChatAttachments y regístralos con registerPaymentReceipts contra exactamente un retiro o bono, confirmando antes destino y archivos. listPaymentReceipts y getReceiptDownloadUrl los consultan después.
 - Resolver disputas, aprobar retiros y pagar bonos mueven dinero real: requieren confirmación explícita con ids y montos en un turno anterior y cada acción queda en la bitácora de auditoría con el id del admin.
 - La configuración de plataforma, las campañas push y la impersonación no están disponibles desde el asistente: indica al usuario que use la pantalla correspondiente.`,
 };

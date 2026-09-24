@@ -154,6 +154,7 @@
     "getAiConfigSummary": "AI settings",
     "getBalances": "Balances and escrow",
     "getBusinessDetail": "Business file",
+    "getBusinessFinance": "Business finance",
     "getBusinessSettings": "Business profile",
     "getConnectStatus": "Stripe Connect status",
     "getCorporateAccount": "Corporate account",
@@ -173,15 +174,19 @@
     "getPlatformKpis": "Platform KPIs",
     "getPlatformSettings": "Platform settings",
     "getProductStockByBranch": "Stock by branch",
+    "getReceiptDownloadUrl": "Receipt download",
     "getRecentOrders": "Recent orders",
     "getRevenueBreakdown": "Revenue by month",
     "getSidebarStats": "Live counters",
     "getSubscription": "Current subscription",
     "getWeeklyRevenue": "Weekly revenue",
+    "getWithdrawal": "Withdrawal detail",
     "listAccountManagers": "Account managers",
     "listApprovalPlans": "Approval plans",
     "listBranches": "Branches",
+    "listBusinessSales": "Business sales",
     "listCampaigns": "Campaigns",
+    "listChatAttachments": "Chat attachments",
     "listCorporateAccounts": "Corporate accounts",
     "listCorporateTiers": "Corporate tiers",
     "listDisputes": "Disputes",
@@ -192,6 +197,7 @@
     "listOpenRequests": "Request radar",
     "listOrders": "Orders",
     "listPaymentLinks": "Payment links",
+    "listPaymentReceipts": "Payment receipts",
     "listPlans": "Plans",
     "listProductCategories": "Product categories",
     "listProducts": "Products",
@@ -211,6 +217,7 @@
     "reactivateCorporateAccount": "Reactivate corporate account",
     "reactivateLocation": "Reactivate location",
     "reactivateUser": "Reactivate user",
+    "registerPaymentReceipts": "Register receipts",
     "rejectBusiness": "Reject business",
     "rejectTierChange": "Reject tier change",
     "rejectWithdrawal": "Reject withdrawal",
@@ -250,5 +257,73 @@
   "wallet": {
     "required": "This model consumes tokens and your balance is zero.",
     "buy": "Buy tokens"
+  },
+  "dashboard": {
+    "orders": "{count, plural, one {# order} other {# orders}}",
+    "payments": "{count, plural, one {# payment} other {# payments}}",
+    "requests": "{count, plural, one {# request} other {# requests}}",
+    "platformKpis": {
+      "title": "Platform KPIs",
+      "gmv": "GMV",
+      "escrow": "Escrow held",
+      "activeBusinesses": "Active businesses",
+      "pendingBusinesses": "Pending review",
+      "totalUsers": "Users",
+      "newUsers": "New this month"
+    },
+    "financeKpis": {
+      "title": "Finance KPIs",
+      "gross": "Gross revenue",
+      "subscriptions": "Subscriptions",
+      "escrow": "Escrow held",
+      "pendingWithdrawals": "Pending withdrawals",
+      "activeBusinesses": "Active businesses"
+    },
+    "businessFinance": {
+      "title": "{name} finances",
+      "available": "Available balance",
+      "escrow": "Escrow held",
+      "monthSales": "Month sales",
+      "monthCommission": "Month commission",
+      "loyaltyPending": "Pending bonuses",
+      "payouts": "Payouts",
+      "payoutsReady": "Enabled",
+      "payoutsNotReady": "No account",
+      "pendingWithdrawals": "Pending withdrawals"
+    },
+    "withdrawal": {
+      "title": "{name} withdrawal"
+    },
+    "withdrawals": {
+      "title": "Withdrawals",
+      "summary": "{count, plural, one {# withdrawal} other {# withdrawals}} · {total}",
+      "business": "Business",
+      "amount": "Amount",
+      "account": "Account",
+      "status": "Status",
+      "requestedAt": "Requested"
+    },
+    "sales": {
+      "title": "Sales",
+      "summary": "{count, plural, one {# payment} other {# payments}} · {total}",
+      "concept": "Concept",
+      "amount": "Amount",
+      "commission": "Commission",
+      "net": "Net",
+      "status": "Status",
+      "date": "Date"
+    },
+    "receipts": {
+      "title": "Payment receipts",
+      "summary": "{count, plural, one {# receipt} other {# receipts}}",
+      "file": "File",
+      "business": "Business",
+      "target": "Target",
+      "size": "Size",
+      "uploadedBy": "Uploaded by",
+      "date": "Date",
+      "withdrawal": "Withdrawal",
+      "loyaltyBonus": "Bonus"
+    }
   }
 }
