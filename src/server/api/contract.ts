@@ -65,11 +65,11 @@ export type TrpcResponse<TResult, TError extends string = ErrorCode> = {
   message: string;
 };
 
-export const ok = <T>(
+export const ok = <T, E extends string = ErrorCode>(
   result: T,
   message: string,
   status = 200,
-): TrpcResponse<T> => ({
+): TrpcResponse<T, E> => ({
   result,
   error: null,
   status,
