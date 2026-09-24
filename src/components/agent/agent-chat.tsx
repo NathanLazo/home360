@@ -1,0 +1,517 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { MessageSquarePlusIcon } from "lucide-react";
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+
+import { ChatApp } from "~/components/agents/chat-app";
+import { ThinkingOrbGlyph } from "~/components/agents/loading-states/thinking-orb";
+import { MessageScroller } from "~/components/agents/message-scroller";
+import { PromptInput, type PromptModel } from "~/components/agents/prompt-input";
+import {
+  UsageMeter,
+  UsageRing,
+  type UsageState,
+} from "~/components/agents/usage-meter";
+import type { AttachmentUploadItem } from "~/components/motion/attachment-upload";
+import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import type { AgentArea } from "~/lib/agent/agent-area";
+import {
+  AGENT_MODELS,
+  DEFAULT_AGENT_MODEL_ID,
+  getAgentModel,
+  isAgentModelId,
+  type AgentModelId,
+} from "~/lib/agent/agent-models";
+import { EASE_OUT, SPRING_LAYOUT } from "~/lib/ease";
+import { cn } from "~/lib/utils";
+import type { AgentUIMessage } from "~/server/agent/home360-agent";
+
+import { AgentAttachments } from "./agent-attachments";
+import { attachmentsToFileParts } from "./agent-chat.files";
+import { AgentConversationMenu } from "./agent-conversation-menu";
+import { AgentMessage, AgentPendingMessage } from "./agent-message";
+import { deriveAgentOrbState } from "./agent-orb-state";
+import {
+  deriveConversationTitle,
+  useAgentConversations,
+} from "./use-agent-conversations";
+
+const FADE_TRANSITION = { duration: 0.2, ease: EASE_OUT } as const;
+
+const MODEL_STORAGE_KEY = "home360.agent.model";
+const THREAD_PARAM = "thread";
+
+const MODEL_OPTIONS: PromptModel[] = AGENT_MODELS.map((option) => ({
+  value: option.id,
+  label: option.label,
+}));
+
+function readStoredModel(): AgentModelId {
+  try {
+    const stored = window.localStorage.getItem(MODEL_STORAGE_KEY);
+    return stored && isAgentModelId(stored) ? stored : DEFAULT_AGENT_MODEL_ID;
+  } catch {
+    return DEFAULT_AGENT_MODEL_ID;
+  }
+}
+
+/** The active thread lives in the URL so a reload or a shared link reopens it. */
+function writeThreadParam(id: string | null) {
+  const url = new URL(window.location.href);
+
+  if (id) {
+    url.searchParams.set(THREAD_PARAM, id);
+  } else {
+    url.searchParams.delete(THREAD_PARAM);
+  }
+
+  window.history.replaceState(window.history.state, "", url);
+}
+
+export type AgentChatProps = {
+  area: AgentArea;
+  /** True while an admin impersonates: writes are refused server-side. */
+  readOnly: boolean;
+  /** False when the gateway key is missing: the composer explains it. */
+  available: boolean;
+};
+
+export function AgentChat({ area, readOnly, available }: AgentChatProps) {
+  const t = useTranslations("agent");
+  const locale = useLocale();
+  const reduce = useReducedMotion() ?? false;
+  const searchParams = useSearchParams();
+  const threads = useAgentConversations();
+  const [input, setInput] = useState("");
+  // The server renders the default; the stored preference applies on mount.
+  const [model, setModel] = useState<AgentModelId>(DEFAULT_AGENT_MODEL_ID);
+  const [attachments, setAttachments] = useState<AttachmentUploadItem[]>([]);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(
+    () => searchParams.get(THREAD_PARAM),
+  );
+  const [transport] = useState(
+    () => new DefaultChatTransport({ api: "/api/agent/chat" }),
+  );
+  const activeIdRef = useRef<string | null>(activeId);
+  // useChat captures its callbacks at creation, so persistence goes via a ref.
+  const persistRef = useRef<(messages: AgentUIMessage[]) => void>(
+    () => undefined,
+  );
+  const { messages, sendMessage, status, stop, error, setMessages } =
+    useChat<AgentUIMessage>({
+      transport,
+      onFinish: ({ messages: finished }) => {
+        persistRef.current(finished);
+      },
+    });
+
+  const newConversationTitle = t("conversations.new");
+
+  useEffect(() => {
+    setModel(readStoredModel());
+  }, []);
+
+  // Restore the thread named in the URL once (useChat state resets on unmount).
+  useEffect(() => {
+    const restoreId = activeIdRef.current;
+
+    if (!restoreId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void threads.load(restoreId).then((restored) => {
+      if (cancelled) {
+        return;
+      }
+
+      if (restored) {
+        setMessages(restored);
+      } else {
+        activeIdRef.current = null;
+        setActiveId(null);
+        writeThreadParam(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+
+  const selectModel = (next: string) => {
+    if (!isAgentModelId(next)) {
+      return;
+    }
+
+    setModel(next);
+
+    try {
+      window.localStorage.setItem(MODEL_STORAGE_KEY, next);
+    } catch {
+      // Preference stays for this session only.
+    }
+  };
+
+  persistRef.current = (finished) => {
+    if (finished.length === 0 || readOnly) {
+      return;
+    }
+
+    void (async () => {
+      const currentId = activeIdRef.current;
+
+      if (!currentId) {
+        const createdId = await threads.create(
+          deriveConversationTitle(finished, newConversationTitle),
+          finished,
+        );
+
+        if (createdId) {
+          activeIdRef.current = createdId;
+          setActiveId(createdId);
+          writeThreadParam(createdId);
+        }
+      } else {
+        await threads.update(currentId, finished);
+      }
+    })();
+  };
+
+  const isBusy = status === "submitted" || status === "streaming";
+  const hasConversation = messages.length > 0;
+  const lastMessage = messages.at(-1);
+  const showPendingMessage =
+    status === "submitted" && lastMessage?.role === "user";
+  const inputOrbState =
+    status === "submitted"
+      ? "connecting"
+      : status === "streaming" && lastMessage?.role === "assistant"
+        ? deriveAgentOrbState(lastMessage.parts, true)
+        : input.trim()
+          ? "listening"
+          : "breathing";
+
+  // Last usage reported by the agent (metadata of the final message of a turn).
+  const usage = useMemo<UsageState | null>(() => {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      const reported =
+        message?.role === "assistant" ? message.metadata?.usage : undefined;
+
+      if (reported) {
+        return {
+          promptTokens: reported.inputTokens,
+          completionTokens: reported.outputTokens,
+          contextWindow: getAgentModel(model).contextWindow,
+        };
+      }
+    }
+
+    return null;
+  }, [messages, model]);
+
+  const submit = (value: string) => {
+    const text = value.trim();
+
+    if (!text || isBusy || !available) {
+      return;
+    }
+
+    const pendingAttachments = attachments;
+    setInput("");
+    setAttachments([]);
+    setAttachmentsOpen(false);
+
+    void (async () => {
+      const files =
+        pendingAttachments.length > 0
+          ? await attachmentsToFileParts(pendingAttachments)
+          : undefined;
+
+      await sendMessage(
+        files && files.length > 0 ? { text, files } : { text },
+        { body: { model, locale } },
+      );
+    })();
+  };
+
+  const resetConversation = () => {
+    setMessages([]);
+    setInput("");
+    setAttachments([]);
+    setAttachmentsOpen(false);
+    setActiveId(null);
+    activeIdRef.current = null;
+    writeThreadParam(null);
+  };
+
+  const selectConversation = (id: string) => {
+    if (isBusy || id === activeId) {
+      return;
+    }
+
+    void threads.load(id).then((loaded) => {
+      if (!loaded) {
+        return;
+      }
+
+      setMessages(loaded);
+      setActiveId(id);
+      activeIdRef.current = id;
+      writeThreadParam(id);
+      setInput("");
+      setAttachments([]);
+      setAttachmentsOpen(false);
+    });
+  };
+
+  const removeConversation = (id: string) => {
+    void threads.remove(id).then((removed) => {
+      if (removed && activeIdRef.current === id) {
+        resetConversation();
+      }
+    });
+  };
+
+  const suggestions = [
+    t(`suggestions.${area}.first`),
+    t(`suggestions.${area}.second`),
+    t(`suggestions.${area}.third`),
+  ];
+
+  return (
+    // overflow-visible keeps the model dropdown from being clipped.
+    <ChatApp className="flex h-[calc(100dvh-7.5rem)] min-h-[28rem] flex-col overflow-visible rounded-none border-0 bg-transparent sm:h-[calc(100dvh-8.5rem)] lg:h-[calc(100dvh-9.5rem)]">
+      <LayoutGroup>
+        <div
+          className={cn(
+            "relative flex h-full min-h-0 flex-1 flex-col",
+            !hasConversation && "justify-center pt-16 md:pt-24",
+          )}
+        >
+          <div className="absolute top-0 right-0 z-10 flex items-center gap-2">
+            <AgentConversationMenu
+              conversations={threads.conversations}
+              activeId={activeId}
+              disabled={isBusy}
+              onNewConversation={resetConversation}
+              onSelect={selectConversation}
+              onDelete={removeConversation}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label={newConversationTitle}
+              title={newConversationTitle}
+              onClick={resetConversation}
+              disabled={!hasConversation || isBusy}
+            >
+              <MessageSquarePlusIcon className="size-4" />
+            </Button>
+            {usage ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={t("contextUsage")}
+                    title={t("contextUsage")}
+                  >
+                    <UsageRing usage={usage} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72 p-3">
+                  <UsageMeter
+                    usage={usage}
+                    className="max-w-none"
+                    labels={{
+                      title: t("usage.title"),
+                      meter: t("usage.meter"),
+                      prompt: t("usage.prompt"),
+                      completion: t("usage.completion"),
+                    }}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
+          </div>
+
+          <AnimatePresence initial={false} mode="popLayout">
+            {hasConversation ? (
+              <motion.div
+                key="thread"
+                initial={
+                  reduce
+                    ? { opacity: 0 }
+                    : { opacity: 0, transform: "translateY(8px)" }
+                }
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                exit={
+                  reduce
+                    ? { opacity: 0 }
+                    : { opacity: 0, transform: "translateY(8px)" }
+                }
+                transition={reduce ? { duration: 0 } : FADE_TRANSITION}
+                className="relative min-h-0 flex-1"
+              >
+                <div
+                  aria-hidden="true"
+                  className="from-background pointer-events-none absolute inset-x-0 top-0 z-[1] h-20 bg-gradient-to-b from-25% to-transparent"
+                />
+                <MessageScroller
+                  className="h-full min-h-0 pr-12 pb-4 sm:pr-16"
+                  contentClassName="pt-16"
+                  busy={isBusy}
+                  navigation="rail"
+                  label={t("threadLabel")}
+                  navigationLabel={t("messageNavigation")}
+                >
+                  <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+                    {messages.map((message, index) => (
+                      <AgentMessage
+                        key={message.id}
+                        message={message}
+                        isLast={index === messages.length - 1}
+                        isStreaming={isBusy}
+                      />
+                    ))}
+                    {showPendingMessage ? <AgentPendingMessage /> : null}
+                    {error ? (
+                      <p role="alert" className="text-error-deep text-xs">
+                        {t("error")}
+                      </p>
+                    ) : null}
+                  </div>
+                </MessageScroller>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          <AnimatePresence initial={false} mode="popLayout">
+            {!hasConversation ? (
+              <motion.div
+                key="welcome"
+                initial={
+                  reduce
+                    ? { opacity: 0 }
+                    : { opacity: 0, transform: "translateY(8px)" }
+                }
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                exit={
+                  reduce
+                    ? { opacity: 0 }
+                    : { opacity: 0, transform: "translateY(-8px)" }
+                }
+                transition={reduce ? { duration: 0 } : FADE_TRANSITION}
+                className="mx-auto mb-4 flex w-full max-w-3xl flex-col items-center gap-4 px-4 text-center"
+              >
+                <ThinkingOrbGlyph
+                  state="breathing"
+                  size={64}
+                  speed={0.7}
+                  decorative
+                  className="opacity-80"
+                />
+                <div>
+                  <p className="text-sm font-medium">
+                    {t(`welcome.${area}.title`)}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {t(`welcome.${area}.subtitle`)}
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => submit(suggestion)}
+                      disabled={!available}
+                      className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          <motion.div
+            layout={reduce ? false : "position"}
+            transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
+            className="relative z-20 mx-auto w-full max-w-3xl pt-2"
+          >
+            {readOnly ? (
+              <p className="text-muted-foreground mb-2 text-center text-xs">
+                {t("readOnlyNotice")}
+              </p>
+            ) : null}
+            {!available ? (
+              <p
+                role="status"
+                className="text-warning-deep mb-2 text-center text-xs"
+              >
+                {t("unavailable")}
+              </p>
+            ) : null}
+            <PromptInput
+              value={input}
+              onValueChange={setInput}
+              onSubmit={submit}
+              loading={isBusy}
+              onStop={stop}
+              disabled={!available}
+              placeholder={t(`placeholder.${area}`)}
+              aria-label={t("inputLabel")}
+              submitLabel={t("composer.send")}
+              stopLabel={t("composer.stop")}
+              chooseModelLabel={t("composer.chooseModel")}
+              models={MODEL_OPTIONS}
+              model={model}
+              onModelChange={selectModel}
+              leadingAction={
+                <AgentAttachments
+                  open={attachmentsOpen}
+                  onOpenChange={setAttachmentsOpen}
+                  items={attachments}
+                  onItemsChange={setAttachments}
+                  disabled={isBusy || !available}
+                />
+              }
+              submitIndicator={
+                <ThinkingOrbGlyph
+                  state={inputOrbState}
+                  size={20}
+                  theme="dark"
+                  decorative
+                />
+              }
+            />
+          </motion.div>
+        </div>
+      </LayoutGroup>
+    </ChatApp>
+  );
+}
