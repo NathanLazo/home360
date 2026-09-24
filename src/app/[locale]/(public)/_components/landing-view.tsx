@@ -8,7 +8,7 @@ import { HowItWorksSection } from "./how-it-works-section";
 import { LandingFooter } from "./landing-footer";
 import { LandingHeader } from "./landing-header";
 import { LandingMotionProvider } from "./landing-motion-provider";
-import { focusRingClass, inkCaptureClass } from "./landing-styles";
+import { focusRingClass } from "./landing-styles";
 import { MetricsSection } from "./metrics-section";
 import { PricingSection } from "./pricing-section";
 import { cn } from "~/lib/utils";
@@ -28,10 +28,7 @@ export async function LandingView() {
     <LandingMotionProvider>
       <div
         data-landing="true"
-        className={cn(
-          "bg-canvas-soft text-foreground flex min-h-dvh flex-col",
-          inkCaptureClass,
-        )}
+        className="bg-canvas-soft text-foreground flex min-h-dvh flex-col"
       >
         <a
           href="#main"

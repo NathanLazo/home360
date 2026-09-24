@@ -111,6 +111,7 @@
 
   /* Foundation palette (DESIGN.md §2). */
   --color-ink: var(--ink);
+  --color-ink-band: var(--ink-band);
   --color-on-ink: var(--on-ink);
   --color-on-metal: var(--on-metal);
   --color-body: var(--body);
@@ -345,6 +346,15 @@
    */
   --metal-surface: oklch(0.946 0 0); /* #ededed — core under the rim */
   --on-metal: oklch(0.205 0 0); /* #171717 — ≥ 8:1 on the fill's darkest stop */
+
+  /*
+   * Ink band fill (landing surfaces flipped to `.dark`): like metal, a
+   * material rather than a theme role. It stays #171717 in BOTH themes, so
+   * it is defined here once and never overridden in `.dark` — capturing
+   * `var(--ink)` from the page scope would flip it to near-white under a
+   * dark root and paint white-on-white content.
+   */
+  --ink-band: oklch(0.205 0 0); /* #171717 */
 
   /* shadcn semantic mapping. */
   --background: var(--canvas-soft);

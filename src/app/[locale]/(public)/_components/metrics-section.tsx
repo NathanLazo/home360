@@ -89,7 +89,7 @@ export async function MetricsSection() {
 
         <ul className="bg-border mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-lg border sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
-            <li key={metric.key} className="bg-[var(--landing-ink)]">
+            <li key={metric.key} className="bg-ink-band">
               <Reveal
                 className="h-full"
                 delayMs={(index + 1) * LANDING_STAGGER_MS}

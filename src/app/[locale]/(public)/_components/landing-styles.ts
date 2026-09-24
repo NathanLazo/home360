@@ -36,17 +36,12 @@ export const sectionPaddingClass = "py-20 lg:py-28";
 export const anchorOffsetClass = "scroll-mt-24";
 
 /**
- * Captures the light-scope ink on the landing root so `.dark` descendants
- * (whose `--ink` flips to near-white) can still paint the ink surface.
- */
-export const inkCaptureClass = "[--landing-ink:var(--ink)]";
-
-/**
  * Ink band / ink surface: polarity-flipped block. `.dark` scopes the tokens
  * for its content (ink text becomes near-white, hairlines white 10 %) while
- * the fill stays the light-scope ink #171717.
+ * the fill is `--ink-band`, a material token that stays #171717 in both
+ * themes (globals.css) — so the band survives a dark page root.
  */
-export const inkSurfaceClass = "dark bg-[var(--landing-ink)] text-foreground";
+export const inkSurfaceClass = "dark bg-ink-band text-foreground";
 
 /** `h1`, hero only. Display hero scale: weight 600, -0.05em tracking. */
 export const heroTitleClass = "text-display-hero text-balance";
