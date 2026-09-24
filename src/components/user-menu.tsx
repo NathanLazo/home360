@@ -1,4 +1,5 @@
 import type { UserRole } from "@generated/prisma";
+import { UserRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { MetalRing } from "~/components/metal";
@@ -9,10 +10,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Link } from "~/i18n/navigation";
+import { agentAreaForRole, AGENT_PROFILE_PATH } from "~/lib/agent/agent-area";
 import { cn } from "~/lib/utils";
 
 export type UserMenuProps = {
@@ -42,6 +46,9 @@ export async function UserMenu({
 }: UserMenuProps) {
   const t = await getTranslations("common.userMenu");
   const seed = id ?? email;
+  // Panel roles own a profile screen (F9-01); customers and workers do not.
+  const area = agentAreaForRole(role);
+  const profileHref = area ? AGENT_PROFILE_PATH[area] : null;
   const botTheme = variant === "dark" ? "dark" : "light";
 
   const trigger = (
@@ -106,6 +113,19 @@ export async function UserMenu({
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        {profileHref ? (
+          <>
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href={profileHref}>
+                  <UserRoundIcon aria-hidden="true" />
+                  {t("profile")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuGroup>
           <SignOutItem label={t("signOut")} pendingLabel={t("signingOut")} />
         </DropdownMenuGroup>

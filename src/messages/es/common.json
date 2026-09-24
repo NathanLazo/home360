@@ -30,7 +30,8 @@
       "CORPORATE": "Corporativo",
       "CUSTOMER": "Cliente",
       "WORKER": "Trabajador"
-    }
+    },
+    "profile": "Perfil"
   },
   "pay": {
     "success": {

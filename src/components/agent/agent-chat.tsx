@@ -49,6 +49,7 @@ import {
 import { EASE_OUT, SPRING_LAYOUT } from "~/lib/ease";
 import { cn } from "~/lib/utils";
 import type { AgentUIMessage } from "~/server/agent/home360-agent";
+import { api } from "~/trpc/react";
 
 import { AgentAttachments } from "./agent-attachments";
 import { attachmentsToFileParts } from "./agent-chat.files";
@@ -69,12 +70,12 @@ const THREAD_PARAM = "thread";
 /** The chat route answers 402 with this code when the wallet is empty. */
 const CREDIT_REQUIRED_CODE = "AI_CREDIT_REQUIRED";
 
-function readStoredModel(): AgentModelId {
+function readStoredModel(): AgentModelId | null {
   try {
     const stored = window.localStorage.getItem(MODEL_STORAGE_KEY);
-    return stored && isAgentModelId(stored) ? stored : DEFAULT_AGENT_MODEL_ID;
+    return stored && isAgentModelId(stored) ? stored : null;
   } catch {
-    return DEFAULT_AGENT_MODEL_ID;
+    return null;
   }
 }
 
@@ -175,9 +176,22 @@ export function AgentChat({
 
   const newConversationTitle = t("conversations.new");
 
+  // Model priority: session override (localStorage) > profile default >
+  // catalog default. The profile query is shared with the profile screen.
+  const profileQuery = api.profile.get.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+  const profileDefaultModel = profileQuery.data?.result?.agentDefaultModel;
+
   useEffect(() => {
-    setModel(readStoredModel());
-  }, []);
+    const stored = readStoredModel();
+
+    if (stored) {
+      setModel(stored);
+    } else if (profileDefaultModel) {
+      setModel(profileDefaultModel);
+    }
+  }, [profileDefaultModel]);
 
   // Restore the thread named in the URL once (useChat state resets on unmount).
   useEffect(() => {

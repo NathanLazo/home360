@@ -30,7 +30,8 @@
       "CORPORATE": "Corporate",
       "CUSTOMER": "Customer",
       "WORKER": "Worker"
-    }
+    },
+    "profile": "Profile"
   },
   "pay": {
     "success": {
