@@ -56,6 +56,7 @@ import { attachmentsToFileParts } from "./agent-chat.files";
 import { AgentConversationMenu } from "./agent-conversation-menu";
 import { AgentMessage, AgentPendingMessage } from "./agent-message";
 import { deriveAgentOrbState } from "./agent-orb-state";
+import { DonVictorWidget } from "./don-victor";
 import {
   deriveConversationTitle,
   truncateConversationTitle,
@@ -162,6 +163,9 @@ export function AgentChat({
     () => new DefaultChatTransport({ api: "/api/agent/chat" }),
   );
   const activeIdRef = useRef<string | null>(activeId);
+  // Drag area and reserved composer for the Don Víctor widget.
+  const boundsRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
   // useChat captures its callbacks at creation, so persistence goes via a ref.
   const persistRef = useRef<(messages: AgentUIMessage[]) => void>(
     () => undefined,
@@ -270,6 +274,7 @@ export function AgentChat({
   const lastMessage = messages.at(-1);
   const showPendingMessage =
     status === "submitted" && lastMessage?.role === "user";
+  // One signal drives the composer orb and the Don Víctor sprite.
   const inputOrbState =
     status === "submitted"
       ? "connecting"
@@ -401,11 +406,21 @@ export function AgentChat({
     >
       <LayoutGroup>
         <div
+          ref={boundsRef}
           className={cn(
             "relative flex h-full min-h-0 flex-1 flex-col",
             !hasConversation && !isDock && "justify-center pt-16 md:pt-24",
           )}
         >
+          {/* The dock bubble is too small to host him. */}
+          {isDock ? null : (
+            <DonVictorWidget
+              state={inputOrbState}
+              boundsRef={boundsRef}
+              reserveRef={composerRef}
+              layoutKey={hasConversation}
+            />
+          )}
           <div
             className={cn(
               "z-10 flex items-center gap-2",
@@ -593,6 +608,7 @@ export function AgentChat({
           </AnimatePresence>
 
           <motion.div
+            ref={composerRef}
             layout={reduce ? false : "position"}
             transition={reduce ? { duration: 0 } : SPRING_LAYOUT}
             className={cn(
