@@ -6,6 +6,7 @@ import {
   type AppShellBreadcrumbProps,
 } from "~/components/app-shell";
 import { LocaleSwitcher } from "~/components/locale-switcher";
+import { ThemeToggle } from "~/components/theme-toggle";
 import { UserMenu } from "~/components/user-menu";
 
 export type AdminHeaderProps = {
@@ -38,7 +39,8 @@ export function AdminHeader({
       toggleSidebarLabel={toggleSidebarLabel}
       actions={
         <>
-          <span className="md:hidden">
+          <span className="flex items-center gap-1 md:hidden">
+            <ThemeToggle />
             <LocaleSwitcher />
           </span>
           <UserMenu {...user} variant="light" />
