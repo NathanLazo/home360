@@ -9,6 +9,7 @@ import {
   fail,
   normalizeError,
   ok,
+  type ErrorCode,
   type TrpcResponse,
 } from "~/server/api/contract";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -70,6 +71,16 @@ const aiBillingProcedure = protectedProcedure.use(async ({ ctx, next }) => {
     ctx: { ...ctx, aiBilling: { area, tenant, userId: ctx.session.user.id } },
   });
 });
+
+type CreditCheckoutError = "AI_WALLET_LIMIT";
+
+function checkoutFail(
+  code: CreditCheckoutError | ErrorCode,
+  status: number,
+  message: string,
+): TrpcResponse<never, CreditCheckoutError> {
+  return fail<never, CreditCheckoutError>(code, status, message);
+}
 
 function unexpectedFailure(
   error: unknown,
@@ -162,11 +173,11 @@ export const aiBillingRouter = createTRPCRouter({
       async ({
         ctx,
         input,
-      }): Promise<TrpcResponse<{ url: string }, "AI_WALLET_LIMIT">> => {
+      }): Promise<TrpcResponse<{ url: string }, CreditCheckoutError>> => {
         const tenant: AiBillingTenant = ctx.aiBilling.tenant;
 
         if (tenant.kind === "internal") {
-          return fail("FORBIDDEN", 403, "Internal usage has no wallet");
+          return checkoutFail("FORBIDDEN", 403, "Internal usage has no wallet");
         }
 
         try {
@@ -193,21 +204,42 @@ export const aiBillingRouter = createTRPCRouter({
           if (!checkout.ok) {
             switch (checkout.code) {
               case "AI_WALLET_LIMIT":
-                return fail("AI_WALLET_LIMIT", 409, "Wallet ceiling reached");
+                return checkoutFail(
+                  "AI_WALLET_LIMIT",
+                  409,
+                  "Wallet ceiling reached",
+                );
               case "FORBIDDEN":
-                return fail("FORBIDDEN", 403, "Internal usage has no wallet");
+                return checkoutFail(
+                  "FORBIDDEN",
+                  403,
+                  "Internal usage has no wallet",
+                );
               case "NOT_FOUND":
-                return fail("NOT_FOUND", 404, "Tenant not found");
+                return checkoutFail("NOT_FOUND", 404, "Tenant not found");
               case "STRIPE_ERROR":
-                return fail("STRIPE_ERROR", 502, "Stripe rejected the checkout");
+                return checkoutFail(
+                  "STRIPE_ERROR",
+                  502,
+                  "Stripe rejected the checkout",
+                );
               case "CONFLICT":
-                return fail("CONFLICT", 409, "Tenant billing is inconsistent");
+                return checkoutFail(
+                  "CONFLICT",
+                  409,
+                  "Tenant billing is inconsistent",
+                );
             }
           }
 
           return ok(checkout.data, "Checkout Session created", 201);
         } catch (error: unknown) {
-          return unexpectedFailure(error, "Unable to start the token purchase");
+          const normalized = normalizeError(error);
+          return checkoutFail(
+            normalized.code,
+            normalized.status,
+            "Unable to start the token purchase",
+          );
         }
       },
     ),

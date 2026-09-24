@@ -123,7 +123,8 @@
     "title": "Context window",
     "meter": "Context window usage",
     "prompt": "prompt",
-    "completion": "response"
+    "completion": "response",
+    "cost": "Cost of this turn: {cost} USD"
   },
   "tools": {
     "acceptProductOrder": "Accept product order",
@@ -237,5 +238,16 @@
     "updateService": "Update service",
     "updateWorker": "Update worker",
     "withdrawQuote": "Withdraw quote"
+  },
+  "models": {
+    "tier": {
+      "free": "Free for now",
+      "low": "Low usage",
+      "high": "High usage"
+    }
+  },
+  "wallet": {
+    "required": "This model consumes tokens and your balance is zero.",
+    "buy": "Buy tokens"
   }
 }
