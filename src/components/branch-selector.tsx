@@ -19,9 +19,15 @@ const ALL_BRANCHES_VALUE = "__all_branches__";
 export type BranchSelectorProps = {
   branches: Array<{ id: string; name: string }>;
   className?: string;
+  /** `sm` (28 px) for the panel header row; `default` (32 px) elsewhere. */
+  size?: "sm" | "default";
 };
 
-export function BranchSelector({ branches, className }: BranchSelectorProps) {
+export function BranchSelector({
+  branches,
+  className,
+  size = "default",
+}: BranchSelectorProps) {
   const t = useTranslations("dashboard.branchSelector");
   const pathname = usePathname();
   const router = useRouter();
@@ -52,6 +58,7 @@ export function BranchSelector({ branches, className }: BranchSelectorProps) {
       onValueChange={selectBranch}
     >
       <SelectTrigger
+        size={size}
         aria-label={t("label")}
         className={cn("w-full min-w-0 sm:w-auto sm:min-w-48", className)}
       >

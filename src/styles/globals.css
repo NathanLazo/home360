@@ -345,7 +345,8 @@
   --chart-4: oklch(0.37 0.013 285.805);
   --chart-5: oklch(0.274 0.006 286.033);
   --radius: 0.5rem;
-  --sidebar: var(--canvas-soft);
+  /* Tool shells: the canvas the rounded panel floats on, one step below it. */
+  --sidebar: var(--canvas-soft-2);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--ink);
   --sidebar-primary-foreground: var(--on-ink);
@@ -409,7 +410,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: var(--canvas-soft);
+  --sidebar: oklch(0.08 0 0); /* near-black canvas under the #0a0a0a panel */
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--ink);
   --sidebar-primary-foreground: var(--on-ink);

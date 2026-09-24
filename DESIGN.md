@@ -95,8 +95,8 @@ color (`bg-canvas`, `text-body`, `border-hairline`, `text-link-deep`…).
 | Hairline | `hairline`, `border`, `input` | #ebebeb | Bordes y divisores |
 | Hairline strong | `hairline-strong` | #a1a1a1 | Borde de `outline`, hover de inputs |
 | Canvas | `canvas`, `card`, `popover` | #ffffff | Cards, dialogs, inputs, menús |
-| Canvas soft | `canvas-soft`, `background`, `sidebar` | #fafafa | **Fondo de página** |
-| Canvas soft 2 | `canvas-soft-2`, `accent`, `muted`, `secondary` | #f5f5f5 | Inset, hover de menús |
+| Canvas soft | `canvas-soft`, `background` | #fafafa | **Fondo de página** (y del panel de la herramienta) |
+| Canvas soft 2 | `canvas-soft-2`, `accent`, `muted`, `secondary`, `sidebar` | #f5f5f5 | Inset, hover de menús, lienzo del shell bajo el panel (dark: `oklch(0.08 0 0)`) |
 | Link | `link`, `ring` | #0070f3 | Links sobre canvas blanco, anillo de foco |
 | Link deep | `link-deep` | #0761d1 | Texto link sobre cualquier superficie (el #0070f3 da 4.36:1 sobre canvas-soft) |
 | Link soft | `link-soft` | #d3e5ff | Fondo de estado info |
@@ -162,7 +162,7 @@ contraste por tinta — `font-normal text-mute` (`accentClass` en
 | `rounded-md` | 8 | Tooltips de charts |
 | `rounded-lg` | 12 | Items de menú/select/command y su highlight, dialogs, pricing, cards grandes, paneles glass |
 | `rounded-xl` | 16 | Paneles internos con borde (en sheets/forms), alerts, popovers de menú/select, textarea, superficies hero, consolas de landing |
-| `rounded-pill` | 100 | Botones, inputs, selects, search, tabs, ítems del sidebar (y su lente), header glass de dashboard/admin/corporate, docks glass |
+| `rounded-pill` | 100 | Botones, inputs, selects, search, tabs, ítems del sidebar (y su lente), docks glass |
 | `rounded-2xl` | 20 | **Cards** (`Card`, KPI, cards de tabla — la tabla hereda el recorte), link cards, dialogs |
 | `rounded-full` | — | Avatares, dots |
 
@@ -252,8 +252,19 @@ Sin glass, nunca.
 ```
 
 **Patrones de la herramienta (dashboard/admin/corporate):**
-- Shell: header flotante `GlassSurface` idéntico en las tres áreas; contenido en
-  `AppShellContent` (`max-w-7xl`, `p-4 sm:p-6 lg:p-8`, destino del skip link).
+- Shell (`src/components/app-shell/`): la herramienta es una **pantalla dentro de la
+  pantalla**. Sidebar `variant="inset"` sobre el lienzo `sidebar`; el panel
+  (`AppShellInset`) flota con `m-2 ml-0`, `rounded-xl`, hairline `border` y `shadow-md`,
+  alto fijo `100svh - 1rem` y `overflow-hidden`: solo desplaza `AppShellContent`
+  (`max-w-7xl`, `p-4 sm:p-6 lg:p-8`, destino del skip link). Arriba `AppShellHeader`
+  (40 px en desktop, 44 en móvil; canvas al 92 % + blur, sin glass) con trigger,
+  hairline vertical y `AppShellBreadcrumb` "Workspace › Sección" (la hoja hace
+  crossfade de 150 ms smooth-out al navegar; instantáneo con reduced motion). Abajo
+  `AppShellFooter` (36 px, solo desktop, `rounded-b-xl`): carril izquierdo para accesos
+  rápidos/burbujas de mensajes, derecha idioma y el slot `data-slot="agent-dock"`
+  reservado para el agente de IA. En móvil el panel es full-bleed, sin footer, y el
+  idioma sube al header. Identidad: las tres áreas usan el sidebar claro; admin se
+  distingue por su chip de rol (`bg-metal`) junto al breadcrumb.
 - Sidebar: notch activo de metal **estático** (`SidebarActiveIndicator`, `bg-metal`)
   que se desliza entre ítems (250 ms smooth-out, instantáneo con reduced motion);
   sobre el ítem activo viaja además un **lente de selección** (`SidebarActiveLens`

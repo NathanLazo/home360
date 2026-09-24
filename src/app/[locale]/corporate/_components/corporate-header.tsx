@@ -1,9 +1,11 @@
 import type { UserRole } from "@generated/prisma";
 
-import { GlassSurface } from "~/components/glass";
+import {
+  AppShellBreadcrumb,
+  AppShellHeader,
+  type AppShellBreadcrumbProps,
+} from "~/components/app-shell";
 import { LocaleSwitcher } from "~/components/locale-switcher";
-import { Separator } from "~/components/ui/separator";
-import { SidebarTrigger } from "~/components/ui/sidebar";
 import { UserMenu } from "~/components/user-menu";
 
 export type CorporateHeaderProps = {
@@ -15,30 +17,28 @@ export type CorporateHeaderProps = {
     role: UserRole;
   };
   toggleSidebarLabel: string;
+  breadcrumb: AppShellBreadcrumbProps;
 };
 
+/** Corporate top row: "Account › Section" and the user menu. */
 export function CorporateHeader({
   user,
   toggleSidebarLabel,
+  breadcrumb,
 }: CorporateHeaderProps) {
   return (
-    // Floating Liquid Glass toolbar: content scrolls under it. Solid canvas
-    // on first paint and under reduced transparency / more contrast.
-    <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
-      <GlassSurface
-        radius="pill"
-        className="flex min-h-12 items-center gap-2 px-3 py-1.5 sm:pr-1.5"
-      >
-        <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mr-1 data-[orientation=vertical]:h-4"
-        />
-        <div className="ml-auto flex items-center gap-2">
-          <LocaleSwitcher />
+    <AppShellHeader
+      toggleSidebarLabel={toggleSidebarLabel}
+      actions={
+        <>
+          <span className="md:hidden">
+            <LocaleSwitcher />
+          </span>
           <UserMenu {...user} variant="light" />
-        </div>
-      </GlassSurface>
-    </header>
+        </>
+      }
+    >
+      <AppShellBreadcrumb {...breadcrumb} />
+    </AppShellHeader>
   );
 }

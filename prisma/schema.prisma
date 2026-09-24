@@ -372,6 +372,7 @@ model User {
   messages                     Message[]
   orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
   requestDiagnoses             RequestDiagnosis[]
+  agentConversations           AgentConversation[]          @relation("UserAgentConversations")
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -1287,4 +1288,27 @@ model Campaign {
 
   @@index([sentAt])
   @@index([sentById])
+}
+
+/// Panel where an AI assistant thread was opened. Mirrors the role of the
+/// owner so a conversation never leaks across dashboards.
+enum AgentArea {
+  BUSINESS
+  CORPORATE
+  ADMIN
+}
+
+/// AI assistant thread (F8). `messages` is the full UIMessage[] snapshot
+/// (parts included) written by the client after every finished turn.
+model AgentConversation {
+  id        String    @id @default(cuid())
+  title     String
+  area      AgentArea
+  messages  Json
+  userId    String
+  user      User      @relation("UserAgentConversations", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, area, updatedAt])
 }

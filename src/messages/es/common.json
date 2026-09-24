@@ -6,6 +6,10 @@
     "clear": "Borrar búsqueda"
   },
   "toggleSidebar": "Mostrar u ocultar menú lateral",
+  "shell": {
+    "breadcrumb": "Ruta de navegación",
+    "footer": "Barra de estado del panel"
+  },
   "localeSwitcher": {
     "label": "Idioma",
     "spanish": "Español",

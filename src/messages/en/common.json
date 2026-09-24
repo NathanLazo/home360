@@ -6,6 +6,10 @@
     "clear": "Clear search"
   },
   "toggleSidebar": "Toggle sidebar",
+  "shell": {
+    "breadcrumb": "Breadcrumb",
+    "footer": "Panel status bar"
+  },
   "localeSwitcher": {
     "label": "Language",
     "spanish": "Español",

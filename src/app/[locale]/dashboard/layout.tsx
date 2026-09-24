@@ -7,13 +7,19 @@ import { notFound } from "next/navigation";
 
 import { DashboardHeader } from "./_components/dashboard-header";
 import { SubscriptionStatusBanner } from "./_components/subscription-status-banner";
-import { AppShellContent } from "~/components/app-shell-content";
+import {
+  AppShellContent,
+  AppShellFooter,
+  AppShellInset,
+} from "~/components/app-shell";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
+import { LocaleSwitcher } from "~/components/locale-switcher";
 import { SessionGuard } from "~/components/session-guard";
 import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 import { routing } from "~/i18n/routing";
+import { DASHBOARD_NAV } from "~/lib/dashboard-nav";
 import { requireRole } from "~/server/auth/require-role";
 import { db } from "~/server/db";
 import { getDashboardShellData } from "~/server/services/business/dashboard-shell";
@@ -38,7 +44,7 @@ export default async function DashboardLayout({
   const [shell, t, common, cookieStore] = await Promise.all([
     getDashboardShellData(db, user.id),
     getTranslations({ locale, namespace: "dashboard" }),
-    getTranslations({ locale, namespace: "common.userMenu" }),
+    getTranslations({ locale, namespace: "common" }),
     cookies(),
   ]);
 
@@ -49,7 +55,7 @@ export default async function DashboardLayout({
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
   const userName = user.name ?? t("sidebar.placeholderName");
-  const userEmail = user.email ?? common("emailUnavailable");
+  const userEmail = user.email ?? common("userMenu.emailUnavailable");
   const labels = {
     home: t("nav.home"),
     services: t("nav.services"),
@@ -60,6 +66,14 @@ export default async function DashboardLayout({
     branches: t("nav.branches"),
     team: t("nav.team"),
     settings: t("nav.settings"),
+  };
+  const breadcrumb = {
+    root: { label: shell.business.name, href: "/dashboard" },
+    sections: DASHBOARD_NAV.map((item) => ({
+      key: item.key,
+      href: item.href,
+      label: labels[item.key],
+    })),
   };
 
   return (
@@ -83,7 +97,7 @@ export default async function DashboardLayout({
           image: user.image ?? null,
         }}
       />
-      <SidebarInset className="min-w-0">
+      <AppShellInset>
         <DashboardHeader
           user={{
             id: user.id,
@@ -94,6 +108,7 @@ export default async function DashboardLayout({
           }}
           branches={shell.branches}
           toggleSidebarLabel={t("header.toggleSidebar")}
+          breadcrumb={breadcrumb}
         />
         <SessionGuard />
         <AppShellContent id="dashboard-content">
@@ -110,7 +125,11 @@ export default async function DashboardLayout({
             {children}
           </SubscriptionAccessProvider>
         </AppShellContent>
-      </SidebarInset>
+        <AppShellFooter
+          label={common("shell.footer")}
+          end={<LocaleSwitcher />}
+        />
+      </AppShellInset>
     </SidebarProvider>
   );
 }

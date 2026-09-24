@@ -5,12 +5,17 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { AppShellContent } from "~/components/app-shell-content";
+import {
+  AppShellContent,
+  AppShellFooter,
+  AppShellInset,
+} from "~/components/app-shell";
+import { LocaleSwitcher } from "~/components/locale-switcher";
 import { SessionGuard } from "~/components/session-guard";
 import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
 import { AdminSidebar } from "./_components/admin-sidebar";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
 import { api } from "~/trpc/server";
@@ -54,17 +59,25 @@ export default async function AdminLayout({
   const user = await requireRole(UserRole.ADMIN, locale, "/admin");
   const [t, common, cookieStore, openDisputes] = await Promise.all([
     getTranslations({ locale, namespace: "admin" }),
-    getTranslations({ locale, namespace: "common.userMenu" }),
+    getTranslations({ locale, namespace: "common" }),
     cookies(),
     getOpenDisputeCount(),
   ]);
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
   const userName = user.name ?? t("sidebar.placeholderName");
-  const userEmail = user.email ?? common("emailUnavailable");
+  const userEmail = user.email ?? common("userMenu.emailUnavailable");
   const labels = Object.fromEntries(
     adminNav.map((item) => [item.key, t(item.labelKey)]),
   );
+  const breadcrumb = {
+    root: { label: "HOME360", href: "/admin" },
+    sections: adminNav.map((item) => ({
+      key: item.key,
+      href: item.href,
+      label: t(item.labelKey),
+    })),
+  };
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -86,7 +99,7 @@ export default async function AdminLayout({
           image: user.image ?? null,
         }}
       />
-      <SidebarInset className="min-w-0">
+      <AppShellInset>
         <AdminHeader
           user={{
             id: user.id,
@@ -97,10 +110,15 @@ export default async function AdminLayout({
           }}
           toggleSidebarLabel={t("header.toggleSidebar")}
           roleLabel={t("header.roleBadge")}
+          breadcrumb={breadcrumb}
         />
         <SessionGuard />
         <AppShellContent id="admin-content">{children}</AppShellContent>
-      </SidebarInset>
+        <AppShellFooter
+          label={common("shell.footer")}
+          end={<LocaleSwitcher />}
+        />
+      </AppShellInset>
     </SidebarProvider>
   );
 }

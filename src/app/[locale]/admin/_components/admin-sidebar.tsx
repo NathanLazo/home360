@@ -38,7 +38,7 @@ export function AdminSidebar({
 
   return (
     <AppSidebar
-      variant="dark"
+      variant="light"
       items={items}
       homeHref="/admin"
       brandLabel={brandLabel}

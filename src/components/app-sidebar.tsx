@@ -79,6 +79,7 @@ export function AppSidebar({
 
   return (
     <Sidebar
+      variant="inset"
       collapsible="icon"
       mobileTitle={mobileTitle}
       mobileDescription={mobileDescription}

@@ -5,13 +5,19 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { AppShellContent } from "~/components/app-shell-content";
+import {
+  AppShellContent,
+  AppShellFooter,
+  AppShellInset,
+} from "~/components/app-shell";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
+import { LocaleSwitcher } from "~/components/locale-switcher";
 import { SessionGuard } from "~/components/session-guard";
 import { CorporateHeader } from "./_components/corporate-header";
+import { CORPORATE_NAV } from "./_components/corporate-nav";
 import { CorporateSidebar } from "./_components/corporate-sidebar";
 import { CorporateStatusBanner } from "./_components/corporate-status-banner";
-import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
 import { db } from "~/server/db";
@@ -45,7 +51,7 @@ export default async function CorporateLayout({
       select: { name: true, status: true, statusReason: true, tier: true },
     }),
     getTranslations({ locale, namespace: "corporate" }),
-    getTranslations({ locale, namespace: "common.userMenu" }),
+    getTranslations({ locale, namespace: "common" }),
     cookies(),
   ]);
 
@@ -56,13 +62,21 @@ export default async function CorporateLayout({
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
   const userName = user.name ?? t("sidebar.placeholderName");
-  const userEmail = user.email ?? common("emailUnavailable");
+  const userEmail = user.email ?? common("userMenu.emailUnavailable");
   const labels = {
     home: t("nav.home"),
     orders: t("nav.orders"),
     locations: t("nav.locations"),
     membership: t("nav.membership"),
     settings: t("nav.settings"),
+  };
+  const breadcrumb = {
+    root: { label: account.name, href: "/corporate" },
+    sections: CORPORATE_NAV.map((item) => ({
+      key: item.key,
+      href: item.href,
+      label: labels[item.key],
+    })),
   };
 
   return (
@@ -89,7 +103,7 @@ export default async function CorporateLayout({
           ariaLabel: t("sidebar.tierLink", { tier: t(`tier.${account.tier}`) }),
         }}
       />
-      <SidebarInset className="min-w-0">
+      <AppShellInset>
         <CorporateHeader
           user={{
             id: user.id,
@@ -99,6 +113,7 @@ export default async function CorporateLayout({
             role: user.role,
           }}
           toggleSidebarLabel={t("header.toggleSidebar")}
+          breadcrumb={breadcrumb}
         />
         <SessionGuard />
         <AppShellContent id="corporate-content">
@@ -112,7 +127,11 @@ export default async function CorporateLayout({
           />
           {children}
         </AppShellContent>
-      </SidebarInset>
+        <AppShellFooter
+          label={common("shell.footer")}
+          end={<LocaleSwitcher />}
+        />
+      </AppShellInset>
     </SidebarProvider>
   );
 }

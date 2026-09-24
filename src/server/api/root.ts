@@ -1,6 +1,7 @@
 import { ok } from "~/server/api/contract";
 import { addressRouter } from "~/server/api/routers/address";
 import { adminRouter } from "~/server/api/routers/admin";
+import { agentRouter } from "~/server/api/routers/agent";
 import { authRouter } from "~/server/api/routers/auth";
 import { branchRouter } from "~/server/api/routers/branch";
 import { businessSettingsRouter } from "~/server/api/routers/business-settings";
@@ -38,6 +39,7 @@ import {
 export const appRouter = createTRPCRouter({
   address: addressRouter,
   admin: adminRouter,
+  agent: agentRouter,
   auth: authRouter,
   branch: branchRouter,
   businessSettings: businessSettingsRouter,

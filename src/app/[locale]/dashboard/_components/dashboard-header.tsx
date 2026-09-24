@@ -1,11 +1,13 @@
 import type { UserRole } from "@generated/prisma";
 
 import { NotificationsBell } from "./notifications-bell";
+import {
+  AppShellBreadcrumb,
+  AppShellHeader,
+  type AppShellBreadcrumbProps,
+} from "~/components/app-shell";
 import { BranchSelector } from "~/components/branch-selector";
-import { GlassSurface } from "~/components/glass";
 import { LocaleSwitcher } from "~/components/locale-switcher";
-import { Separator } from "~/components/ui/separator";
-import { SidebarTrigger } from "~/components/ui/sidebar";
 import { UserMenu } from "~/components/user-menu";
 
 export type DashboardHeaderProps = {
@@ -18,35 +20,39 @@ export type DashboardHeaderProps = {
   };
   branches: Array<{ id: string; name: string }>;
   toggleSidebarLabel: string;
+  breadcrumb: AppShellBreadcrumbProps;
 };
 
+/**
+ * Business panel top row: "Business › Section" plus the branch filter, the
+ * bell and the user menu. The language switch lives in the panel footer on
+ * desktop and only surfaces here on mobile, where there is no footer.
+ */
 export function DashboardHeader({
   user,
   branches,
   toggleSidebarLabel,
+  breadcrumb,
 }: DashboardHeaderProps) {
   return (
-    // Floating Liquid Glass toolbar: content scrolls under it. Solid canvas
-    // on first paint and under reduced transparency / more contrast. Always a
-    // single row: the branch filter flexes to fill the space on mobile.
-    <header className="sticky top-0 z-30 px-2 pt-2 sm:px-3">
-      <GlassSurface
-        radius="pill"
-        className="flex min-h-12 items-center gap-2 px-3 py-1.5 pr-1.5"
-      >
-        <SidebarTrigger aria-label={toggleSidebarLabel} className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mr-1 data-[orientation=vertical]:h-4"
-        />
-        <BranchSelector
-          branches={branches}
-          className="flex-1 sm:ml-auto sm:flex-none"
-        />
-        <NotificationsBell />
-        <LocaleSwitcher />
-        <UserMenu {...user} variant="light" />
-      </GlassSurface>
-    </header>
+    <AppShellHeader
+      toggleSidebarLabel={toggleSidebarLabel}
+      actions={
+        <>
+          <BranchSelector
+            branches={branches}
+            size="sm"
+            className="w-auto max-w-36 sm:max-w-none sm:min-w-48"
+          />
+          <NotificationsBell />
+          <span className="md:hidden">
+            <LocaleSwitcher />
+          </span>
+          <UserMenu {...user} variant="light" />
+        </>
+      }
+    >
+      <AppShellBreadcrumb {...breadcrumb} />
+    </AppShellHeader>
   );
 }
