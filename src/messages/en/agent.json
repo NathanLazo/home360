@@ -243,6 +243,7 @@
     "tier": {
       "free": "Free for now",
       "low": "Low usage",
+      "medium": "Medium usage",
       "high": "High usage"
     }
   },
