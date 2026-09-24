@@ -123,7 +123,8 @@
     "title": "Ventana de contexto",
     "meter": "Uso de la ventana de contexto",
     "prompt": "prompt",
-    "completion": "respuesta"
+    "completion": "respuesta",
+    "cost": "Costo de este turno: {cost} USD"
   },
   "tools": {
     "acceptProductOrder": "Aceptar orden de producto",
@@ -237,5 +238,16 @@
     "updateService": "Actualizar servicio",
     "updateWorker": "Actualizar trabajador",
     "withdrawQuote": "Retirar cotización"
+  },
+  "models": {
+    "tier": {
+      "free": "Gratis por ahora",
+      "low": "Bajo consumo",
+      "high": "Alto consumo"
+    }
+  },
+  "wallet": {
+    "required": "Este modelo consume tokens y tu saldo está en cero.",
+    "buy": "Comprar tokens"
   }
 }

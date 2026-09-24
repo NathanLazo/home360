@@ -373,6 +373,12 @@ model User {
   orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
   requestDiagnoses             RequestDiagnosis[]
   agentConversations           AgentConversation[]          @relation("UserAgentConversations")
+  // F8-05 / F9-01: assistant model preference (id of AGENT_MODELS; null =
+  // catalog default) and profile avatar stored in Vercel Blob (wins over
+  // `image`, the Google picture).
+  agentDefaultModel            String?
+  avatarPathname               String?
+  aiUsage                      AiUsage[]
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -408,6 +414,12 @@ model Business {
   // Dashboard notifications bell: feed items newer than this are unread.
   // null = never opened (everything in the feed counts as unread).
   notificationsSeenAt DateTime?
+  // F8-05: prepaid assistant wallet, USD micros (1 USD = 1_000_000). The
+  // welcome credit is granted once; `aiWelcomeCreditAt` is the idempotency mark.
+  aiCreditUsdMicros   Int                @default(0)
+  aiWelcomeCreditAt   DateTime?
+  aiUsage             AiUsage[]
+  aiCreditPurchases   AiCreditPurchase[]
   branches            Branch[]
   workers             Worker[]
   services            Service[]
@@ -791,6 +803,11 @@ model CorporateAccount {
   accountManagerId   String? // account executive (tier >= STANDARD)
   accountManager     User?                        @relation("CorporateAccountManager", fields: [accountManagerId], references: [id], onDelete: SetNull)
   stripeCustomerId   String?                      @unique
+  // F8-05: prepaid assistant wallet (see Business).
+  aiCreditUsdMicros  Int                          @default(0)
+  aiWelcomeCreditAt  DateTime?
+  aiUsage            AiUsage[]
+  aiCreditPurchases  AiCreditPurchase[]
   statusReason       String?
   locations          CorporateLocation[]
   serviceRequests    ServiceRequest[]
@@ -1311,4 +1328,68 @@ model AgentConversation {
   updatedAt DateTime  @updatedAt
 
   @@index([userId, area, updatedAt])
+}
+
+/// How a turn of the assistant was settled (F8-05).
+enum AiUsageSettlement {
+  PREPAID
+  FREE
+  INTERNAL
+}
+
+/// One row per finished assistant turn: tokens reported by the gateway, the
+/// platform price applied and the wallet it was debited from. Admin usage is
+/// INTERNAL (no charge); free models are FREE.
+model AiUsage {
+  id                 String            @id @default(cuid())
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId         String?
+  business           Business?         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  corporateAccountId String?
+  corporateAccount   CorporateAccount? @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  conversationId     String?
+  /// Id of the assistant message that closed the turn (idempotency key).
+  messageId          String            @unique
+  model              String
+  inputTokens        Int
+  outputTokens       Int
+  /// Platform price (gateway × markup) in USD micros.
+  costUsdMicros      Int
+  /// Gateway list price in USD micros, kept for margin reporting.
+  gatewayCostUsdMicros Int
+  settlement         AiUsageSettlement
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([businessId, createdAt])
+  @@index([corporateAccountId, createdAt])
+  @@index([userId, createdAt])
+}
+
+enum AiCreditPurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+/// Prepaid token pack bought through Stripe Checkout (mode payment, USD).
+model AiCreditPurchase {
+  id                      String                 @id @default(cuid())
+  businessId              String?
+  business                Business?              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  corporateAccountId      String?
+  corporateAccount        CorporateAccount?      @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  packCode                String
+  amountUsdCents          Int
+  creditUsdMicros         Int
+  status                  AiCreditPurchaseStatus @default(PENDING)
+  stripeCheckoutSessionId String?                @unique
+  stripePaymentIntentId   String?                @unique
+  paidAt                  DateTime?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  @@index([businessId, createdAt])
+  @@index([corporateAccountId, createdAt])
 }

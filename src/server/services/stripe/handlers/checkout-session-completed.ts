@@ -3,6 +3,7 @@ import "server-only";
 import { PaymentLinkStatus } from "@generated/prisma";
 import Stripe from "stripe";
 
+import { applyCreditPurchase } from "~/server/services/ai-billing/apply-credit-purchase";
 import { svcOk } from "~/server/services/service-result";
 import type { StripeEventHandler } from "../webhook-dispatcher";
 import { capturePaymentIntent } from "./payment-intent-succeeded";
@@ -36,6 +37,25 @@ export const handleCheckoutSessionCompleted: StripeEventHandler = async (
       "INVALID_SESSION_METADATA",
       `Checkout Session ${session.id} carries unreadable metadata`,
     );
+  }
+
+  // F8-05: token pack purchases share the envelope but never touch escrow.
+  if (metadata.data.aiCreditPurchaseId !== undefined) {
+    if (session.payment_status !== "paid") {
+      return svcOk(null);
+    }
+
+    const applied = await applyCreditPurchase(deps.db, {
+      purchaseId: metadata.data.aiCreditPurchaseId,
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId: expandableId(session.payment_intent),
+      amountTotalUsdCents: session.amount_total,
+      currency: session.currency,
+    });
+
+    return applied.ok
+      ? svcOk(null)
+      : handlerFail(applied.code, applied.detail);
   }
 
   const paymentLinkId = metadata.data.paymentLinkId;

@@ -23,6 +23,8 @@ ya no funcionan como backlog.
 5. [`P-WEB-05-released-payment-refunds.md`](P-WEB-05-released-payment-refunds.md)
 6. [`F8-01-ai-assistant.md`](F8-01-ai-assistant.md) — asistente IA por panel (implementado; falta `db:push` y `build`)
 7. [`F8-02-don-victor-widget.md`](F8-02-don-victor-widget.md) — Don Víctor, widget pixel-art del asistente (implementado)
+8. [`F8-05-ai-models-pricing-credits.md`](F8-05-ai-models-pricing-credits.md) — catálogo de 3 modelos, precio ×2 por token, créditos prepagados y pospago en factura (planeado)
+9. [`F9-01-user-profile.md`](F9-01-user-profile.md) — vista de perfil por panel (cuenta, seguridad, dispositivos, asistente, facturación IA) desde el avatar del header (planeado; depende de F8-05)
 
 `P-WEB-01` y `P-WEB-02` bloquean el cierre de la app móvil. `P-WEB-03` debe cerrarse
 antes de producción. `P-WEB-04` lo ejecuta Roger. `P-WEB-05` es una capacidad posterior y

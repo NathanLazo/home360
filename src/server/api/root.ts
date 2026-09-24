@@ -2,6 +2,7 @@ import { ok } from "~/server/api/contract";
 import { addressRouter } from "~/server/api/routers/address";
 import { adminRouter } from "~/server/api/routers/admin";
 import { agentRouter } from "~/server/api/routers/agent";
+import { aiBillingRouter } from "~/server/api/routers/ai-billing";
 import { authRouter } from "~/server/api/routers/auth";
 import { branchRouter } from "~/server/api/routers/branch";
 import { businessSettingsRouter } from "~/server/api/routers/business-settings";
@@ -15,6 +16,7 @@ import { messagingRouter } from "~/server/api/routers/messaging";
 import { orderRouter } from "~/server/api/routers/order";
 import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
+import { profileRouter } from "~/server/api/routers/profile";
 import { pushRouter } from "~/server/api/routers/push";
 import { quoteRouter } from "~/server/api/routers/quote";
 import { radarRouter } from "~/server/api/routers/radar";
@@ -40,6 +42,7 @@ export const appRouter = createTRPCRouter({
   address: addressRouter,
   admin: adminRouter,
   agent: agentRouter,
+  aiBilling: aiBillingRouter,
   auth: authRouter,
   branch: branchRouter,
   businessSettings: businessSettingsRouter,
@@ -54,6 +57,7 @@ export const appRouter = createTRPCRouter({
   order: orderRouter,
   payment: paymentRouter,
   product: productRouter,
+  profile: profileRouter,
   push: pushRouter,
   quote: quoteRouter,
   radar: radarRouter,

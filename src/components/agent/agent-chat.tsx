@@ -26,13 +26,15 @@ import {
   type UsageState,
 } from "~/components/agents/usage-meter";
 import type { AttachmentUploadItem } from "~/components/motion/attachment-upload";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import type { AgentArea } from "~/lib/agent/agent-area";
+import { Link } from "~/i18n/navigation";
+import { agentProfileBillingHref, type AgentArea } from "~/lib/agent/agent-area";
 import {
   AGENT_MODELS,
   DEFAULT_AGENT_MODEL_ID,
@@ -40,6 +42,10 @@ import {
   isAgentModelId,
   type AgentModelId,
 } from "~/lib/agent/agent-models";
+import {
+  formatUsdMicros,
+  turnCostUsdMicros,
+} from "~/lib/agent/agent-pricing";
 import { EASE_OUT, SPRING_LAYOUT } from "~/lib/ease";
 import { cn } from "~/lib/utils";
 import type { AgentUIMessage } from "~/server/agent/home360-agent";
@@ -61,10 +67,8 @@ const FADE_TRANSITION = { duration: 0.2, ease: EASE_OUT } as const;
 const MODEL_STORAGE_KEY = "home360.agent.model";
 const THREAD_PARAM = "thread";
 
-const MODEL_OPTIONS: PromptModel[] = AGENT_MODELS.map((option) => ({
-  value: option.id,
-  label: option.label,
-}));
+/** The chat route answers 402 with this code when the wallet is empty. */
+const CREDIT_REQUIRED_CODE = "AI_CREDIT_REQUIRED";
 
 function readStoredModel(): AgentModelId {
   try {
@@ -119,6 +123,25 @@ export function AgentChat({
   const t = useTranslations("agent");
   const locale = useLocale();
   const reduce = useReducedMotion() ?? false;
+  // Consumption tier next to each model (owner decision F8-05): free / low / high.
+  const modelOptions = useMemo<PromptModel[]>(
+    () =>
+      AGENT_MODELS.map((option) => ({
+        value: option.id,
+        label: (
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span className="truncate">{option.label}</span>
+            <Badge
+              variant="secondary"
+              className="shrink-0 px-1.5 py-0 text-[10px] leading-4"
+            >
+              {t(`models.tier.${option.tier}`)}
+            </Badge>
+          </span>
+        ),
+      })),
+    [t],
+  );
   const searchParams = useSearchParams();
   const threads = useAgentConversations();
   const isDock = variant === "dock";
@@ -232,6 +255,7 @@ export function AgentChat({
   };
 
   const isBusy = status === "submitted" || status === "streaming";
+
   const hasConversation = messages.length > 0;
   const lastMessage = messages.at(-1);
   const showPendingMessage =
@@ -265,6 +289,18 @@ export function AgentChat({
     return null;
   }, [messages, model]);
 
+  const creditRequired =
+    error?.message.includes(CREDIT_REQUIRED_CODE) ?? false;
+  const turnCost = usage
+    ? formatUsdMicros(
+        turnCostUsdMicros(model, {
+          inputTokens: usage.promptTokens,
+          outputTokens: usage.completionTokens,
+        }),
+        locale,
+      )
+    : null;
+
   const submit = (value: string) => {
     const text = value.trim();
 
@@ -289,7 +325,7 @@ export function AgentChat({
 
       await sendMessage(
         files && files.length > 0 ? { text, files } : { text },
-        { body: { model, locale } },
+        { body: { model, locale, conversationId: activeIdRef.current } },
       );
     })();
   };
@@ -424,6 +460,11 @@ export function AgentChat({
                         completion: t("usage.completion"),
                       }}
                     />
+                    {turnCost ? (
+                      <p className="text-muted-foreground mt-2 text-xs tabular-nums">
+                        {t("usage.cost", { cost: turnCost })}
+                      </p>
+                    ) : null}
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : null}
@@ -474,7 +515,21 @@ export function AgentChat({
                       />
                     ))}
                     {showPendingMessage ? <AgentPendingMessage /> : null}
-                    {error ? (
+                    {error && creditRequired ? (
+                      <p
+                        role="alert"
+                        className="text-warning-deep flex flex-wrap items-center gap-x-2 gap-y-1 text-xs"
+                      >
+                        <span>{t("wallet.required")}</span>
+                        <Link
+                          href={agentProfileBillingHref(area)}
+                          className="text-link-deep font-medium underline-offset-4 hover:underline"
+                        >
+                          {t("wallet.buy")}
+                        </Link>
+                      </p>
+                    ) : null}
+                    {error && !creditRequired ? (
                       <p role="alert" className="text-error-deep text-xs">
                         {t("error")}
                       </p>
@@ -572,7 +627,7 @@ export function AgentChat({
               submitLabel={t("composer.send")}
               stopLabel={t("composer.stop")}
               chooseModelLabel={t("composer.chooseModel")}
-              models={MODEL_OPTIONS}
+              models={modelOptions}
               model={model}
               onModelChange={selectModel}
               leadingAction={
