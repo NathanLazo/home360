@@ -22,6 +22,7 @@ ya no funcionan como backlog.
 4. [`P-WEB-04-operational-rollout.md`](P-WEB-04-operational-rollout.md)
 5. [`P-WEB-05-released-payment-refunds.md`](P-WEB-05-released-payment-refunds.md)
 6. [`F8-01-ai-assistant.md`](F8-01-ai-assistant.md) — asistente IA por panel (implementado; falta `db:push` y `build`)
+7. [`F8-02-don-victor-widget.md`](F8-02-don-victor-widget.md) — Don Víctor, widget pixel-art del asistente (implementado)
 
 `P-WEB-01` y `P-WEB-02` bloquean el cierre de la app móvil. `P-WEB-03` debe cerrarse
 antes de producción. `P-WEB-04` lo ejecuta Roger. `P-WEB-05` es una capacidad posterior y
