@@ -92,7 +92,7 @@ export function AppSidebar({
               <Link href={homeHref} aria-label={brandLabel}>
                 <span
                   aria-hidden="true"
-                  className="metal-rim shadow-metal text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
+                  className="metal-rim shadow-metal text-on-metal flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
                 >
                   H
                 </span>

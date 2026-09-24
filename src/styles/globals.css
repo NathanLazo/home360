@@ -112,6 +112,7 @@
   /* Foundation palette (DESIGN.md §2). */
   --color-ink: var(--ink);
   --color-on-ink: var(--on-ink);
+  --color-on-metal: var(--on-metal);
   --color-body: var(--body);
   --color-mute: var(--mute);
   --color-hairline: var(--hairline);
@@ -337,6 +338,13 @@
     oklch(1 0 0 / 0.14) 0%,
     oklch(1 0 0 / 0) 55%
   );
+  /*
+   * Metal is a material, not a theme role: the chrome stays light silver and
+   * its text stays ink-dark in BOTH themes (owner's rule — text on liquid
+   * metal never turns white). Neither token is overridden in `.dark`.
+   */
+  --metal-surface: oklch(0.946 0 0); /* #ededed — core under the rim */
+  --on-metal: oklch(0.205 0 0); /* #171717 — ≥ 8:1 on the fill's darkest stop */
 
   /* shadcn semantic mapping. */
   --background: var(--canvas-soft);
@@ -485,15 +493,16 @@
  * Static liquid-metal rim: a 1px polished-silver border drawn with the
  * background-clip trick (no pseudo-element, no positioning, no WebGL), over a
  * solid core with a top gloss. Override the core with `[--metal-core:…]`
- * (hover states) and the width with `[--metal-rim-width:…]`.
+ * (hover states) and the width with `[--metal-rim-width:…]`. The core is
+ * theme-invariant chrome (`--metal-surface`); pair text with `text-on-metal`.
  */
 @utility metal-rim {
   border: var(--metal-rim-width, 1px) solid transparent;
   background:
     var(--metal-gloss) padding-box,
     linear-gradient(
-        var(--metal-core, var(--primary)),
-        var(--metal-core, var(--primary))
+        var(--metal-core, var(--metal-surface)),
+        var(--metal-core, var(--metal-surface))
       )
       padding-box,
     var(--metal-rim) border-box;
@@ -515,7 +524,7 @@
     linear-gradient(#000 0 0);
 }
 
-/* Chrome fill for badges, pills and active indicators. Pair with `text-ink`. */
+/* Chrome fill for badges, pills and active indicators. Pair with `text-on-metal`. */
 @utility bg-metal {
   background-image: var(--metal-gloss), var(--metal-fill);
 }
