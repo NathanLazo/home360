@@ -15,6 +15,10 @@
     "spanish": "Español",
     "english": "English"
   },
+  "themeToggle": {
+    "toDark": "Cambiar a modo oscuro",
+    "toLight": "Cambiar a modo claro"
+  },
   "userMenu": {
     "open": "Abrir menú de usuario",
     "emailUnavailable": "Correo no disponible",

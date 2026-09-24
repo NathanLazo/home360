@@ -14,6 +14,7 @@ import {
 } from "~/components/app-shell";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
 import { LocaleSwitcher } from "~/components/locale-switcher";
+import { ThemeToggle } from "~/components/theme-toggle";
 import { SessionGuard } from "~/components/session-guard";
 import { SubscriptionAccessProvider } from "~/components/dashboard/subscription-access-context";
 import { DashboardSidebar } from "~/components/dashboard-sidebar";
@@ -65,6 +66,7 @@ export default async function DashboardLayout({
     subscription: t("nav.subscription"),
     branches: t("nav.branches"),
     team: t("nav.team"),
+    assistant: t("nav.assistant"),
     settings: t("nav.settings"),
   };
   const breadcrumb = {
@@ -127,7 +129,12 @@ export default async function DashboardLayout({
         </AppShellContent>
         <AppShellFooter
           label={common("shell.footer")}
-          end={<LocaleSwitcher />}
+          end={
+            <>
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </>
+          }
         />
       </AppShellInset>
     </SidebarProvider>

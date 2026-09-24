@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   ScaleIcon,
   SettingsIcon,
+  SparklesIcon,
   UsersIcon,
 } from "lucide-react";
 
@@ -43,6 +44,12 @@ export const adminNav: SidebarNavDefinition[] = [
     labelKey: "nav.corporate",
     href: "/admin/corporate",
     icon: Building2Icon,
+  },
+  {
+    key: "assistant",
+    labelKey: "nav.assistant",
+    href: "/admin/assistant",
+    icon: SparklesIcon,
   },
   {
     key: "settings",

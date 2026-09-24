@@ -115,14 +115,12 @@ export function createCorporateTools(caller: AgentCaller) {
       description:
         "Create a location. Coordinates are optional but required for the request radar. The tier location cap applies.",
       inputSchema: corporateLocationCreateSchema,
-      execute: (input) =>
-        runTool(() => caller.corporate.createLocation(input)),
+      execute: (input) => runTool(() => caller.corporate.createLocation(input)),
     }),
     updateLocation: tool({
       description: "Update location fields; omitted fields are kept.",
       inputSchema: corporateLocationUpdateSchema,
-      execute: (input) =>
-        runTool(() => caller.corporate.updateLocation(input)),
+      execute: (input) => runTool(() => caller.corporate.updateLocation(input)),
     }),
     deactivateLocation: tool({
       description: "Deactivate a location (it stops receiving new requests).",
@@ -139,8 +137,7 @@ export function createCorporateTools(caller: AgentCaller) {
 
     // Requests and quotes
     listRequests: tool({
-      description:
-        "Service requests created by the account and their status.",
+      description: "Service requests created by the account and their status.",
       inputSchema: corporateRequestListSchema,
       execute: (input) => runTool(() => caller.corporate.listRequests(input)),
     }),

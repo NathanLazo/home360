@@ -4,6 +4,7 @@ import {
   HomeIcon,
   MapPinIcon,
   SettingsIcon,
+  SparklesIcon,
 } from "lucide-react";
 
 export const CORPORATE_NAV = [
@@ -26,6 +27,11 @@ export const CORPORATE_NAV = [
     key: "membership",
     href: "/corporate/membership",
     icon: BadgeCheckIcon,
+  },
+  {
+    key: "assistant",
+    href: "/corporate/assistant",
+    icon: SparklesIcon,
   },
   {
     key: "settings",

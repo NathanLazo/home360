@@ -29,9 +29,10 @@ export function toToolFailure(error: unknown): AgentToolFailure {
   if (error instanceof TRPCError) {
     return {
       result: null,
-      error: error.message === "IMPERSONATION_READ_ONLY"
-        ? "IMPERSONATION_READ_ONLY"
-        : error.code,
+      error:
+        error.message === "IMPERSONATION_READ_ONLY"
+          ? "IMPERSONATION_READ_ONLY"
+          : error.code,
       status: TRPC_CODE_STATUS[error.code] ?? 500,
       message: error.message,
     };

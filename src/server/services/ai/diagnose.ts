@@ -110,8 +110,50 @@ function buildInstructions(settings: DiagnosisSettings): string {
   ].join("\n");
 }
 
+type ImageBytes = { data: Uint8Array; mediaType: string };
+
+const IMAGE_FETCH_TIMEOUT_MS = 10_000;
+
+const IMAGE_TYPE_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+/**
+ * Anthropic behind the AI Gateway rejects URL image sources
+ * ("URL sources are not supported"), so the signed Blob URLs are fetched
+ * here and handed to the model as inline bytes.
+ */
+async function fetchImage(url: string): Promise<ImageBytes> {
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(IMAGE_FETCH_TIMEOUT_MS),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Image fetch failed with status ${response.status}`);
+  }
+
+  const headerType = response.headers
+    .get("content-type")
+    ?.split(";")[0]
+    ?.trim();
+  // Fall back to the pathname extension when the store answers a generic type.
+  const mediaType = headerType?.startsWith("image/")
+    ? headerType
+    : (IMAGE_TYPE_BY_EXTENSION[
+        new URL(url).pathname.split(".").pop()?.toLowerCase() ?? ""
+      ] ?? "image/jpeg");
+
+  return {
+    data: new Uint8Array(await response.arrayBuffer()),
+    mediaType,
+  };
+}
+
 function buildUserMessage(input: {
-  imageUrls: string[];
+  images: ImageBytes[];
   videoUrls?: string[];
   description?: string;
 }): ModelMessage {
@@ -130,9 +172,10 @@ function buildUserMessage(input: {
   return {
     role: "user",
     content: [
-      ...input.imageUrls.map((url) => ({
-        type: "image" as const,
-        image: new URL(url),
+      ...input.images.map((image) => ({
+        type: "file" as const,
+        data: image.data,
+        mediaType: image.mediaType,
       })),
       {
         type: "text" as const,
@@ -173,11 +216,12 @@ export async function diagnoseProblem(
     })) ?? DEFAULT_SETTINGS;
 
   try {
+    const images = await Promise.all(input.imageUrls.map(fetchImage));
     const { object } = await generateObject({
       model: DIAGNOSIS_MODEL,
       schema: diagnosisSchema,
       instructions: buildInstructions(settings),
-      messages: [buildUserMessage(input)],
+      messages: [buildUserMessage({ ...input, images })],
       abortSignal: AbortSignal.timeout(DIAGNOSIS_TIMEOUT_MS),
     });
 
@@ -187,10 +231,15 @@ export async function diagnoseProblem(
     const maxPriceCents = Math.max(object.minPriceCents, object.maxPriceCents);
 
     return svcOk({ ...object, minPriceCents, maxPriceCents });
-  } catch {
+  } catch (error) {
     // Timeouts, gateway/provider failures and malformed generations all end
-    // here. The raw error is intentionally dropped so provider details never
-    // leak through the contract.
+    // here. The error is logged for operators (name + message only, never
+    // the prompt or media) and never leaks through the contract.
+    console.error(
+      "[ai/diagnose] generation failed:",
+      error instanceof Error ? `${error.name}: ${error.message}` : error,
+    );
+
     return svcFail("AI_UNAVAILABLE", "Diagnosis generation failed");
   }
 }

@@ -15,7 +15,9 @@ type AssistantPageProps = { params: Promise<{ locale: string }> };
  * only reads the impersonation flag for the read-only notice and prefetches
  * the thread list. The assistant is unavailable without a gateway key.
  */
-export default async function AdminAssistantPage({ params }: AssistantPageProps) {
+export default async function AdminAssistantPage({
+  params,
+}: AssistantPageProps) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

@@ -59,14 +59,16 @@ export function createAdminTools(caller: AgentCaller) {
       execute: (input) => runTool(() => caller.admin.overview.getKpis(input)),
     }),
     getSidebarStats: tool({
-      description: "Live counters: open disputes and businesses awaiting review.",
+      description:
+        "Live counters: open disputes and businesses awaiting review.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.admin.overview.getSidebarStats()),
     }),
     getPendingBusinesses: tool({
       description: "Businesses waiting for approval, with submitted documents.",
       inputSchema: z.object({}),
-      execute: () => runTool(() => caller.admin.overview.getPendingBusinesses()),
+      execute: () =>
+        runTool(() => caller.admin.overview.getPendingBusinesses()),
     }),
     getOpenDisputes: tool({
       description: "Disputes that are open or in review, newest first.",
@@ -260,14 +262,16 @@ export function createAdminTools(caller: AgentCaller) {
       execute: (input) => runTool(() => caller.admin.corporate.getById(input)),
     }),
     listCorporateTiers: tool({
-      description: "Tier catalog with default commission, fee and location cap.",
+      description:
+        "Tier catalog with default commission, fee and location cap.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.admin.corporate.listTiers()),
     }),
     listAccountManagers: tool({
       description: "Admins that can be assigned as corporate account managers.",
       inputSchema: z.object({}),
-      execute: () => runTool(() => caller.admin.corporate.listAccountManagers()),
+      execute: () =>
+        runTool(() => caller.admin.corporate.listAccountManagers()),
     }),
     createCorporateAccount: tool({
       description:
@@ -313,7 +317,8 @@ export function createAdminTools(caller: AgentCaller) {
       execute: () => runTool(() => caller.admin.settings.get()),
     }),
     listCampaigns: tool({
-      description: "Push campaigns sent so far with audience and recipient count.",
+      description:
+        "Push campaigns sent so far with audience and recipient count.",
       inputSchema: listCampaignsSchema,
       execute: (input) =>
         runTool(() => caller.admin.settings.listCampaigns(input)),

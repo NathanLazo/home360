@@ -11,6 +11,7 @@ import {
   AppShellInset,
 } from "~/components/app-shell";
 import { LocaleSwitcher } from "~/components/locale-switcher";
+import { ThemeToggle } from "~/components/theme-toggle";
 import { SessionGuard } from "~/components/session-guard";
 import { adminNav } from "./_components/admin-nav";
 import { AdminHeader } from "./_components/admin-header";
@@ -116,7 +117,12 @@ export default async function AdminLayout({
         <AppShellContent id="admin-content">{children}</AppShellContent>
         <AppShellFooter
           label={common("shell.footer")}
-          end={<LocaleSwitcher />}
+          end={
+            <>
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </>
+          }
         />
       </AppShellInset>
     </SidebarProvider>

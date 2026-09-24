@@ -6,6 +6,7 @@ import {
   MapPinIcon,
   PackageIcon,
   SettingsIcon,
+  SparklesIcon,
   UsersIcon,
   WrenchIcon,
 } from "lucide-react";
@@ -58,6 +59,12 @@ export const DASHBOARD_NAV = [
     labelKey: "nav.team",
     href: "/dashboard/team",
     icon: UsersIcon,
+  },
+  {
+    key: "assistant",
+    labelKey: "nav.assistant",
+    href: "/dashboard/assistant",
+    icon: SparklesIcon,
   },
   {
     key: "settings",

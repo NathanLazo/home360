@@ -172,14 +172,12 @@ export function createBusinessTools(caller: AgentCaller) {
       description:
         "Paginated escrow transactions (payments) with status, method and branch filters.",
       inputSchema: listTransactionsSchema,
-      execute: (input) =>
-        runTool(() => caller.payment.listTransactions(input)),
+      execute: (input) => runTool(() => caller.payment.listTransactions(input)),
     }),
     listPaymentLinks: tool({
       description: "Payment links created by the business and their status.",
       inputSchema: listPaymentLinksSchema,
-      execute: (input) =>
-        runTool(() => caller.payment.listPaymentLinks(input)),
+      execute: (input) => runTool(() => caller.payment.listPaymentLinks(input)),
     }),
     createPaymentLink: tool({
       description:
@@ -198,8 +196,7 @@ export function createBusinessTools(caller: AgentCaller) {
     listWithdrawals: tool({
       description: "Withdrawal requests of the business and their status.",
       inputSchema: listWithdrawalsSchema,
-      execute: (input) =>
-        runTool(() => caller.payment.listWithdrawals(input)),
+      execute: (input) => runTool(() => caller.payment.listWithdrawals(input)),
     }),
     requestWithdrawal: tool({
       description:
@@ -236,8 +233,7 @@ export function createBusinessTools(caller: AgentCaller) {
     getProductStockByBranch: tool({
       description: "Stock and low-stock threshold of one product per branch.",
       inputSchema: z.object({ productId: cuid }),
-      execute: (input) =>
-        runTool(() => caller.product.getStockByBranch(input)),
+      execute: (input) => runTool(() => caller.product.getStockByBranch(input)),
     }),
     createProduct: tool({
       description:

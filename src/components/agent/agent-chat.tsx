@@ -16,7 +16,10 @@ import { useSearchParams } from "next/navigation";
 import { ChatApp } from "~/components/agents/chat-app";
 import { ThinkingOrbGlyph } from "~/components/agents/loading-states/thinking-orb";
 import { MessageScroller } from "~/components/agents/message-scroller";
-import { PromptInput, type PromptModel } from "~/components/agents/prompt-input";
+import {
+  PromptInput,
+  type PromptModel,
+} from "~/components/agents/prompt-input";
 import {
   UsageMeter,
   UsageRing,
@@ -102,8 +105,8 @@ export function AgentChat({ area, readOnly, available }: AgentChatProps) {
   const [model, setModel] = useState<AgentModelId>(DEFAULT_AGENT_MODEL_ID);
   const [attachments, setAttachments] = useState<AttachmentUploadItem[]>([]);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(
-    () => searchParams.get(THREAD_PARAM),
+  const [activeId, setActiveId] = useState<string | null>(() =>
+    searchParams.get(THREAD_PARAM),
   );
   const [transport] = useState(
     () => new DefaultChatTransport({ api: "/api/agent/chat" }),

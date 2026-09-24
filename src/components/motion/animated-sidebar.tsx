@@ -826,7 +826,7 @@ export const AnimatedSidebarMenu = forwardRef<
   return (
     <SharedLayoutBg
       {...props}
-      ref={forwardedRef as React.Ref<HTMLElement>}
+      ref={forwardedRef}
       as="ul"
       inset={0}
       pillClassName="rounded-xl bg-muted/70"

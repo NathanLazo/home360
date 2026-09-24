@@ -15,6 +15,10 @@
     "spanish": "Español",
     "english": "English"
   },
+  "themeToggle": {
+    "toDark": "Switch to dark mode",
+    "toLight": "Switch to light mode"
+  },
   "userMenu": {
     "open": "Open user menu",
     "emailUnavailable": "Email unavailable",

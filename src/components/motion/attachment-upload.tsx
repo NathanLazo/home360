@@ -23,7 +23,9 @@ import {
   useReducedMotion,
 } from "motion/react";
 import {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useRef,
@@ -67,6 +69,40 @@ export type AttachmentUploadClassNames = {
   row?: string;
 };
 
+export interface AttachmentUploadLabels {
+  uploadComplete: string;
+  uploadCompleteFor: (name: string) => string;
+  removing: string;
+  uploadFailed: string;
+  uploadFailedFor: (name: string) => string;
+  retry: string;
+  remove: string;
+  limitReached: string;
+  limitSummary: (count: number, max: number) => string;
+  web: string;
+}
+
+const DEFAULT_ATTACHMENT_LABELS: AttachmentUploadLabels = {
+  uploadComplete: "Upload complete",
+  uploadCompleteFor: (name) => `Upload complete for ${name}`,
+  removing: "Removing attachment",
+  uploadFailed: "Upload failed",
+  uploadFailedFor: (name) => `Upload failed for ${name}`,
+  retry: "Retry upload",
+  remove: "Remove attachment",
+  limitReached: "Attachment limit reached",
+  limitSummary: (count, max) => `${count} of ${max} attachments added`,
+  web: "Web",
+};
+
+const AttachmentLabelsContext = createContext<AttachmentUploadLabels>(
+  DEFAULT_ATTACHMENT_LABELS,
+);
+
+function useAttachmentLabels() {
+  return useContext(AttachmentLabelsContext);
+}
+
 export interface AttachmentUploadProps {
   value?: AttachmentUploadItem[];
   defaultValue?: AttachmentUploadItem[];
@@ -87,6 +123,8 @@ export interface AttachmentUploadProps {
   attachmentsLabel?: string;
   className?: string;
   classNames?: AttachmentUploadClassNames;
+  /** Status and tooltip copy; the host translates it. */
+  labels?: Partial<AttachmentUploadLabels>;
 }
 
 const ITEM_TRANSITION = { duration: 0.2, ease: EASE_OUT } as const;
@@ -188,16 +226,18 @@ function RowAction({
   retryable?: boolean;
   reduce?: boolean;
 }) {
+  const labels = useAttachmentLabels();
+
   if (state === "uploading") {
     return <span aria-hidden="true" className="size-9 shrink-0" />;
   }
 
   if (state === "complete") {
     return (
-      <Tooltip content="Upload complete" side="top" delay={100}>
+      <Tooltip content={labels.uploadComplete} side="top" delay={100}>
         <motion.span
           role="status"
-          aria-label={`Upload complete for ${label}`}
+          aria-label={labels.uploadCompleteFor(label)}
           initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.75 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={ITEM_TRANSITION}
@@ -211,7 +251,7 @@ function RowAction({
 
   if (state === "removing") {
     return (
-      <Tooltip content="Removing attachment" side="top" delay={100}>
+      <Tooltip content={labels.removing} side="top" delay={100}>
         <span
           role="status"
           aria-label={`Removing ${label}`}
@@ -236,10 +276,10 @@ function RowAction({
   if (state === "failed") {
     if (!retryable) {
       return (
-        <Tooltip content="Upload failed" side="top" delay={100}>
+        <Tooltip content={labels.uploadFailed} side="top" delay={100}>
           <span
             role="status"
-            aria-label={`Upload failed for ${label}`}
+            aria-label={labels.uploadFailedFor(label)}
             className="grid size-9 shrink-0 place-items-center rounded-xl text-destructive"
           >
             <AlertCircle className="size-4" />
@@ -249,7 +289,7 @@ function RowAction({
     }
 
     return (
-      <Tooltip content="Retry upload" side="top" delay={100}>
+      <Tooltip content={labels.retry} side="top" delay={100}>
         <motion.button
           type="button"
           aria-label={`Retry ${label}`}
@@ -265,7 +305,7 @@ function RowAction({
   }
 
   return (
-    <Tooltip content="Remove attachment" side="top" delay={100}>
+    <Tooltip content={labels.remove} side="top" delay={100}>
       <motion.button
         type="button"
         aria-label={`Remove ${label}`}
@@ -497,6 +537,7 @@ function AttachmentRow({
   reduce: boolean;
   className?: string;
 }) {
+  const labels = useAttachmentLabels();
   const size = formatBytes(item.size);
   const progress =
     item.duration && item.duration > 0
@@ -651,12 +692,12 @@ function AttachmentRow({
               </span>
               {failed ? (
                 <span className="block truncate text-[11px] text-destructive">
-                  {item.error ?? "Upload failed"}
+                  {item.error ?? labels.uploadFailed}
                 </span>
               ) : null}
             </span>
             <span className="shrink-0 text-xs text-muted-foreground">
-              {item.kind === "link" ? "Web" : size}
+              {item.kind === "link" ? labels.web : size}
             </span>
             {item.kind === "link" && item.href ? (
               <a
@@ -720,7 +761,9 @@ export function AttachmentUpload({
   attachmentsLabel = "Attachments",
   className,
   classNames,
+  labels: labelOverrides,
 }: AttachmentUploadProps) {
+  const labels = { ...DEFAULT_ATTACHMENT_LABELS, ...labelOverrides };
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const dragDepthRef = useRef(0);
@@ -932,6 +975,7 @@ export function AttachmentUpload({
     : undefined;
 
   return (
+    <AttachmentLabelsContext.Provider value={labels}>
     <LayoutGroup id={inputId}>
       <div className={cn("w-full", className)}>
       <input
@@ -1015,11 +1059,11 @@ export function AttachmentUpload({
           <Upload className="size-[18px]" />
         </motion.span>
         <span className="text-sm font-semibold tracking-[-0.01em] text-foreground">
-          {maxReached ? "Attachment limit reached" : title}
+          {maxReached ? labels.limitReached : title}
         </span>
         <span className="mt-1 text-xs leading-5 text-muted-foreground">
           {maxReached
-            ? `${items.length} of ${maxFiles} attachments added`
+            ? labels.limitSummary(items.length, maxFiles)
             : description ?? `Maximum ${formatMaxSize(maxFileSize)} file size`}
         </span>
       </motion.button>
@@ -1077,5 +1121,6 @@ export function AttachmentUpload({
       />
       </div>
     </LayoutGroup>
+    </AttachmentLabelsContext.Provider>
   );
 }

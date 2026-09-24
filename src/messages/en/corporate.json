@@ -4,6 +4,7 @@
     "orders": "Orders",
     "locations": "Locations",
     "membership": "Membership",
+    "assistant": "Assistant",
     "settings": "Settings"
   },
   "sidebar": {

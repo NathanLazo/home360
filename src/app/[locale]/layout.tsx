@@ -6,6 +6,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
 import { routing } from "~/i18n/routing";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -77,15 +78,18 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
+      suppressHydrationWarning
       className={`${geist.variable} ${geistMono.variable} ${fraunces.variable}`}
     >
       <body className="antialiased">
-        <NextIntlClientProvider>
-          <TRPCReactProvider>
-            {children}
-            <Toaster />
-          </TRPCReactProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider>
+            <TRPCReactProvider>
+              {children}
+              <Toaster />
+            </TRPCReactProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

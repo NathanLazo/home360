@@ -11,7 +11,22 @@ export interface UsageState {
 
 export type UsageMeterVariant = 'Bar' | 'Inline';
 
+export interface UsageMeterLabels {
+  title: string;
+  meter: string;
+  prompt: string;
+  completion: string;
+}
+
+const DEFAULT_LABELS: UsageMeterLabels = {
+  title: 'Context window',
+  meter: 'Context window usage',
+  prompt: 'prompt',
+  completion: 'response',
+};
+
 export interface UsageMeterProps {
+  labels?: Partial<UsageMeterLabels>;
   usage: UsageState;
   variant?: UsageMeterVariant;
   className?: string;
@@ -61,7 +76,13 @@ export function UsageRing({ usage, className }: { usage: UsageState; className?:
   );
 }
 
-export function UsageMeter({ usage, variant = 'Bar', className }: UsageMeterProps) {
+export function UsageMeter({
+  usage,
+  variant = 'Bar',
+  className,
+  labels: labelOverrides,
+}: UsageMeterProps) {
+  const labels = { ...DEFAULT_LABELS, ...labelOverrides };
   const used = usage.promptTokens + usage.completionTokens;
   const ratio = Math.min(1, used / usage.contextWindow);
   const percent = Math.round(ratio * 100);
@@ -93,7 +114,7 @@ export function UsageMeter({ usage, variant = 'Bar', className }: UsageMeterProp
   return (
     <div className={cn('w-full max-w-[380px]', className)}>
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12.5px] font-medium text-foreground">Ventana de contexto</span>
+        <span className="text-[12.5px] font-medium text-foreground">{labels.title}</span>
         <span className="font-mono text-[11.5px] tabular-nums text-muted-foreground">
           {formatTokens(used)} / {formatTokens(usage.contextWindow)} · {percent}%
         </span>
@@ -104,7 +125,7 @@ export function UsageMeter({ usage, variant = 'Bar', className }: UsageMeterProp
         aria-valuemin={0}
         aria-valuemax={usage.contextWindow}
         aria-valuenow={used}
-        aria-label="Uso de la ventana de contexto"
+        aria-label={labels.meter}
         className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
       >
         <span
@@ -115,7 +136,8 @@ export function UsageMeter({ usage, variant = 'Bar', className }: UsageMeterProp
 
       <div className="mt-2.5 flex items-center justify-between font-mono text-[10.5px] tabular-nums text-muted-foreground/70">
         <span>
-          prompt {formatTokens(usage.promptTokens)} · respuesta {formatTokens(usage.completionTokens)}
+          {labels.prompt} {formatTokens(usage.promptTokens)} · {labels.completion}{' '}
+          {formatTokens(usage.completionTokens)}
         </span>
       </div>
     </div>

@@ -76,7 +76,9 @@ export async function POST(request: Request) {
 
   const requestedModel = parsed.data.model;
   const model =
-    requestedModel && isAgentModelId(requestedModel) ? requestedModel : AGENT_MODEL;
+    requestedModel && isAgentModelId(requestedModel)
+      ? requestedModel
+      : AGENT_MODEL;
 
   const { session, area } = agentSession;
   const caller = createCaller({ db, session, headers: request.headers });

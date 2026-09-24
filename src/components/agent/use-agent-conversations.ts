@@ -86,7 +86,10 @@ export function useAgentConversations() {
   );
 
   const create = useCallback(
-    async (title: string, messages: AgentUIMessage[]): Promise<string | null> => {
+    async (
+      title: string,
+      messages: AgentUIMessage[],
+    ): Promise<string | null> => {
       try {
         const response = await createMutation.mutateAsync({ title, messages });
 

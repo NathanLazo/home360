@@ -12,6 +12,7 @@ import {
 } from "~/components/app-shell";
 import { ImpersonationBanner } from "~/components/impersonation-banner";
 import { LocaleSwitcher } from "~/components/locale-switcher";
+import { ThemeToggle } from "~/components/theme-toggle";
 import { SessionGuard } from "~/components/session-guard";
 import { CorporateHeader } from "./_components/corporate-header";
 import { CORPORATE_NAV } from "./_components/corporate-nav";
@@ -68,6 +69,7 @@ export default async function CorporateLayout({
     orders: t("nav.orders"),
     locations: t("nav.locations"),
     membership: t("nav.membership"),
+    assistant: t("nav.assistant"),
     settings: t("nav.settings"),
   };
   const breadcrumb = {
@@ -129,7 +131,12 @@ export default async function CorporateLayout({
         </AppShellContent>
         <AppShellFooter
           label={common("shell.footer")}
-          end={<LocaleSwitcher />}
+          end={
+            <>
+              <ThemeToggle />
+              <LocaleSwitcher />
+            </>
+          }
         />
       </AppShellInset>
     </SidebarProvider>

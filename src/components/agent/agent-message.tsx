@@ -96,7 +96,11 @@ export type AgentMessageProps = {
   isStreaming: boolean;
 };
 
-export function AgentMessage({ message, isLast, isStreaming }: AgentMessageProps) {
+export function AgentMessage({
+  message,
+  isLast,
+  isStreaming,
+}: AgentMessageProps) {
   const t = useTranslations("agent");
   const responseLabels = {
     copy: t("response.copy"),
@@ -205,7 +209,10 @@ export function AgentMessage({ message, isLast, isStreaming }: AgentMessageProps
 
   return (
     <Message from="assistant" animateIn>
-      <MessageAvatar className="bg-transparent" aria-label={t("assistantLabel")}>
+      <MessageAvatar
+        className="bg-transparent"
+        aria-label={t("assistantLabel")}
+      >
         <ThinkingOrbGlyph
           state={activity.state}
           size={20}

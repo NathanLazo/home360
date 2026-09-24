@@ -41,7 +41,9 @@ const AREA_HINTS: Record<AgentArea, string> = {
  * client.
  */
 export function buildAgentInstructions(context: AgentPromptContext): string {
-  const who = context.userName ? `Hablas con ${context.userName}` : "Hablas con el usuario";
+  const who = context.userName
+    ? `Hablas con ${context.userName}`
+    : "Hablas con el usuario";
   const tenant = context.tenantName ? ` de "${context.tenantName}"` : "";
   const readOnly = context.readOnly
     ? `\n- SESIÓN DE SOLO LECTURA: un administrador está viendo este panel en modo impersonación. Toda herramienta que modifique datos devolverá IMPERSONATION_READ_ONLY; explícalo y no reintentes.`

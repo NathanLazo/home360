@@ -1,8 +1,16 @@
 import "server-only";
 
-import type { AgentArea as PrismaAgentArea, Prisma, PrismaClient } from "@generated/prisma";
+import type {
+  AgentArea as PrismaAgentArea,
+  Prisma,
+  PrismaClient,
+} from "@generated/prisma";
 import type { AgentArea } from "~/lib/agent/agent-area";
-import { svcFail, svcOk, type ServiceResult } from "~/server/services/service-result";
+import {
+  svcFail,
+  svcOk,
+  type ServiceResult,
+} from "~/server/services/service-result";
 
 const AREA_TO_PRISMA: Record<AgentArea, PrismaAgentArea> = {
   business: "BUSINESS",

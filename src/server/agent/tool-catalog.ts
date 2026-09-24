@@ -11,7 +11,10 @@ import { createCorporateTools } from "./tools/corporate-tools";
  * owner can never see an admin tool, not even its name. Tool authorization is
  * still re-checked by the tRPC procedures on every call.
  */
-export function createAgentTools(area: AgentArea, caller: AgentCaller): ToolSet {
+export function createAgentTools(
+  area: AgentArea,
+  caller: AgentCaller,
+): ToolSet {
   switch (area) {
     case "business":
       return createBusinessTools(caller);

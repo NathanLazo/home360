@@ -21,6 +21,7 @@ ya no funcionan como backlog.
 3. [`P-WEB-03-production-decisions.md`](P-WEB-03-production-decisions.md)
 4. [`P-WEB-04-operational-rollout.md`](P-WEB-04-operational-rollout.md)
 5. [`P-WEB-05-released-payment-refunds.md`](P-WEB-05-released-payment-refunds.md)
+6. [`F8-01-ai-assistant.md`](F8-01-ai-assistant.md) — asistente IA por panel (implementado; falta `db:push` y `build`)
 
 `P-WEB-01` y `P-WEB-02` bloquean el cierre de la app móvil. `P-WEB-03` debe cerrarse
 antes de producción. `P-WEB-04` lo ejecuta Roger. `P-WEB-05` es una capacidad posterior y
