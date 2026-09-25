@@ -8,6 +8,10 @@ import {
   type AgentModelId,
 } from "~/lib/agent/agent-models";
 import {
+  EMPTY_ATTACHMENT_STORE,
+  type AgentAttachmentStore,
+} from "./agent-attachments";
+import {
   buildAgentInstructions,
   type AgentPromptContext,
 } from "./agent-instructions";
@@ -28,6 +32,8 @@ export type CreateHome360AgentInput = {
   caller: AgentCaller;
   context: AgentPromptContext;
   model?: AgentModelId;
+  /** Files attached in the conversation, resolvable by tools via filename. */
+  attachments?: AgentAttachmentStore;
 };
 
 export function createHome360Agent({
@@ -35,11 +41,12 @@ export function createHome360Agent({
   caller,
   context,
   model = AGENT_MODEL,
+  attachments = EMPTY_ATTACHMENT_STORE,
 }: CreateHome360AgentInput) {
   return new ToolLoopAgent({
     model,
     instructions: buildAgentInstructions(context),
-    tools: createAgentTools(area, caller),
+    tools: createAgentTools(area, caller, attachments),
     stopWhen: isStepCount(MAX_STEPS),
   });
 }

@@ -103,7 +103,7 @@ export function PlanCard({
           </CardTitle>
           {plan.isCurrent ? (
             // Same static-chrome chip as the sidebar plan: "yours" reads as metal.
-            <Badge className="bg-metal text-ink shadow-hairline">
+            <Badge className="bg-metal text-on-metal shadow-hairline">
               {t("currentPlanTag")}
             </Badge>
           ) : null}

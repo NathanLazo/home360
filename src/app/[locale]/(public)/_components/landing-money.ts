@@ -10,16 +10,11 @@ const MONEY_LOCALE: Record<string, string> = {
   en: "en-MX",
 };
 
-export function formatMxnFromCents(
-  locale: string,
-  cents: number,
-  options?: { compact?: boolean },
-): string {
+export function formatMxnFromCents(locale: string, cents: number): string {
   return new Intl.NumberFormat(MONEY_LOCALE[locale] ?? "es-MX", {
     style: "currency",
     currency: "MXN",
     currencyDisplay: "narrowSymbol",
     maximumFractionDigits: 0,
-    ...(options?.compact ? { notation: "compact" as const } : {}),
   }).format(cents / 100);
 }

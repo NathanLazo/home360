@@ -47,7 +47,8 @@ export function PricingCard({
       lift={!highlighted}
       className={cn(
         "flex h-full flex-col gap-8 p-7",
-        highlighted && cn(inkSurfaceClass, "shadow-float"),
+        // `w-full`: fill the beam frame (a flex row), or the ring outgrows it.
+        highlighted && cn(inkSurfaceClass, "shadow-float w-full"),
       )}
     >
       <div className="flex flex-col gap-5">

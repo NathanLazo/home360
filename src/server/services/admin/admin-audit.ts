@@ -118,6 +118,18 @@ export type AdminAuditEvent =
       action: typeof AdminAuditAction.CAMPAIGN_SENT;
       campaignId: string;
       metadata: { audience: CampaignAudience; recipientCount: number };
+    }
+  | {
+      action: typeof AdminAuditAction.PAYOUT_RECEIPT_REGISTERED;
+      target:
+        | { type: "withdrawal"; withdrawalId: string }
+        | { type: "loyaltyBonus"; bonusId: string };
+      metadata: {
+        businessId: string;
+        receiptCount: number;
+        totalSizeBytes: number;
+        notesPresent: boolean;
+      };
     };
 
 type AuditRow = {
@@ -229,6 +241,22 @@ function toRow(event: AdminAuditEvent): AuditRow {
         after: undefined,
         metadata: event.metadata,
       };
+    case AdminAuditAction.PAYOUT_RECEIPT_REGISTERED:
+      return event.target.type === "withdrawal"
+        ? {
+            targetType: AdminAuditTarget.WITHDRAWAL,
+            targetId: event.target.withdrawalId,
+            before: undefined,
+            after: undefined,
+            metadata: event.metadata,
+          }
+        : {
+            targetType: AdminAuditTarget.LOYALTY_BONUS,
+            targetId: event.target.bonusId,
+            before: undefined,
+            after: undefined,
+            metadata: event.metadata,
+          };
   }
 }
 

@@ -25,6 +25,7 @@ import type { AgentUIMessage } from "~/server/agent/home360-agent";
 
 import { AgentMarkdown } from "./agent-markdown";
 import { deriveAgentActivity } from "./agent-orb-state";
+import { AgentToolDashboards } from "./agent-tool-dashboard";
 import { AgentToolChips } from "./agent-tool-part";
 
 type AgentPart = AgentUIMessage["parts"][number];
@@ -236,6 +237,7 @@ export function AgentMessage({
           activitySegments.map(renderSegment)
         )}
         {answerSegment ? renderSegment(answerSegment) : null}
+        {!streaming ? <AgentToolDashboards parts={message.parts} /> : null}
         {hasVisibleParts && streaming && activity.state !== "composing" ? (
           <ThinkingShimmer>{activityLabel}</ThinkingShimmer>
         ) : null}

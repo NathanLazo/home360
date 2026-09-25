@@ -1,0 +1,190 @@
+{
+  "title": "Profile",
+  "subtitle": "Your account, security and assistant usage.",
+  "loading": "Loading your profile",
+  "queryErrorTitle": "We couldn't load your profile",
+  "errorTitle": "We couldn't open your profile",
+  "errorDescription": "Something went wrong while opening this screen. Retry to load it again.",
+  "retry": "Retry",
+  "readOnlyNotice": "Read-only session: you are viewing this panel in impersonation mode. Changes are disabled.",
+  "notConfigured": "The assistant is not configured in this environment: the AI Gateway key is missing.",
+  "nav": {
+    "label": "Profile sections",
+    "account": "Account",
+    "security": "Security",
+    "devices": "Devices",
+    "assistant": "Assistant",
+    "billing": "AI billing",
+    "workspace": "Workspace"
+  },
+  "identity": {
+    "memberSince": "Member since {date}",
+    "nameFallback": "No name",
+    "emailUnavailable": "Email unavailable"
+  },
+  "account": {
+    "title": "Account",
+    "description": "How you appear on the platform and the language you use it in.",
+    "nameLabel": "Name",
+    "nameError": "Enter a name between 2 and 80 characters.",
+    "emailLabel": "Email",
+    "emailReadOnly": "It is your sign-in identifier and cannot be changed here.",
+    "localeLabel": "Preferred language",
+    "localeHint": "Also sets the language of the emails we send you.",
+    "roleLabel": "Role",
+    "save": "Save changes",
+    "unsaved": "Unsaved changes",
+    "upToDate": "Everything saved"
+  },
+  "security": {
+    "title": "Security",
+    "description": "Password, linked accounts and active sessions.",
+    "password": {
+      "changeTitle": "Change password",
+      "createTitle": "Create password",
+      "changeDescription": "Changing it ends all your sessions and you will need to sign in again.",
+      "createDescription": "You sign in with Google. Create a password to also sign in with your email; doing so ends all your sessions.",
+      "currentLabel": "Current password",
+      "currentError": "Enter your current password.",
+      "currentInvalid": "The current password is not valid. Type it again.",
+      "newLabel": "New password",
+      "newHint": "8 to 72 characters.",
+      "newError": "Use 8 to 72 characters.",
+      "sameAsCurrentError": "The new password must differ from the current one.",
+      "confirmLabel": "Confirm the new password",
+      "confirmError": "The passwords do not match.",
+      "change": "Change password",
+      "create": "Create password",
+      "redirecting": "Signing out"
+    },
+    "linked": {
+      "title": "Linked accounts",
+      "google": "Google",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "note": "Linking or unlinking accounts is not available here."
+    },
+    "signOutEverywhere": {
+      "title": "Sign out on every device",
+      "description": "Ends the web session and the mobile app session on all your devices, including this one.",
+      "action": "Sign out everywhere",
+      "confirmTitle": "Sign out everywhere?",
+      "confirmDescription": "You will need to sign in again on every device, including this one.",
+      "confirm": "Sign out",
+      "cancel": "Cancel"
+    }
+  },
+  "devices": {
+    "title": "Devices",
+    "description": "Mobile app devices that receive your notifications.",
+    "empty": "You haven't signed in to the mobile app yet.",
+    "remove": "Remove",
+    "removeLabel": "Remove {name}",
+    "lastSeen": "Last used {date}",
+    "unnamed": "Unnamed device",
+    "platform": {
+      "IOS": "iOS",
+      "ANDROID": "Android"
+    }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "description": "The model the assistant opens with and what you have used this month.",
+    "defaultModel": "Default model",
+    "free": "Free",
+    "pricePerMillion": "{input} input · {output} output per million tokens",
+    "contextWindow": "{tokens} token context",
+    "noTools": "No tools",
+    "save": "Save model",
+    "unsaved": "Unsaved changes",
+    "upToDate": "Everything saved",
+    "usageThisMonth": "This month's usage",
+    "usageEmpty": "The assistant hasn't generated any usage this month.",
+    "usageTurns": "{turns, plural, one {# turn} other {# turns}}",
+    "usageTokens": "{input} input · {output} output"
+  },
+  "billing": {
+    "title": "AI billing",
+    "description": "Prepaid assistant balance and usage ledger, with every charge verifiable.",
+    "balance": "Prepaid balance",
+    "balanceHint": "Deducted per turn at the model's price. Free models don't use balance.",
+    "balanceEmpty": "Your balance is zero: paid models won't answer until you buy tokens.",
+    "buy": "Buy tokens",
+    "internalNoCharge": "Internal usage, no charge",
+    "internalDescription": "HOME360 team usage is not billed; the ledger remains for auditing.",
+    "queryErrorTitle": "We couldn't load billing",
+    "ledgerErrorTitle": "We couldn't load usage",
+    "purchasesErrorTitle": "We couldn't load purchases",
+    "packs": {
+      "title": "Choose a pack",
+      "description": "The pack credits exactly what it costs, no bonuses. Payment is processed by Stripe.",
+      "group": "Token packs",
+      "label": "Pack {code}",
+      "credit": "Credits {amount} of balance",
+      "lineItem": "HOME360 · Assistant tokens · Pack {code}",
+      "pay": "Pay {amount}",
+      "cancel": "Cancel",
+      "redirecting": "Opening Stripe…"
+    },
+    "ledger": {
+      "title": "Usage",
+      "empty": "The assistant hasn't generated any charges yet.",
+      "loadMore": "Load more",
+      "loadingMore": "Loading…",
+      "columns": {
+        "date": "Date",
+        "model": "Model",
+        "tokens": "Tokens",
+        "cost": "Cost",
+        "origin": "Origin"
+      },
+      "tokens": "{input} input · {output} output"
+    },
+    "origin": {
+      "PREPAID": "Balance",
+      "FREE": "Free",
+      "INTERNAL": "Internal"
+    },
+    "purchases": {
+      "title": "Purchases",
+      "empty": "You haven't bought tokens yet.",
+      "row": "Pack {code}",
+      "status": {
+        "PENDING": "Pending",
+        "PAID": "Paid",
+        "FAILED": "Failed"
+      }
+    },
+    "invoicesLink": "View plan invoices",
+    "checkout": {
+      "success": "Purchase completed. Your balance was updated.",
+      "cancelled": "Purchase cancelled. Nothing was charged."
+    }
+  },
+  "workspace": {
+    "title": "Workspace",
+    "description": "What belongs to the business or the platform lives on its own screen.",
+    "business": {
+      "settings": "Business settings",
+      "subscription": "Subscription",
+      "branches": "Branches"
+    },
+    "corporate": {
+      "settings": "Company",
+      "membership": "Membership",
+      "locations": "Locations"
+    },
+    "admin": {
+      "settings": "Platform settings"
+    }
+  },
+  "feedback": {
+    "identityUpdated": "Account updated.",
+    "passwordUpdated": "Password updated.",
+    "passwordCreated": "Password created.",
+    "assistantUpdated": "Default model updated.",
+    "deviceRemoved": "Device removed.",
+    "sessionsRevoked": "Sessions ended.",
+    "transportError": "We couldn't complete the action. Check your connection and try again."
+  }
+}

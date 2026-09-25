@@ -5,6 +5,7 @@ import { z } from "zod";
 import { env } from "~/env";
 import { isAgentModelId } from "~/lib/agent/agent-models";
 import type { TokenUsage } from "~/lib/agent/agent-pricing";
+import { collectAgentAttachments } from "~/server/agent/agent-attachments";
 import {
   resolveAgentSession,
   resolveAgentTenantName,
@@ -112,6 +113,7 @@ export async function POST(request: Request) {
     area,
     caller,
     model,
+    attachments: collectAgentAttachments(uiMessages),
     context: {
       area,
       locale: parsed.data.locale,

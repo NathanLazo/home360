@@ -504,13 +504,11 @@ export function AgentChat({
                 transition={reduce ? { duration: 0 } : FADE_TRANSITION}
                 className="relative min-h-0 flex-1"
               >
-                <div
-                  aria-hidden="true"
-                  className="from-background pointer-events-none absolute inset-x-0 top-0 z-[1] h-20 bg-gradient-to-b from-25% to-transparent"
-                />
+                {/* Top fade as a mask, not a painted gradient: the chat is
+                    transparent and the page's tint wash must show through. */}
                 <MessageScroller
                   className={cn(
-                    "h-full min-h-0 pb-4",
+                    "h-full min-h-0 pb-4 [mask-image:linear-gradient(to_bottom,transparent_1.25rem,black_5rem)]",
                     isDock ? "px-3" : "pr-12 sm:pr-16",
                   )}
                   contentClassName={isDock ? "pt-4" : "pt-16"}

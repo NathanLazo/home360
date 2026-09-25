@@ -10,8 +10,10 @@ import { cn } from "~/lib/utils";
  * Buttons (DESIGN.md §6): slim pills (32 px default). On coarse pointers an
  * invisible `::after` extends the hit area to ≥ 44 px without growing the pill.
  *
- * `default` is the liquid-metal primary: an ink core wearing a static CSS
- * chrome rim (`metal-rim` in `globals.css`) — cheap, SSR-safe, no WebGL.
+ * `default` is the liquid-metal primary: a theme-invariant chrome core wearing
+ * a static CSS rim (`metal-rim` in `globals.css`) — cheap, SSR-safe, no WebGL.
+ * Its label is always ink-dark (`text-on-metal`): text on metal never flips
+ * with the theme.
  * The decisive action of a screen (≤ 1–2 per screen) upgrades with
  * `metal="live"` (or `metal="bend"` for the single key CTA) to the landing
  * hero's button: ink pill + full-strength chromatic WebGL ring.
@@ -25,9 +27,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /** Liquid-metal primary: ink core + static chrome rim. */
+        /** Liquid-metal primary: theme-invariant chrome core + static rim, always ink text. */
         default:
-          "metal-rim text-primary-foreground shadow-metal hover:[--metal-core:color-mix(in_oklch,var(--primary)_86%,white)] dark:hover:[--metal-core:color-mix(in_oklch,var(--primary)_88%,black)]",
+          "metal-rim text-on-metal shadow-metal hover:[--metal-core:color-mix(in_oklch,var(--metal-surface)_88%,black)]",
         destructive:
           "bg-destructive text-white hover:bg-error-deep focus-visible:ring-destructive dark:text-on-ink dark:hover:bg-destructive/90",
         /** Transparent with a stronger hairline; sits on any surface. */
@@ -118,7 +120,7 @@ function Button({
   const Comp = asChild ? Slot.Root : "button";
 
   // A live ring renders the landing hero's metal button everywhere: a plain
-  // ink pill (the static rim would double the edge and wash the shader out)
+  // chrome pill (the static rim would double the edge and wash the shader out)
   // wearing the full-strength chromatic ring.
   const underLiveRing =
     variant === "default" &&

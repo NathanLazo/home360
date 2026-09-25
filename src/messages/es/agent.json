@@ -154,6 +154,7 @@
     "getAiConfigSummary": "Configuración de IA",
     "getBalances": "Saldos y escrow",
     "getBusinessDetail": "Expediente del negocio",
+    "getBusinessFinance": "Finanzas del negocio",
     "getBusinessSettings": "Perfil del negocio",
     "getConnectStatus": "Estado de Stripe Connect",
     "getCorporateAccount": "Cuenta corporativa",
@@ -173,15 +174,19 @@
     "getPlatformKpis": "KPIs de plataforma",
     "getPlatformSettings": "Configuración de plataforma",
     "getProductStockByBranch": "Stock por sucursal",
+    "getReceiptDownloadUrl": "Descargar comprobante",
     "getRecentOrders": "Órdenes recientes",
     "getRevenueBreakdown": "Ingresos por mes",
     "getSidebarStats": "Contadores en vivo",
     "getSubscription": "Suscripción actual",
     "getWeeklyRevenue": "Ingresos semanales",
+    "getWithdrawal": "Detalle de retiro",
     "listAccountManagers": "Gestores de cuenta",
     "listApprovalPlans": "Planes de aprobación",
     "listBranches": "Sucursales",
+    "listBusinessSales": "Ventas del negocio",
     "listCampaigns": "Campañas",
+    "listChatAttachments": "Archivos del chat",
     "listCorporateAccounts": "Cuentas corporativas",
     "listCorporateTiers": "Tiers corporativos",
     "listDisputes": "Disputas",
@@ -192,6 +197,7 @@
     "listOpenRequests": "Radar de solicitudes",
     "listOrders": "Órdenes",
     "listPaymentLinks": "Links de pago",
+    "listPaymentReceipts": "Comprobantes de pago",
     "listPlans": "Planes",
     "listProductCategories": "Categorías de productos",
     "listProducts": "Productos",
@@ -211,6 +217,7 @@
     "reactivateCorporateAccount": "Reactivar cuenta corporativa",
     "reactivateLocation": "Reactivar ubicación",
     "reactivateUser": "Reactivar usuario",
+    "registerPaymentReceipts": "Registrar comprobantes",
     "rejectBusiness": "Rechazar negocio",
     "rejectTierChange": "Rechazar cambio de tier",
     "rejectWithdrawal": "Rechazar retiro",
@@ -243,11 +250,80 @@
     "tier": {
       "free": "Gratis por ahora",
       "low": "Bajo consumo",
+      "medium": "Consumo medio",
       "high": "Alto consumo"
     }
   },
   "wallet": {
     "required": "Este modelo consume tokens y tu saldo está en cero.",
     "buy": "Comprar tokens"
+  },
+  "dashboard": {
+    "orders": "{count, plural, one {# orden} other {# órdenes}}",
+    "payments": "{count, plural, one {# pago} other {# pagos}}",
+    "requests": "{count, plural, one {# solicitud} other {# solicitudes}}",
+    "platformKpis": {
+      "title": "KPIs de plataforma",
+      "gmv": "GMV",
+      "escrow": "Escrow retenido",
+      "activeBusinesses": "Negocios activos",
+      "pendingBusinesses": "Pendientes de revisión",
+      "totalUsers": "Usuarios",
+      "newUsers": "Nuevos en el mes"
+    },
+    "financeKpis": {
+      "title": "KPIs financieros",
+      "gross": "Ingreso bruto",
+      "subscriptions": "Suscripciones",
+      "escrow": "Escrow retenido",
+      "pendingWithdrawals": "Retiros pendientes",
+      "activeBusinesses": "Negocios activos"
+    },
+    "businessFinance": {
+      "title": "Finanzas de {name}",
+      "available": "Saldo disponible",
+      "escrow": "Escrow retenido",
+      "monthSales": "Ventas del mes",
+      "monthCommission": "Comisión del mes",
+      "loyaltyPending": "Bonos pendientes",
+      "payouts": "Payouts",
+      "payoutsReady": "Habilitados",
+      "payoutsNotReady": "Sin cuenta",
+      "pendingWithdrawals": "Retiros pendientes"
+    },
+    "withdrawal": {
+      "title": "Retiro de {name}"
+    },
+    "withdrawals": {
+      "title": "Retiros",
+      "summary": "{count, plural, one {# retiro} other {# retiros}} · {total}",
+      "business": "Negocio",
+      "amount": "Monto",
+      "account": "Cuenta",
+      "status": "Estado",
+      "requestedAt": "Solicitado"
+    },
+    "sales": {
+      "title": "Ventas",
+      "summary": "{count, plural, one {# pago} other {# pagos}} · {total}",
+      "concept": "Concepto",
+      "amount": "Monto",
+      "commission": "Comisión",
+      "net": "Neto",
+      "status": "Estado",
+      "date": "Fecha"
+    },
+    "receipts": {
+      "title": "Comprobantes de pago",
+      "summary": "{count, plural, one {# comprobante} other {# comprobantes}}",
+      "file": "Archivo",
+      "business": "Negocio",
+      "target": "Destino",
+      "size": "Tamaño",
+      "uploadedBy": "Subido por",
+      "date": "Fecha",
+      "withdrawal": "Retiro",
+      "loyaltyBonus": "Bono"
+    }
   }
 }

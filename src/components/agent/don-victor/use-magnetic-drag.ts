@@ -17,7 +17,10 @@ import {
   type DonVictorPosition,
 } from "./don-victor-position";
 
-/** Distance from the top or bottom edge within which the widget snaps to it. */
+/**
+ * Distance from the top edge, or from the composer's top edge, within which
+ * the widget snaps to it.
+ */
 const VERTICAL_MAGNET_PX = 32;
 
 export type MagneticDragOptions = {
@@ -38,7 +41,13 @@ export type MagneticDragOptions = {
   layoutKey?: string | number | boolean;
 };
 
-type Limits = { maxX: number; maxY: number };
+type Limits = {
+  maxX: number;
+  /** Lowest free-rest offset: composer top minus widget minus gap. */
+  maxY: number;
+  /** Docked offset: flush against the input card, past the wrapper's padding. */
+  dockY: number;
+};
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -46,9 +55,10 @@ function clamp(value: number, min: number, max: number) {
 
 /**
  * Free drag inside a container with a magnet on the edges: on release the
- * widget glides to the nearest side, and to the top or bottom when it is
- * close enough. The container and the reserved composer are observed, so a
- * resize re-clamps the widget instead of leaving it stranded outside.
+ * widget glides to the nearest side, to the top when it is close enough, or
+ * docks on the composer's top edge — keeping its horizontal offset — when
+ * dropped near it. The container and the reserved composer are observed, so
+ * a resize re-clamps the widget instead of leaving it stranded outside.
  */
 export function useMagneticDrag({
   boundsRef,
@@ -60,16 +70,22 @@ export function useMagneticDrag({
   const widgetRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const limitsRef = useRef<Limits>({ maxX: 0, maxY: 0 });
+  const limitsRef = useRef<Limits>({ maxX: 0, maxY: 0, dockY: 0 });
   const positionRef = useRef<DonVictorPosition | null>(null);
   const [ready, setReady] = useState(false);
-  const [limits, setLimits] = useState<Limits>({ maxX: 0, maxY: 0 });
+  const [limits, setLimits] = useState<Limits>({ maxX: 0, maxY: 0, dockY: 0 });
 
   const settle = useCallback(
     (position: DonVictorPosition, instant: boolean) => {
-      const { maxX, maxY } = limitsRef.current;
-      const targetX = position.side === "left" ? gap : maxX;
-      const targetY = clamp(position.top, gap, maxY);
+      const { maxX, maxY, dockY } = limitsRef.current;
+      const targetX =
+        position.side === "composer"
+          ? clamp(position.left, gap, maxX)
+          : position.side === "left"
+            ? gap
+            : maxX;
+      const targetY =
+        position.side === "composer" ? dockY : clamp(position.top, gap, maxY);
 
       if (instant) {
         x.set(targetX);
@@ -95,10 +111,17 @@ export function useMagneticDrag({
     const measure = () => {
       // The reserved element is a child of the bounds, so its offsetTop is
       // the floor of the drag area whether it sits at the bottom or centred.
-      const floor = reserveRef.current?.offsetTop ?? bounds.clientHeight;
+      const reserve = reserveRef.current;
+      const floor = reserve?.offsetTop ?? bounds.clientHeight;
+      // The wrapper's top padding is empty space: docked, the widget sits
+      // past it, flush against the visible input card.
+      const reservePadding = reserve
+        ? Number.parseFloat(getComputedStyle(reserve).paddingTop) || 0
+        : 0;
       const next: Limits = {
         maxX: Math.max(gap, bounds.clientWidth - widget.offsetWidth - gap),
         maxY: Math.max(gap, floor - widget.offsetHeight - gap),
+        dockY: Math.max(gap, floor + reservePadding - widget.offsetHeight),
       };
 
       limitsRef.current = next;
@@ -136,22 +159,30 @@ export function useMagneticDrag({
       return;
     }
 
-    const { maxX, maxY } = limitsRef.current;
+    const { maxX, maxY, dockY } = limitsRef.current;
     const currentX = x.get();
     const currentY = y.get();
-    const centerX = currentX + widget.offsetWidth / 2;
-    const side =
-      centerX < (maxX + widget.offsetWidth + gap) / 2 ? "left" : "right";
 
-    let top = clamp(currentY, gap, maxY);
+    let position: DonVictorPosition;
 
-    if (top - gap < VERTICAL_MAGNET_PX) {
-      top = gap;
-    } else if (maxY - top < VERTICAL_MAGNET_PX) {
-      top = maxY;
+    if (dockY - clamp(currentY, gap, dockY) < VERTICAL_MAGNET_PX) {
+      // Close to the composer: dock on its top edge, keeping the drop's
+      // horizontal offset instead of gliding to a side.
+      position = { side: "composer", left: clamp(currentX, gap, maxX) };
+    } else {
+      const centerX = currentX + widget.offsetWidth / 2;
+      const side =
+        centerX < (maxX + widget.offsetWidth + gap) / 2 ? "left" : "right";
+
+      let top = clamp(currentY, gap, maxY);
+
+      if (top - gap < VERTICAL_MAGNET_PX) {
+        top = gap;
+      }
+
+      position = { side, top };
     }
 
-    const position: DonVictorPosition = { side, top };
     positionRef.current = position;
     writeDonVictorPosition(position);
     settle(position, reduceMotion);
@@ -166,7 +197,7 @@ export function useMagneticDrag({
       left: gap,
       top: gap,
       right: limits.maxX,
-      bottom: limits.maxY,
+      bottom: limits.dockY,
     },
     onDragEnd,
   };
