@@ -53,10 +53,6 @@ export function toToolFailure(error: unknown): AgentToolFailure {
 const MAX_TOOL_CHARS = 16_000;
 const MAX_STRING_CHARS = 500;
 
-function hasToJson(value: object): value is { toJSON: () => unknown } {
-  return typeof (value as { toJSON?: unknown }).toJSON === "function";
-}
-
 function shrinkValue(value: unknown, arrayCap: number): unknown {
   if (typeof value === "string") {
     return value.length > MAX_STRING_CHARS
@@ -69,11 +65,6 @@ function shrinkValue(value: unknown, arrayCap: number): unknown {
   }
 
   if (typeof value === "object" && value !== null) {
-    // Dates and Decimals serialize themselves; do not walk into them.
-    if (hasToJson(value)) {
-      return value;
-    }
-
     const out: Record<string, unknown> = {};
 
     for (const [key, raw] of Object.entries(value)) {
@@ -91,13 +82,24 @@ function shrinkValue(value: unknown, arrayCap: number): unknown {
  * and the model is told the result was trimmed so it asks for filters instead
  * of paginating blindly.
  */
-export function maybeTruncateToolResult(value: unknown): unknown {
+export function maybeTruncateToolResult(raw: unknown): unknown {
   let serialized: string;
+  let value: unknown;
 
+  // The tRPC caller hands back live `Date` / `Decimal` instances and
+  // `undefined` fields. They are not `JSONValue`, and AI SDK rejects the
+  // next step's prompt when a tool result carries them ("messages do not
+  // match the ModelMessage[] schema"), so every result becomes plain JSON.
   try {
-    serialized = JSON.stringify(value);
+    serialized = JSON.stringify(raw) ?? "null";
+    value = JSON.parse(serialized) as unknown;
   } catch {
-    return value;
+    return {
+      result: null,
+      error: "INTERNAL_ERROR",
+      status: 500,
+      message: "The tool result could not be serialized.",
+    } satisfies AgentToolFailure;
   }
 
   if (serialized.length <= MAX_TOOL_CHARS) {

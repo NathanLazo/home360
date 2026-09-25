@@ -131,6 +131,16 @@ export async function POST(request: Request) {
   return createAgentUIStreamResponse({
     agent,
     uiMessages,
+    // The client only sees a generic failure; the real cause is logged so a
+    // broken tool or provider rejection is diagnosable from the server logs.
+    onError: (error: unknown) => {
+      console.error("[agent] turn failed", {
+        area,
+        model,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return "AGENT_TURN_FAILED";
+    },
     messageMetadata: ({ part }): AgentMessageMetadata | undefined => {
       if (part.type !== "finish") {
         return undefined;
