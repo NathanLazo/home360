@@ -15,8 +15,8 @@ character is wanted instead of the pixel-art agent sprite.
 | `pointing-up.png` | Bust, attentive | Tips, announcements |
 | `fingers-up.png` | Both index fingers up | Steps / "how it works" |
 
-Sizes are modest (≈160–300 px): fine at avatar/card scale, not for
-full-bleed hero. High-resolution full-body and half-body sprites for
+Cutouts are re-extracted with alpha matting and upscaled 4x with
+Real-ESRGAN (620–830 px): usable at avatar, card and mid-page scale. High-resolution full-body and half-body sprites for
 the seven chat states (`breathing`, `listening`, `connecting`,
 `searching`, `working`, `solving`, `composing` — see
 `src/components/agent/don-victor/don-victor-choreography.ts`) are
