@@ -251,6 +251,8 @@
  */
 :root {
   --ink: oklch(0.205 0 0); /* #171717 — primary, headings */
+  /* Light-scope ink, never flipped by `.dark`: fill of polarity-flipped surfaces. */
+  --ink-static: oklch(0.205 0 0);
   --on-ink: oklch(1 0 0);
   --body: oklch(0.42 0 0); /* #4d4d4d — secondary copy (8.1:1 on canvas-soft) */
   --mute: oklch(
