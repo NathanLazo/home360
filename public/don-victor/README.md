@@ -16,9 +16,15 @@ character is wanted instead of the pixel-art agent sprite.
 | `fingers-up.png` | Both index fingers up | Steps / "how it works" |
 
 Cutouts are re-extracted with alpha matting and upscaled 4x with
-Real-ESRGAN (620–830 px): usable at avatar, card and mid-page scale. High-resolution full-body and half-body sprites for
+Real-ESRGAN (620–830 px): usable at avatar, card and mid-page scale.
+
+## sprites/ — original vector state sprites
+
+`sprites/` holds an original flat-vector illustration of Don Victor in
 the seven chat states (`breathing`, `listening`, `connecting`,
-`searching`, `working`, `solving`, `composing` — see
-`src/components/agent/don-victor/don-victor-choreography.ts`) are
-pending AI generation with character reference; they require a
-`GEMINI_API_KEY` in the cloud environment.
+`searching`, `working`, `solving`, `composing` — mirroring
+`src/components/agent/don-victor/don-victor-choreography.ts`), each in
+`full-*` (full body, 1170 px) and `half-*` (waist up, 900 px) variants,
+transparent PNG. Effects use the action tint (`tint-sky` #4f9fd8).
+SVG sources and the build script live in `sprites-src/`; re-render
+with `python3 public/don-victor/sprites-src/build.py` (needs cairosvg).
