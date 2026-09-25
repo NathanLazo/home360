@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 
 /** Receipts are proofs of payment: photos, scans or the bank's PDF voucher. */
 export const PAYOUT_RECEIPT_CONTENT_TYPES = [
@@ -45,8 +46,8 @@ function hasExactlyOneTarget(input: {
 
 export const registerPayoutReceiptsSchema = z
   .object({
-    withdrawalId: z.string().cuid().optional(),
-    loyaltyBonusId: z.string().cuid().optional(),
+    withdrawalId: recordIdSchema.optional(),
+    loyaltyBonusId: recordIdSchema.optional(),
     notes: z.string().trim().max(500).optional(),
     files: z
       .array(payoutReceiptFileSchema)
@@ -64,10 +65,10 @@ export type RegisterPayoutReceiptsInput = z.infer<
 
 export const listPayoutReceiptsSchema = z
   .object({
-    withdrawalId: z.string().cuid().optional(),
-    loyaltyBonusId: z.string().cuid().optional(),
-    businessId: z.string().cuid().optional(),
-    cursor: z.string().cuid().optional(),
+    withdrawalId: recordIdSchema.optional(),
+    loyaltyBonusId: recordIdSchema.optional(),
+    businessId: recordIdSchema.optional(),
+    cursor: recordIdSchema.optional(),
     direction: infiniteQueryDirectionSchema,
   })
   .strict();
@@ -75,7 +76,7 @@ export const listPayoutReceiptsSchema = z
 export type ListPayoutReceiptsInput = z.infer<typeof listPayoutReceiptsSchema>;
 
 export const getPayoutReceiptUrlSchema = z
-  .object({ receiptId: z.string().cuid() })
+  .object({ receiptId: recordIdSchema })
   .strict();
 
 export const PAYOUT_RECEIPTS_PAGE_SIZE = 20;

@@ -11,6 +11,7 @@ import {
   EMPTY_ATTACHMENT_STORE,
   type AgentAttachmentStore,
 } from "./agent-attachments";
+import { compactAgentMessages } from "./agent-context";
 import {
   buildAgentInstructions,
   type AgentPromptContext,
@@ -48,6 +49,11 @@ export function createHome360Agent({
     instructions: buildAgentInstructions(context),
     tools: createAgentTools(area, caller, attachments),
     stopWhen: isStepCount(MAX_STEPS),
+    // Every step re-checks the prompt budget: old tool results and files are
+    // compacted so long threads and 20-step turns never overflow the model.
+    prepareStep: ({ messages }) => ({
+      messages: compactAgentMessages(messages),
+    }),
   });
 }
 

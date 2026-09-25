@@ -49,11 +49,13 @@ import {
   reactivateBusinessSchema,
   reactivateUserSchema,
   rejectBusinessSchema,
+  moderationReasonSchema,
   reopenBusinessReviewSchema,
-  reviewDocumentSchema,
+  type ReviewDocumentInput,
   suspendBusinessSchema,
   suspendUserSchema,
 } from "~/app/[locale]/admin/users/_components/users.schema";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import type { AgentAttachmentStore } from "../agent-attachments";
 import {
   runTool,
@@ -62,14 +64,10 @@ import {
 } from "../tool-runtime";
 
 const registerPaymentReceiptsSchema = z.object({
-  withdrawalId: z
-    .string()
-    .cuid()
+  withdrawalId: recordIdSchema
     .optional()
     .describe("Withdrawal the receipts prove; exclusive with loyaltyBonusId"),
-  loyaltyBonusId: z
-    .string()
-    .cuid()
+  loyaltyBonusId: recordIdSchema
     .optional()
     .describe("Loyalty bonus the receipts prove; exclusive with withdrawalId"),
   filenames: z
@@ -79,6 +77,36 @@ const registerPaymentReceiptsSchema = z.object({
     .describe("Exact filenames of attachments in this conversation"),
   notes: z.string().trim().max(500).optional(),
 });
+
+/**
+ * Flat mirror of `reviewDocumentSchema`: that one is a discriminated union,
+ * which serializes to a root `anyOf` that providers reject as a tool input
+ * (the whole turn fails, not just this tool). The "rejection needs notes"
+ * rule is re-checked in `execute` and again by the procedure.
+ */
+const reviewBusinessDocumentSchema = z.object({
+  documentId: recordIdSchema,
+  status: z.enum(["APPROVED", "REJECTED"]),
+  notes: moderationReasonSchema
+    .optional()
+    .describe("5 to 500 characters; required when status is REJECTED"),
+});
+
+function toReviewDocumentInput(
+  input: z.infer<typeof reviewBusinessDocumentSchema>,
+): ReviewDocumentInput | null {
+  if (input.status === "APPROVED") {
+    return {
+      documentId: input.documentId,
+      status: "APPROVED",
+      notes: input.notes,
+    };
+  }
+
+  return input.notes
+    ? { documentId: input.documentId, status: "REJECTED", notes: input.notes }
+    : null;
+}
 
 function isReceiptContentType(
   value: string,
@@ -206,9 +234,22 @@ export function createAdminTools(
     reviewBusinessDocument: tool({
       description:
         "Approve or reject one uploaded business document. Rejection requires notes.",
-      inputSchema: reviewDocumentSchema,
-      execute: (input) =>
-        runTool(() => caller.admin.users.reviewDocument(input)),
+      inputSchema: reviewBusinessDocumentSchema,
+      execute: (input) => {
+        const review = toReviewDocumentInput(input);
+
+        if (!review) {
+          return Promise.resolve({
+            result: null,
+            error: "NOTES_REQUIRED",
+            status: 400,
+            message:
+              "Rejecting a document requires notes (5 to 500 characters) explaining what to upload again.",
+          } satisfies AgentToolFailure);
+        }
+
+        return runTool(() => caller.admin.users.reviewDocument(review));
+      },
     }),
     suspendUser: tool({
       description:

@@ -7,6 +7,7 @@ import {
 } from "@generated/prisma";
 
 import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 
 /** "YYYY-MM" in the platform's financial time zone; defaults to this month. */
 export const financeMonthSchema = z.string().regex(/^\d{4}-\d{2}$/u);
@@ -50,7 +51,7 @@ export const listWithdrawalsSchema = z
     business: z.string().trim().max(100).optional(),
     from: withdrawalDateSchema.optional(),
     to: withdrawalDateSchema.optional(),
-    cursor: z.string().cuid().optional(),
+    cursor: recordIdSchema.optional(),
     direction: infiniteQueryDirectionSchema,
   })
   .strict();
@@ -68,12 +69,12 @@ export const revenueBreakdownSchema = z
 export const withdrawalReasonSchema = z.string().trim().min(5).max(500);
 
 export const approveWithdrawalSchema = z
-  .object({ withdrawalId: z.string().cuid() })
+  .object({ withdrawalId: recordIdSchema })
   .strict();
 
 export const rejectWithdrawalSchema = z
   .object({
-    withdrawalId: z.string().cuid(),
+    withdrawalId: recordIdSchema,
     reason: withdrawalReasonSchema,
   })
   .strict();
@@ -90,15 +91,15 @@ export const loyaltyBonusStatusSchema = z.nativeEnum(LoyaltyBonusStatus);
 export const listLoyaltyBonusesSchema = z
   .object({
     status: loyaltyBonusStatusSchema.optional(),
-    businessId: z.string().cuid().optional(),
-    cursor: z.string().cuid().optional(),
+    businessId: recordIdSchema.optional(),
+    cursor: recordIdSchema.optional(),
     direction: infiniteQueryDirectionSchema,
   })
   .strict();
 
 export const payLoyaltyBonusSchema = z
   .object({
-    bonusId: z.string().cuid(),
+    bonusId: recordIdSchema,
     method: z.nativeEnum(LoyaltyPayoutMethod),
     notes: z.string().trim().max(500).optional(),
   })
@@ -108,7 +109,7 @@ export const loyaltyCancelReasonSchema = z.string().trim().min(5).max(500);
 
 export const cancelLoyaltyBonusSchema = z
   .object({
-    bonusId: z.string().cuid(),
+    bonusId: recordIdSchema,
     reason: loyaltyCancelReasonSchema,
   })
   .strict();

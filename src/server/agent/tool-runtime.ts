@@ -46,7 +46,11 @@ export function toToolFailure(error: unknown): AgentToolFailure {
   };
 }
 
-const MAX_TOOL_CHARS = 48_000;
+/**
+ * One tool result may take ~4k tokens: 20 steps of them still fit the
+ * context budget of `agent-context.ts` next to the conversation.
+ */
+const MAX_TOOL_CHARS = 16_000;
 const MAX_STRING_CHARS = 500;
 
 function hasToJson(value: object): value is { toJSON: () => unknown } {
@@ -100,7 +104,7 @@ export function maybeTruncateToolResult(value: unknown): unknown {
     return value;
   }
 
-  for (const arrayCap of [40, 20, 10, 5]) {
+  for (const arrayCap of [20, 10, 5, 3]) {
     const shrunk = shrinkValue(value, arrayCap);
     let shrunkSerialized: string;
 
