@@ -36,10 +36,11 @@ export const sectionPaddingClass = "py-20 lg:py-28";
 export const anchorOffsetClass = "scroll-mt-24";
 
 /**
- * Captures the light-scope ink on the landing root so `.dark` descendants
- * (whose `--ink` flips to near-white) can still paint the ink surface.
+ * Pins the light-scope ink on the landing root so `.dark` descendants
+ * (whose `--ink` flips to near-white) can still paint the ink surface. Reads
+ * `--ink-static`, not `--ink`: under a dark theme the root is already `.dark`.
  */
-export const inkCaptureClass = "[--landing-ink:var(--ink)]";
+export const inkCaptureClass = "[--landing-ink:var(--ink-static)]";
 
 /**
  * Ink band / ink surface: polarity-flipped block. `.dark` scopes the tokens
