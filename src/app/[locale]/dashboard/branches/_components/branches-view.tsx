@@ -50,10 +50,7 @@ export function BranchesView() {
           responseError ? errors(responseError) : t("errorDescription")
         }
         action={
-          <Button
-            type="button"
-            onClick={() => void query.refetch()}
-          >
+          <Button type="button" onClick={() => void query.refetch()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>

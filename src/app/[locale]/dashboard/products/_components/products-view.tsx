@@ -108,10 +108,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
           responseError ? errors(responseError) : t("queryErrorDescription")
         }
         action={
-          <Button
-            type="button"
-            onClick={() => void retryAll()}
-          >
+          <Button type="button" onClick={() => void retryAll()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>

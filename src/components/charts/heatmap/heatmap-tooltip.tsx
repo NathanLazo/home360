@@ -36,6 +36,10 @@ export interface HeatmapTooltipProps {
    * When true, the tooltip appears and disappears instantly with no motion.
    */
   instant?: boolean;
+  /** Header date line. Default: English long date. */
+  formatDate?: (date: Date) => string;
+  /** Weekday line under the date. Default: English weekday. */
+  formatWeekday?: (date: Date) => string;
 }
 
 export const HeatmapTooltip = memo(function HeatmapTooltip({
@@ -46,6 +50,8 @@ export const HeatmapTooltip = memo(function HeatmapTooltip({
   showDelay = 0,
   hideDelay = 120,
   instant = false,
+  formatDate = formatHeatmapTooltipDate,
+  formatWeekday = formatHeatmapTooltipWeekday,
 }: HeatmapTooltipProps) {
   const { containerRef, width, height } = useHeatmap();
   const { tooltipData } = useHeatmapInteraction();
@@ -74,10 +80,10 @@ export const HeatmapTooltip = memo(function HeatmapTooltip({
       <div className="overflow-hidden">
         <div className="px-3 py-2.5 text-left">
           <div className="font-medium text-chart-tooltip-foreground text-xs">
-            {formatHeatmapTooltipDate(date)}
+            {formatDate(date)}
           </div>
           <div className="mt-0.5 text-chart-tooltip-muted text-xs">
-            {formatHeatmapTooltipWeekday(date)}
+            {formatWeekday(date)}
           </div>
           <div className="my-2 border-chart-tooltip-muted/30 border-t" />
           <div className="text-chart-tooltip-foreground text-sm">

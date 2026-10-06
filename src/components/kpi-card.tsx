@@ -32,6 +32,7 @@ export type KpiCardProps = {
     trend: "up" | "down" | "neutral";
   };
   icon?: LucideIcon;
+  className?: string;
 };
 
 const deltaClasses: Record<
@@ -49,9 +50,10 @@ export function KpiCard({
   numeric,
   delta,
   icon: Icon,
+  className,
 }: KpiCardProps) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle className="text-muted-foreground text-copy-sm font-medium">
           {label}

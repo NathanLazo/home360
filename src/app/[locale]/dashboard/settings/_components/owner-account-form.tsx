@@ -93,10 +93,7 @@ export function OwnerAccountForm({
       </div>
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={saving || !isDirty}
-        >
+        <Button type="submit" disabled={saving || !isDirty}>
           <SubmitStatusIcon pending={saving} succeeded={saved} />
           {t("save")}
         </Button>

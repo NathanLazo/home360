@@ -10,6 +10,7 @@ import {
   getRecentOrders,
   getWeeklyRevenue,
 } from "~/server/services/dashboard/business-kpis";
+import { getBusinessInsights } from "~/server/services/dashboard/business-insights";
 import {
   getBusinessFeed,
   markBusinessFeedSeen,
@@ -28,6 +29,10 @@ const getWeeklyRevenueSchema = branchScopedSchema.extend({
 });
 
 const getOrdersByBranchSchema = branchScopedSchema.extend({
+  days: z.number().int().min(1).max(365).default(30),
+});
+
+const getInsightsSchema = branchScopedSchema.extend({
   days: z.number().int().min(1).max(365).default(30),
 });
 
@@ -108,6 +113,31 @@ export const dashboardRouter = createTRPCRouter({
 
         const result = await getOrdersByBranch(ctx.db, ctx.business.id, input);
         return ok(result, "Orders by branch loaded");
+      } catch (error) {
+        return normalizedFailure(error);
+      }
+    }),
+
+  getInsights: businessProcedure
+    .input(getInsightsSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        if (
+          !(await branchBelongsToBusiness(
+            ctx.db,
+            ctx.business.id,
+            input.branchId,
+          ))
+        ) {
+          return fail("NOT_FOUND", 404, "Branch not found");
+        }
+
+        const result = await getBusinessInsights(
+          ctx.db,
+          ctx.business.id,
+          input,
+        );
+        return ok(result, "Business insights loaded");
       } catch (error) {
         return normalizedFailure(error);
       }

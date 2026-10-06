@@ -50,11 +50,7 @@ export function LatestInvoiceSummary({
           </a>
         </Button>
       ) : (
-        <Button
-          type="button"
-          disabled
-          title={t("downloadUnavailable")}
-        >
+        <Button type="button" disabled title={t("downloadUnavailable")}>
           <DownloadIcon aria-hidden="true" />
           {t("download")}
         </Button>

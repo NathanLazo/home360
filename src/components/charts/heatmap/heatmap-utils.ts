@@ -278,15 +278,17 @@ export type HeatmapWeekStartDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /** Day labels with row 0 aligned to `weekStartDay`. */
 export function getHeatmapDayLabels(
-  weekStartDay: HeatmapWeekStartDay = 0
+  weekStartDay: HeatmapWeekStartDay = 0,
+  /** Sunday-first labels (7 entries) to localize the axis. */
+  sundayFirstLabels: readonly string[] = HEATMAP_DAY_LABELS
 ): readonly string[] {
   if (weekStartDay === 0) {
-    return HEATMAP_DAY_LABELS;
+    return sundayFirstLabels;
   }
 
   return [
-    ...HEATMAP_DAY_LABELS.slice(weekStartDay),
-    ...HEATMAP_DAY_LABELS.slice(0, weekStartDay),
+    ...sundayFirstLabels.slice(weekStartDay),
+    ...sundayFirstLabels.slice(0, weekStartDay),
   ];
 }
 

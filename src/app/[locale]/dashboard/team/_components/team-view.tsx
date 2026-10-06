@@ -64,10 +64,7 @@ export function TeamView() {
         title={t("queryErrorTitle")}
         description={code ? errors(code) : t("queryErrorDescription")}
         action={
-          <Button
-            type="button"
-            onClick={() => void listQuery.refetch()}
-          >
+          <Button type="button" onClick={() => void listQuery.refetch()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>

@@ -80,10 +80,7 @@ export function SubscriptionView() {
           title={t("currentErrorTitle")}
           description={errorsT(currentError)}
           action={
-            <Button
-              type="button"
-              onClick={() => void currentQuery.refetch()}
-            >
+            <Button type="button" onClick={() => void currentQuery.refetch()}>
               <RotateCcwIcon aria-hidden="true" />
               {t("retry")}
             </Button>
@@ -117,10 +114,7 @@ export function SubscriptionView() {
           title={t("plansErrorTitle")}
           description={errorsT(plansError)}
           action={
-            <Button
-              type="button"
-              onClick={() => void plansQuery.refetch()}
-            >
+            <Button type="button" onClick={() => void plansQuery.refetch()}>
               <RotateCcwIcon aria-hidden="true" />
               {t("retry")}
             </Button>

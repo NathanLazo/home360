@@ -22,6 +22,8 @@ export interface HeatmapYAxisProps {
   labelFormat?: HeatmapYAxisLabelFormat;
   /** Per-row label opacity — mirrors {@link HeatmapCells} `rowOpacity`. */
   rowOpacity?: number | readonly number[];
+  /** Sunday-first day labels (7 entries). Default: English short names. */
+  dayLabels?: readonly string[];
 }
 
 export const HeatmapYAxis = memo(function HeatmapYAxis({
@@ -29,6 +31,7 @@ export const HeatmapYAxis = memo(function HeatmapYAxis({
   tickFilter = "odd",
   labelFormat = "full",
   rowOpacity,
+  dayLabels,
 }: HeatmapYAxisProps) {
   const { containerRef, margin, binHeight, gap, yScale, weekStartDay } =
     useHeatmap();
@@ -40,14 +43,23 @@ export const HeatmapYAxis = memo(function HeatmapYAxis({
 
   const labels = useMemo(
     () =>
-      getHeatmapDayLabels(weekStartDay)
+      getHeatmapDayLabels(weekStartDay, dayLabels)
         .map((label, row) => ({
           row,
           label: formatHeatmapYAxisLabel(label, labelFormat),
           y: margin.top + yScale(row) + (binHeight - gap) / 2,
         }))
         .filter((tick) => shouldShowHeatmapYAxisTick(tick.row, tickFilter)),
-    [binHeight, gap, labelFormat, margin.top, tickFilter, weekStartDay, yScale]
+    [
+      binHeight,
+      dayLabels,
+      gap,
+      labelFormat,
+      margin.top,
+      tickFilter,
+      weekStartDay,
+      yScale,
+    ]
   );
 
   const container = containerRef.current;

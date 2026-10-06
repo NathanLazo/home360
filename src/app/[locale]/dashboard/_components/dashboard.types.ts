@@ -16,3 +16,7 @@ export type NotificationFeed = NonNullable<
   DashboardOutput["getNotifications"]["result"]
 >;
 export type NotificationItem = NotificationFeed["items"][number];
+export type DashboardInsights = NonNullable<
+  DashboardOutput["getInsights"]["result"]
+>;
+export type OrderPipeline = DashboardInsights["pipeline"];

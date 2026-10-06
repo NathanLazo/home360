@@ -330,11 +330,7 @@ export function ProductFormSheet({
             </div>
             <SheetFormDock>
               <SheetClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={busy}
-                >
+                <Button type="button" variant="outline" disabled={busy}>
                   {t("cancel")}
                 </Button>
               </SheetClose>

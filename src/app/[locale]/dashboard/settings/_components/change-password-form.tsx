@@ -160,10 +160,7 @@ export function ChangePasswordForm({
       />
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={pending}
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? (
             <LoaderCircleIcon
               aria-hidden="true"

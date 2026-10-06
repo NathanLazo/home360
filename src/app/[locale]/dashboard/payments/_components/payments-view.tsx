@@ -35,11 +35,7 @@ function SectionError({
           <p className="font-semibold">{title}</p>
           <p className="text-muted-foreground text-copy-sm">{description}</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onRetry}
-        >
+        <Button type="button" variant="outline" onClick={onRetry}>
           <RotateCcwIcon aria-hidden="true" />
           {retryLabel}
         </Button>

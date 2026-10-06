@@ -9,12 +9,16 @@ import { getHeatmapColumnMonthAnchor } from "./heatmap-utils";
 export interface HeatmapXAxisProps {
   /** Additional class name for labels */
   className?: string;
+  /** Month tick label. Default: English short month. */
+  formatMonth?: (date: Date) => string;
 }
 
 const monthFmt = new Intl.DateTimeFormat("en-US", { month: "short" });
+const defaultFormatMonth = (date: Date) => monthFmt.format(date);
 
 export const HeatmapXAxis = memo(function HeatmapXAxis({
   className,
+  formatMonth = defaultFormatMonth,
 }: HeatmapXAxisProps) {
   const { containerRef, data, margin, xScale } = useHeatmap();
   const [mounted, setMounted] = useState(false);
@@ -44,7 +48,7 @@ export const HeatmapXAxis = memo(function HeatmapXAxis({
       }
 
       ticks.push({
-        label: monthFmt.format(monthAnchor),
+        label: formatMonth(monthAnchor),
         x: margin.left + xScale(columnIndex),
         key: monthKey,
       });
@@ -52,7 +56,7 @@ export const HeatmapXAxis = memo(function HeatmapXAxis({
     }
 
     return ticks;
-  }, [data, margin.left, xScale]);
+  }, [data, formatMonth, margin.left, xScale]);
 
   const container = containerRef.current;
   if (!(mounted && container)) {

@@ -163,10 +163,7 @@ export function WeeklyRevenueChart({
             className="self-start sm:self-end"
           >
             {(["all", "services", "products"] as const).map((mode) => (
-              <TabsTrigger
-                key={mode}
-                value={mode}
-              >
+              <TabsTrigger key={mode} value={mode}>
                 {t(`${mode}Tab`)}
               </TabsTrigger>
             ))}
