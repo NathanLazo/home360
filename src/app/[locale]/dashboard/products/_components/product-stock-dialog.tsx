@@ -179,7 +179,11 @@ export function ProductStockDialog({
             </div>
             <DialogFooter className="border-t px-6 py-4">
               <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={submitting}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={submitting}
+                >
                   {formT("cancel")}
                 </Button>
               </DialogClose>

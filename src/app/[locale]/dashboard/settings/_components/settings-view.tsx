@@ -40,7 +40,10 @@ export function SettingsView() {
         title={t("queryErrorTitle")}
         description={code ? errors(code) : t("queryErrorDescription")}
         action={
-          <Button type="button" onClick={() => void settingsQuery.refetch()}>
+          <Button
+            type="button"
+            onClick={() => void settingsQuery.refetch()}
+          >
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>

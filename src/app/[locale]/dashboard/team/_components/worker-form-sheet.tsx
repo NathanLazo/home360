@@ -208,7 +208,11 @@ export function WorkerFormSheet({
           </div>
           <SheetFormDock>
             <SheetClose asChild>
-              <Button type="button" variant="outline" disabled={submitting}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={submitting}
+              >
                 {t("form.cancel")}
               </Button>
             </SheetClose>

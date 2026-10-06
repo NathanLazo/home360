@@ -43,7 +43,11 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
             label={t(`status.${invoice.status}`)}
           />
           {invoice.pdfUrl ? (
-            <Button asChild variant="ghost" size="sm">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+            >
               <a
                 href={invoice.pdfUrl}
                 target="_blank"

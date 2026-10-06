@@ -86,7 +86,12 @@ export function NotificationsBell() {
             <p className="text-muted-foreground text-xs">
               {errorCode ? errorsT(errorCode) : t("errorDescription")}
             </p>
-            <Button type="button" variant="outline" size="sm" onClick={retry}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={retry}
+            >
               <RotateCcwIcon aria-hidden="true" />
               {t("retry")}
             </Button>

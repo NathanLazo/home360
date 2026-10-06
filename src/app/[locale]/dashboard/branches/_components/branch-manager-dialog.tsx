@@ -169,7 +169,11 @@ export function BranchManagerDialog({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={submitting}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={submitting}
+              >
                 {t("cancel")}
               </Button>
             </DialogClose>
