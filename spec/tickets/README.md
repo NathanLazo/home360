@@ -29,7 +29,7 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 
 | # | Repo | Trabajo | Ticket |
 |---|------|---------|--------|
-| W2 | web | Receipts de Expo Push diferidos (cron) | P-WEB-01 |
+| W2 | web | ✅ Receipts de Expo Push diferidos: tabla `PushReceipt` + `cron/push-receipts` | P-WEB-01 |
 | W3 | web | ✅ Build de producción falla sin Stripe, Blob o AI Gateway (`src/env.js`) | P-WEB-03 |
 | W4 | web | Perfil: avatar, formulario de contraseña único, `NumberTicker`, `SubmitStatusIcon` | F9-01 |
 | W5 | web | ✅ F8-05 reescrito: solo prepago en USD (decisión owner 2026-10-18) | F8-05 |
@@ -45,14 +45,13 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 
 ### Fase 3 — Producción (owner)
 
-- Decisiones P-WEB-03; `pnpm db:push` + seed; variables faltantes en Vercel.
+- Decisiones P-WEB-03; `pnpm db:push` (incluye `PushReceipt`) + seed; variables faltantes en Vercel.
 - Credenciales FCM/APNs en EAS; builds Android/iOS; envío a tiendas.
 - E2E en dispositivo (P-WEB-04); backups y observabilidad.
 - Posterior al lanzamiento: P-WEB-05.
 
 ## Tickets
 
-- [`P-WEB-01`](P-WEB-01-verification-and-push-types.md) — verificación y push (receipts diferidos)
 - [`P-WEB-02`](P-WEB-02-mobile-api-gaps.md) — huecos API móvil (en código; falta E2E)
 - [`P-WEB-03`](P-WEB-03-production-decisions.md) — decisiones de producción (owner)
 - [`P-WEB-04`](P-WEB-04-operational-rollout.md) — rollout operativo (owner)
