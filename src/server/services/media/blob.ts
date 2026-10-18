@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createId } from "@paralleldrive/cuid2";
-import { issueSignedToken, presignUrl } from "@vercel/blob";
+import { get, issueSignedToken, presignUrl } from "@vercel/blob";
 
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
@@ -151,10 +151,7 @@ export async function createDownloadUrl(
     pathname: string;
   },
 ): Promise<ServiceResult<DownloadUrlGrant, MediaServiceError>> {
-  if (
-    !isOwnedMediaPathname(input.pathname, input.userId) &&
-    !(await authorizeMediaRead(db, input.userId, input.pathname))
-  ) {
+  if (!(await canReadMedia(db, input.userId, input.pathname))) {
     return svcFail("NOT_FOUND", "Blob not found");
   }
 
@@ -181,6 +178,53 @@ export async function createDownloadUrl(
   });
 
   return svcOk({ url: presignedUrl, pathname: input.pathname, expiresAt });
+}
+
+/** Read rule shared by signed URLs and server-side reads (owner or reference). */
+export async function canReadMedia(
+  db: PrismaClient,
+  userId: string,
+  pathname: string,
+): Promise<boolean> {
+  return (
+    isOwnedMediaPathname(pathname, userId) ||
+    (await authorizeMediaRead(db, userId, pathname))
+  );
+}
+
+export type MediaBytes = { data: Uint8Array; contentType: string };
+
+/**
+ * Reads a private blob server-side with the read-write token, straight from
+ * origin (`useCache: false`), for consumers like the AI diagnosis that need
+ * the bytes. Callers authorize with `canReadMedia` first. `null` when the
+ * blob does not exist or storage is not configured.
+ */
+export async function readMediaBytes(
+  pathname: string,
+  options: { abortSignal?: AbortSignal } = {},
+): Promise<MediaBytes | null> {
+  const token = getReadWriteToken();
+
+  if (!token) {
+    return null;
+  }
+
+  const result = await get(pathname, {
+    access: "private",
+    token,
+    useCache: false,
+    abortSignal: options.abortSignal,
+  });
+
+  if (result?.statusCode !== 200) {
+    return null;
+  }
+
+  return {
+    data: new Uint8Array(await new Response(result.stream).arrayBuffer()),
+    contentType: result.blob.contentType,
+  };
 }
 
 /**

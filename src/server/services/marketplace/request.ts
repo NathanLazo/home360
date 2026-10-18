@@ -10,7 +10,7 @@ import {
 import { diagnoseProblem } from "~/server/services/ai/diagnose";
 import {
   ownsRequestMedia,
-  signRequestMedia,
+  resolveRequestMedia,
 } from "~/server/services/marketplace/request-media";
 import {
   resolveRequestLocation,
@@ -152,7 +152,7 @@ async function resolveDiagnosis(
     });
   }
 
-  const media = await signRequestMedia(db, {
+  const media = await resolveRequestMedia(db, {
     userId: input.customerId,
     mediaPathnames: input.mediaPathnames,
   });
@@ -162,8 +162,8 @@ async function resolveDiagnosis(
   }
 
   const diagnosis = await diagnoseProblem(db, {
-    imageUrls: media.data.imageUrls,
-    videoUrls: media.data.videoUrls,
+    imagePathnames: media.data.imagePathnames,
+    videoCount: media.data.videoCount,
     description: input.description,
   });
 
