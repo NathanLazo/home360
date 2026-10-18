@@ -18,6 +18,7 @@ import {
   stopOrderRecording,
   transitionAssignedOrder,
 } from "~/server/services/orders/worker-flow";
+import { getWorkerStats } from "~/server/services/orders/worker-stats";
 
 const orderIdSchema = z.object({ orderId: z.string().cuid() });
 
@@ -240,6 +241,16 @@ export const workerOrdersRouter = createTRPCRouter({
         return unexpectedFailure(error, "Order could not be finished");
       }
     }),
+
+  getStats: workerProcedure.query(async ({ ctx }) => {
+    try {
+      const stats = await getWorkerStats(ctx.db, { workerId: ctx.worker.id });
+
+      return ok(stats, "Worker stats loaded");
+    } catch (error) {
+      return unexpectedFailure(error, "Worker stats could not load");
+    }
+  }),
 
   setAvailability: workerProcedure
     .input(setAvailabilitySchema)
