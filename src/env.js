@@ -1,6 +1,16 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+/**
+ * Money and AI integrations are optional in dev and previews (the feature
+ * fails with a stable code) but a Vercel production deploy must not ship
+ * without them: the build fails instead of degrading silently (P-WEB-03).
+ */
+const isVercelProduction = process.env.VERCEL_ENV === "production";
+const requiredInProduction = isVercelProduction
+  ? z.string()
+  : z.string().optional();
+
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -23,10 +33,10 @@ export const env = createEnv({
     // Vercel AI Gateway key. The AI SDK reads it from process.env on its own;
     // it is declared here for validation and for the availability check in
     // the AI diagnosis service.
-    AI_GATEWAY_API_KEY: z.string().optional(),
+    AI_GATEWAY_API_KEY: requiredInProduction,
     // Gateway model id for the assistant; must exist in AGENT_MODELS.
     AGENT_MODEL: z.string().optional(),
-    BLOB_READ_WRITE_TOKEN: z.string().optional(),
+    BLOB_READ_WRITE_TOKEN: requiredInProduction,
     CRON_SECRET: z.string(),
     POSTGRES_PRISMA_URL: z.string().url(),
     EMAIL_FROM: z.string().optional(),
@@ -42,9 +52,9 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().optional(),
     SENDDM_API_KEY: z.string().optional(),
     SMS_FROM: z.string().optional(),
-    STRIPE_SECRET_KEY: z.string().optional(),
-    STRIPE_WEBHOOK_SECRET: z.string().optional(),
-    STRIPE_CONNECT_WEBHOOK_SECRET: z.string().optional(),
+    STRIPE_SECRET_KEY: requiredInProduction,
+    STRIPE_WEBHOOK_SECRET: requiredInProduction,
+    STRIPE_CONNECT_WEBHOOK_SECRET: requiredInProduction,
   },
 
   /**
@@ -53,7 +63,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: requiredInProduction,
     NEXT_PUBLIC_PUSHER_KEY: z.string().optional(),
     NEXT_PUBLIC_PUSHER_CLUSTER: z.string().optional(),
   },
