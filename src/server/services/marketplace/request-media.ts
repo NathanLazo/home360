@@ -2,7 +2,7 @@ import "server-only";
 
 import type { PrismaClient } from "@generated/prisma";
 import {
-  createDownloadUrl,
+  canReadMedia,
   isOwnedMediaPathname,
   type MediaKind,
 } from "~/server/services/media/blob";
@@ -14,9 +14,11 @@ export const REQUEST_MEDIA_KINDS: readonly MediaKind[] = [
   "requestVideo",
 ];
 
-export type SignedRequestMedia = {
-  imageUrls: string[];
-  videoUrls: string[];
+export type ResolvedRequestMedia = {
+  /** Photo pathnames; the diagnosis reads their bytes server-side. */
+  imagePathnames: string[];
+  /** Videos are not sent to the model, only counted as context. */
+  videoCount: number;
 };
 
 function isPathnameOfKind(pathname: string, kind: MediaKind): boolean {
@@ -34,14 +36,14 @@ export function ownsRequestMedia(
 }
 
 /**
- * Exchanges owned pathnames for short-lived signed URLs split by kind. A
- * video alone is enough: the diagnosis only needs at least one media item.
+ * Authorizes the request media and splits it by kind. A video alone is
+ * enough: the diagnosis only needs at least one media item.
  */
-export async function signRequestMedia(
+export async function resolveRequestMedia(
   db: PrismaClient,
   input: { userId: string; mediaPathnames: string[] },
 ): Promise<
-  ServiceResult<SignedRequestMedia, "VALIDATION_ERROR" | "INTERNAL_ERROR">
+  ServiceResult<ResolvedRequestMedia, "VALIDATION_ERROR" | "INTERNAL_ERROR">
 > {
   if (input.mediaPathnames.length === 0) {
     return svcFail(
@@ -50,25 +52,20 @@ export async function signRequestMedia(
     );
   }
 
-  const imageUrls: string[] = [];
-  const videoUrls: string[] = [];
+  const imagePathnames: string[] = [];
+  let videoCount = 0;
 
   for (const pathname of input.mediaPathnames) {
-    const grant = await createDownloadUrl(db, {
-      userId: input.userId,
-      pathname,
-    });
-
-    if (!grant.ok) {
+    if (!(await canReadMedia(db, input.userId, pathname))) {
       return svcFail("INTERNAL_ERROR", "Could not resolve request media");
     }
 
     if (isPathnameOfKind(pathname, "requestPhoto")) {
-      imageUrls.push(grant.data.url);
+      imagePathnames.push(pathname);
     } else {
-      videoUrls.push(grant.data.url);
+      videoCount += 1;
     }
   }
 
-  return svcOk({ imageUrls, videoUrls });
+  return svcOk({ imagePathnames, videoCount });
 }
