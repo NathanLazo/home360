@@ -6,12 +6,15 @@ import {
   AdminAuditAction,
   DisputeResolution,
   DisputeStatus,
+  OrderEventType,
   OrderStatus,
+  OrderType,
   PaymentStatus,
   type PrismaClient,
 } from "@generated/prisma";
 
 import { writeAdminAudit } from "../admin/admin-audit";
+import { restoreHeldStock } from "../orders/stock-hold";
 import { refundPayment, releasePayment } from "../payments/escrow";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -52,8 +55,11 @@ type LoadedDispute = {
   orderId: string;
   order: {
     id: string;
+    type: OrderType;
     recordingUrl: string | null;
     recordingComplete: boolean;
+    deliveryEvidenceUrls: string[];
+    events: { type: OrderEventType }[];
     payment: {
       id: string;
       status: PaymentStatus;
@@ -67,17 +73,35 @@ function isNonNegativeInteger(value: number | undefined): value is number {
 }
 
 /**
- * D6: an incomplete recording resolves in favour of the customer. Any other
+ * D6 evidence state per order type (audit §6 #14). SERVICE: a complete
+ * recording. PRODUCT: delivery proof photos (DELIVERY) or a redeemed pickup
+ * code (PICKED_UP event, PICKUP) — products are never recorded.
+ */
+function hasVerifiableEvidence(dispute: LoadedDispute): boolean {
+  if (dispute.order.type === OrderType.PRODUCT) {
+    return (
+      dispute.order.deliveryEvidenceUrls.length > 0 ||
+      dispute.order.events.some(
+        (event) => event.type === OrderEventType.PICKED_UP,
+      )
+    );
+  }
+
+  return dispute.order.recordingUrl !== null && dispute.order.recordingComplete;
+}
+
+/**
+ * D6: missing evidence resolves in favour of the customer. Any other
  * resolution stays possible, but only with an explicit written justification.
  */
 function requiresJustification(
   dispute: LoadedDispute,
   resolution: DisputeResolution,
 ): boolean {
-  const recordingComplete =
-    dispute.order.recordingUrl !== null && dispute.order.recordingComplete;
-
-  return !recordingComplete && resolution !== DisputeResolution.FULL_REFUND;
+  return (
+    !hasVerifiableEvidence(dispute) &&
+    resolution !== DisputeResolution.FULL_REFUND
+  );
 }
 
 export async function resolveDispute(
@@ -93,8 +117,14 @@ export async function resolveDispute(
       order: {
         select: {
           id: true,
+          type: true,
           recordingUrl: true,
           recordingComplete: true,
+          deliveryEvidenceUrls: true,
+          events: {
+            where: { type: OrderEventType.PICKED_UP },
+            select: { type: true },
+          },
           payment: {
             select: { id: true, status: true, amountCents: true },
           },
@@ -123,8 +153,8 @@ export async function resolveDispute(
     );
   }
 
-  const recordingCompleteAtResolution =
-    dispute.order.recordingUrl !== null && dispute.order.recordingComplete;
+  // For PRODUCT this records the delivery-evidence state (D6 by type).
+  const recordingCompleteAtResolution = hasVerifiableEvidence(dispute);
   const notes = justification.length > 0 ? justification : null;
 
   if (input.resolution === DisputeResolution.MORE_EVIDENCE) {
@@ -319,6 +349,11 @@ async function finalize(
       where: { id: args.dispute.orderId },
       data: { status: args.orderStatus },
     });
+
+    // D10-4: a FULL_REFUND cancels the order, so its held units go back.
+    if (args.orderStatus === OrderStatus.CANCELLED) {
+      await restoreHeldStock(tx, { orderId: args.dispute.orderId });
+    }
 
     await writeAdminAudit(tx, args.adminId, {
       action: AdminAuditAction.DISPUTE_RESOLVED,

@@ -54,6 +54,9 @@ export type RadarRequestItem = {
   aiUrgency: string | null;
   distanceKm: number;
   createdAt: Date;
+  /** Request aimed at this business only (D10-11). */
+  targeted: boolean;
+  expiresAt: Date | null;
   customerName: string | null;
   zone: RadarCustomerZone;
   evidence: RadarEvidenceItem[];
@@ -80,6 +83,8 @@ type RadarRequestRow = {
   longitude: number;
   photoUrls: string[];
   createdAt: Date;
+  expiresAt: Date | null;
+  targeted: boolean;
   customerName: string | null;
   distanceKm: number;
 };
@@ -136,6 +141,8 @@ function toRadarItem(
     aiUrgency: row.aiUrgency,
     distanceKm: row.distanceKm,
     createdAt: row.createdAt,
+    targeted: row.targeted,
+    expiresAt: row.expiresAt,
     customerName: row.customerName,
     zone: toCustomerZone(row.neighborhood, row.latitude, row.longitude),
     evidence,
@@ -143,10 +150,12 @@ function toRadarItem(
 }
 
 /**
- * OPEN or QUOTED requests (other businesses may already have offered) inside
- * the branch radius, matching the business catalog and without a quote from
- * this business in any state — own offers (incl. WITHDRAWN, which can be
- * revived) live in quote.listMine.
+ * OPEN or QUOTED requests (other businesses may already have offered), not
+ * past `expiresAt`, without a quote from this business in any state — own
+ * offers (incl. WITHDRAWN, which can be revived) live in quote.listMine.
+ * Untargeted requests must sit inside the branch radius and match the
+ * business catalog; requests targeted at this business (D10-11) always show,
+ * requests targeted at another business never do.
  */
 export async function listOpenRequests(
   db: PrismaClient,
@@ -167,19 +176,6 @@ export async function listOpenRequests(
   }
 
   const categories = await listBusinessCategories(db, input.businessId);
-
-  if (categories.length === 0) {
-    return svcOk({
-      items: [],
-      nextCursor: null,
-      branchId: branch.data.id,
-      effectiveRadiusKm: await getEffectiveRadiusKm(
-        db,
-        branch.data.coverageRadiusKm,
-      ),
-    });
-  }
-
   const effectiveRadiusKm = await getEffectiveRadiusKm(
     db,
     branch.data.coverageRadiusKm,
@@ -207,6 +203,20 @@ export async function listOpenRequests(
     )`;
   }
 
+  const distanceSql = haversineKmSql(
+    origin,
+    Prisma.raw('r."latitude"'),
+    Prisma.raw('r."longitude"'),
+  );
+  // Without catalog categories only targeted requests can match.
+  const openRadarSql =
+    categories.length === 0
+      ? Prisma.sql`FALSE`
+      : Prisma.sql`(
+          r."targetBusinessId" IS NULL
+          AND r."category" IN (${Prisma.join(categories)})
+          AND ${distanceSql} <= ${effectiveRadiusKm}
+        )`;
   const rows = await db.$queryRaw<RadarRequestRow[]>(Prisma.sql`
     SELECT
       r."id",
@@ -222,29 +232,23 @@ export async function listOpenRequests(
       r."longitude",
       r."photoUrls",
       r."createdAt",
+      r."expiresAt",
+      (r."targetBusinessId" IS NOT NULL) AS "targeted",
       u."name" AS "customerName",
-      ${haversineKmSql(
-        origin,
-        Prisma.raw('r."latitude"'),
-        Prisma.raw('r."longitude"'),
-      )} AS "distanceKm"
+      ${distanceSql} AS "distanceKm"
     FROM "ServiceRequest" AS r
     INNER JOIN "User" AS u ON u."id" = r."customerId"
     WHERE r."status"::text IN (${RequestStatus.OPEN}, ${RequestStatus.QUOTED})
       AND r."latitude" IS NOT NULL
       AND r."longitude" IS NOT NULL
-      AND r."category" IN (${Prisma.join(categories)})
+      AND (r."expiresAt" IS NULL OR r."expiresAt" > NOW())
+      AND (r."targetBusinessId" = ${input.businessId} OR ${openRadarSql})
       AND NOT EXISTS (
         SELECT 1
         FROM "Quote" AS q
         WHERE q."requestId" = r."id"
           AND q."businessId" = ${input.businessId}
       )
-      AND ${haversineKmSql(
-        origin,
-        Prisma.raw('r."latitude"'),
-        Prisma.raw('r."longitude"'),
-      )} <= ${effectiveRadiusKm}
       ${cursorFilter}
     ORDER BY r."createdAt" DESC, r."id" DESC
     LIMIT ${PAGE_SIZE + 1}
@@ -323,6 +327,8 @@ export async function getRadarRequest(
       longitude: true,
       photoUrls: true,
       createdAt: true,
+      expiresAt: true,
+      targetBusinessId: true,
       status: true,
       customer: { select: { name: true } },
       quotes: {
@@ -397,6 +403,8 @@ export async function getRadarRequest(
     aiUrgency: request.aiUrgency,
     distanceKm,
     createdAt: request.createdAt,
+    targeted: request.targetBusinessId !== null,
+    expiresAt: request.expiresAt,
     customerName: request.customer.name,
     zone: toCustomerZone(
       request.neighborhood,

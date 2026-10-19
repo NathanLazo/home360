@@ -52,5 +52,12 @@
   "AI_CREDIT_REQUIRED": "The assistant needs token credit to use this model. Buy tokens in your profile or switch to a free model.",
   "AI_WALLET_LIMIT": "Your token balance is already at the allowed maximum.",
   "PASSWORD_ALREADY_SET": "This account already has a password. Use the change password option.",
-  "DEVICE_NOT_FOUND": "That device is no longer linked to your account."
+  "DEVICE_NOT_FOUND": "That device is no longer linked to your account.",
+  "OUT_OF_STOCK": "There is not enough stock available for this quantity.",
+  "PICKUP_NOT_AVAILABLE": "Pickup is not available at this branch.",
+  "DELIVERY_NOT_AVAILABLE": "Home delivery is not available for this product at your address.",
+  "PICKUP_CODE_INVALID": "The pickup code is not valid for any order ready for pickup.",
+  "FULFILLMENT_MISMATCH": "This action does not match the order's delivery method or current step.",
+  "REQUEST_EXPIRED": "This request has expired and no longer accepts offers.",
+  "PICKUP_NOT_CONFIGURED": "Pickup codes are not configured yet. Try again later."
 }

@@ -10,8 +10,10 @@ import type { Prisma, PrismaClient } from "@generated/prisma";
  * Per-order conversation: the order's customer, the owner of the business and
  * the assigned worker (`Order.workerId`, MA-01). Per-request conversation
  * (`requestId` + `businessId`, MA-08): the request's customer and the owner of
- * the quoting business. Once `quote.accept` re-links the conversation to an
- * Order, the order rule wins.
+ * the quoting business. Inquiry conversation (`customerId` + `businessId`,
+ * no order nor request, D10-12): that customer and the business owner. Once
+ * `quote.accept` re-links a request conversation to an Order, the order rule
+ * wins.
  */
 export async function getConversationParticipantIds(
   db: PrismaClient,
@@ -29,6 +31,7 @@ export async function getConversationParticipantIds(
       },
       request: { select: { customerId: true } },
       business: { select: { ownerId: true } },
+      customerId: true,
     },
   });
 
@@ -46,6 +49,10 @@ export async function getConversationParticipantIds(
 
   if (conversation.request && conversation.business) {
     return [conversation.request.customerId, conversation.business.ownerId];
+  }
+
+  if (conversation.customerId && conversation.business) {
+    return [conversation.customerId, conversation.business.ownerId];
   }
 
   // A conversation without order and without request×business pair cannot be
@@ -111,6 +118,8 @@ export function participantConversationsWhere(
       { order: { worker: { userId } } },
       { orderId: null, request: { customerId: userId } },
       { orderId: null, business: { ownerId: userId } },
+      // Inquiry chat (D10-12): the customer side.
+      { orderId: null, requestId: null, customerId: userId },
     ],
   };
 }

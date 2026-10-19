@@ -66,5 +66,33 @@
   "ratingReminder": {
     "title": "¿Cómo te fue?",
     "body": "Califica el servicio que recibiste; tu opinión ayuda a otros clientes."
+  },
+  "quoteAccepted": {
+    "title": "Aceptaron tu cotización",
+    "body": "Un cliente aceptó tu oferta. La orden inicia en cuanto el pago quede protegido."
+  },
+  "productAccepted": {
+    "title": "Pedido aceptado",
+    "body": "El negocio aceptó tu pedido y lo está preparando."
+  },
+  "orderReadyForPickup": {
+    "title": "Listo para recoger",
+    "body": "Tu pedido está listo. Muestra tu código QR de recolección en la sucursal."
+  },
+  "orderOutForDelivery": {
+    "title": "Va en camino",
+    "body": "Tu pedido va en camino a tu domicilio."
+  },
+  "orderDelivered": {
+    "title": "Pedido entregado",
+    "body": "El negocio marcó tu pedido como entregado. Revisa las fotos y confirma la entrega."
+  },
+  "orderPaymentExpired": {
+    "title": "Orden vencida",
+    "body": "La orden se canceló porque el pago no se completó a tiempo."
+  },
+  "paidOrderCancelledByCustomer": {
+    "title": "El cliente canceló la orden",
+    "body": "El cliente canceló una orden pagada antes de iniciar. El pago se reembolsó completo."
   }
 }

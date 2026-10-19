@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   OrderEventType,
+  OrderStatus,
   PaymentMethod,
   PaymentStatus,
   Prisma,
@@ -280,9 +281,15 @@ export async function capturePayment(
             input.providerAmountCents,
             providerPlanPct,
           );
-          const escrowReleaseAt = new Date(
-            Date.now() + escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
-          );
+          // D10-3: an order's auto-release clock arms at CONFIRMATION_REQUESTED
+          // (WORK_DONE / DELIVERED), never at capture. Payment links have no
+          // confirmation step, so they keep the capture-time clock.
+          const escrowReleaseAt =
+            input.orderId !== undefined
+              ? null
+              : new Date(
+                  Date.now() + escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
+                );
           const payment = await tx.payment.create({
             data: {
               businessId: input.businessId,
@@ -378,6 +385,30 @@ export type ReleaseOrderEvent = {
   type: typeof OrderEventType.CONFIRMED | typeof OrderEventType.AUTO_RELEASED;
   actorUserId?: string;
 };
+
+/** Order states an escrow release closes (D10-3, audit §6 #1 and #8). */
+const RELEASE_COMPLETABLE_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.PAID,
+  OrderStatus.IN_PROGRESS,
+  OrderStatus.SHIPPING,
+];
+
+/**
+ * A released escrow closes its order in the same step that records the
+ * release event (CAS from PAID / IN_PROGRESS / SHIPPING). Disputed orders are
+ * closed by the dispute resolution instead, so they never match here. This
+ * also completes an order whose earlier release got stuck in RELEASING and
+ * succeeded later from the cron (audit §6 #8).
+ */
+async function completeReleasedOrder(
+  db: Pick<PrismaClient, "order">,
+  orderId: string,
+): Promise<void> {
+  await db.order.updateMany({
+    where: { id: orderId, status: { in: RELEASE_COMPLETABLE_ORDER_STATUSES } },
+    data: { status: OrderStatus.COMPLETED },
+  });
+}
 
 async function ensureReleaseOrderEvent(
   db: Pick<PrismaClient, "orderEvent">,
@@ -784,6 +815,10 @@ export async function releasePayment(
       });
     }
 
+    if (payment.order) {
+      await completeReleasedOrder(db, payment.order.id);
+    }
+
     return svcOk({
       paymentId: payment.id,
       stripeTransferId: payment.stripeTransferId,
@@ -864,6 +899,10 @@ export async function releasePayment(
       data: {
         status: PaymentStatus.RELEASING,
         escrowReleaseAttemptedAt: releaseAttemptedAt,
+        // Once claimed, a failed transfer (e.g. NO_CONNECT_ACCOUNT) must be
+        // retried by the cron as soon as possible, not at the original
+        // auto-release deadline (audit §6 #8).
+        escrowReleaseAt: releaseAttemptedAt,
       },
     });
 
@@ -976,6 +1015,10 @@ export async function releasePayment(
           });
         }
 
+        if (payment.order) {
+          await completeReleasedOrder(tx, payment.order.id);
+        }
+
         return svcOk({
           paymentId: payment.id,
           stripeTransferId: transfer.id,
@@ -1007,6 +1050,10 @@ export async function releasePayment(
       });
     }
 
+    if (payment.order) {
+      await completeReleasedOrder(tx, payment.order.id);
+    }
+
     return svcOk({
       paymentId: payment.id,
       stripeTransferId: transfer.id,
@@ -1029,6 +1076,32 @@ const duePaymentWhere = (now: Date) => {
             OR: [
               { escrowReleaseAttemptedAt: null },
               { escrowReleaseAttemptedAt: { lte: retryBefore } },
+            ],
+            // D10-3: an order escrow only auto-releases after the provider
+            // asked for confirmation (or the customer redeemed a pickup).
+            // Guards legacy rows whose clock was armed at capture.
+            AND: [
+              {
+                OR: [
+                  { orderId: null },
+                  {
+                    order: {
+                      is: {
+                        events: {
+                          some: {
+                            type: {
+                              in: [
+                                OrderEventType.CONFIRMATION_REQUESTED,
+                                OrderEventType.PICKED_UP,
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
             ],
           },
           {

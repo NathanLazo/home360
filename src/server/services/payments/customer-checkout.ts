@@ -1,14 +1,12 @@
 import "server-only";
 
 import {
-  BranchStatus,
   OrderEventType,
   OrderStatus,
-  OrderType,
+  type OrderType,
   PaymentMethod,
   PaymentStatus,
   Prisma,
-  ProductStatus,
   QuoteStatus,
   RequestStatus,
   type PrismaClient,
@@ -27,7 +25,6 @@ import {
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 
 const MAX_PRISMA_INT = 2_147_483_647;
-const MILLISECONDS_PER_HOUR = 60 * 60 * 1_000;
 const STRIPE_API_VERSION = "2026-07-29.dahlia" as const;
 
 export type CustomerCheckoutDeps = {
@@ -37,6 +34,8 @@ export type CustomerCheckoutDeps = {
 };
 
 export type CheckoutIntentResult = {
+  /** The order being paid (D10-7: lets the app retry or open it). */
+  orderId: string;
   paymentIntentClientSecret: string;
   ephemeralKeySecret: string;
   customerId: string;
@@ -174,12 +173,17 @@ async function getReusablePaymentIntent(
   }
 }
 
-async function createOrderPaymentIntent(
+/**
+ * Creates (or reuses) the PaymentSheet intent of an own PENDING order of any
+ * type. A PENDING Payment row with a reusable intent is reused, which is what
+ * makes a PRODUCT payment retry possible (D10-7).
+ */
+export async function createOrderPaymentIntent(
   deps: CustomerCheckoutDeps,
   input: {
     customerId: string;
     orderId: string;
-    expectedType: OrderType;
+    expectedType?: OrderType;
   },
 ): Promise<ServiceResult<CheckoutIntentResult, CheckoutErrorCode>> {
   if (deps.publishableKey.trim().length === 0) {
@@ -190,7 +194,7 @@ async function createOrderPaymentIntent(
     where: {
       id: input.orderId,
       customerId: input.customerId,
-      type: input.expectedType,
+      ...(input.expectedType ? { type: input.expectedType } : {}),
     },
     select: {
       id: true,
@@ -364,6 +368,7 @@ async function createOrderPaymentIntent(
     }
 
     return svcOk({
+      orderId: order.id,
       paymentIntentClientSecret: paymentIntent.client_secret,
       ephemeralKeySecret: ephemeralKey.secret,
       customerId: customer.data.stripeCustomerId,
@@ -379,103 +384,15 @@ async function createOrderPaymentIntent(
   }
 }
 
+/**
+ * `checkout.createIntent({ orderId })`: pays (or retries paying) an own
+ * PENDING order. Accepts SERVICE and PRODUCT orders (D10-7).
+ */
 export async function createServiceCheckoutIntent(
   deps: CustomerCheckoutDeps,
   input: { customerId: string; orderId: string },
 ): Promise<ServiceResult<CheckoutIntentResult, CheckoutErrorCode>> {
-  return createOrderPaymentIntent(deps, {
-    ...input,
-    expectedType: OrderType.SERVICE,
-  });
-}
-
-export async function createProductCheckoutIntent(
-  deps: CustomerCheckoutDeps,
-  input: {
-    customerId: string;
-    productId: string;
-    quantity: number;
-    addressId: string;
-  },
-): Promise<ServiceResult<CheckoutIntentResult, CheckoutErrorCode>> {
-  const [address, product] = await Promise.all([
-    deps.db.address.findFirst({
-      where: { id: input.addressId, userId: input.customerId },
-      select: { addressLine: true, latitude: true, longitude: true },
-    }),
-    deps.db.product.findFirst({
-      where: {
-        id: input.productId,
-        status: ProductStatus.PUBLISHED,
-        business: { status: "ACTIVE" },
-      },
-      select: {
-        id: true,
-        name: true,
-        priceCents: true,
-        businessId: true,
-      },
-    }),
-  ]);
-
-  if (!address || !product) {
-    return svcFail("NOT_FOUND", "Product or address not found");
-  }
-
-  const branch = await deps.db.branch.findFirst({
-    where: { businessId: product.businessId, status: BranchStatus.ACTIVE },
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    select: { id: true },
-  });
-
-  if (!branch) {
-    return svcFail("CONFLICT", "Business has no active branch");
-  }
-
-  const stock = await deps.db.productStock.findUnique({
-    where: {
-      productId_branchId: { productId: product.id, branchId: branch.id },
-    },
-    select: { stock: true },
-  });
-
-  if (!stock || stock.stock < input.quantity) {
-    return svcFail("CONFLICT", "Product stock is insufficient");
-  }
-
-  const providerAmountCents = product.priceCents * input.quantity;
-
-  if (
-    !Number.isSafeInteger(providerAmountCents) ||
-    providerAmountCents <= 0 ||
-    providerAmountCents > MAX_PRISMA_INT
-  ) {
-    return svcFail("CONFLICT", "Invalid product checkout amount");
-  }
-
-  const order = await deps.db.order.create({
-    data: {
-      type: OrderType.PRODUCT,
-      title: product.name,
-      status: OrderStatus.PENDING,
-      amountCents: providerAmountCents,
-      customerId: input.customerId,
-      businessId: product.businessId,
-      branchId: branch.id,
-      productId: product.id,
-      quantity: input.quantity,
-      deliveryAddressLine: address.addressLine,
-      deliveryLatitude: address.latitude,
-      deliveryLongitude: address.longitude,
-    },
-    select: { id: true },
-  });
-
-  return createOrderPaymentIntent(deps, {
-    customerId: input.customerId,
-    orderId: order.id,
-    expectedType: OrderType.PRODUCT,
-  });
+  return createOrderPaymentIntent(deps, input);
 }
 
 export async function listCustomerPaymentMethods(
@@ -536,10 +453,6 @@ export async function finalizePendingCheckoutPayment(
         select: {
           id: true,
           status: true,
-          type: true,
-          quantity: true,
-          productId: true,
-          branchId: true,
           business: { select: { ownerId: true } },
           quote: { select: { id: true, requestId: true } },
         },
@@ -574,19 +487,6 @@ export async function finalizePendingCheckoutPayment(
     return svcFail("CONFLICT", "Checkout is not pending");
   }
 
-  const settings = await deps.db.platformSettings.findUnique({
-    where: { id: 1 },
-    select: { escrowAutoReleaseHours: true },
-  });
-
-  if (
-    !settings ||
-    !Number.isInteger(settings.escrowAutoReleaseHours) ||
-    settings.escrowAutoReleaseHours < 0
-  ) {
-    return svcFail("CONFLICT", "Invalid escrow release configuration");
-  }
-
   let shouldNotifyBusiness = false;
   const result = await deps.db.$transaction(async (tx) => {
     const captured = await tx.payment.updateMany({
@@ -599,9 +499,8 @@ export async function finalizePendingCheckoutPayment(
       data: {
         status: PaymentStatus.IN_ESCROW,
         stripeChargeId: input.stripeChargeId,
-        escrowReleaseAt: new Date(
-          Date.now() + settings.escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
-        ),
+        // D10-3: the auto-release clock arms at CONFIRMATION_REQUESTED.
+        escrowReleaseAt: null,
       },
     });
 
@@ -660,22 +559,8 @@ export async function finalizePendingCheckoutPayment(
       });
     }
 
-    if (
-      order.type === OrderType.PRODUCT &&
-      order.productId !== null &&
-      order.branchId !== null
-    ) {
-      await tx.productStock.update({
-        where: {
-          productId_branchId: {
-            productId: order.productId,
-            branchId: order.branchId,
-          },
-        },
-        data: { stock: { decrement: order.quantity } },
-      });
-    }
-
+    // D10-4: PRODUCT stock was reserved when the PENDING order was created
+    // (Order.stockHeldQty); the capture never touches ProductStock.
     return svcOk({ handled: true });
   });
 

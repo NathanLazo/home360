@@ -4,12 +4,17 @@ import {
   OrderEventType,
   OrderStatus,
   PaymentStatus,
-  QuoteStatus,
-  RequestStatus,
+  type Prisma,
   type PrismaClient,
+  type RequestStatus,
 } from "@generated/prisma";
 import Stripe from "stripe";
 
+import {
+  reopenRequestAfterCancel,
+  type ReopenedRequest,
+} from "~/server/services/orders/reopen-request";
+import { restoreHeldStock } from "~/server/services/orders/stock-hold";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -36,14 +41,91 @@ function isStripeError(error: unknown): error is Stripe.errors.StripeError {
 }
 
 /**
+ * Cancels a checkout PaymentIntent that never carried money. An intent that
+ * may already hold money (succeeded / processing / requires_capture) makes
+ * the caller's cancellation a CONFLICT: the webhook will capture it.
+ */
+export async function voidCheckoutIntent(
+  stripe: Stripe,
+  intentId: string,
+): Promise<ServiceResult<null>> {
+  try {
+    const intent = await stripe.paymentIntents.retrieve(intentId);
+
+    if (NON_CANCELLABLE_INTENT_STATUSES.includes(intent.status)) {
+      return svcFail("CONFLICT", "Order payment is already in progress");
+    }
+
+    if (intent.status !== "canceled") {
+      await stripe.paymentIntents.cancel(intentId);
+    }
+
+    return svcOk(null);
+  } catch (error) {
+    if (isStripeError(error)) {
+      return svcFail("STRIPE_ERROR", "Payment intent cancel failed");
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Closes a never-paid order inside the caller's transaction: CAS
+ * PENDING → CANCELLED, the abandoned attempt's PENDING Payment row removed
+ * (it never held money), the lifecycle event (CANCELLED by the customer or
+ * PAYMENT_EXPIRED by the cron), the held stock restored (D10-4) and the
+ * request reopened (D10-9). `null` when the order is no longer PENDING.
+ */
+export async function closePendingOrder(
+  tx: Prisma.TransactionClient,
+  input: {
+    orderId: string;
+    paymentId: string | null;
+    actorUserId: string | null;
+    eventType:
+      typeof OrderEventType.CANCELLED | typeof OrderEventType.PAYMENT_EXPIRED;
+    now: Date;
+  },
+): Promise<ReopenedRequest | null> {
+  const claimed = await tx.order.updateMany({
+    where: { id: input.orderId, status: OrderStatus.PENDING },
+    data: { status: OrderStatus.CANCELLED },
+  });
+
+  if (claimed.count === 0) {
+    return null;
+  }
+
+  if (input.paymentId) {
+    await tx.payment.deleteMany({
+      where: { id: input.paymentId, status: PaymentStatus.PENDING },
+    });
+  }
+
+  await tx.orderEvent.create({
+    data: {
+      orderId: input.orderId,
+      type: input.eventType,
+      ...(input.actorUserId ? { actorUserId: input.actorUserId } : {}),
+    },
+  });
+
+  await restoreHeldStock(tx, { orderId: input.orderId });
+
+  return reopenRequestAfterCancel(tx, {
+    orderId: input.orderId,
+    now: input.now,
+  });
+}
+
+/**
  * Cancels the customer's own order while it is still `PENDING` (never paid).
  * A PaymentSheet attempt is cancelled in Stripe first — an intent that may
  * already carry money makes the whole operation a CONFLICT. Then, in one
- * transaction: order CANCELLED + event, the abandoned attempt's PENDING
- * Payment row removed (it never held money), the order's quote EXPIRED (it
- * stays linked to the cancelled order) and the sibling quotes that the accept
- * expired go back to PENDING so the request reopens as QUOTED/OPEN — unless
- * the request itself already expired.
+ * transaction, `closePendingOrder`: order CANCELLED + event, PENDING Payment
+ * row removed, held stock restored and the request reopened (QUOTED/OPEN)
+ * unless it already expired.
  */
 export async function cancelUnpaidOrder(
   deps: CancelUnpaidOrderDeps,
@@ -58,13 +140,6 @@ export async function cancelUnpaidOrder(
       business: { select: { ownerId: true } },
       payment: {
         select: { id: true, status: true, stripePaymentIntentId: true },
-      },
-      quote: {
-        select: {
-          id: true,
-          requestId: true,
-          request: { select: { expiresAt: true } },
-        },
       },
     },
   });
@@ -84,85 +159,23 @@ export async function cancelUnpaidOrder(
   const intentId = order.payment?.stripePaymentIntentId ?? null;
 
   if (intentId) {
-    try {
-      const intent = await stripe.paymentIntents.retrieve(intentId);
+    const voided = await voidCheckoutIntent(stripe, intentId);
 
-      if (NON_CANCELLABLE_INTENT_STATUSES.includes(intent.status)) {
-        return svcFail("CONFLICT", "Order payment is already in progress");
-      }
-
-      if (intent.status !== "canceled") {
-        await stripe.paymentIntents.cancel(intentId);
-      }
-    } catch (error) {
-      if (isStripeError(error)) {
-        return svcFail("STRIPE_ERROR", "Payment intent cancel failed");
-      }
-
-      throw error;
+    if (!voided.ok) {
+      return voided;
     }
   }
 
   const now = new Date();
-  const result = await db.$transaction(async (tx) => {
-    const claimed = await tx.order.updateMany({
-      where: { id: order.id, status: OrderStatus.PENDING },
-      data: { status: OrderStatus.CANCELLED },
-    });
-
-    if (claimed.count === 0) {
-      return null;
-    }
-
-    if (order.payment) {
-      await tx.payment.deleteMany({
-        where: { id: order.payment.id, status: PaymentStatus.PENDING },
-      });
-    }
-
-    await tx.orderEvent.create({
-      data: {
-        orderId: order.id,
-        type: OrderEventType.CANCELLED,
-        actorUserId: input.customerId,
-      },
-    });
-
-    if (!order.quote) {
-      return { requestId: null, requestStatus: null };
-    }
-
-    await tx.quote.update({
-      where: { id: order.quote.id },
-      data: { status: QuoteStatus.EXPIRED },
-    });
-
-    const requestExpired =
-      order.quote.request.expiresAt !== null &&
-      order.quote.request.expiresAt.getTime() <= now.getTime();
-    const restored = requestExpired
-      ? { count: 0 }
-      : await tx.quote.updateMany({
-          where: {
-            requestId: order.quote.requestId,
-            id: { not: order.quote.id },
-            status: QuoteStatus.EXPIRED,
-          },
-          data: { status: QuoteStatus.PENDING },
-        });
-    const requestStatus = requestExpired
-      ? RequestStatus.EXPIRED
-      : restored.count > 0
-        ? RequestStatus.QUOTED
-        : RequestStatus.OPEN;
-
-    await tx.serviceRequest.update({
-      where: { id: order.quote.requestId },
-      data: { status: requestStatus },
-    });
-
-    return { requestId: order.quote.requestId, requestStatus };
-  });
+  const result = await db.$transaction((tx) =>
+    closePendingOrder(tx, {
+      orderId: order.id,
+      paymentId: order.payment?.id ?? null,
+      actorUserId: input.customerId,
+      eventType: OrderEventType.CANCELLED,
+      now,
+    }),
+  );
 
   if (!result) {
     return svcFail("CONFLICT", "Only unpaid orders can be cancelled");

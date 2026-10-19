@@ -107,11 +107,33 @@ export async function notifyNearbyBusinesses(
   try {
     const request = await db.serviceRequest.findUnique({
       where: { id: requestId },
-      select: { category: true, latitude: true, longitude: true },
+      select: {
+        category: true,
+        latitude: true,
+        longitude: true,
+        targetBusinessId: true,
+      },
     });
 
     if (!request) {
       return svcFail("NOT_FOUND", "Request not found");
+    }
+
+    // D10-11: a targeted request reaches only its business (if ACTIVE),
+    // without the category and radius match.
+    if (request.targetBusinessId !== null) {
+      const target = await db.business.findFirst({
+        where: { id: request.targetBusinessId, status: "ACTIVE" },
+        select: { id: true },
+      });
+      const businessIds = target ? [target.id] : [];
+
+      await Promise.allSettled([
+        sendEmails(db, { businessIds, category: request.category }),
+        sendPush(db, requestId, businessIds),
+      ]);
+
+      return svcOk({ businessIds });
     }
 
     if (request.latitude === null || request.longitude === null) {

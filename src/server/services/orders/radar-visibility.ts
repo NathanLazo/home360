@@ -6,10 +6,7 @@ import {
   ServiceStatus,
   type PrismaClient,
 } from "@generated/prisma";
-import {
-  haversineKm,
-  type GeoPoint,
-} from "~/server/services/geo/haversine";
+import { haversineKm, type GeoPoint } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 const PLATFORM_SETTINGS_ID = 1;
@@ -109,8 +106,11 @@ export async function listBusinessCategories(
 
 /**
  * True when the business may see the request under radar privacy rules:
- * OPEN or QUOTED (no accepted offer yet), category in the catalog, within the
- * effective radius of some ACTIVE branch with coordinates. Used by authorizeMediaRead (MA-02) and quote.submit.
+ * OPEN or QUOTED (no accepted offer yet) and not past `expiresAt` (D10-5).
+ * A request targeted at one business (D10-11) is visible only to that
+ * business, without the category and radius gates; any other request needs
+ * the category in the catalog and the effective radius of some ACTIVE branch
+ * with coordinates. Used by authorizeMediaRead (MA-02) and quote.submit.
  */
 export async function isRequestVisibleOnRadar(
   db: PrismaClient,
@@ -120,17 +120,25 @@ export async function isRequestVisibleOnRadar(
     where: {
       id: input.requestId,
       status: { in: [RequestStatus.OPEN, RequestStatus.QUOTED] },
-      latitude: { not: null },
-      longitude: { not: null },
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     select: {
       category: true,
       latitude: true,
       longitude: true,
+      targetBusinessId: true,
     },
   });
 
-  if (request?.latitude == null || request.longitude == null) {
+  if (!request) {
+    return false;
+  }
+
+  if (request.targetBusinessId !== null) {
+    return request.targetBusinessId === input.businessId;
+  }
+
+  if (request.latitude === null || request.longitude === null) {
     return false;
   }
 
@@ -175,10 +183,7 @@ export async function isRequestVisibleOnRadar(
       continue;
     }
 
-    const effectiveRadiusKm = Math.min(
-      branch.coverageRadiusKm,
-      notifyRadiusKm,
-    );
+    const effectiveRadiusKm = Math.min(branch.coverageRadiusKm, notifyRadiusKm);
     const distanceKm = haversineKm(
       { latitude: branch.latitude, longitude: branch.longitude },
       requestPoint,

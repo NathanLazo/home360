@@ -64,6 +64,12 @@ enum OrderType {
   PRODUCT
 }
 
+// F10 (D10-1): how a PRODUCT order reaches the customer. Null on SERVICE.
+enum FulfillmentMethod {
+  DELIVERY
+  PICKUP
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -264,6 +270,12 @@ enum OrderEventType {
   // back to the technician; DISPUTE_OPENED freezes the escrow.
   REWORK_REQUESTED
   DISPUTE_OPENED
+  // F10 (D10-2/D10-5): PRODUCT fulfillment sub-state and unpaid expiry.
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  PICKED_UP
+  PAYMENT_EXPIRED
 }
 
 enum AiUrgency {
@@ -372,6 +384,7 @@ model User {
   customerProfile              CustomerProfile?
   addresses                    Address[]
   messages                     Message[]
+  inquiryConversations         Conversation[]               @relation("InquiryConversations")
   orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
   requestDiagnoses             RequestDiagnosis[]
   agentConversations           AgentConversation[]          @relation("UserAgentConversations")
@@ -437,6 +450,7 @@ model Business {
   loyaltyBonuses      LoyaltyBonus[]
   payoutReceipts      PayoutReceipt[]
   conversations       Conversation[]
+  targetedRequests    ServiceRequest[]   @relation("TargetedRequests")
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
@@ -455,6 +469,9 @@ model Branch {
   latitude         Float?
   longitude        Float?
   coverageRadiusKm Int            @default(10)
+  // F10 (D10-1/D10-6): the branch offers a pickup counter / ships deliveries.
+  pickupEnabled    Boolean        @default(true)
+  deliveryEnabled  Boolean        @default(true)
   status           BranchStatus   @default(ACTIVE)
   businessId       String
   business         Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -597,12 +614,19 @@ model ServiceRequest {
   corporateAccount    CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
   corporateLocationId String?
   corporateLocation   CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
+  // F10 (D10-11): request aimed at one business (and optionally one of its
+  // services). Only that business sees it on the radar and gets notified.
+  // targetServiceId is a plain id (no FK) like suggestedServiceId.
+  targetBusinessId    String?
+  targetBusiness      Business?          @relation("TargetedRequests", fields: [targetBusinessId], references: [id], onDelete: SetNull)
+  targetServiceId     String?
   quotes              Quote[]
   conversations       Conversation[]
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
   @@index([customerId])
+  @@index([targetBusinessId, status])
   @@index([status, createdAt])
   @@index([category])
   @@index([corporateAccountId, createdAt])
@@ -710,6 +734,18 @@ model Order {
   // finish (RECORDING_JUSTIFICATION_REQUIRED, D6: disputes still favour the
   // customer when the recording is incomplete).
   recordingJustification String?
+  // F10 (D10-1/D10-2): PRODUCT fulfillment. Null on SERVICE.
+  fulfillmentMethod      FulfillmentMethod?
+  // DELIVERY proof photos (kind `evidence`) written by order.markDelivered.
+  deliveryEvidenceUrls   String[]
+  deliveryNote           String?
+  // PICKUP: SHA-256 of the pickup code. The plaintext is derived on demand as
+  // HMAC(PICKUP_CODE_SECRET, order.id) and never stored.
+  pickupCodeHash         String?            @unique
+  pickedUpAt             DateTime?
+  // F10 (D10-4): units taken from ProductStock(productId, branchId) at order
+  // creation. > 0 while held; reset to 0 by the single restore path (CAS).
+  stockHeldQty           Int                @default(0)
   materials              OrderMaterial[]
   recordingSegments      RecordingSegment[]
   payment                Payment?
@@ -1267,11 +1303,19 @@ model Conversation {
   // created directly per order (getOrCreateConversation).
   businessId String?
   business   Business?       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // F10 (D10-12): pre-sale inquiry chat customer × business (no order, no
+  // request). productId is a plain id (the catalog row may be deleted).
+  customerId String?
+  customer   User?           @relation("InquiryConversations", fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String?
   messages   Message[]
   createdAt  DateTime        @default(now())
 
   // One conversation per request×business pair (MA-08).
   @@unique([requestId, businessId])
+  // One inquiry conversation per business×customer pair (D10-12).
+  @@unique([businessId, customerId])
+  @@index([customerId])
   @@index([requestId])
   @@index([businessId])
 }
@@ -1331,6 +1375,10 @@ model PlatformSettings {
   notifyNewRequestRadiusKm    Int      @default(10)
   notifyPaymentRelease        Boolean  @default(true)
   notifyRatingReminderHours   Int      @default(24)
+  // F10 (D10-5): PENDING orders expire after this many minutes; new requests
+  // get expiresAt = createdAt + requestTtlHours.
+  unpaidOrderTtlMinutes       Int      @default(30)
+  requestTtlHours             Int      @default(72)
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
 }

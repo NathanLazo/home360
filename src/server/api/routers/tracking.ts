@@ -8,7 +8,7 @@ import {
 } from "~/server/api/contract";
 import { consumerProcedure } from "~/server/api/consumer-procedure";
 import { createTRPCRouter, workerProcedure } from "~/server/api/trpc";
-import { cancelUnpaidOrder } from "~/server/services/orders/cancel-unpaid-order";
+import { cancelConsumerOrder } from "~/server/services/orders/cancel-consumer-order";
 import { requestOrderRework } from "~/server/services/orders/request-rework";
 import {
   getCustomerOrderView,
@@ -36,6 +36,8 @@ const requestReworkSchema = z.object({
 const serviceErrorStatuses = {
   NOT_FOUND: 404,
   CONFLICT: 409,
+  PAYMENT_NOT_REFUNDABLE: 409,
+  REFUND_EXCEEDS_LIMIT: 409,
   STRIPE_ERROR: 502,
 } as const satisfies Record<string, number>;
 
@@ -101,13 +103,16 @@ export const trackingRouter = createTRPCRouter({
       }
     }),
 
-  /** Cancels an own order that was never paid and reopens its request. */
+  /**
+   * Cancels an own order and reopens its request: PENDING (never paid) or,
+   * D10-9, PAID before the work starts (full refund + stock restored).
+   */
   cancelOrder: consumerProcedure
     .input(getOrderSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        const cancelled = await cancelUnpaidOrder(
-          { db: ctx.db, stripe: getStripe() },
+        const cancelled = await cancelConsumerOrder(
+          { db: ctx.db, resolveStripe: getStripe },
           { customerId: ctx.consumer.userId, orderId: input.orderId },
         );
 

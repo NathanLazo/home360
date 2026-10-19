@@ -1,13 +1,16 @@
 import "server-only";
 
 import {
+  BusinessStatus,
   QuoteStatus,
   RequestStatus,
+  ServiceStatus,
   type AiUrgency,
   type PrismaClient,
   type ServiceRequest,
 } from "@generated/prisma";
 import { diagnoseProblem } from "~/server/services/ai/diagnose";
+import { createDownloadUrl } from "~/server/services/media/blob";
 import {
   ownsRequestMedia,
   resolveRequestMedia,
@@ -46,7 +49,12 @@ export type CreateRequestInput = {
   description?: string;
   location: RequestLocationInput;
   diagnosis: RequestDiagnosisSource;
+  /** D10-11: aim the request at one ACTIVE business (and service). */
+  target?: { businessId?: string; serviceId?: string };
 };
+
+const MILLISECONDS_PER_HOUR = 60 * 60 * 1_000;
+const DEFAULT_REQUEST_TTL_HOURS = 72;
 
 export type CreateRequestResult = {
   request: ServiceRequest;
@@ -60,8 +68,18 @@ export type RequestDetail = ServiceRequest & {
   suggestions: RequestSuggestions;
 };
 
+/** D10-13: a request row plus what the "Mis solicitudes" list needs. */
+export type RequestListItem = ServiceRequest & {
+  pendingQuoteCount: number;
+  /** Order created by the accepted quote, if any (open it from the list). */
+  acceptedOrderId: string | null;
+  targetBusiness: { id: string; name: string } | null;
+  /** Signed, short-lived URL of the first request photo (null without one). */
+  thumbnailUrl: string | null;
+};
+
 export type RequestListResult = {
-  items: ServiceRequest[];
+  items: RequestListItem[];
   nextCursor: string | null;
 };
 
@@ -193,6 +211,67 @@ async function resolveDiagnosis(
   });
 }
 
+type ResolvedTarget = {
+  targetBusinessId: string | null;
+  targetServiceId: string | null;
+};
+
+/**
+ * D10-11 target: a service implies its business; a business alone is valid
+ * when ACTIVE. Inactive, unknown or mismatched targets are a NOT_FOUND.
+ */
+async function resolveRequestTarget(
+  db: PrismaClient,
+  target: CreateRequestInput["target"],
+): Promise<ServiceResult<ResolvedTarget>> {
+  if (!target || (!target.businessId && !target.serviceId)) {
+    return svcOk({ targetBusinessId: null, targetServiceId: null });
+  }
+
+  if (target.serviceId) {
+    const service = await db.service.findFirst({
+      where: {
+        id: target.serviceId,
+        status: ServiceStatus.ACTIVE,
+        business: { status: BusinessStatus.ACTIVE },
+        ...(target.businessId ? { businessId: target.businessId } : {}),
+      },
+      select: { id: true, businessId: true },
+    });
+
+    return service
+      ? svcOk({
+          targetBusinessId: service.businessId,
+          targetServiceId: service.id,
+        })
+      : svcFail("NOT_FOUND", "Target service not found");
+  }
+
+  const business = await db.business.findFirst({
+    where: { id: target.businessId, status: BusinessStatus.ACTIVE },
+    select: { id: true },
+  });
+
+  return business
+    ? svcOk({ targetBusinessId: business.id, targetServiceId: null })
+    : svcFail("NOT_FOUND", "Target business not found");
+}
+
+async function requestExpiresAt(db: PrismaClient, now: Date): Promise<Date> {
+  const settings = await db.platformSettings.findUnique({
+    where: { id: 1 },
+    select: { requestTtlHours: true },
+  });
+  const hours =
+    settings &&
+    Number.isInteger(settings.requestTtlHours) &&
+    settings.requestTtlHours > 0
+      ? settings.requestTtlHours
+      : DEFAULT_REQUEST_TTL_HOURS;
+
+  return new Date(now.getTime() + hours * MILLISECONDS_PER_HOUR);
+}
+
 /**
  * C2→C3 flow: validates the uploaded media belongs to the caller, resolves
  * the diagnosis (fresh AI run, stored `request.diagnose` result or manual
@@ -218,6 +297,12 @@ export async function createServiceRequest(
     return location;
   }
 
+  const target = await resolveRequestTarget(db, input.target);
+
+  if (!target.ok) {
+    return target;
+  }
+
   const resolved = await resolveDiagnosis(db, input);
 
   if (!resolved.ok) {
@@ -230,6 +315,8 @@ export async function createServiceRequest(
   const needsHumanReview =
     diagnosis.confidencePct !== null &&
     (await requiresHumanReview(db, diagnosis.confidencePct));
+  // D10-5: requests stop accepting offers after `requestTtlHours`.
+  const expiresAt = await requestExpiresAt(db, new Date());
   const request = await db.$transaction(async (tx) => {
     if (diagnosis.storedDiagnosisId !== null) {
       const consumed = await tx.requestDiagnosis.updateMany({
@@ -268,6 +355,9 @@ export async function createServiceRequest(
         corporateLocationId: location.data.corporateLocationId,
         suggestedServiceId: diagnosis.suggestedServiceId,
         suggestedProductId: diagnosis.suggestedProductId,
+        targetBusinessId: target.data.targetBusinessId,
+        targetServiceId: target.data.targetServiceId,
+        expiresAt,
         status: RequestStatus.OPEN,
       },
     });
@@ -324,7 +414,15 @@ export async function getMyRequest(
   return svcOk({ ...request, suggestions });
 }
 
-/** Cursor pagination over the caller's requests (F2-05 pattern). */
+function isRequestPhotoPathname(pathname: string): boolean {
+  return pathname.split("/")[1] === "requestPhoto";
+}
+
+/**
+ * Cursor pagination over the caller's requests (F2-05 pattern), enriched
+ * for the customer list (D10-13): pending quote count, accepted order id,
+ * the targeted business and a signed thumbnail of the first photo.
+ */
 export async function listMyRequests(
   db: PrismaClient,
   input: { customerId: string; cursor?: string },
@@ -345,10 +443,38 @@ export async function listMyRequests(
     take: PAGE_SIZE + 1,
     ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    include: {
+      targetBusiness: { select: { id: true, name: true } },
+      quotes: {
+        where: { status: QuoteStatus.ACCEPTED },
+        select: { order: { select: { id: true } } },
+        take: 1,
+      },
+      _count: {
+        select: { quotes: { where: { status: QuoteStatus.PENDING } } },
+      },
+    },
   });
-  const items = rows.slice(0, PAGE_SIZE);
-  const nextCursor =
-    rows.length > PAGE_SIZE ? (items.at(-1)?.id ?? null) : null;
+  const page = rows.slice(0, PAGE_SIZE);
+  const nextCursor = rows.length > PAGE_SIZE ? (page.at(-1)?.id ?? null) : null;
+  const items = await Promise.all(
+    page.map(async ({ quotes, _count, ...request }) => {
+      const photo = request.photoUrls.find(isRequestPhotoPathname) ?? null;
+      const grant = photo
+        ? await createDownloadUrl(db, {
+            userId: input.customerId,
+            pathname: photo,
+          })
+        : null;
+
+      return {
+        ...request,
+        pendingQuoteCount: _count.quotes,
+        acceptedOrderId: quotes[0]?.order?.id ?? null,
+        thumbnailUrl: grant?.ok ? grant.data.url : null,
+      };
+    }),
+  );
 
   return svcOk({ items, nextCursor });
 }

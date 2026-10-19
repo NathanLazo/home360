@@ -315,7 +315,12 @@
         "CANCELLED": "Orden cancelada",
         "WORKER_ASSIGNED": "Técnico asignado",
         "REWORK_REQUESTED": "El cliente pidió un ajuste",
-        "DISPUTE_OPENED": "Disputa abierta"
+        "DISPUTE_OPENED": "Disputa abierta",
+        "READY_FOR_PICKUP": "Listo para recoger",
+        "OUT_FOR_DELIVERY": "En camino al domicilio",
+        "DELIVERED": "Entregado",
+        "PICKED_UP": "Recogido por el cliente",
+        "PAYMENT_EXPIRED": "Venció el plazo de pago"
       }
     },
     "tabs": {

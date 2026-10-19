@@ -5,7 +5,12 @@ import { createHmac } from "node:crypto";
 import { Prisma, type PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 
-export type AuthAction = "login" | "register" | "password-reset";
+export type AuthAction =
+  | "login"
+  | "register"
+  | "password-reset"
+  // F10: failed pickup-code redemptions per business (brute-force guard).
+  | "pickup-redeem";
 
 export type RateLimitRule = {
   action: AuthAction;

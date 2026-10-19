@@ -21,7 +21,15 @@ import {
   orderCancelSchema,
   orderIdSchema,
   orderListSchema,
+  orderMarkDeliveredSchema,
+  orderRedeemPickupSchema,
 } from "~/server/services/orders/order.schema";
+import {
+  markDelivered,
+  markOutForDelivery,
+  markReadyForPickup,
+  redeemPickup,
+} from "~/server/services/orders/product-fulfillment";
 import { getStripe } from "~/server/services/stripe/client";
 
 function orderFailure(error: unknown) {
@@ -37,6 +45,11 @@ const serviceErrorStatuses = {
   PAYMENT_NOT_REFUNDABLE: 409,
   REFUND_EXCEEDS_LIMIT: 409,
   STRIPE_ERROR: 502,
+  // F10 fulfillment (D10-2).
+  FULFILLMENT_MISMATCH: 409,
+  PICKUP_CODE_INVALID: 422,
+  PICKUP_NOT_CONFIGURED: 503,
+  TOO_MANY_REQUESTS: 429,
 } as const satisfies Record<string, number>;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;
@@ -116,6 +129,101 @@ export const orderRouter = createTRPCRouter({
         }
 
         return ok(cancelled.data, "Order cancelled");
+      } catch (error) {
+        return orderFailure(error);
+      }
+    }),
+
+  /** D10-2 DELIVERY (optional step): the package left the branch. */
+  markOutForDelivery: activeBusinessProcedure
+    .input(orderIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const marked = await markOutForDelivery(ctx.db, {
+          businessId: ctx.business.id,
+          actorUserId: ctx.session.user.id,
+          orderId: input.id,
+        });
+
+        if (!marked.ok) {
+          return serviceFailure(marked.code, "Out for delivery failed");
+        }
+
+        return ok(marked.data, "Order out for delivery");
+      } catch (error) {
+        return orderFailure(error);
+      }
+    }),
+
+  /**
+   * D10-2 DELIVERY: delivered with ≥1 photo; requests the customer's
+   * confirmation and arms the auto-release clock.
+   */
+  markDelivered: activeBusinessProcedure
+    .input(orderMarkDeliveredSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const marked = await markDelivered(ctx.db, {
+          businessId: ctx.business.id,
+          actorUserId: ctx.session.user.id,
+          orderId: input.id,
+          evidencePathnames: input.evidencePathnames,
+          note: input.note,
+        });
+
+        if (!marked.ok) {
+          return serviceFailure(marked.code, "Mark delivered failed");
+        }
+
+        return ok(marked.data, "Order delivered");
+      } catch (error) {
+        return orderFailure(error);
+      }
+    }),
+
+  /** D10-2 PICKUP: the order waits at the branch with its pickup code. */
+  markReadyForPickup: activeBusinessProcedure
+    .input(orderIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const marked = await markReadyForPickup(ctx.db, {
+          businessId: ctx.business.id,
+          actorUserId: ctx.session.user.id,
+          orderId: input.id,
+        });
+
+        if (!marked.ok) {
+          return serviceFailure(marked.code, "Ready for pickup failed");
+        }
+
+        return ok(marked.data, "Order ready for pickup");
+      } catch (error) {
+        return orderFailure(error);
+      }
+    }),
+
+  /**
+   * D10-2 PICKUP: redeems the customer's QR code → PICKED_UP + CONFIRMED,
+   * immediate escrow release and COMPLETED.
+   */
+  redeemPickup: activeBusinessProcedure
+    .input(orderRedeemPickupSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const redeemed = await redeemPickup(
+          { db: ctx.db, resolveStripe: getStripe },
+          {
+            businessId: ctx.business.id,
+            actorUserId: ctx.session.user.id,
+            code: input.code,
+          },
+        );
+
+        if (!redeemed.ok) {
+          return serviceFailure(redeemed.code, "Pickup redemption failed");
+        }
+
+        return ok(redeemed.data, "Pickup redeemed");
       } catch (error) {
         return orderFailure(error);
       }

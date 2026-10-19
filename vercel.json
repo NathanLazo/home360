@@ -3,6 +3,7 @@
   "crons": [
     { "path": "/api/cron/release-escrow", "schedule": "0 * * * *" },
     { "path": "/api/cron/rating-reminders", "schedule": "30 * * * *" },
-    { "path": "/api/cron/push-receipts", "schedule": "45 * * * *" }
+    { "path": "/api/cron/push-receipts", "schedule": "45 * * * *" },
+    { "path": "/api/cron/expire-unpaid-orders", "schedule": "*/15 * * * *" }
   ]
 }

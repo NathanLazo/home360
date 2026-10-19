@@ -24,6 +24,8 @@ import {
 const listByRequestSchema = z.object({
   requestId: z.string().cuid(),
   sort: z.enum(QUOTE_SORTS).default("recommended"),
+  /** D10-13: quote history by status; defaults to the open offers. */
+  status: z.nativeEnum(QuoteStatus).default(QuoteStatus.PENDING),
 });
 
 const quoteIdSchema = z.object({ id: z.string().cuid() });
@@ -55,6 +57,7 @@ const serviceErrorStatuses = {
   CONFLICT: 409,
   VALIDATION_ERROR: 422,
   STRIPE_ERROR: 502,
+  REQUEST_EXPIRED: 409,
 } as const satisfies Record<string, number>;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;
@@ -88,6 +91,7 @@ export const quoteRouter = createTRPCRouter({
           customerId: ctx.customer.id,
           requestId: input.requestId,
           sort: input.sort,
+          status: input.status,
         });
 
         if (!list.ok) {

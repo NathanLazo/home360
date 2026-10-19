@@ -12,6 +12,7 @@ import {
   type ConsumerOrderDetail,
 } from "~/server/services/orders/consumer-order-detail";
 import { triggerPusherEvent } from "~/server/services/messaging/pusher-server";
+import { derivePickupCode } from "~/server/services/orders/pickup-code";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 const PAGE_SIZE = 20;
@@ -290,6 +291,11 @@ export async function updateWorkerLocation(
 export type CustomerOrderView = Omit<ConsumerOrderDetail, "worker"> & {
   /** Assigned technician profile (always present when assigned). */
   assignedWorker: ConsumerOrderDetail["worker"];
+  /**
+   * PICKUP QR payload (D10-2): only for the customer, only while the order
+   * is READY_FOR_PICKUP and not picked up (`actions.canShowPickupQr`).
+   */
+  pickupCode: string | null;
   /** Live position, only inside the tracking window (see above). */
   worker?: TrackedWorker;
   etaMinutes?: number;
@@ -323,10 +329,14 @@ export async function getCustomerOrderView(
   }
 
   const { worker: assignedWorker, ...rest } = detail.data;
+  const pickupCode = rest.actions.canShowPickupQr
+    ? derivePickupCode(rest.id)
+    : null;
 
   return svcOk({
     ...rest,
     assignedWorker,
+    pickupCode,
     ...(tracking.data.worker ? { worker: tracking.data.worker } : {}),
     ...(tracking.data.etaMinutes !== undefined
       ? { etaMinutes: tracking.data.etaMinutes }

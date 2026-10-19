@@ -26,6 +26,9 @@ const branchListSelect = {
   coverageRadiusKm: true,
   latitude: true,
   longitude: true,
+  // F10 (D10-1): fulfillment flags (editing them lands with the web ticket).
+  pickupEnabled: true,
+  deliveryEnabled: true,
 } satisfies Prisma.BranchSelect;
 
 const MAX_SERIALIZABLE_ATTEMPTS = 3;

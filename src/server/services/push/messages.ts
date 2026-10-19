@@ -26,7 +26,15 @@ export type PushMessageKey =
   | "orderWorkerAssigned"
   | "disputeOpened"
   | "reworkRequested"
-  | "orderCancelledByCustomer";
+  | "orderCancelledByCustomer"
+  // F10 (D10-15).
+  | "quoteAccepted"
+  | "productAccepted"
+  | "orderReadyForPickup"
+  | "orderOutForDelivery"
+  | "orderDelivered"
+  | "orderPaymentExpired"
+  | "paidOrderCancelledByCustomer";
 
 export type LocalizedPushInput = {
   message: PushMessageKey;

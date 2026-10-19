@@ -5,6 +5,7 @@ import {
   DisputeUrgency,
   OrderEventType,
   OrderStatus,
+  OrderType,
   PaymentStatus,
   Prisma,
   type PrismaClient,
@@ -114,7 +115,9 @@ export async function openCustomerDispute(
             status: true,
             businessId: true,
             amountCents: true,
+            type: true,
             recordingComplete: true,
+            deliveryEvidenceUrls: true,
             business: { select: { ownerId: true } },
             payment: { select: { id: true, status: true } },
             dispute: { select: { id: true } },
@@ -148,11 +151,23 @@ export async function openCustomerDispute(
           return svcFail("CONFLICT", "Order escrow is no longer held");
         }
 
+        // D6 by type (audit §6 #14): a PRODUCT "started" once the business
+        // accepted it and is "evidenced" by delivery photos or a pickup.
+        const isProduct = order.type === OrderType.PRODUCT;
         const urgency = disputeUrgency({
           reason: input.reason,
-          recordingComplete: order.recordingComplete,
+          recordingComplete: isProduct
+            ? order.deliveryEvidenceUrls.length > 0 ||
+              order.events.some(
+                (event) => event.type === OrderEventType.PICKED_UP,
+              )
+            : order.recordingComplete,
           workStarted: order.events.some(
-            (event) => event.type === OrderEventType.RECORDING_STARTED,
+            (event) =>
+              event.type ===
+              (isProduct
+                ? OrderEventType.ACCEPTED
+                : OrderEventType.RECORDING_STARTED),
           ),
           amountCents: order.amountCents,
         });

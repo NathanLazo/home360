@@ -6,6 +6,7 @@ import {
   OrderType,
   type PrismaClient,
 } from "@generated/prisma";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 export type AcceptProductResult = {
@@ -28,7 +29,7 @@ export async function acceptProductOrder(
       businessId: input.businessId,
       type: OrderType.PRODUCT,
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, customerId: true },
   });
 
   if (!order) {
@@ -59,6 +60,12 @@ export async function acceptProductOrder(
       type: OrderEventType.ACCEPTED,
       actorUserId: input.actorUserId,
     },
+  });
+
+  // D10-15: the customer learns the business is preparing the order.
+  await sendLocalizedPushToUser(db, order.customerId, {
+    message: "productAccepted",
+    url: `home360app://orders/${order.id}`,
   });
 
   return svcOk({ orderId: order.id, status: OrderStatus.SHIPPING });

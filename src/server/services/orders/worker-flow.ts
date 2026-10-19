@@ -14,6 +14,7 @@ import {
   isOwnedMediaPathname,
 } from "~/server/services/media/blob";
 import { currentCycleEvents } from "~/server/services/orders/work-cycle";
+import { armAutoRelease } from "~/server/services/payments/auto-release";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -735,7 +736,7 @@ export async function finishAssignedOrder(
             customerId: true,
             recordingComplete: true,
             payment: {
-              select: { id: true, status: true, escrowReleaseAt: true },
+              select: { id: true, status: true },
             },
             events: {
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -843,31 +844,10 @@ export async function finishAssignedOrder(
           ],
         });
 
-        // After a rework the auto-release was paused; the new confirmation
-        // window restarts from this finish.
-        if (
-          order.payment?.status === PaymentStatus.IN_ESCROW &&
-          order.payment.escrowReleaseAt === null
-        ) {
-          const settings = await tx.platformSettings.findUnique({
-            where: { id: 1 },
-            select: { escrowAutoReleaseHours: true },
-          });
-
-          if (settings) {
-            await tx.payment.updateMany({
-              where: {
-                id: order.payment.id,
-                status: PaymentStatus.IN_ESCROW,
-                escrowReleaseAt: null,
-              },
-              data: {
-                escrowReleaseAt: new Date(
-                  Date.now() + settings.escrowAutoReleaseHours * 3_600_000,
-                ),
-              },
-            });
-          }
+        // D10-3: the auto-release clock arms at CONFIRMATION_REQUESTED and
+        // every finish (first one or after a rework) restarts the window.
+        if (order.payment?.status === PaymentStatus.IN_ESCROW) {
+          await armAutoRelease(tx, { paymentId: order.payment.id });
         }
 
         await releaseWorkerAvailability(tx, input.workerId);

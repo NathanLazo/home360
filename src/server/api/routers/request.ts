@@ -49,6 +49,9 @@ const createRequestSchema = z
     corporateLocationId: z.string().cuid().optional(),
     diagnosisId: z.string().cuid().optional(),
     category: z.enum(REQUEST_CATEGORIES).optional(),
+    // D10-11: targeted request (only that business sees and is notified).
+    businessId: z.string().cuid().optional(),
+    serviceId: z.string().cuid().optional(),
   })
   .refine(
     (input) =>
@@ -192,6 +195,7 @@ export const requestRouter = createTRPCRouter({
           description: input.description,
           location,
           diagnosis: toDiagnosisSource(input),
+          target: { businessId: input.businessId, serviceId: input.serviceId },
         });
 
         if (!created.ok) {

@@ -7,10 +7,12 @@ import {
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
+import { consumerProcedure } from "~/server/api/consumer-procedure";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   getOrCreateForOrder,
   getOrCreateForRequest,
+  getOrCreateInquiry,
   listMessages,
   listMyConversations,
   markConversationRead,
@@ -24,6 +26,11 @@ const orderIdSchema = z.object({ orderId: z.string().cuid() });
 const forRequestSchema = z.object({
   requestId: z.string().cuid(),
   businessId: z.string().cuid().optional(),
+});
+
+const inquirySchema = z.object({
+  businessId: z.string().cuid(),
+  productId: z.string().cuid().optional(),
 });
 
 const cursorSchema = z.object({ cursor: z.string().cuid().optional() });
@@ -106,6 +113,27 @@ export const messagingRouter = createTRPCRouter({
           role: ctx.session.user.role,
           requestId: input.requestId,
           businessId: input.businessId,
+        });
+
+        if (!conversation.ok) {
+          return serviceFailure(conversation.code, "Conversation load failed");
+        }
+
+        return ok(conversation.data, "Conversation ready");
+      } catch (error) {
+        return unexpectedFailure(error, "Conversation load failed");
+      }
+    }),
+
+  /** D10-12: pre-sale chat customer × business (optionally about a product). */
+  getOrCreateInquiry: consumerProcedure
+    .input(inquirySchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const conversation = await getOrCreateInquiry(ctx.db, {
+          customerId: ctx.consumer.userId,
+          businessId: input.businessId,
+          productId: input.productId,
         });
 
         if (!conversation.ok) {

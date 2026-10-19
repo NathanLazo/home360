@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  OrderStatus,
   Prisma,
   type PrismaClient,
   type ProductStatus,
@@ -625,40 +626,11 @@ export async function updateProduct(
       });
 
       if (input.stocks) {
-        const includedBranchIds = input.stocks.map(({ branchId }) => branchId);
-
-        await tx.productStock.deleteMany({
-          where: {
-            productId: input.id,
-            branch: { businessId },
-            ...(includedBranchIds.length > 0
-              ? { branchId: { notIn: includedBranchIds } }
-              : {}),
-          },
+        await applyStockChanges(tx, {
+          businessId,
+          productId: input.id,
+          stocks: input.stocks,
         });
-
-        await Promise.all(
-          input.stocks.map((stock) =>
-            tx.productStock.upsert({
-              where: {
-                productId_branchId: {
-                  productId: input.id,
-                  branchId: stock.branchId,
-                },
-              },
-              create: {
-                productId: input.id,
-                branchId: stock.branchId,
-                stock: stock.stock,
-                lowStockThreshold: stock.lowStockThreshold,
-              },
-              update: {
-                stock: stock.stock,
-                lowStockThreshold: stock.lowStockThreshold,
-              },
-            }),
-          ),
-        );
       }
 
       return ok(product, "Product updated");
@@ -666,6 +638,191 @@ export async function updateProduct(
   } catch (error) {
     if (isSkuConflict(error)) {
       return fail("SKU_TAKEN", 409, "Product SKU is already in use");
+    }
+
+    if (error instanceof StockChangedError) {
+      return fail("CONFLICT", 409, error.message);
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Order states whose reservation may still be restored (D10-4): a COMPLETED
+ * order consumed its units, a CANCELLED one already gave them back.
+ */
+const STOCK_HOLDING_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.PENDING,
+  OrderStatus.PAID,
+  OrderStatus.SHIPPING,
+  OrderStatus.DISPUTED,
+];
+
+export type StockChange = {
+  branchId: string;
+  stock: number;
+  lowStockThreshold: number;
+  /**
+   * D10-4 optimistic precondition: the available stock the editor saw. When
+   * present the write only applies if it still matches (else CONFLICT), so a
+   * sale reserved meanwhile is never overwritten.
+   */
+  expectedStock?: number;
+};
+
+class StockChangedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StockChangedError";
+  }
+}
+
+/**
+ * Replace-all stock edit inside the caller's transaction. Branches left out
+ * stop carrying the product — refused while an open order still holds units
+ * there (its restore would resurrect the row). Rows with `expectedStock` are
+ * compare-and-set; rows without it keep the legacy absolute write.
+ */
+async function applyStockChanges(
+  tx: Prisma.TransactionClient,
+  input: {
+    businessId: string;
+    productId: string;
+    stocks: readonly StockChange[];
+  },
+): Promise<void> {
+  const includedBranchIds = input.stocks.map(({ branchId }) => branchId);
+  const removedHeld = await tx.order.count({
+    where: {
+      productId: input.productId,
+      stockHeldQty: { gt: 0 },
+      status: { in: STOCK_HOLDING_ORDER_STATUSES },
+      branch: { businessId: input.businessId },
+      ...(includedBranchIds.length > 0
+        ? { branchId: { notIn: includedBranchIds } }
+        : {}),
+    },
+  });
+
+  if (removedHeld > 0) {
+    throw new StockChangedError("A removed branch still holds reserved units");
+  }
+
+  await tx.productStock.deleteMany({
+    where: {
+      productId: input.productId,
+      branch: { businessId: input.businessId },
+      ...(includedBranchIds.length > 0
+        ? { branchId: { notIn: includedBranchIds } }
+        : {}),
+    },
+  });
+
+  for (const stock of input.stocks) {
+    if (stock.expectedStock === undefined) {
+      await tx.productStock.upsert({
+        where: {
+          productId_branchId: {
+            productId: input.productId,
+            branchId: stock.branchId,
+          },
+        },
+        create: {
+          productId: input.productId,
+          branchId: stock.branchId,
+          stock: stock.stock,
+          lowStockThreshold: stock.lowStockThreshold,
+        },
+        update: {
+          stock: stock.stock,
+          lowStockThreshold: stock.lowStockThreshold,
+        },
+      });
+      continue;
+    }
+
+    const changed = await tx.productStock.updateMany({
+      where: {
+        productId: input.productId,
+        branchId: stock.branchId,
+        stock: stock.expectedStock,
+      },
+      data: {
+        stock: stock.stock,
+        lowStockThreshold: stock.lowStockThreshold,
+      },
+    });
+
+    if (changed.count === 1) {
+      continue;
+    }
+
+    const existing = await tx.productStock.findUnique({
+      where: {
+        productId_branchId: {
+          productId: input.productId,
+          branchId: stock.branchId,
+        },
+      },
+      select: { id: true },
+    });
+
+    // A branch that did not carry the product yet starts from 0.
+    if (existing || stock.expectedStock !== 0) {
+      throw new StockChangedError("Stock changed since it was read");
+    }
+
+    await tx.productStock.create({
+      data: {
+        productId: input.productId,
+        branchId: stock.branchId,
+        stock: stock.stock,
+        lowStockThreshold: stock.lowStockThreshold,
+      },
+    });
+  }
+}
+
+/**
+ * `product.adjustStock` (D10-4): per-branch stock edit with an optional
+ * `expectedStock` precondition per row; a stale row answers CONFLICT.
+ */
+export async function adjustProductStock(
+  db: PrismaClient,
+  businessId: string,
+  input: { id: string; stocks: StockChange[] },
+): Promise<ProductResponse<{ id: string }>> {
+  try {
+    return await db.$transaction(async (tx) => {
+      const current = await tx.product.findFirst({
+        where: { id: input.id, businessId },
+        select: { id: true },
+      });
+
+      if (!current) {
+        return fail("NOT_FOUND", 404, "Product not found");
+      }
+
+      if (!(await stocksBelongToBusiness(tx, businessId, input.stocks))) {
+        return fail(
+          "VALIDATION_ERROR",
+          422,
+          "Some stock branches do not belong to the business",
+        );
+      }
+
+      await applyStockChanges(tx, {
+        businessId,
+        productId: input.id,
+        stocks: input.stocks,
+      });
+
+      return ok({ id: current.id }, "Product stock updated");
+    });
+  } catch (error) {
+    if (error instanceof StockChangedError) {
+      return fail("CONFLICT", 409, error.message);
     }
 
     throw error;

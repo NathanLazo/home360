@@ -3,7 +3,6 @@ import "server-only";
 import {
   OrderEventType,
   OrderStatus,
-  OrderType,
   type Prisma,
   type PrismaClient,
 } from "@generated/prisma";
@@ -37,10 +36,10 @@ export type ConfirmDeliveryScope =
   | { kind: "CORPORATE"; corporateAccountId: string };
 
 /**
- * Customer (or corporate) confirmation that releases the escrow. SERVICE
- * orders may only be confirmed once the technician finished the current work
- * cycle (WORK_DONE / CONFIRMATION_REQUESTED, a pending rework reopens it);
- * PRODUCT orders keep the delivery-status rule. The actor is always the
+ * Customer (or corporate) confirmation that releases the escrow. Every order
+ * may only be confirmed once the provider requested it (CONFIRMATION_REQUESTED
+ * written by WORK_DONE or, for PRODUCT, DELIVERED; a pending rework reopens
+ * the cycle). The actor is always the
  * order's customer user so the CONFIRMED event is attributed correctly.
  */
 export async function confirmOrderDelivery(
@@ -64,7 +63,6 @@ export async function confirmOrderDelivery(
     where,
     select: {
       id: true,
-      type: true,
       status: true,
       customerId: true,
       payment: { select: { id: true, status: true } },
@@ -88,11 +86,10 @@ export async function confirmOrderDelivery(
     return svcFail("CONFLICT", "Order cannot be confirmed in its status");
   }
 
-  if (
-    order.type === OrderType.SERVICE &&
-    !isAwaitingConfirmation(order.events)
-  ) {
-    return svcFail("CONFLICT", "The work has not been marked as done yet");
+  // D10-8: both types confirm only after the provider asked for it
+  // (SERVICE: WORK_DONE; PRODUCT: DELIVERED). A pending rework reopens it.
+  if (!isAwaitingConfirmation(order.events)) {
+    return svcFail("CONFLICT", "The order has not been delivered yet");
   }
 
   const released = await releasePayment(deps, {

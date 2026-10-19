@@ -2,7 +2,6 @@ import { ProductStatus } from "@generated/prisma";
 import { z } from "zod";
 
 import {
-  productAdjustStockSchema,
   productCreateSchema,
   productImportSchema,
   productListSchema,
@@ -16,6 +15,7 @@ import {
   createTRPCRouter,
 } from "~/server/api/trpc";
 import {
+  adjustProductStock,
   createProduct,
   deleteProduct,
   getProductStockByBranch,
@@ -26,6 +26,7 @@ import {
   setProductStatus,
   updateProduct,
 } from "~/server/services/catalog/product-catalog";
+import { productStockAdjustSchema } from "~/server/services/catalog/product-stock.schema";
 
 const productIdSchema = z.object({ id: z.string().cuid() });
 const productStockSchema = z.object({ productId: z.string().cuid() });
@@ -119,15 +120,13 @@ export const productRouter = createTRPCRouter({
     }),
 
   // Per-branch stock adjustment (row action). Same replace-all semantics as
-  // `update.stocks`: branches left out stop carrying the product.
+  // `update.stocks`: branches left out stop carrying the product. D10-4:
+  // rows may carry `expectedStock` (compare-and-set → CONFLICT when stale).
   adjustStock: activeBusinessProcedure
-    .input(productAdjustStockSchema)
+    .input(productStockAdjustSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await updateProduct(ctx.db, ctx.business.id, {
-          id: input.id,
-          stocks: input.stocks,
-        });
+        return await adjustProductStock(ctx.db, ctx.business.id, input);
       } catch (error) {
         return productFailure(error);
       }

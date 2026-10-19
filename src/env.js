@@ -55,6 +55,9 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: requiredInProduction,
     STRIPE_WEBHOOK_SECRET: requiredInProduction,
     STRIPE_CONNECT_WEBHOOK_SECRET: requiredInProduction,
+    // F10 (D10-2): HMAC key deriving the PICKUP QR code from the order id.
+    // Optional in dev/previews (pickup readiness fails with a stable code).
+    PICKUP_CODE_SECRET: requiredInProduction,
   },
 
   /**
@@ -98,6 +101,7 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_CONNECT_WEBHOOK_SECRET: process.env.STRIPE_CONNECT_WEBHOOK_SECRET,
+    PICKUP_CODE_SECRET: process.env.PICKUP_CODE_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

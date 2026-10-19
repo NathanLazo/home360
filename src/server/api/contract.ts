@@ -55,6 +55,14 @@ export const DOMAIN_ERROR_CODES = [
   "CURRENT_PASSWORD_INVALID",
   "PASSWORD_ALREADY_SET",
   "DEVICE_NOT_FOUND",
+  // F10 fulfillment, stock and discovery.
+  "OUT_OF_STOCK",
+  "PICKUP_NOT_AVAILABLE",
+  "DELIVERY_NOT_AVAILABLE",
+  "PICKUP_CODE_INVALID",
+  "FULFILLMENT_MISMATCH",
+  "REQUEST_EXPIRED",
+  "PICKUP_NOT_CONFIGURED",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];
