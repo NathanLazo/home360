@@ -15,25 +15,37 @@ import {
   releaseRateLimitAttempts,
   reserveRateLimitAttempts,
 } from "~/server/services/auth/rate-limit";
-import { isOwnedMediaPathname } from "~/server/services/media/blob";
+import {
+  isOwnedMediaPathname,
+  mediaExists,
+} from "~/server/services/media/blob";
 import {
   derivePickupCode,
   hashPickupCode,
   isPickupCodeConfigured,
 } from "~/server/services/orders/pickup-code";
 import { effectiveFulfillmentMethod } from "~/server/services/orders/order-actions";
+import { consumeHeldStock } from "~/server/services/orders/stock-hold";
 import { armAutoRelease } from "~/server/services/payments/auto-release";
 import { releasePayment } from "~/server/services/payments/escrow";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { runSerializable } from "~/server/services/serializable-tx";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
-/** D10-2 pickup brute-force guard: failed redemptions per business. */
+/**
+ * D10-2 pickup guard: unknown codes per cashier × business (F10 review L4 —
+ * one cashier's mistaken scans no longer lock the whole business). Only a
+ * code that matches no order counts; a known order in the wrong state
+ * (CONFLICT) is a mistake, not a guess.
+ */
 const PICKUP_REDEEM_MAX_FAILURES = 10;
 const PICKUP_REDEEM_WINDOW_MINUTES = 10;
 
 export type FulfillmentErrorCode =
-  "FULFILLMENT_MISMATCH" | "VALIDATION_ERROR" | "PICKUP_NOT_CONFIGURED";
+  | "FULFILLMENT_MISMATCH"
+  | "VALIDATION_ERROR"
+  | "PICKUP_NOT_CONFIGURED"
+  | "EVIDENCE_REUSED";
 
 export type RedeemPickupErrorCode = "PICKUP_CODE_INVALID" | "TOO_MANY_REQUESTS";
 
@@ -198,12 +210,28 @@ export async function markDelivered(
 ): Promise<ServiceResult<MarkDeliveredResult, FulfillmentErrorCode>> {
   if (
     input.evidencePathnames.length === 0 ||
+    new Set(input.evidencePathnames).size !== input.evidencePathnames.length ||
     input.evidencePathnames.some(
       (pathname) =>
         !isOwnedMediaPathname(pathname, input.actorUserId, ["evidence"]),
     )
   ) {
     return svcFail("VALIDATION_ERROR", "Invalid delivery evidence pathname");
+  }
+
+  // F10 review M5: the evidence arms the auto-release and weighs in D6, so
+  // every photo must really exist in storage (checked before the tx: no I/O
+  // inside it). Unconfigured storage fails closed.
+  const uploaded = await Promise.all(
+    input.evidencePathnames.map((pathname) => mediaExists(pathname)),
+  );
+
+  if (uploaded.some((exists) => exists === null)) {
+    throw new Error("Blob storage is not configured");
+  }
+
+  if (uploaded.some((exists) => exists === false)) {
+    return svcFail("VALIDATION_ERROR", "Delivery evidence was not uploaded");
   }
 
   const result = await runSerializable<
@@ -237,6 +265,22 @@ export async function markDelivered(
         return svcFail("CONFLICT", "Order escrow is no longer held");
       }
 
+      // M5: a photo already attached to any order (delivery evidence or
+      // SERVICE before/after) cannot prove this delivery.
+      const reused = await tx.order.count({
+        where: {
+          OR: [
+            { deliveryEvidenceUrls: { hasSome: input.evidencePathnames } },
+            { beforeUrls: { hasSome: input.evidencePathnames } },
+            { afterUrls: { hasSome: input.evidencePathnames } },
+          ],
+        },
+      });
+
+      if (reused > 0) {
+        return svcFail("EVIDENCE_REUSED", "Delivery evidence already used");
+      }
+
       await tx.order.update({
         where: { id: order.id },
         data: {
@@ -263,6 +307,9 @@ export async function markDelivered(
       const escrowReleaseAt = await armAutoRelease(tx, {
         paymentId: order.payment.id,
       });
+
+      // L1: the units left with the customer; the hold becomes final.
+      await consumeHeldStock(tx, { orderId: order.id });
 
       return svcOk({ customerId: order.customerId, escrowReleaseAt });
     },
@@ -362,7 +409,8 @@ export async function markReadyForPickup(
 /**
  * PICKUP redemption (D10-2): the business scans the customer's QR. The code
  * is looked up by hash inside the business's own READY_FOR_PICKUP orders; a
- * miss is `PICKUP_CODE_INVALID` and counts against a per-business rate limit.
+ * miss is `PICKUP_CODE_INVALID` and counts against a per-cashier × business
+ * rate limit (CONFLICT outcomes do not, F10 review L4).
  * The customer handing over the code is the confirmation, so one short
  * transaction writes PICKED_UP, `pickedUpAt` and makes the escrow due now;
  * then the escrow is released (CONFIRMED) and the order COMPLETED. A failed
@@ -381,7 +429,7 @@ export async function redeemPickup(
   const reservation = await reserveRateLimitAttempts(db, [
     {
       action: "pickup-redeem",
-      identifier: `business:${input.businessId}`,
+      identifier: `business:${input.businessId}:user:${input.actorUserId}`,
       max: PICKUP_REDEEM_MAX_FAILURES,
       windowMinutes: PICKUP_REDEEM_WINDOW_MINUTES,
     },
@@ -465,6 +513,8 @@ export async function redeemPickup(
         where: { id: order.payment.id, status: PaymentStatus.IN_ESCROW },
         data: { escrowReleaseAt: pickedUpAt },
       });
+      // L1: the units left with the customer; the hold becomes final.
+      await consumeHeldStock(tx, { orderId: order.id });
 
       return svcOk({
         orderId: order.id,
@@ -477,12 +527,17 @@ export async function redeemPickup(
     conflictExhausted,
   );
 
-  if (!claimed.ok) {
+  // L4: only unknown codes count against the limit; a recognised order in
+  // the wrong state (CONFLICT) or a success releases the reserved attempt.
+  if (!claimed.ok && claimed.code === "PICKUP_CODE_INVALID") {
     return claimed;
   }
 
-  // Only failed redemptions count against the limit.
   await releaseRateLimitAttempts(db, reservation.attemptIds);
+
+  if (!claimed.ok) {
+    return claimed;
+  }
 
   let released = false;
 

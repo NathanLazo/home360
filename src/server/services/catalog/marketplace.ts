@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Prisma, PrismaClient } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
 import {
   productBranchStockSelect,
   summarizeAvailability,
@@ -27,9 +28,8 @@ export type MarketplaceSearchInput = {
  * surfaces ACTIVE businesses and their published catalog, and never exposes
  * owner ids or financial data.
  */
-const activeBusinessFilter = {
-  status: "ACTIVE",
-} satisfies Prisma.BusinessWhereInput;
+// F10 review L6: ACTIVE and not CANCELED (the `activeBusinessProcedure` rule).
+const activeBusinessFilter = marketplaceBusinessWhere;
 
 export const serviceCatalogFilter = {
   status: "ACTIVE",

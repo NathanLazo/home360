@@ -1,7 +1,6 @@
 import "server-only";
 
 import {
-  BusinessStatus,
   QuoteStatus,
   RequestStatus,
   ServiceStatus,
@@ -10,6 +9,7 @@ import {
   type ServiceRequest,
 } from "@generated/prisma";
 import { diagnoseProblem } from "~/server/services/ai/diagnose";
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
 import { createDownloadUrl } from "~/server/services/media/blob";
 import {
   ownsRequestMedia,
@@ -66,6 +66,8 @@ export type CreateRequestResult = {
 
 export type RequestDetail = ServiceRequest & {
   suggestions: RequestSuggestions;
+  /** Business a targeted request was sent to (D10-12), so the app can say so on reopen. */
+  targetBusiness: { id: string; name: string } | null;
 };
 
 /** D10-13: a request row plus what the "Mis solicitudes" list needs. */
@@ -233,7 +235,7 @@ async function resolveRequestTarget(
       where: {
         id: target.serviceId,
         status: ServiceStatus.ACTIVE,
-        business: { status: BusinessStatus.ACTIVE },
+        business: marketplaceBusinessWhere,
         ...(target.businessId ? { businessId: target.businessId } : {}),
       },
       select: { id: true, businessId: true },
@@ -248,7 +250,7 @@ async function resolveRequestTarget(
   }
 
   const business = await db.business.findFirst({
-    where: { id: target.businessId, status: BusinessStatus.ACTIVE },
+    where: { id: target.businessId, ...marketplaceBusinessWhere },
     select: { id: true },
   });
 
@@ -398,20 +400,26 @@ export async function getMyRequest(
   db: PrismaClient,
   input: { customerId: string; id: string },
 ): Promise<ServiceResult<RequestDetail>> {
-  const request = await db.serviceRequest.findFirst({
+  const row = await db.serviceRequest.findFirst({
     where: { id: input.id, customerId: input.customerId },
+    include: { targetBusiness: { select: { id: true, name: true } } },
   });
 
-  if (!request) {
+  if (!row) {
     return svcFail("NOT_FOUND", "Request not found");
   }
 
+  const { targetBusiness, ...request } = row;
   const suggestions = await loadSuggestionsByIds(db, {
     serviceId: request.suggestedServiceId,
     productId: request.suggestedProductId,
   });
 
-  return svcOk({ ...request, suggestions });
+  return svcOk({
+    ...request,
+    suggestions,
+    targetBusiness: targetBusiness ?? null,
+  });
 }
 
 function isRequestPhotoPathname(pathname: string): boolean {

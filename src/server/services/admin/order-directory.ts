@@ -14,6 +14,10 @@ import type {
 } from "@generated/prisma";
 
 import type { AdminOrderListInput } from "~/server/services/admin/admin-order.schema";
+import {
+  listOrderStockMovements,
+  type StockMovementItem,
+} from "~/server/services/catalog/stock-movements";
 import { effectiveFulfillmentMethod } from "~/server/services/orders/order-actions";
 import {
   resolveOrderMediaUrl,
@@ -216,6 +220,11 @@ export type AdminOrderDetail = {
     createdAt: Date;
     actorName: string | null;
   }[];
+  /**
+   * F10-b: last 20 ledger rows of the order's product at its branch (PRODUCT
+   * orders; empty otherwise), newest first.
+   */
+  stockMovements: StockMovementItem[];
 };
 
 function folioFromSearch(search: string): number | null {
@@ -311,12 +320,22 @@ export async function getAdminOrder(
   }
 
   const userId = input.adminUserId;
-  const [before, after, delivery, recordingUrl] = await Promise.all([
-    signMediaPathnames(db, { userId, pathnames: order.beforeUrls }),
-    signMediaPathnames(db, { userId, pathnames: order.afterUrls }),
-    signMediaPathnames(db, { userId, pathnames: order.deliveryEvidenceUrls }),
-    resolveOrderMediaUrl(db, { userId, reference: order.recordingUrl }),
-  ]);
+  const [before, after, delivery, recordingUrl, stockMovements] =
+    await Promise.all([
+      signMediaPathnames(db, { userId, pathnames: order.beforeUrls }),
+      signMediaPathnames(db, { userId, pathnames: order.afterUrls }),
+      signMediaPathnames(db, {
+        userId,
+        pathnames: order.deliveryEvidenceUrls,
+      }),
+      resolveOrderMediaUrl(db, { userId, reference: order.recordingUrl }),
+      order.product && order.branch
+        ? listOrderStockMovements(db, {
+            productId: order.product.id,
+            branchId: order.branch.id,
+          })
+        : Promise.resolve([]),
+    ]);
 
   return svcOk({
     id: order.id,
@@ -391,5 +410,6 @@ export async function getAdminOrder(
       createdAt: event.createdAt,
       actorName: event.actor?.name ?? null,
     })),
+    stockMovements,
   });
 }

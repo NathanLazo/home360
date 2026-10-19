@@ -16,7 +16,8 @@ export type ReopenedRequest = {
  * D10-9: what every cancellation of a SERVICE order does to its marketplace
  * request, whoever cancels (customer, business or the expiry cron). The
  * order's own quote becomes EXPIRED (it stays linked to the cancelled order);
- * the sibling quotes that the accept / capture expired go back to PENDING so
+ * the sibling quotes that the accept / capture expired — and that never
+ * produced an order of their own — go back to PENDING so
  * the request reopens as QUOTED (or OPEN without siblings), unless the
  * request itself already expired. PRODUCT orders have no quote: no-op.
  *
@@ -61,6 +62,9 @@ export async function reopenRequestAfterCancel(
           requestId: quote.requestId,
           id: { not: quote.id },
           status: QuoteStatus.EXPIRED,
+          // F10 review M1: a quote already tied to an earlier (cancelled)
+          // order can never be accepted again (`Order.quoteId @unique`).
+          order: { is: null },
         },
         data: { status: QuoteStatus.PENDING },
       });

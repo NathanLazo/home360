@@ -11,9 +11,14 @@ import {
 import Stripe from "stripe";
 
 import {
+  closePendingOrder,
+  voidIntentsAfterClose,
+} from "~/server/services/orders/cancel-unpaid-order";
+import {
   reopenRequestAfterCancel,
   type ReopenedRequest,
 } from "~/server/services/orders/reopen-request";
+import { expireOrderCheckoutSession } from "~/server/services/payments/order-checkout-session";
 import { restoreHeldStock } from "~/server/services/orders/stock-hold";
 import {
   refundPayment,
@@ -69,14 +74,26 @@ async function voidPendingIntent(
   }
 }
 
+export type CancelledPaidOrder = ReopenedRequest & {
+  /**
+   * False when Stripe did not confirm the refund but the payment already
+   * left IN_ESCROW (REFUNDING): the cancel stands and the refund is finished
+   * by the `charge.refunded` webhook or the expiry cron's reconciliation.
+   */
+  refunded: boolean;
+};
+
 /**
  * Shared refund path of a PAID order (business cancel and, D10-9, the
  * customer's cancel before work starts). The order is claimed PAID →
  * CANCELLED by CAS (inside the caller's row scope) before touching Stripe so
- * `acceptProduct` / the worker flow cannot race it, and restored to `PAID`
- * if the full refund fails. Once the money is back, one short transaction
- * restores the held stock exactly once (D10-4) and reopens the request and
- * its sibling quotes (D10-9).
+ * `acceptProduct` / the worker flow cannot race it. If the refund fails the
+ * order goes back to PAID only while the payment is still held (F10 review
+ * M6): once `refundPayment` claimed it (REFUNDING — e.g. a Stripe timeout
+ * after the money actually moved), the cancel stands and the refund is
+ * finished by `charge.refunded` or the expiry cron. The held stock restore,
+ * the request reopen and the CANCELLED event share one transaction (F10
+ * review L2).
  */
 export async function cancelPaidOrderWithRefund(
   deps: CancelOrderDeps,
@@ -84,8 +101,10 @@ export async function cancelPaidOrderWithRefund(
     orderId: string;
     paymentId: string;
     scope: Prisma.OrderWhereInput;
+    actorUserId: string;
+    note?: string;
   },
-): Promise<ServiceResult<ReopenedRequest, CancelOrderErrorCode>> {
+): Promise<ServiceResult<CancelledPaidOrder, CancelOrderErrorCode>> {
   const { db } = deps;
   const claimed = await db.order.updateMany({
     where: { ...input.scope, id: input.orderId, status: OrderStatus.PAID },
@@ -96,11 +115,18 @@ export async function cancelPaidOrderWithRefund(
     return svcFail("CONFLICT", "Order can no longer be cancelled");
   }
 
-  const restorePaid = () =>
+  // M6: never put the order back to PAID once the money is (being) returned,
+  // or acceptProduct / the worker could ship against a refunded escrow.
+  const restorePaidWhileHeld = () =>
     db.order.updateMany({
-      where: { id: input.orderId, status: OrderStatus.CANCELLED },
+      where: {
+        id: input.orderId,
+        status: OrderStatus.CANCELLED,
+        payment: { is: { status: PaymentStatus.IN_ESCROW } },
+      },
       data: { status: OrderStatus.PAID },
     });
+  let refunded = true;
 
   try {
     // Omitting both components is F3's contract for a total refund.
@@ -110,21 +136,57 @@ export async function cancelPaidOrderWithRefund(
     );
 
     if (!refund.ok) {
-      await restorePaid();
-      return svcFail(refund.code);
+      const restored = await restorePaidWhileHeld();
+
+      if (restored.count > 0) {
+        return svcFail(refund.code);
+      }
+
+      const payment = await db.payment.findUnique({
+        where: { id: input.paymentId },
+        select: { status: true },
+      });
+
+      refunded = payment?.status === PaymentStatus.REFUNDED;
+      console.error("[cancel-paid-order] REFUND_PENDING", {
+        orderId: input.orderId,
+        code: refund.code,
+      });
     }
   } catch (error) {
-    await restorePaid();
-    throw error;
+    const restored = await restorePaidWhileHeld();
+
+    if (restored.count > 0) {
+      throw error;
+    }
+
+    refunded = false;
+    console.error("[cancel-paid-order] REFUND_PENDING", {
+      orderId: input.orderId,
+      code: "UNEXPECTED_ERROR",
+    });
   }
 
   const reopened = await db.$transaction(async (tx) => {
-    await restoreHeldStock(tx, { orderId: input.orderId });
+    await restoreHeldStock(tx, {
+      orderId: input.orderId,
+      actorUserId: input.actorUserId,
+      reason: "CANCELLED_WITH_REFUND",
+    });
+
+    await tx.orderEvent.create({
+      data: {
+        orderId: input.orderId,
+        type: OrderEventType.CANCELLED,
+        actorUserId: input.actorUserId,
+        ...(input.note ? { note: input.note } : {}),
+      },
+    });
 
     return reopenRequestAfterCancel(tx, { orderId: input.orderId });
   });
 
-  return svcOk(reopened);
+  return svcOk({ ...reopened, refunded });
 }
 
 /**
@@ -158,6 +220,7 @@ export async function cancelOrder(
       id: true,
       status: true,
       customerId: true,
+      checkoutSessionId: true,
       payment: {
         select: { id: true, status: true, stripePaymentIntentId: true },
       },
@@ -177,10 +240,24 @@ export async function cancelOrder(
       return svcFail("CONFLICT", "Order payment is not pending");
     }
 
-    if (payment?.stripePaymentIntentId) {
+    // F10 review H1: a hosted Checkout Session must stop being payable first.
+    if (order.checkoutSessionId) {
+      const sessionClosed = await expireOrderCheckoutSession(
+        deps.resolveStripe(),
+        order.checkoutSessionId,
+      );
+
+      if (!sessionClosed.ok) {
+        return sessionClosed;
+      }
+    }
+
+    const preVoidedIntentId = payment?.stripePaymentIntentId ?? null;
+
+    if (preVoidedIntentId) {
       const voided = await voidPendingIntent(
         deps.resolveStripe(),
-        payment.stripePaymentIntentId,
+        preVoidedIntentId,
       );
 
       if (!voided.ok) {
@@ -188,28 +265,29 @@ export async function cancelOrder(
       }
     }
 
-    const claimed = await db.$transaction(async (tx) => {
-      const changed = await tx.order.updateMany({
-        where: {
-          id: order.id,
-          businessId: input.businessId,
-          status: OrderStatus.PENDING,
-        },
-        data: { status: OrderStatus.CANCELLED },
-      });
+    // Same close as the customer's unpaid cancel and the expiry cron: PENDING
+    // Payment rows removed by orderId, CANCELLED event (with the reason),
+    // stock restored and request reopened in one transaction.
+    const closed = await db.$transaction((tx) =>
+      closePendingOrder(tx, {
+        orderId: order.id,
+        actorUserId: input.actorUserId,
+        eventType: OrderEventType.CANCELLED,
+        note: input.reason,
+        now: new Date(),
+      }),
+    );
 
-      if (changed.count === 0) {
-        return false;
-      }
-
-      await restoreHeldStock(tx, { orderId: order.id });
-      await reopenRequestAfterCancel(tx, { orderId: order.id });
-
-      return true;
-    });
-
-    if (!claimed) {
+    if (!closed) {
       return svcFail("CONFLICT", "Order can no longer be cancelled");
+    }
+
+    if (closed.removedIntentIds.some((id) => id !== preVoidedIntentId)) {
+      await voidIntentsAfterClose(deps.resolveStripe(), {
+        orderId: order.id,
+        intentIds: closed.removedIntentIds,
+        alreadyVoided: preVoidedIntentId,
+      });
     }
   } else if (order.status === OrderStatus.PAID) {
     const payment = order.payment;
@@ -228,25 +306,18 @@ export async function cancelOrder(
       orderId: order.id,
       paymentId: payment.id,
       scope: { businessId: input.businessId },
+      actorUserId: input.actorUserId,
+      note: input.reason,
     });
 
     if (!cancelled.ok) {
       return cancelled;
     }
 
-    refunded = true;
+    refunded = cancelled.data.refunded;
   } else {
     return svcFail("CONFLICT", "Order can no longer be cancelled");
   }
-
-  await db.orderEvent.create({
-    data: {
-      orderId: order.id,
-      type: OrderEventType.CANCELLED,
-      actorUserId: input.actorUserId,
-      note: input.reason,
-    },
-  });
 
   await sendLocalizedPushToUser(db, order.customerId, {
     message: "orderCancelled",
@@ -333,19 +404,12 @@ export async function cancelPaidOrderByConsumer(
     orderId: order.id,
     paymentId: order.payment.id,
     scope: { customerId: input.customerId },
+    actorUserId: input.customerId,
   });
 
   if (!cancelled.ok) {
     return cancelled;
   }
-
-  await db.orderEvent.create({
-    data: {
-      orderId: order.id,
-      type: OrderEventType.CANCELLED,
-      actorUserId: input.customerId,
-    },
-  });
 
   await sendLocalizedPushToUser(db, order.business.ownerId, {
     message: "paidOrderCancelledByCustomer",
@@ -355,7 +419,6 @@ export async function cancelPaidOrderByConsumer(
   return svcOk({
     orderId: order.id,
     status: OrderStatus.CANCELLED,
-    refunded: true,
     ...cancelled.data,
   });
 }

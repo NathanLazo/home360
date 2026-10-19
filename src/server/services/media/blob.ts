@@ -1,7 +1,13 @@
 import "server-only";
 
 import { createId } from "@paralleldrive/cuid2";
-import { get, issueSignedToken, presignUrl } from "@vercel/blob";
+import {
+  BlobNotFoundError,
+  get,
+  head,
+  issueSignedToken,
+  presignUrl,
+} from "@vercel/blob";
 
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
@@ -38,11 +44,20 @@ const MEDIA_POLICIES: Record<
   MediaKind,
   { allowedContentTypes: readonly string[]; maxSizeBytes: number }
 > = {
-  requestPhoto: { allowedContentTypes: IMAGE_CONTENT_TYPES, maxSizeBytes: 10 * MB },
-  requestVideo: { allowedContentTypes: VIDEO_CONTENT_TYPES, maxSizeBytes: 60 * MB },
+  requestPhoto: {
+    allowedContentTypes: IMAGE_CONTENT_TYPES,
+    maxSizeBytes: 10 * MB,
+  },
+  requestVideo: {
+    allowedContentTypes: VIDEO_CONTENT_TYPES,
+    maxSizeBytes: 60 * MB,
+  },
   evidence: { allowedContentTypes: IMAGE_CONTENT_TYPES, maxSizeBytes: 10 * MB },
   recording: { allowedContentTypes: VIDEO_CONTENT_TYPES, maxSizeBytes: 2 * GB },
-  chatAttachment: { allowedContentTypes: IMAGE_CONTENT_TYPES, maxSizeBytes: 10 * MB },
+  chatAttachment: {
+    allowedContentTypes: IMAGE_CONTENT_TYPES,
+    maxSizeBytes: 10 * MB,
+  },
 };
 
 /** File extension per allowed content type; keeps pathnames self-descriptive. */
@@ -125,10 +140,17 @@ export async function createUploadUrl(input: {
     maximumSizeInBytes: input.sizeBytes,
     validUntil: expiresAt.getTime(),
   });
+  // The mobile app PUTs raw bytes without the Blob SDK headers, so the store
+  // must never append a random suffix: the blob has to land exactly at
+  // `pathname`, which is what the app later sends to `request.create`,
+  // `workerOrders.finish`, etc. (production incident 2026-10-19: every
+  // diagnosis read failed with "Image not found in blob storage").
   const { presignedUrl } = await presignUrl(signedToken, {
     operation: "put",
     pathname,
     access: "private",
+    addRandomSuffix: false,
+    allowOverwrite: false,
     allowedContentTypes: [input.contentType],
     maximumSizeInBytes: input.sizeBytes,
     validUntil: expiresAt.getTime(),
@@ -225,6 +247,37 @@ export async function readMediaBytes(
     data: new Uint8Array(await new Response(result.stream).arrayBuffer()),
     contentType: result.blob.contentType,
   };
+}
+
+/**
+ * Whether a blob was actually uploaded at `pathname` (metadata-only `head`,
+ * no bytes). `null` when storage is not configured, so callers fail closed
+ * instead of trusting an unverifiable reference (F10 review M5).
+ */
+export async function mediaExists(
+  pathname: string,
+  options: { abortSignal?: AbortSignal } = {},
+): Promise<boolean | null> {
+  const token = getReadWriteToken();
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const blob = await head(pathname, {
+      token,
+      abortSignal: options.abortSignal,
+    });
+
+    return blob.pathname === pathname;
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) {
+      return false;
+    }
+
+    throw error;
+  }
 }
 
 /**

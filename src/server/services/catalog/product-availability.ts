@@ -138,22 +138,29 @@ export type BranchSelection =
   | { ok: true; branchId: string }
   | { ok: false; code: "DELIVERY_NOT_AVAILABLE" | "OUT_OF_STOCK" };
 
+export type DeliveryBranchRanking =
+  | { ok: true; branchIds: string[] }
+  | { ok: false; code: "DELIVERY_NOT_AVAILABLE" | "OUT_OF_STOCK" };
+
 /**
- * D10-6 DELIVERY branch: the ACTIVE delivery-enabled branch with enough
- * available units nearest to the address (geo-less branches rank last).
+ * D10-6 DELIVERY candidates: the ACTIVE delivery-enabled branches with
+ * enough available units, nearest to the address first (geo-less branches
+ * rank last, ties by most stock). Checkout re-ranks inside its transaction
+ * and falls through to the next candidate when a reservation loses the race
+ * for the last units (F10 review L8).
  */
-export function selectDeliveryBranch(
+export function rankDeliveryBranches(
   rows: readonly ProductBranchStockRow[],
   quantity: number,
   destination: GeoPoint,
-): BranchSelection {
+): DeliveryBranchRanking {
   const deliverable = rows.filter(canDeliver);
 
   if (deliverable.length === 0) {
     return { ok: false, code: "DELIVERY_NOT_AVAILABLE" };
   }
 
-  const nearest = deliverable
+  const branchIds = deliverable
     .filter((row) => row.stock >= quantity)
     .map((row) => ({
       row,
@@ -164,10 +171,11 @@ export function selectDeliveryBranch(
         (a.distanceKm ?? Number.POSITIVE_INFINITY) -
           (b.distanceKm ?? Number.POSITIVE_INFINITY) ||
         b.row.stock - a.row.stock,
-    )[0];
+    )
+    .map(({ row }) => row.branch.id);
 
-  return nearest
-    ? { ok: true, branchId: nearest.row.branch.id }
+  return branchIds.length > 0
+    ? { ok: true, branchIds }
     : { ok: false, code: "OUT_OF_STOCK" };
 }
 

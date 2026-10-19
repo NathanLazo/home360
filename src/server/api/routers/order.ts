@@ -50,6 +50,8 @@ const serviceErrorStatuses = {
   PICKUP_CODE_INVALID: 422,
   PICKUP_NOT_CONFIGURED: 503,
   TOO_MANY_REQUESTS: 429,
+  // F10 review M5: a photo already attached to another order.
+  EVIDENCE_REUSED: 409,
 } as const satisfies Record<string, number>;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;

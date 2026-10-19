@@ -56,6 +56,7 @@ const serviceErrorStatuses = {
   OUT_OF_STOCK: 409,
   PICKUP_NOT_AVAILABLE: 409,
   DELIVERY_NOT_AVAILABLE: 409,
+  ORDER_EXPIRED: 409,
 } as const;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;

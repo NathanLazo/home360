@@ -14,7 +14,7 @@ import {
 } from "@generated/prisma";
 
 import { writeAdminAudit } from "../admin/admin-audit";
-import { restoreHeldStock } from "../orders/stock-hold";
+import { consumeHeldStock, restoreHeldStock } from "../orders/stock-hold";
 import { refundPayment, releasePayment } from "../payments/escrow";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -350,9 +350,30 @@ async function finalize(
       data: { status: args.orderStatus },
     });
 
-    // D10-4: a FULL_REFUND cancels the order, so its held units go back.
+    // D10-4: a FULL_REFUND cancels the order, so its held units go back —
+    // unless the goods were already handed over (F10 review L1: they left
+    // with the customer; restoring would add phantom units). Any other
+    // resolution makes the sale final: the hold is consumed.
     if (args.orderStatus === OrderStatus.CANCELLED) {
-      await restoreHeldStock(tx, { orderId: args.dispute.orderId });
+      const handedOver = await tx.orderEvent.findFirst({
+        where: {
+          orderId: args.dispute.orderId,
+          type: { in: [OrderEventType.DELIVERED, OrderEventType.PICKED_UP] },
+        },
+        select: { id: true },
+      });
+
+      if (handedOver) {
+        await consumeHeldStock(tx, { orderId: args.dispute.orderId });
+      } else {
+        await restoreHeldStock(tx, {
+          orderId: args.dispute.orderId,
+          actorUserId: args.adminId,
+          reason: "DISPUTE_FULL_REFUND",
+        });
+      }
+    } else {
+      await consumeHeldStock(tx, { orderId: args.dispute.orderId });
     }
 
     await writeAdminAudit(tx, args.adminId, {

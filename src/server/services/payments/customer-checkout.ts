@@ -3,16 +3,22 @@ import "server-only";
 import {
   OrderEventType,
   OrderStatus,
-  type OrderType,
+  OrderType,
   PaymentMethod,
   PaymentStatus,
   Prisma,
+  ProductStatus,
   QuoteStatus,
   RequestStatus,
   type PrismaClient,
 } from "@generated/prisma";
 import Stripe from "stripe";
 
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
+import {
+  isPastUnpaidOrderTtl,
+  resolveUnpaidOrderTtlMinutes,
+} from "~/server/services/orders/unpaid-order-ttl";
 import {
   commissionCentsOnPrincipal,
   resolveCommissionPct,
@@ -49,7 +55,7 @@ export type SavedPaymentMethod = {
   last4: string;
 };
 
-type CheckoutErrorCode = "BUSINESS_NOT_ACTIVE";
+type CheckoutErrorCode = "BUSINESS_NOT_ACTIVE" | "ORDER_EXPIRED";
 
 function isStripeError(error: unknown): error is Stripe.errors.StripeError {
   return error instanceof Stripe.errors.StripeError;
@@ -59,6 +65,22 @@ function expandableId(
   value: string | { id: string } | null | undefined,
 ): string | null {
   return typeof value === "string" ? value : (value?.id ?? null);
+}
+
+/** Best effort: an intent created for an order that closed meanwhile. */
+async function voidAbandonedIntent(
+  stripe: Stripe,
+  intentId: string,
+): Promise<void> {
+  try {
+    await stripe.paymentIntents.cancel(intentId, {
+      cancellation_reason: "abandoned",
+    });
+  } catch {
+    console.error("[customer-checkout] ABANDONED_INTENT_VOID_FAILED", {
+      code: "STRIPE_ERROR",
+    });
+  }
 }
 
 export async function ensureCustomerStripeCustomer(
@@ -205,6 +227,8 @@ export async function createOrderPaymentIntent(
       customerId: true,
       businessId: true,
       corporateAccountId: true,
+      createdAt: true,
+      productId: true,
       payment: {
         select: {
           id: true,
@@ -222,6 +246,33 @@ export async function createOrderPaymentIntent(
 
   if (order.status !== OrderStatus.PENDING) {
     return svcFail("CONFLICT", "Order is not pending payment");
+  }
+
+  // F10 review M2 / L7: an order past the unpaid TTL is about to be expired
+  // by the cron (and its snapshot may be stale): never start a new attempt.
+  const ttlMinutes = await resolveUnpaidOrderTtlMinutes(deps.db);
+
+  if (isPastUnpaidOrderTtl(order.createdAt, ttlMinutes)) {
+    return svcFail("ORDER_EXPIRED", "Order expired before it was paid");
+  }
+
+  // L7: a PRODUCT retry re-validates that the product is still sold by a
+  // marketplace-visible business (unpublished or cancelled meanwhile).
+  if (order.type === OrderType.PRODUCT) {
+    const sellable =
+      order.productId !== null &&
+      (await deps.db.product.count({
+        where: {
+          id: order.productId,
+          businessId: order.businessId,
+          status: ProductStatus.PUBLISHED,
+          business: marketplaceBusinessWhere,
+        },
+      })) > 0;
+
+    if (!sellable) {
+      return svcFail("NOT_FOUND", "Product is no longer available");
+    }
   }
 
   const customer = await ensureCustomerStripeCustomer(deps, input.customerId);
@@ -314,23 +365,46 @@ export async function createOrderPaymentIntent(
     );
 
     try {
-      await deps.db.payment.create({
-        data: {
-          orderId: order.id,
-          businessId: order.businessId,
-          method: PaymentMethod.CARD,
-          status: PaymentStatus.PENDING,
-          amountCents: totalCents,
-          providerAmountCents: order.amountCents,
-          serviceFeeCentsApplied: settings.customerServiceFeeCents,
-          commissionPctApplied: commission.data.effectivePct,
-          commissionCents,
-          providerPlanCommissionPctApplied: commission.data.providerPlanPct,
-          providerPlanCommissionCents,
-          commissionSource: commission.data.source,
-          stripePaymentIntentId: paymentIntent.id,
-        },
+      // F10 review M2: the row is only created while the order is still
+      // PENDING. The CAS touch takes the order's row lock, so a concurrent
+      // `closePendingOrder` either runs first (count 0 → refused here) or
+      // waits and then removes this row by orderId and voids its intent.
+      const created = await deps.db.$transaction(async (tx) => {
+        const locked = await tx.order.updateMany({
+          where: { id: order.id, status: OrderStatus.PENDING },
+          data: { updatedAt: new Date() },
+        });
+
+        if (locked.count === 0) {
+          return false;
+        }
+
+        await tx.payment.create({
+          data: {
+            orderId: order.id,
+            businessId: order.businessId,
+            method: PaymentMethod.CARD,
+            status: PaymentStatus.PENDING,
+            amountCents: totalCents,
+            providerAmountCents: order.amountCents,
+            serviceFeeCentsApplied: settings.customerServiceFeeCents,
+            commissionPctApplied: commission.data.effectivePct,
+            commissionCents,
+            providerPlanCommissionPctApplied: commission.data.providerPlanPct,
+            providerPlanCommissionCents,
+            commissionSource: commission.data.source,
+            stripePaymentIntentId: paymentIntent.id,
+          },
+        });
+
+        return true;
       });
+
+      if (!created) {
+        await voidAbandonedIntent(deps.stripe, paymentIntent.id);
+
+        return svcFail("CONFLICT", "Order is not pending payment");
+      }
     } catch (error) {
       if (!(
         error instanceof Prisma.PrismaClientKnownRequestError &&

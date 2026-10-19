@@ -5,6 +5,9 @@ import { getStripe } from "~/server/services/stripe/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// F10 review L10: the batch makes bounded Stripe calls (8 s each) under a
+// 40 s run budget; `hasMore` in the body says another run should continue.
+export const maxDuration = 60;
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" } as const;
 

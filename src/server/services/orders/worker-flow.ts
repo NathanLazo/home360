@@ -421,10 +421,20 @@ export async function transitionAssignedOrder(
         }
 
         if (input.to === OrderEventType.EN_ROUTE) {
-          await tx.order.update({
-            where: { id: order.id },
+          // F10 review M6: work only starts while the escrow is held; an
+          // order whose refund is in flight (REFUNDING) never goes en route.
+          const started = await tx.order.updateMany({
+            where: {
+              id: order.id,
+              status: OrderStatus.PAID,
+              payment: { is: { status: PaymentStatus.IN_ESCROW } },
+            },
             data: { status: OrderStatus.IN_PROGRESS },
           });
+
+          if (started.count === 0) {
+            return svcFail("CONFLICT", "Order escrow is no longer held");
+          }
         }
 
         await tx.orderEvent.create({

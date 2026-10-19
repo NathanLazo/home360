@@ -59,5 +59,7 @@
   "PICKUP_CODE_INVALID": "El código de recolección no corresponde a ninguna orden lista para recoger.",
   "FULFILLMENT_MISMATCH": "Esta acción no corresponde al método de entrega o al paso actual de la orden.",
   "REQUEST_EXPIRED": "Esta solicitud venció y ya no acepta ofertas.",
-  "PICKUP_NOT_CONFIGURED": "Los códigos de recolección aún no están configurados. Intenta más tarde."
+  "PICKUP_NOT_CONFIGURED": "Los códigos de recolección aún no están configurados. Intenta más tarde.",
+  "ORDER_EXPIRED": "Esta orden venció sin pagarse. Vuelve a hacer el pedido.",
+  "EVIDENCE_REUSED": "Una de estas fotos ya se usó como evidencia en otra orden. Sube fotos nuevas."
 }

@@ -11,6 +11,7 @@ import {
   haversineKmSql,
   type GeoPoint,
 } from "~/server/services/geo/haversine";
+import { approximateCoordinate } from "~/server/services/geo/approximate";
 import { createDownloadUrl } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {
@@ -29,8 +30,7 @@ export {
 export type { RadarBranch } from "./radar-visibility";
 
 const PAGE_SIZE = 20;
-/** Privacy gating (MA-13): approx. 100 m precision, never the exact pin. */
-const COORD_DECIMALS = 3;
+// Privacy gating (MA-13): approx. 100 m precision (`approximateCoordinate`).
 
 export type RadarCustomerZone = {
   neighborhood: string | null;
@@ -89,11 +89,6 @@ type RadarRequestRow = {
   distanceKm: number;
 };
 
-function approximateCoord(value: number): number {
-  const factor = 10 ** COORD_DECIMALS;
-  return Math.round(value * factor) / factor;
-}
-
 function toCustomerZone(
   neighborhood: string | null,
   latitude: number | null,
@@ -101,8 +96,8 @@ function toCustomerZone(
 ): RadarCustomerZone {
   return {
     neighborhood,
-    latitude: latitude === null ? null : approximateCoord(latitude),
-    longitude: longitude === null ? null : approximateCoord(longitude),
+    latitude: latitude === null ? null : approximateCoordinate(latitude),
+    longitude: longitude === null ? null : approximateCoordinate(longitude),
   };
 }
 
@@ -286,6 +281,11 @@ export type RadarOwnQuote = {
 };
 
 export type RadarRequestDetail = RadarRequestItem & {
+  /**
+   * Opaque user id of the requester: lets the pre-sale chat (D10-12) tell
+   * the customer's messages from the business's. Never a contact detail.
+   */
+  customerId: string;
   description: string | null;
   status: RequestStatus;
   /** Whether a new/revived offer can still be sent (P-WEB-02 / N2). */
@@ -330,6 +330,7 @@ export async function getRadarRequest(
       expiresAt: true,
       targetBusinessId: true,
       status: true,
+      customerId: true,
       customer: { select: { name: true } },
       quotes: {
         where: { businessId: input.businessId },
@@ -406,6 +407,7 @@ export async function getRadarRequest(
     targeted: request.targetBusinessId !== null,
     expiresAt: request.expiresAt,
     customerName: request.customer.name,
+    customerId: request.customerId,
     zone: toCustomerZone(
       request.neighborhood,
       request.latitude,

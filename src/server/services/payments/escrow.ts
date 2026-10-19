@@ -32,6 +32,9 @@ const CAPTURE_MAX_SERIALIZABLE_ATTEMPTS = 3;
 export const capturePaymentErrorCodes = [
   "INVALID_TARGET",
   "BUSINESS_NOT_ACTIVE",
+  // F10 review H1: the order is no longer PENDING (expired / cancelled); the
+  // webhook refunds the charge instead of holding it in escrow.
+  "ORDER_NOT_PAYABLE",
 ] as const;
 
 export type CapturePaymentErrorCode = (typeof capturePaymentErrorCodes)[number];
@@ -152,11 +155,13 @@ export async function capturePayment(
           } | null = null;
           let expectedProviderAmountCents: number;
           let paymentLinkServiceFeeCents: number | null = null;
+          let orderStatus: OrderStatus | null = null;
 
           if (input.orderId !== undefined) {
             const order = await tx.order.findFirst({
               where: { id: input.orderId, businessId: input.businessId },
               select: {
+                status: true,
                 amountCents: true,
                 corporateAccountId: true,
                 payment: {
@@ -170,6 +175,7 @@ export async function capturePayment(
             }
 
             expectedProviderAmountCents = order.amountCents;
+            orderStatus = order.status;
             corporateAccountId = order.corporateAccountId;
             targetPayment = order.payment;
           } else {
@@ -204,13 +210,6 @@ export async function capturePayment(
             return svcFail("INVALID_TARGET");
           }
 
-          if (
-            targetPayment !== null &&
-            targetPayment.stripePaymentIntentId !== input.stripePaymentIntentId
-          ) {
-            return svcFail("INVALID_TARGET");
-          }
-
           const existingPayment = await tx.payment.findUnique({
             where: { stripePaymentIntentId: input.stripePaymentIntentId },
             select: {
@@ -229,6 +228,23 @@ export async function capturePayment(
             return matchesExistingPayment(existingPayment, input)
               ? svcOk({ paymentId: existingPayment.id })
               : svcFail("INVALID_TARGET");
+          }
+
+          // H1 defense in depth: a capture that lands on an order the cron
+          // or a cancel already closed (late hosted-checkout payment, an
+          // intent that raced the close) must never become an IN_ESCROW row
+          // nobody can release; the caller refunds it outside this tx.
+          // Checked before the payment-mismatch guard so a second charge on
+          // an order another intent already paid is refunded too.
+          if (orderStatus !== null && orderStatus !== OrderStatus.PENDING) {
+            return svcFail("ORDER_NOT_PAYABLE");
+          }
+
+          if (
+            targetPayment !== null &&
+            targetPayment.stripePaymentIntentId !== input.stripePaymentIntentId
+          ) {
+            return svcFail("INVALID_TARGET");
           }
 
           const settings = await tx.platformSettings.findUnique({
@@ -1147,6 +1163,12 @@ export async function releaseDuePayments(
         select: {
           id: true,
           business: { select: { ownerId: true } },
+          // F10 review L3: a redeemed pickup whose inline release failed.
+          events: {
+            where: { type: OrderEventType.PICKED_UP },
+            select: { actorUserId: true },
+            take: 1,
+          },
         },
       },
     },
@@ -1157,15 +1179,26 @@ export async function releaseDuePayments(
   const notifyRelease = await isPaymentReleaseNotificationEnabled(deps.db);
 
   for (const payment of duePayments) {
+    // L3: the customer confirmed a pickup by handing over the code, so the
+    // deferred release is recorded as that CONFIRMED (by the redeeming
+    // cashier), not as an AUTO_RELEASED timeout — and no auto-release push.
+    const pickup = payment.order?.events[0] ?? null;
+    const event: ReleaseOrderEvent = pickup
+      ? {
+          type: OrderEventType.CONFIRMED,
+          ...(pickup.actorUserId ? { actorUserId: pickup.actorUserId } : {}),
+        }
+      : { type: OrderEventType.AUTO_RELEASED };
+
     try {
       const result = await releasePayment(deps, {
         paymentId: payment.id,
-        event: { type: OrderEventType.AUTO_RELEASED },
+        event,
       });
 
       if (result.ok) {
         released += 1;
-        if (payment.order && notifyRelease) {
+        if (payment.order && notifyRelease && !pickup) {
           await sendLocalizedPushToUser(
             deps.db,
             payment.order.business.ownerId,

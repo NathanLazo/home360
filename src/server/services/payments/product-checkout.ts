@@ -2,21 +2,34 @@ import "server-only";
 
 import {
   BranchStatus,
-  BusinessStatus,
   FulfillmentMethod,
+  OrderEventType,
   OrderStatus,
   OrderType,
   PaymentStatus,
   ProductStatus,
+  StockMovementType,
   type Prisma,
 } from "@generated/prisma";
 
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
 import {
   productBranchStockSelect,
-  selectDeliveryBranch,
+  rankDeliveryBranches,
   validatePickupBranch,
 } from "~/server/services/catalog/product-availability";
-import { reserveProductStock } from "~/server/services/orders/stock-hold";
+import {
+  closePendingOrder,
+  voidIntentsAfterClose,
+} from "~/server/services/orders/cancel-unpaid-order";
+import {
+  recordStockMovement,
+  reserveProductStock,
+} from "~/server/services/orders/stock-hold";
+import {
+  resolveUnpaidOrderTtlMinutes,
+  unpaidOrderCutoff,
+} from "~/server/services/orders/unpaid-order-ttl";
 import {
   createOrderPaymentIntent,
   type CheckoutIntentResult,
@@ -30,11 +43,18 @@ import {
 } from "~/server/services/service-result";
 
 const MAX_PRISMA_INT = 2_147_483_647;
-const MILLISECONDS_PER_MINUTE = 60_000;
-const DEFAULT_UNPAID_ORDER_TTL_MINUTES = 30;
+/**
+ * F10 review M4: open (PENDING) PRODUCT orders a customer may hold at once.
+ * Each one reserves stock, so without a cap one account could reserve a
+ * product's whole availability by cycling quantities / addresses / branches.
+ * A new checkout over the cap replaces the customer's oldest open order
+ * (cancelled and its units released in the same transaction).
+ */
+export const MAX_OPEN_PRODUCT_ORDERS_PER_CUSTOMER = 3;
 
 export type ProductCheckoutErrorCode =
   | "BUSINESS_NOT_ACTIVE"
+  | "ORDER_EXPIRED"
   | "OUT_OF_STOCK"
   | "PICKUP_NOT_AVAILABLE"
   | "DELIVERY_NOT_AVAILABLE"
@@ -64,10 +84,17 @@ type PendingOrderPlan = {
   productId: string;
   title: string;
   businessId: string;
-  branchId: string;
   amountCents: number;
   target: DeliveryTarget;
 };
+
+type PendingOrderOutcome = {
+  orderId: string;
+  /** PaymentIntents of replaced orders (M4), voided after the transaction. */
+  replacedIntents: { orderId: string; intentIds: string[] }[];
+};
+
+type PendingOrderErrorCode = "OUT_OF_STOCK" | "DELIVERY_NOT_AVAILABLE";
 
 function targetWhere(target: DeliveryTarget): Prisma.OrderWhereInput {
   return target.method === FulfillmentMethod.PICKUP
@@ -80,29 +107,96 @@ function targetWhere(target: DeliveryTarget): Prisma.OrderWhereInput {
 }
 
 /**
+ * Branches to try, in order. PICKUP is the customer's (validated) branch.
+ * DELIVERY is re-ranked from the stock read inside the transaction (L8), so
+ * a branch emptied concurrently is skipped instead of failing the checkout.
+ */
+async function candidateBranches(
+  tx: Prisma.TransactionClient,
+  plan: PendingOrderPlan,
+  quantity: number,
+): Promise<ServiceResult<string[], PendingOrderErrorCode>> {
+  if (plan.target.method === FulfillmentMethod.PICKUP) {
+    return svcOk([plan.target.branchId]);
+  }
+
+  const rows = await tx.productStock.findMany({
+    where: { productId: plan.productId },
+    select: productBranchStockSelect,
+  });
+  const ranking = rankDeliveryBranches(rows, quantity, {
+    latitude: plan.target.latitude,
+    longitude: plan.target.longitude,
+  });
+
+  return ranking.ok
+    ? svcOk(ranking.branchIds)
+    : svcFail(ranking.code, "No branch can deliver this order");
+}
+
+/**
+ * M4: keeps the customer at most `MAX_OPEN_PRODUCT_ORDERS_PER_CUSTOMER` open
+ * PRODUCT orders counting the one about to be created. The oldest extra ones
+ * are closed like the customer's own unpaid cancel (`closePendingOrder`:
+ * CANCELLED event, PENDING Payment rows removed, units released with their
+ * ledger row) inside the caller's transaction; their intents are returned
+ * so they are voided after it. An order whose intent may already carry
+ * money is still closed: a late capture is refunded (`ORDER_NOT_PAYABLE`).
+ */
+async function replaceOldestOpenOrders(
+  tx: Prisma.TransactionClient,
+  input: { customerId: string; keepOrderId: string; now: Date },
+): Promise<PendingOrderOutcome["replacedIntents"]> {
+  const older = await tx.order.findMany({
+    where: {
+      customerId: input.customerId,
+      type: OrderType.PRODUCT,
+      status: OrderStatus.PENDING,
+      id: { not: input.keepOrderId },
+    },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    select: { id: true },
+  });
+  // The new order counts towards the cap.
+  const excess = older.length + 1 - MAX_OPEN_PRODUCT_ORDERS_PER_CUSTOMER;
+  const replaced: PendingOrderOutcome["replacedIntents"] = [];
+
+  for (const order of older.slice(0, Math.max(0, excess))) {
+    const closed = await closePendingOrder(tx, {
+      orderId: order.id,
+      actorUserId: input.customerId,
+      eventType: OrderEventType.CANCELLED,
+      stockReason: "REPLACED_BY_NEWER_CHECKOUT",
+      now: input.now,
+    });
+
+    if (closed && closed.removedIntentIds.length > 0) {
+      replaced.push({ orderId: order.id, intentIds: closed.removedIntentIds });
+    }
+  }
+
+  return replaced;
+}
+
+/**
  * Finds the customer's open PENDING order for the same product, quantity and
  * fulfillment (D10-7) or creates one, reserving the stock atomically in the
- * same Serializable transaction (D10-4). Returns the order id or the stable
- * OUT_OF_STOCK code.
+ * same Serializable transaction (D10-4) together with its RESERVE ledger row
+ * (F10-b). Over the per-customer cap the oldest open order is replaced (M4).
  */
 async function findOrCreatePendingOrder(
   deps: Pick<CustomerCheckoutDeps, "db">,
   input: ProductCheckoutInput,
   plan: PendingOrderPlan,
-): Promise<ServiceResult<{ orderId: string }, "OUT_OF_STOCK">> {
-  const settings = await deps.db.platformSettings.findUnique({
-    where: { id: 1 },
-    select: { unpaidOrderTtlMinutes: true },
-  });
-  const ttlMinutes =
-    settings?.unpaidOrderTtlMinutes ?? DEFAULT_UNPAID_ORDER_TTL_MINUTES;
-  const freshSince = new Date(
-    Date.now() - ttlMinutes * MILLISECONDS_PER_MINUTE,
-  );
+): Promise<ServiceResult<PendingOrderOutcome, PendingOrderErrorCode>> {
+  const ttlMinutes = await resolveUnpaidOrderTtlMinutes(deps.db);
 
-  return runSerializable<ServiceResult<{ orderId: string }, "OUT_OF_STOCK">>(
+  return runSerializable<
+    ServiceResult<PendingOrderOutcome, PendingOrderErrorCode>
+  >(
     deps.db,
     async (tx) => {
+      const now = new Date();
       const existing = await tx.order.findFirst({
         where: {
           customerId: input.customerId,
@@ -111,7 +205,7 @@ async function findOrCreatePendingOrder(
           productId: plan.productId,
           quantity: input.quantity,
           fulfillmentMethod: plan.target.method,
-          createdAt: { gt: freshSince },
+          createdAt: { gt: unpaidOrderCutoff(ttlMinutes, now) },
           ...targetWhere(plan.target),
           OR: [
             { payment: { is: null } },
@@ -123,14 +217,29 @@ async function findOrCreatePendingOrder(
       });
 
       if (existing) {
-        return svcOk({ orderId: existing.id });
+        return svcOk({ orderId: existing.id, replacedIntents: [] });
       }
 
-      const reserved = await reserveProductStock(tx, {
-        productId: plan.productId,
-        branchId: plan.branchId,
-        quantity: input.quantity,
-      });
+      const candidates = await candidateBranches(tx, plan, input.quantity);
+
+      if (!candidates.ok) {
+        return candidates;
+      }
+
+      let reserved: { branchId: string; stockAfter: number } | null = null;
+
+      for (const branchId of candidates.data) {
+        const stockAfter = await reserveProductStock(tx, {
+          productId: plan.productId,
+          branchId,
+          quantity: input.quantity,
+        });
+
+        if (stockAfter !== null) {
+          reserved = { branchId, stockAfter };
+          break;
+        }
+      }
 
       if (!reserved) {
         return svcFail("OUT_OF_STOCK", "Product stock is insufficient");
@@ -144,7 +253,7 @@ async function findOrCreatePendingOrder(
           amountCents: plan.amountCents,
           customerId: input.customerId,
           businessId: plan.businessId,
-          branchId: plan.branchId,
+          branchId: reserved.branchId,
           productId: plan.productId,
           quantity: input.quantity,
           fulfillmentMethod: plan.target.method,
@@ -160,7 +269,24 @@ async function findOrCreatePendingOrder(
         select: { id: true },
       });
 
-      return svcOk({ orderId: order.id });
+      await recordStockMovement(tx, {
+        productId: plan.productId,
+        branchId: reserved.branchId,
+        type: StockMovementType.RESERVE,
+        quantity: -input.quantity,
+        stockAfter: reserved.stockAfter,
+        orderId: order.id,
+        actorUserId: input.customerId,
+      });
+
+      // After the RESERVE row so the ledger's `stockAfter` stays sequential.
+      const replacedIntents = await replaceOldestOpenOrders(tx, {
+        customerId: input.customerId,
+        keepOrderId: order.id,
+        now,
+      });
+
+      return svcOk({ orderId: order.id, replacedIntents });
     },
     () => svcFail("CONFLICT", "Product checkout conflicted"),
   );
@@ -172,7 +298,9 @@ async function findOrCreatePendingOrder(
  * or PICKUP (a chosen ACTIVE pickup-enabled, geocoded branch). The units are
  * reserved with the PENDING order (D10-4) and released by the cancel paths
  * or the expiry cron. Idempotent per product × quantity × fulfillment: a
- * retry reuses the open PENDING order and its PaymentIntent (D10-7).
+ * retry reuses the open PENDING order and its PaymentIntent (D10-7). Only
+ * marketplace-visible businesses sell (L6), and a customer keeps at most
+ * `MAX_OPEN_PRODUCT_ORDERS_PER_CUSTOMER` open orders (M4).
  */
 export async function createProductCheckoutIntent(
   deps: CustomerCheckoutDeps,
@@ -182,7 +310,7 @@ export async function createProductCheckoutIntent(
     where: {
       id: input.productId,
       status: ProductStatus.PUBLISHED,
-      business: { status: BusinessStatus.ACTIVE },
+      business: marketplaceBusinessWhere,
     },
     select: {
       id: true,
@@ -198,7 +326,6 @@ export async function createProductCheckoutIntent(
   }
 
   let target: DeliveryTarget;
-  let branchId: string;
 
   if (input.fulfillmentMethod === FulfillmentMethod.DELIVERY) {
     if (!input.addressId) {
@@ -214,16 +341,16 @@ export async function createProductCheckoutIntent(
       return svcFail("NOT_FOUND", "Address not found");
     }
 
-    const selection = selectDeliveryBranch(product.stocks, input.quantity, {
+    // Early answer from the snapshot; the transaction re-ranks (L8).
+    const ranking = rankDeliveryBranches(product.stocks, input.quantity, {
       latitude: address.latitude,
       longitude: address.longitude,
     });
 
-    if (!selection.ok) {
-      return svcFail(selection.code, "No branch can deliver this order");
+    if (!ranking.ok) {
+      return svcFail(ranking.code, "No branch can deliver this order");
     }
 
-    branchId = selection.branchId;
     target = {
       method: FulfillmentMethod.DELIVERY,
       addressLine: address.addressLine,
@@ -267,8 +394,7 @@ export async function createProductCheckoutIntent(
       );
     }
 
-    branchId = selection.branchId;
-    target = { method: FulfillmentMethod.PICKUP, branchId };
+    target = { method: FulfillmentMethod.PICKUP, branchId: selection.branchId };
   }
 
   const amountCents = product.priceCents * input.quantity;
@@ -285,13 +411,19 @@ export async function createProductCheckoutIntent(
     productId: product.id,
     title: product.name,
     businessId: product.businessId,
-    branchId,
     amountCents,
     target,
   });
 
   if (!pending.ok) {
     return pending;
+  }
+
+  for (const replaced of pending.data.replacedIntents) {
+    await voidIntentsAfterClose(deps.stripe, {
+      orderId: replaced.orderId,
+      intentIds: replaced.intentIds,
+    });
   }
 
   return createOrderPaymentIntent(deps, {

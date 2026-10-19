@@ -2,7 +2,6 @@ import "server-only";
 
 import {
   BranchStatus,
-  BusinessStatus,
   ProductStatus,
   ServiceStatus,
   type BusinessType,
@@ -16,6 +15,8 @@ import {
   productBranchStockSelect,
   summarizeAvailability,
 } from "~/server/services/catalog/product-availability";
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
+import { approximateCoordinate } from "~/server/services/geo/approximate";
 import type { GeoPoint } from "~/server/services/geo/haversine";
 
 import type { MarketplaceKind } from "./marketplace";
@@ -63,13 +64,19 @@ export type MarketplaceBusinessProfile = {
   guaranteeNotes: string | null;
   ratingAvg: number | null;
   ratingCount: number;
+  /**
+   * F10 review L5: only pickup counters are public places. A branch without
+   * pickup (often a service business's home base) has no address and only
+   * approximate coordinates (~110 m), so `exactLocation` is false.
+   */
   branches: {
     id: string;
     name: string;
-    address: string;
+    address: string | null;
     latitude: number | null;
     longitude: number | null;
     pickupEnabled: boolean;
+    exactLocation: boolean;
     distanceKm: number | null;
   }[];
   services: {
@@ -199,7 +206,7 @@ export async function listMarketplaceBusinesses(
   input: ListBusinessesInput,
 ): Promise<TrpcResponse<MarketplaceBusinessList>> {
   const rows = await db.business.findMany({
-    where: { status: BusinessStatus.ACTIVE, ...catalogWhere(input) },
+    where: { ...marketplaceBusinessWhere, ...catalogWhere(input) },
     take: MAX_DIRECTORY_SCAN,
     orderBy: [{ ratingAvg: { sort: "desc", nulls: "last" } }, { id: "asc" }],
     select: {
@@ -298,7 +305,7 @@ export async function getMarketplaceBusiness(
   input: { id: string; origin: GeoPoint | null },
 ): Promise<TrpcResponse<MarketplaceBusinessProfile>> {
   const business = await db.business.findFirst({
-    where: { id: input.id, status: BusinessStatus.ACTIVE },
+    where: { id: input.id, ...marketplaceBusinessWhere },
     select: {
       id: true,
       name: true,
@@ -358,15 +365,28 @@ export async function getMarketplaceBusiness(
       guaranteeNotes: business.guaranteeNotes,
       ratingAvg: business.ratingAvg,
       ratingCount: business.ratingCount,
-      branches: business.branches.map((branch) => ({
-        ...branch,
-        distanceKm: distanceFrom(
-          input.origin,
+      branches: business.branches.map((branch) => {
+        const point =
           branch.latitude !== null && branch.longitude !== null
-            ? { latitude: branch.latitude, longitude: branch.longitude }
-            : null,
-        ),
-      })),
+            ? branch.pickupEnabled
+              ? { latitude: branch.latitude, longitude: branch.longitude }
+              : {
+                  latitude: approximateCoordinate(branch.latitude),
+                  longitude: approximateCoordinate(branch.longitude),
+                }
+            : null;
+
+        return {
+          id: branch.id,
+          name: branch.name,
+          address: branch.pickupEnabled ? branch.address : null,
+          latitude: point?.latitude ?? null,
+          longitude: point?.longitude ?? null,
+          pickupEnabled: branch.pickupEnabled,
+          exactLocation: branch.pickupEnabled,
+          distanceKm: distanceFrom(input.origin, point),
+        };
+      }),
       services: business.services,
       products: business.products.map(({ stocks, ...product }) => {
         const availability = summarizeAvailability(stocks, input.origin);
@@ -391,7 +411,7 @@ export async function getMarketplaceService(
     where: {
       id,
       status: ServiceStatus.ACTIVE,
-      business: { status: BusinessStatus.ACTIVE },
+      business: marketplaceBusinessWhere,
     },
     select: {
       id: true,

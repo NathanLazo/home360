@@ -63,6 +63,11 @@ export const DOMAIN_ERROR_CODES = [
   "FULFILLMENT_MISMATCH",
   "REQUEST_EXPIRED",
   "PICKUP_NOT_CONFIGURED",
+  // F10 review: unpaid order past its TTL (M2) / evidence already used (M5).
+  "ORDER_EXPIRED",
+  "EVIDENCE_REUSED",
+  // Rate limits (auth, pickup redemption); translated in errors.json.
+  "TOO_MANY_REQUESTS",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

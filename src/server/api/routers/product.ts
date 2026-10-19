@@ -27,6 +27,8 @@ import {
   updateProduct,
 } from "~/server/services/catalog/product-catalog";
 import { productStockAdjustSchema } from "~/server/services/catalog/product-stock.schema";
+import { stockMovementListSchema } from "~/server/services/catalog/stock-movement.schema";
+import { listStockMovements } from "~/server/services/catalog/stock-movements";
 
 const productIdSchema = z.object({ id: z.string().cuid() });
 const productStockSchema = z.object({ productId: z.string().cuid() });
@@ -76,6 +78,17 @@ export const productRouter = createTRPCRouter({
       }
     }),
 
+  // F10-b stock ledger of one product (newest first, cursor = movement id).
+  listStockMovements: businessProcedure
+    .input(stockMovementListSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        return await listStockMovements(ctx.db, ctx.business.id, input);
+      } catch (error) {
+        return productFailure(error);
+      }
+    }),
+
   listCategories: businessProcedure.query(async ({ ctx }) => {
     try {
       return await listProductCategories(ctx.db, ctx.business.id);
@@ -88,7 +101,12 @@ export const productRouter = createTRPCRouter({
     .input(productCreateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await createProduct(ctx.db, ctx.business, input);
+        return await createProduct(
+          ctx.db,
+          ctx.business,
+          input,
+          ctx.session.user.id,
+        );
       } catch (error) {
         return productFailure(error);
       }
@@ -103,6 +121,7 @@ export const productRouter = createTRPCRouter({
           ctx.business.id,
           input.branchId,
           input.rows,
+          ctx.session.user.id,
         );
       } catch (error) {
         return productFailure(error);
@@ -113,7 +132,12 @@ export const productRouter = createTRPCRouter({
     .input(productUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await updateProduct(ctx.db, ctx.business.id, input);
+        return await updateProduct(
+          ctx.db,
+          ctx.business.id,
+          input,
+          ctx.session.user.id,
+        );
       } catch (error) {
         return productFailure(error);
       }
@@ -126,7 +150,12 @@ export const productRouter = createTRPCRouter({
     .input(productStockAdjustSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await adjustProductStock(ctx.db, ctx.business.id, input);
+        return await adjustProductStock(
+          ctx.db,
+          ctx.business.id,
+          input,
+          ctx.session.user.id,
+        );
       } catch (error) {
         return productFailure(error);
       }

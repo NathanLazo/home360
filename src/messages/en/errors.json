@@ -59,5 +59,7 @@
   "PICKUP_CODE_INVALID": "The pickup code is not valid for any order ready for pickup.",
   "FULFILLMENT_MISMATCH": "This action does not match the order's delivery method or current step.",
   "REQUEST_EXPIRED": "This request has expired and no longer accepts offers.",
-  "PICKUP_NOT_CONFIGURED": "Pickup codes are not configured yet. Try again later."
+  "PICKUP_NOT_CONFIGURED": "Pickup codes are not configured yet. Try again later.",
+  "ORDER_EXPIRED": "This order expired before it was paid. Place the order again.",
+  "EVIDENCE_REUSED": "One of these photos was already used as evidence on another order. Upload new photos."
 }

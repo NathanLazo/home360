@@ -11,6 +11,11 @@ import {
   type Prisma,
   type PrismaClient,
 } from "@generated/prisma";
+import {
+  DEFAULT_UNPAID_ORDER_TTL_MINUTES,
+  isPastUnpaidOrderTtl,
+  resolveUnpaidOrderTtlMinutes,
+} from "~/server/services/orders/unpaid-order-ttl";
 import { createDownloadUrl } from "~/server/services/media/blob";
 import { canConsumerCancelPaidOrder } from "~/server/services/orders/cancel-order";
 import { effectiveFulfillmentMethod } from "~/server/services/orders/order-actions";
@@ -249,6 +254,10 @@ export async function getConsumerOrderDetail(
     return svcFail("NOT_FOUND", "Order not found");
   }
 
+  const unpaidTtlMinutes =
+    order.status === OrderStatus.PENDING
+      ? await resolveUnpaidOrderTtlMinutes(db)
+      : DEFAULT_UNPAID_ORDER_TTL_MINUTES;
   const settings = order.payment
     ? null
     : await db.platformSettings.findUnique({
@@ -381,10 +390,13 @@ export async function getConsumerOrderDetail(
         order.status === OrderStatus.COMPLETED && order.review === null,
       // A PENDING Payment row is an abandoned PaymentSheet attempt whose
       // intent `checkout.createIntent` reuses (PRODUCT retry, D10-7).
+      // F10 review M2: past the unpaid TTL the cron cancels it and
+      // `createIntent` answers ORDER_EXPIRED, so the app must not offer it.
       canPay:
         order.status === OrderStatus.PENDING &&
         (order.payment === null ||
-          order.payment.status === PaymentStatus.PENDING),
+          order.payment.status === PaymentStatus.PENDING) &&
+        !isPastUnpaidOrderTtl(order.createdAt, unpaidTtlMinutes),
       canShowPickupQr,
     },
   });
