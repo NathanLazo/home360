@@ -364,6 +364,9 @@ model User {
   // in and every live session is revoked through `sessionsValidFrom`.
   suspendedAt                  DateTime?
   suspensionReason             String?
+  // Self-service account deletion (App Store 5.1.1(v)): PII is anonymized and
+  // the row is kept (suspended) so orders, payments and audits stay traceable.
+  deletedAt                    DateTime?
   accounts                     Account[]
   sessions                     Session[]                    @relation("SessionOwner")
   impersonationSessions        Session[]                    @relation("SessionImpersonation")

@@ -68,6 +68,9 @@ export const DOMAIN_ERROR_CODES = [
   "EVIDENCE_REUSED",
   // Rate limits (auth, pickup redemption); translated in errors.json.
   "TOO_MANY_REQUESTS",
+  // Self-service account deletion blockers (money or work still in flight).
+  "ACCOUNT_HAS_ACTIVE_ORDERS",
+  "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];
