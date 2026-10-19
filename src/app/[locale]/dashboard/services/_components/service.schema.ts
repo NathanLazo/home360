@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 import { ServiceStatus } from "@generated/prisma";
 
 const durationMaxSchema = z
@@ -18,7 +20,7 @@ const serviceFields = {
     .positive()
     .max(24 * 60),
   durationMaxMinutes: durationMaxSchema.optional(),
-  workerIds: z.array(z.string().cuid()).max(50).default([]),
+  workerIds: z.array(recordIdSchema).max(50).default([]),
 };
 
 export const serviceCreateSchema = z
@@ -32,13 +34,13 @@ export const serviceCreateSchema = z
 
 export const serviceUpdateSchema = z
   .object({
-    id: z.string().cuid(),
+    id: recordIdSchema,
     name: serviceFields.name.optional(),
     category: serviceFields.category.optional(),
     basePriceCents: serviceFields.basePriceCents.optional(),
     durationMinutes: serviceFields.durationMinutes.optional(),
     durationMaxMinutes: durationMaxSchema.nullable().optional(),
-    workerIds: z.array(z.string().cuid()).max(50).optional(),
+    workerIds: z.array(recordIdSchema).max(50).optional(),
   })
   .refine(
     (value) =>
@@ -53,7 +55,7 @@ export const serviceListSchema = z.object({
   search: z.string().trim().min(1).max(100).optional(),
   category: z.string().trim().max(60).optional(),
   status: z.nativeEnum(ServiceStatus).optional(),
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export type ServiceCreateInput = z.infer<typeof serviceCreateSchema>;

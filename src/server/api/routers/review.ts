@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -11,7 +12,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
 import { createOrderReview } from "~/server/services/reviews/create-review";
 
 const createReviewSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
   rating: z.number().int().min(1).max(5),
   comment: z.string().trim().max(1_000).optional(),
 });

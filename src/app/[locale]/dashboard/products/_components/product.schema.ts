@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 import { ProductStatus } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import type { ErrorCode } from "~/server/api/contract";
 
 const productStockSchema = z.object({
-  branchId: z.string().cuid(),
+  branchId: recordIdSchema,
   stock: z.number().int().min(0).default(0),
   lowStockThreshold: z.number().int().min(0).default(5),
 });
@@ -56,7 +57,7 @@ export const productCreateSchema = z.object({
 });
 
 export const productUpdateSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
   name: productFields.name.optional(),
   sku: productFields.sku.optional(),
   category: productFields.category.optional(),
@@ -68,7 +69,7 @@ export const productUpdateSchema = z.object({
 
 /** Stock-only adjustment from the row action (per-branch dialog). */
 export const productAdjustStockSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
   stocks: productStocksSchema,
 });
 
@@ -77,8 +78,8 @@ export const productListSchema = z.object({
   category: z.string().trim().max(60).optional(),
   status: z.nativeEnum(ProductStatus).optional(),
   lowStockOnly: z.boolean().optional(),
-  branchId: z.string().cuid().optional(),
-  cursor: z.string().cuid().optional(),
+  branchId: recordIdSchema.optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const productCsvErrorCodes = [
@@ -109,7 +110,7 @@ export const productCsvRowSchema = z.object({
 
 export const productImportSchema = z.object({
   rows: z.array(productCsvRowSchema).min(1).max(500),
-  branchId: z.string().cuid(),
+  branchId: recordIdSchema,
 });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;

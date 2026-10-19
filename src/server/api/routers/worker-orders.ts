@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { OrderEventType, WorkerAvailability } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -20,7 +21,7 @@ import {
 } from "~/server/services/orders/worker-flow";
 import { getWorkerStats } from "~/server/services/orders/worker-stats";
 
-const orderIdSchema = z.object({ orderId: z.string().cuid() });
+const orderIdSchema = z.object({ orderId: recordIdSchema });
 
 const transitionSchema = orderIdSchema.extend({
   to: z.enum([OrderEventType.EN_ROUTE, OrderEventType.ARRIVED]),
@@ -38,7 +39,7 @@ const startRecordingSchema = orderIdSchema.extend({
 
 const stopRecordingSchema = z
   .object({
-    segmentId: z.string().cuid(),
+    segmentId: recordIdSchema,
     pathname: z.string().trim().min(1).max(500).optional(),
     interrupted: z.boolean().default(false),
     endLat: geoSchema.shape.lat,
@@ -50,7 +51,7 @@ const stopRecordingSchema = z
   });
 
 const materialSchema = z.object({
-  productId: z.string().cuid().optional(),
+  productId: recordIdSchema.optional(),
   name: z.string().trim().min(1).max(200),
   quantity: z.number().int().positive().max(10_000),
   unitPriceCents: z.number().int().nonnegative().max(2_147_483_647),
@@ -69,7 +70,7 @@ const finishSchema = orderIdSchema.extend({
 const listAssignedSchema = z
   .object({
     scope: z.enum(ASSIGNED_ORDER_SCOPES).default("today"),
-    cursor: z.string().cuid().optional(),
+    cursor: recordIdSchema.optional(),
   })
   .default({ scope: "today" });
 

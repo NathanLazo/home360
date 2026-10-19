@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -18,6 +19,7 @@ import {
   cancelMyRequest,
   createServiceRequest,
   getMyRequest,
+  hideMyRequest,
   listMyRequests,
   type RequestDiagnosisSource,
 } from "~/server/services/marketplace/request";
@@ -45,13 +47,13 @@ const createRequestSchema = z
   .object({
     mediaPathnames: mediaPathnamesSchema.default([]),
     description: z.string().trim().max(1_000).optional(),
-    addressId: z.string().cuid().optional(),
-    corporateLocationId: z.string().cuid().optional(),
-    diagnosisId: z.string().cuid().optional(),
+    addressId: recordIdSchema.optional(),
+    corporateLocationId: recordIdSchema.optional(),
+    diagnosisId: recordIdSchema.optional(),
     category: z.enum(REQUEST_CATEGORIES).optional(),
     // D10-11: targeted request (only that business sees and is notified).
-    businessId: z.string().cuid().optional(),
-    serviceId: z.string().cuid().optional(),
+    businessId: recordIdSchema.optional(),
+    serviceId: recordIdSchema.optional(),
   })
   .refine(
     (input) =>
@@ -73,10 +75,10 @@ const createRequestSchema = z
 
 type CreateRequestSchemaInput = z.infer<typeof createRequestSchema>;
 
-const requestIdSchema = z.object({ id: z.string().cuid() });
+const requestIdSchema = z.object({ id: recordIdSchema });
 
 const listMineSchema = z
-  .object({ cursor: z.string().cuid().optional() })
+  .object({ cursor: recordIdSchema.optional() })
   .optional();
 
 /**
@@ -262,6 +264,26 @@ export const requestRouter = createTRPCRouter({
         return ok(cancelled.data, "Request cancelled");
       } catch (error) {
         return unexpectedFailure(error, "Request cancel failed");
+      }
+    }),
+
+  /** Customer soft delete: hidden from the customer, kept for traceability. */
+  hide: consumerProcedure
+    .input(requestIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const hidden = await hideMyRequest(ctx.db, {
+          customerId: ctx.consumer.userId,
+          id: input.id,
+        });
+
+        if (!hidden.ok) {
+          return serviceFailure(hidden.code, "Request delete failed");
+        }
+
+        return ok(hidden.data, "Request deleted");
+      } catch (error) {
+        return unexpectedFailure(error, "Request delete failed");
       }
     }),
 });

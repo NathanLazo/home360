@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 import { BranchStatus } from "@generated/prisma";
 
 const branchFields = {
@@ -28,7 +30,7 @@ const coordinatesPairIssue = {
 };
 
 export const branchIdSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
 });
 
 export const branchCreateSchema = z

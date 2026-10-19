@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 /**
  * URL contract of the payments screen. Shared by the server page (prefetch)
  * and the client view (tab state), so both read `?tab=` and `?branch=` the
@@ -17,7 +19,7 @@ export type PaymentsTab = (typeof PAYMENTS_TABS)[number];
 export const DEFAULT_PAYMENTS_TAB: PaymentsTab = "transactions";
 
 const paymentsTabSchema = z.enum(PAYMENTS_TABS);
-const branchIdSchema = z.string().trim().cuid();
+const branchIdSchema = recordIdSchema;
 
 export function parsePaymentsTab(value: unknown): PaymentsTab {
   const parsed = paymentsTabSchema.safeParse(value);

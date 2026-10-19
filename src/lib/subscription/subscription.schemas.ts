@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 import { planCodeSchema } from "./plan-codes";
 
 /**
@@ -24,5 +26,5 @@ export type SubscriptionErrorCode = (typeof subscriptionErrorCodes)[number];
 export const planChangeSchema = z.object({ planCode: planCodeSchema });
 
 export const listInvoicesSchema = z.object({
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });

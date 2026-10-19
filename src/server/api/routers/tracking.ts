@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -17,10 +18,10 @@ import {
 } from "~/server/services/orders/tracking";
 import { getStripe } from "~/server/services/stripe/client";
 
-const getOrderSchema = z.object({ orderId: z.string().cuid() });
+const getOrderSchema = z.object({ orderId: recordIdSchema });
 
 const listMyOrdersSchema = z
-  .object({ cursor: z.string().cuid().optional() })
+  .object({ cursor: recordIdSchema.optional() })
   .optional();
 
 const updateLocationSchema = z.object({
@@ -29,7 +30,7 @@ const updateLocationSchema = z.object({
 });
 
 const requestReworkSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
   note: z.string().trim().min(10).max(1_000),
 });
 

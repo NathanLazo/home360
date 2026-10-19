@@ -1,6 +1,7 @@
 import { ServiceStatus } from "@generated/prisma";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   serviceCreateSchema,
   serviceListSchema,
@@ -22,7 +23,7 @@ import {
   updateService,
 } from "~/server/services/catalog/service-catalog";
 
-const serviceIdSchema = z.object({ id: z.string().cuid() });
+const serviceIdSchema = z.object({ id: recordIdSchema });
 const serviceStatusSchema = serviceIdSchema.extend({
   status: z.nativeEnum(ServiceStatus),
 });

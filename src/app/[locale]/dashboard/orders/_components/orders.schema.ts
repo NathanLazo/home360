@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 export const ordersTabSchema = z.enum(["orders", "requests", "offers"]);
 export type OrdersTab = z.infer<typeof ordersTabSchema>;
 
@@ -22,7 +24,7 @@ export const OFFER_MESSAGE_MAX = 500;
  * schedule comes from a `datetime-local` input (viewer's local time).
  */
 export const offerFormSchema = z.object({
-  workerId: z.string().cuid(),
+  workerId: recordIdSchema,
   price: z.coerce.number().positive().max(10_000_000),
   scheduledAt: z
     .string()

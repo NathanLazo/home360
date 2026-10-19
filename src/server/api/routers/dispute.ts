@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -21,21 +22,21 @@ import {
 const evidenceSchema = z.array(z.string().trim().min(1).max(500)).max(10);
 
 const openDisputeSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
   reason: z.enum(DISPUTE_REASONS),
   description: z.string().trim().min(20).max(2_000),
   evidenceUrls: evidenceSchema.default([]),
 });
 
-const orderIdSchema = z.object({ orderId: z.string().cuid() });
+const orderIdSchema = z.object({ orderId: recordIdSchema });
 
 const addEvidenceSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
   evidenceUrls: evidenceSchema.min(1),
 });
 
 const respondSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
   argument: z.string().trim().min(20).max(2_000),
   evidenceUrls: evidenceSchema.default([]),
 });

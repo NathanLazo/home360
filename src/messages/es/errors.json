@@ -61,5 +61,7 @@
   "REQUEST_EXPIRED": "Esta solicitud venció y ya no acepta ofertas.",
   "PICKUP_NOT_CONFIGURED": "Los códigos de recolección aún no están configurados. Intenta más tarde.",
   "ORDER_EXPIRED": "Esta orden venció sin pagarse. Vuelve a hacer el pedido.",
-  "EVIDENCE_REUSED": "Una de estas fotos ya se usó como evidencia en otra orden. Sube fotos nuevas."
+  "EVIDENCE_REUSED": "Una de estas fotos ya se usó como evidencia en otra orden. Sube fotos nuevas.",
+  "ACCOUNT_HAS_ACTIVE_ORDERS": "Tienes órdenes en curso. Termínalas o cancélalas antes de eliminar tu cuenta.",
+  "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION": "Cancela la suscripción de tu negocio antes de eliminar tu cuenta."
 }
