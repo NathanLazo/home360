@@ -125,10 +125,17 @@ export async function createUploadUrl(input: {
     maximumSizeInBytes: input.sizeBytes,
     validUntil: expiresAt.getTime(),
   });
+  // The mobile app PUTs raw bytes without the Blob SDK headers, so the store
+  // must never append a random suffix: the blob has to land exactly at
+  // `pathname`, which is what the app later sends to `request.create`,
+  // `workerOrders.finish`, etc. (production incident 2026-10-19: every
+  // diagnosis read failed with "Image not found in blob storage").
   const { presignedUrl } = await presignUrl(signedToken, {
     operation: "put",
     pathname,
     access: "private",
+    addRandomSuffix: false,
+    allowOverwrite: false,
     allowedContentTypes: [input.contentType],
     maximumSizeInBytes: input.sizeBytes,
     validUntil: expiresAt.getTime(),
