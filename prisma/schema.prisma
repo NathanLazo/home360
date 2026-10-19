@@ -1213,6 +1213,19 @@ model PushToken {
   @@index([userId])
 }
 
+/// Expo push tickets awaiting their delivery receipt. Expo publishes receipts
+/// minutes after sending, so `cron/push-receipts` checks them later and prunes
+/// `DeviceNotRegistered` tokens. No relation to PushToken: the token may be
+/// gone by the time the receipt is read.
+model PushReceipt {
+  receiptId String   @id
+  expoToken String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
 model CustomerProfile {
   id                     String  @id @default(cuid())
   userId                 String  @unique
