@@ -10,14 +10,18 @@ import {
 import { useTranslations } from "next-intl";
 
 import { ProductStockFields } from "./product-stock-fields";
-import { parseStockRows, toStockFormValues } from "./product-stock.utils";
+import {
+  parseStockRows,
+  toStockAdjustRows,
+  toStockFormValues,
+} from "./product-stock.utils";
 import type {
   ProductFormErrors,
   ProductListItem,
   ProductMutationResult,
+  ProductStockAdjustRequest,
   ProductStockFormValue,
 } from "./product.types";
-import type { ProductAdjustStockInput } from "./product.schema";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
@@ -42,7 +46,9 @@ export function ProductStockDialog({
   product: ProductListItem | null;
   submitting: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: ProductAdjustStockInput) => Promise<ProductMutationResult>;
+  onSubmit: (
+    input: ProductStockAdjustRequest,
+  ) => Promise<ProductMutationResult>;
 }) {
   const t = useTranslations("dashboard.products.stockDialog");
   const formT = useTranslations("dashboard.products.form");
@@ -51,6 +57,9 @@ export function ProductStockDialog({
   useCloseWhenReadOnly(open, onOpenChange);
   const [rows, setRows] = useState<ProductStockFormValue[] | null>(null);
   const [errors, setErrors] = useState<ProductFormErrors>({});
+  // D10-4: the stock moved after the dialog loaded it; the user reloads
+  // before re-applying the change.
+  const [stale, setStale] = useState(false);
   const shakeInvalid = useErrorShake();
   const stockQuery = api.product.getStockByBranch.useQuery(
     { productId: product?.id ?? "" },
@@ -63,6 +72,7 @@ export function ProductStockDialog({
     if (!open) {
       setRows(null);
       setErrors({});
+      setStale(false);
       return;
     }
     if (rows !== null || stockQuery.isFetching || !stockQuery.data?.result) {
@@ -96,8 +106,19 @@ export function ProductStockDialog({
     }
 
     setErrors({});
-    const result = await onSubmit({ id: product.id, stocks });
-    if (result.ok) onOpenChange(false);
+    const adjustRows = toStockAdjustRows(rows) ?? stocks;
+    const result = await onSubmit({ id: product.id, stocks: adjustRows });
+    if (result.ok) {
+      onOpenChange(false);
+      return;
+    }
+    if (result.error === "CONFLICT") setStale(true);
+  }
+
+  function reload() {
+    setStale(false);
+    setRows(null);
+    void stockQuery.refetch();
   }
 
   return (
@@ -161,6 +182,29 @@ export function ProductStockDialog({
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-5">
+              {stale ? (
+                <div
+                  role="alert"
+                  className="bg-warning-soft mx-4 mb-4 flex flex-col items-start gap-2 rounded-xl p-4"
+                >
+                  <p className="text-warning-deep text-copy-sm inline-flex items-center gap-2 font-medium">
+                    <TriangleAlertIcon aria-hidden="true" className="size-4" />
+                    {t("conflictTitle")}
+                  </p>
+                  <p className="text-warning-deep text-copy-sm">
+                    {t("conflictDescription")}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={reload}
+                  >
+                    <RotateCcwIcon aria-hidden="true" />
+                    {t("reload")}
+                  </Button>
+                </div>
+              ) : null}
               {rows === null ? (
                 <div className="flex h-40 items-center justify-center">
                   <LoaderCircleIcon
@@ -179,18 +223,16 @@ export function ProductStockDialog({
             </div>
             <DialogFooter className="border-t px-6 py-4">
               <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={submitting}
-                >
+                <Button type="button" variant="outline" disabled={submitting}>
                   {formT("cancel")}
                 </Button>
               </DialogClose>
               <Button
                 type="submit"
                 metal="live"
-                disabled={submitting || rows === null || rows.length === 0}
+                disabled={
+                  submitting || stale || rows === null || rows.length === 0
+                }
               >
                 {submitting ? (
                   <LoaderCircleIcon

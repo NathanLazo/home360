@@ -7,6 +7,7 @@ import { OrderDetailSheet } from "./order-detail-sheet";
 import { OrderFilters } from "./order-filters";
 import type { OrderFiltersState } from "./order.types";
 import { OrdersTable } from "./orders-table";
+import { RedeemPickupButton } from "./redeem-pickup-button";
 import { toOrderListDateRange } from "./order-date-range";
 import { SectionError } from "~/components/section-error";
 import { TableSkeleton } from "~/components/table-skeleton";
@@ -96,13 +97,16 @@ export function OrdersPanel({
 
   return (
     <>
-      <OrderFilters
-        filters={filters}
-        workers={workers}
-        searchDraft={searchDraft}
-        onSearchChange={(value) => setSearchDraft(value.slice(0, 100))}
-        onChange={setFilters}
-      />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <OrderFilters
+          filters={filters}
+          workers={workers}
+          searchDraft={searchDraft}
+          onSearchChange={(value) => setSearchDraft(value.slice(0, 100))}
+          onChange={setFilters}
+        />
+        <RedeemPickupButton />
+      </div>
 
       {listQuery.isPending ? <OrdersLoadingState label={t("loading")} /> : null}
 

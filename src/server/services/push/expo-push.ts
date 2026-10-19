@@ -7,6 +7,9 @@ import Expo, {
 
 import type { PrismaClient } from "@generated/prisma";
 
+import { queuePushReceipts } from "./push-receipts";
+import { deviceIsNotRegistered, removeTokens } from "./push-token-pruning";
+
 export type PushDeepLink =
   | `home360app://request/${string}`
   | `home360app://orders/${string}`
@@ -28,37 +31,11 @@ export type PushDeliveryResult = {
 
 const expo = new Expo();
 
-function deviceIsNotRegistered(receipt: {
-  status: "ok" | "error";
-  details?: { error?: string } | object;
-}): boolean {
-  return (
-    receipt.status === "error" &&
-    receipt.details !== undefined &&
-    "error" in receipt.details &&
-    receipt.details.error === "DeviceNotRegistered"
-  );
-}
-
-async function removeTokens(
-  db: PrismaClient,
-  tokens: ReadonlySet<string>,
-): Promise<number> {
-  if (tokens.size === 0) {
-    return 0;
-  }
-
-  const deleted = await db.pushToken.deleteMany({
-    where: { expoToken: { in: [...tokens] } },
-  });
-
-  return deleted.count;
-}
-
 /**
  * Sends one localized notification to every Expo device registered by a user.
  * Delivery is best-effort so a push provider outage never rolls back the
- * domain operation that produced the notification.
+ * domain operation that produced the notification. Ticket errors prune dead
+ * tokens now; receipt errors are pruned later by `cron/push-receipts`.
  */
 export async function sendPushToUser(
   db: PrismaClient,
@@ -108,19 +85,8 @@ export async function sendPushToUser(
       });
     }
 
-    const receiptIds = [...receiptTokens.keys()];
-
-    for (const chunk of expo.chunkPushNotificationReceiptIds(receiptIds)) {
-      const receipts = await expo.getPushNotificationReceiptsAsync(chunk);
-
-      for (const [receiptId, receipt] of Object.entries(receipts)) {
-        const token = receiptTokens.get(receiptId);
-
-        if (token && deviceIsNotRegistered(receipt)) {
-          deadTokens.add(token);
-        }
-      }
-    }
+    // Receipts are not ready right after sending; cron/push-receipts reads them.
+    await queuePushReceipts(db, receiptTokens);
   } catch {
     console.error("[push] EXPO_DELIVERY_FAILED", { userId });
   }
@@ -133,9 +99,8 @@ export async function sendPushToUser(
 /**
  * Broadcast variant for admin campaigns: one notification to an arbitrary
  * set of Expo tokens, sent in Expo-sized chunks. Same best-effort contract as
- * `sendPushToUser`, including pruning of `DeviceNotRegistered` tokens. Receipts
- * are not polled here: a campaign may target thousands of devices and the
- * ticket errors already flag dead tokens.
+ * `sendPushToUser`: ticket errors prune dead tokens now and receipts are
+ * queued for `cron/push-receipts`.
  */
 export async function sendPushToTokens(
   db: PrismaClient,
@@ -156,6 +121,7 @@ export async function sendPushToTokens(
     body: notification.body,
     data: { url: notification.url },
   }));
+  const receiptTokens = new Map<ExpoPushReceiptId, string>();
   const deadTokens = new Set<string>();
   let sent = 0;
 
@@ -173,6 +139,7 @@ export async function sendPushToTokens(
 
         if (ticket.status === "ok") {
           sent += 1;
+          receiptTokens.set(ticket.id, token);
         } else if (deviceIsNotRegistered(ticket)) {
           deadTokens.add(token);
         }
@@ -185,6 +152,7 @@ export async function sendPushToTokens(
     }
   }
 
+  await queuePushReceipts(db, receiptTokens);
   const removed = await removeTokens(db, deadTokens);
 
   return { sent, removed };

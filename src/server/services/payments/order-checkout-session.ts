@@ -3,6 +3,10 @@ import "server-only";
 import { OrderStatus, OrderType, type PrismaClient } from "@generated/prisma";
 import Stripe from "stripe";
 
+import {
+  isPastUnpaidOrderTtl,
+  resolveUnpaidOrderTtlMinutes,
+} from "~/server/services/orders/unpaid-order-ttl";
 import { resolveCommissionPct } from "~/server/services/payments/commission-resolution";
 import { ensureCustomerStripeCustomer } from "~/server/services/payments/customer-checkout";
 import {
@@ -27,7 +31,7 @@ export type OrderCheckoutSessionInput = {
   serviceFeeLabel: string;
 };
 
-type CheckoutSessionErrorCode = "BUSINESS_NOT_ACTIVE";
+type CheckoutSessionErrorCode = "BUSINESS_NOT_ACTIVE" | "ORDER_EXPIRED";
 
 function isStripeError(error: unknown): error is Stripe.errors.StripeError {
   return error instanceof Stripe.errors.StripeError;
@@ -59,6 +63,7 @@ export async function createOrderCheckoutSession(
       amountCents: true,
       businessId: true,
       corporateAccountId: true,
+      createdAt: true,
       payment: { select: { id: true } },
     },
   });
@@ -69,6 +74,14 @@ export async function createOrderCheckoutSession(
 
   if (order.status !== OrderStatus.PENDING || order.payment !== null) {
     return svcFail("CONFLICT", "Order is not pending payment");
+  }
+
+  // F10 review M2: an order past the unpaid TTL is about to be expired by
+  // the cron; it must not open a new payment attempt.
+  const ttlMinutes = await resolveUnpaidOrderTtlMinutes(deps.db);
+
+  if (isPastUnpaidOrderTtl(order.createdAt, ttlMinutes)) {
+    return svcFail("ORDER_EXPIRED", "Order expired before it was paid");
   }
 
   const settings = await deps.db.platformSettings.findUnique({
@@ -152,6 +165,20 @@ export async function createOrderCheckoutSession(
       { idempotencyKey: `order-checkout-session-${order.id}` },
     );
 
+    // F10 review H1: remember the session so the expiry cron can expire it
+    // in Stripe before cancelling the order. An order that stopped being
+    // PENDING meanwhile (cron, cancel) must not keep a payable session.
+    const linked = await deps.db.order.updateMany({
+      where: { id: order.id, status: OrderStatus.PENDING },
+      data: { checkoutSessionId: session.id },
+    });
+
+    if (linked.count === 0) {
+      await expireOrderCheckoutSession(deps.stripe, session.id);
+
+      return svcFail("CONFLICT", "Order is not pending payment");
+    }
+
     if (!session.url) {
       return svcFail("STRIPE_ERROR", "Checkout Session has no url");
     }
@@ -163,5 +190,65 @@ export async function createOrderCheckoutSession(
     }
 
     throw error;
+  }
+}
+
+/**
+ * F10 review H1: closes an order's hosted Checkout Session before the order
+ * is cancelled. `complete` (the customer already paid, or an async method is
+ * settling) is a CONFLICT: the order must stay PENDING for the webhook.
+ * `expired` is already closed. `timeoutMs` bounds each Stripe call (cron).
+ */
+export async function expireOrderCheckoutSession(
+  stripe: Stripe,
+  sessionId: string,
+  options: { timeoutMs?: number } = {},
+): Promise<ServiceResult<null>> {
+  const requestOptions =
+    options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {};
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(
+      sessionId,
+      {},
+      requestOptions,
+    );
+
+    if (session.status === "complete") {
+      return svcFail("CONFLICT", "Checkout Session already completed");
+    }
+
+    if (session.status === "open") {
+      await stripe.checkout.sessions.expire(sessionId, {}, requestOptions);
+    }
+
+    return svcOk(null);
+  } catch (error) {
+    if (!isStripeError(error)) {
+      throw error;
+    }
+
+    // The expire can lose a race with the customer completing the session.
+    try {
+      const current = await stripe.checkout.sessions.retrieve(
+        sessionId,
+        {},
+        requestOptions,
+      );
+
+      if (current.status === "expired") {
+        return svcOk(null);
+      }
+
+      return current.status === "complete"
+        ? svcFail("CONFLICT", "Checkout Session already completed")
+        : svcFail("STRIPE_ERROR", "Checkout Session expire failed");
+    } catch (retryError) {
+      if (isStripeError(retryError)) {
+        return svcFail("STRIPE_ERROR", "Checkout Session expire failed");
+      }
+
+      throw retryError;
+    }
   }
 }

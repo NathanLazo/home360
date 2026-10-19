@@ -26,6 +26,9 @@ const branchListSelect = {
   coverageRadiusKm: true,
   latitude: true,
   longitude: true,
+  // F10 (D10-1): fulfillment flags (editing them lands with the web ticket).
+  pickupEnabled: true,
+  deliveryEnabled: true,
 } satisfies Prisma.BranchSelect;
 
 const MAX_SERIALIZABLE_ATTEMPTS = 3;
@@ -140,6 +143,12 @@ export async function createBranch(
               coverageRadiusKm: input.coverageRadiusKm,
               latitude: input.latitude ?? null,
               longitude: input.longitude ?? null,
+              ...(input.pickupEnabled !== undefined
+                ? { pickupEnabled: input.pickupEnabled }
+                : {}),
+              ...(input.deliveryEnabled !== undefined
+                ? { deliveryEnabled: input.deliveryEnabled }
+                : {}),
             },
             select: { id: true },
           });
@@ -178,6 +187,12 @@ export async function updateBranch(
         ...(input.latitude !== undefined ? { latitude: input.latitude } : {}),
         ...(input.longitude !== undefined
           ? { longitude: input.longitude }
+          : {}),
+        ...(input.pickupEnabled !== undefined
+          ? { pickupEnabled: input.pickupEnabled }
+          : {}),
+        ...(input.deliveryEnabled !== undefined
+          ? { deliveryEnabled: input.deliveryEnabled }
           : {}),
       },
       select: { id: true },

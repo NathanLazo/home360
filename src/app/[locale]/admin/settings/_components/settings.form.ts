@@ -45,6 +45,9 @@ export const settingsFormSchema = z.object({
   notifyRatingReminderHours: intInRange(
     SETTINGS_RANGES.notifyRatingReminderHours,
   ),
+  // Expiration (D10-5)
+  unpaidOrderTtlMinutes: intInRange(SETTINGS_RANGES.unpaidOrderTtlMinutes),
+  requestTtlHours: intInRange(SETTINGS_RANGES.requestTtlHours),
 });
 
 export type SettingsFormValues = z.infer<typeof settingsFormSchema>;

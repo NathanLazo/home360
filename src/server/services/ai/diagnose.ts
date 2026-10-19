@@ -6,6 +6,7 @@ import { z } from "zod";
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import type { AgentModelId } from "~/lib/agent/agent-models";
+import { readMediaBytes } from "~/server/services/media/blob";
 import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -124,42 +125,33 @@ const IMAGE_TYPE_BY_EXTENSION: Record<string, string> = {
 };
 
 /**
- * Anthropic behind the AI Gateway rejects URL image sources
- * ("URL sources are not supported"), so the signed Blob URLs are fetched
- * here and handed to the model as inline bytes.
+ * Providers behind the AI Gateway may reject URL image sources, so the
+ * private blobs are read server-side and handed to the model as inline bytes.
  */
-async function fetchImage(url: string): Promise<ImageBytes> {
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(IMAGE_FETCH_TIMEOUT_MS),
+async function readImage(pathname: string): Promise<ImageBytes> {
+  const media = await readMediaBytes(pathname, {
+    abortSignal: AbortSignal.timeout(IMAGE_FETCH_TIMEOUT_MS),
   });
 
-  if (!response.ok) {
-    throw new Error(`Image fetch failed with status ${response.status}`);
+  if (media === null) {
+    throw new Error("Image not found in blob storage");
   }
 
-  const headerType = response.headers
-    .get("content-type")
-    ?.split(";")[0]
-    ?.trim();
   // Fall back to the pathname extension when the store answers a generic type.
-  const mediaType = headerType?.startsWith("image/")
-    ? headerType
-    : (IMAGE_TYPE_BY_EXTENSION[
-        new URL(url).pathname.split(".").pop()?.toLowerCase() ?? ""
-      ] ?? "image/jpeg");
+  const mediaType = media.contentType.startsWith("image/")
+    ? media.contentType
+    : (IMAGE_TYPE_BY_EXTENSION[pathname.split(".").pop()?.toLowerCase() ?? ""] ??
+      "image/jpeg");
 
-  return {
-    data: new Uint8Array(await response.arrayBuffer()),
-    mediaType,
-  };
+  return { data: media.data, mediaType };
 }
 
 function buildUserMessage(input: {
   images: ImageBytes[];
-  videoUrls?: string[];
+  videoCount: number;
   description?: string;
 }): ModelMessage {
-  const videoCount = input.videoUrls?.length ?? 0;
+  const videoCount = input.videoCount;
   // The model only receives images: a video is surfaced as context so the
   // diagnosis honestly lowers its confidence instead of pretending to see it.
   const videoContext =
@@ -188,20 +180,20 @@ function buildUserMessage(input: {
 }
 
 /**
- * Analyzes the request photos with Claude Sonnet through the Vercel AI
+ * Analyzes the request photos with `DIAGNOSIS_MODEL` through the Vercel AI
  * Gateway and returns a structured diagnosis. Backend only — the prompt and
  * any provider error are never exposed to the caller: every failure surfaces
  * as a clean `AI_UNAVAILABLE`.
  */
 export async function diagnoseProblem(
   db: PrismaClient,
-  input: { imageUrls: string[]; videoUrls?: string[]; description?: string },
+  input: { imagePathnames: string[]; videoCount: number; description?: string },
 ): Promise<ServiceResult<ProblemDiagnosis, DiagnoseErrorCode>> {
   if (!env.AI_GATEWAY_API_KEY) {
     return svcFail("AI_UNAVAILABLE", "AI gateway key is not configured");
   }
 
-  if (input.imageUrls.length === 0 && (input.videoUrls?.length ?? 0) === 0) {
+  if (input.imagePathnames.length === 0 && input.videoCount === 0) {
     return svcFail("INTERNAL_ERROR", "Diagnosis requires at least one media");
   }
 
@@ -218,7 +210,7 @@ export async function diagnoseProblem(
     })) ?? DEFAULT_SETTINGS;
 
   try {
-    const images = await Promise.all(input.imageUrls.map(fetchImage));
+    const images = await Promise.all(input.imagePathnames.map(readImage));
     const { object } = await generateObject({
       model: DIAGNOSIS_MODEL,
       schema: diagnosisSchema,

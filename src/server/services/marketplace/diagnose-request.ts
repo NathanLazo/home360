@@ -4,7 +4,7 @@ import type { AiUrgency, PrismaClient } from "@generated/prisma";
 import { diagnoseProblem } from "~/server/services/ai/diagnose";
 import {
   ownsRequestMedia,
-  signRequestMedia,
+  resolveRequestMedia,
 } from "~/server/services/marketplace/request-media";
 import {
   suggestForRequest,
@@ -45,7 +45,7 @@ export async function diagnoseRequestMedia(
     );
   }
 
-  const media = await signRequestMedia(db, {
+  const media = await resolveRequestMedia(db, {
     userId: input.userId,
     mediaPathnames: input.mediaPathnames,
   });
@@ -55,8 +55,8 @@ export async function diagnoseRequestMedia(
   }
 
   const diagnosis = await diagnoseProblem(db, {
-    imageUrls: media.data.imageUrls,
-    videoUrls: media.data.videoUrls,
+    imagePathnames: media.data.imagePathnames,
+    videoCount: media.data.videoCount,
     description: input.description,
   });
 

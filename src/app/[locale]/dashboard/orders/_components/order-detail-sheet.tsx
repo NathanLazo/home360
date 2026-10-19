@@ -13,8 +13,10 @@ import {
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { OrderConversationPanel } from "./order-conversation-panel";
+import { ConversationPanel } from "./conversation-panel";
 import { OrderDetailActions } from "./order-detail-actions";
+import { OrderDetailRow } from "./order-detail-row";
+import { OrderFulfillmentSection } from "./order-fulfillment-section";
 import { OrderStatusBadge } from "./order-status-badge";
 import { OrderTimeline } from "./order-timeline";
 import type { OrderDetail, WorkerOption } from "./order.types";
@@ -31,21 +33,6 @@ import {
 } from "~/components/ui/sheet";
 import { Skeleton } from "~/components/ui/skeleton";
 import { UserAvatar } from "~/components/user-avatar";
-
-function DetailRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="text-copy-sm grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 text-right font-medium break-words">{children}</dd>
-    </div>
-  );
-}
 
 function DetailSkeleton() {
   return (
@@ -80,6 +67,7 @@ export function OrderDetailSheet({
   const t = useTranslations("dashboard.orders.detail");
   const statusT = useTranslations("dashboard.orderStatus");
   const errorsT = useTranslations("errors");
+  const conversationT = useTranslations("dashboard.orders.conversation");
   const formatter = useFormatter();
   const locale = useLocale();
   const [conversationOpen, setConversationOpen] = useState(false);
@@ -195,14 +183,16 @@ export function OrderDetailSheet({
               />
 
               {conversationOpen ? (
-                <OrderConversationPanel
-                  orderId={order.id}
+                <ConversationPanel
+                  id="order-conversation"
+                  source={{ kind: "order", orderId: order.id }}
                   customerId={order.customer.id}
-                  customerName={
-                    order.customer.name ??
-                    order.customer.email ??
-                    t("notAvailable")
-                  }
+                  title={conversationT("title", {
+                    name:
+                      order.customer.name ??
+                      order.customer.email ??
+                      t("notAvailable"),
+                  })}
                 />
               ) : null}
 
@@ -216,7 +206,7 @@ export function OrderDetailSheet({
                   {t("overviewTitle")}
                 </h3>
                 <dl className="space-y-3">
-                  <DetailRow label={t("customerLabel")}>
+                  <OrderDetailRow label={t("customerLabel")}>
                     {order.customer.email ? (
                       <span className="inline-flex items-center justify-end gap-2">
                         <UserAvatar
@@ -229,52 +219,48 @@ export function OrderDetailSheet({
                     ) : (
                       (order.customer.name ?? t("notAvailable"))
                     )}
-                  </DetailRow>
-                  <DetailRow label={t("emailLabel")}>
+                  </OrderDetailRow>
+                  <OrderDetailRow label={t("emailLabel")}>
                     {order.customer.email ?? t("notAvailable")}
-                  </DetailRow>
-                  <DetailRow label={t("branchLabel")}>
+                  </OrderDetailRow>
+                  <OrderDetailRow label={t("branchLabel")}>
                     {order.branch?.name ?? t("noBranch")}
-                  </DetailRow>
-                  <DetailRow label={t("itemLabel")}>
+                  </OrderDetailRow>
+                  <OrderDetailRow label={t("itemLabel")}>
                     {order.type === "SERVICE"
                       ? (order.service?.name ?? t("notAvailable"))
                       : (order.product?.name ?? t("notAvailable"))}
-                  </DetailRow>
-                  <DetailRow label={t("typeLabel")}>
+                  </OrderDetailRow>
+                  <OrderDetailRow label={t("typeLabel")}>
                     {t(
                       order.type === "SERVICE" ? "typeService" : "typeProduct",
                     )}
-                  </DetailRow>
-                  <DetailRow label={t("quantityLabel")}>
+                  </OrderDetailRow>
+                  <OrderDetailRow label={t("quantityLabel")}>
                     <span className="font-mono tabular-nums">
                       {order.quantity}
                     </span>
-                  </DetailRow>
+                  </OrderDetailRow>
                   {order.type === "SERVICE" ? (
-                    <DetailRow label={t("workerLabel")}>
+                    <OrderDetailRow label={t("workerLabel")}>
                       {order.worker?.fullName ?? t("noWorker")}
-                    </DetailRow>
+                    </OrderDetailRow>
                   ) : null}
                   {order.quote?.scheduledFor ? (
-                    <DetailRow label={t("scheduledLabel")}>
+                    <OrderDetailRow label={t("scheduledLabel")}>
                       <time dateTime={order.quote.scheduledFor.toISOString()}>
                         {formatter.dateTime(order.quote.scheduledFor, {
                           dateStyle: "medium",
                           timeStyle: "short",
                         })}
                       </time>
-                    </DetailRow>
+                    </OrderDetailRow>
                   ) : null}
-                  <DetailRow
-                    label={t(
-                      order.type === "PRODUCT"
-                        ? "deliveryAddressLabel"
-                        : "serviceAddressLabel",
-                    )}
-                  >
-                    {order.addressLine ?? t("notAvailable")}
-                  </DetailRow>
+                  {order.type === "SERVICE" ? (
+                    <OrderDetailRow label={t("serviceAddressLabel")}>
+                      {order.addressLine ?? t("notAvailable")}
+                    </OrderDetailRow>
+                  ) : null}
                 </dl>
                 {order.quote?.message ? (
                   <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
@@ -288,6 +274,13 @@ export function OrderDetailSheet({
                 ) : null}
               </section>
 
+              {order.type === "PRODUCT" ? (
+                <>
+                  <Separator />
+                  <OrderFulfillmentSection order={order} />
+                </>
+              ) : null}
+
               <Separator />
 
               <section aria-labelledby="order-payment-heading">
@@ -298,117 +291,123 @@ export function OrderDetailSheet({
                   {t("paymentTitle")}
                 </h3>
                 <dl className="space-y-3">
-                  <DetailRow label={t("totalLabel")}>
+                  <OrderDetailRow label={t("totalLabel")}>
                     <span className="font-mono tabular-nums">
                       {currency(order.amountCents)}
                     </span>
-                  </DetailRow>
+                  </OrderDetailRow>
                   {order.payment ? (
                     <>
-                      <DetailRow label={t("commissionLabel")}>
+                      <OrderDetailRow label={t("commissionLabel")}>
                         <span className="font-mono tabular-nums">
                           {currency(order.payment.commissionCents)}
                         </span>
-                      </DetailRow>
-                      <DetailRow label={t("paymentMethodLabel")}>
+                      </OrderDetailRow>
+                      <OrderDetailRow label={t("paymentMethodLabel")}>
                         {t(`paymentMethod.${order.payment.method}`)}
-                      </DetailRow>
-                      <DetailRow label={t("paymentStatusLabel")}>
+                      </OrderDetailRow>
+                      <OrderDetailRow label={t("paymentStatusLabel")}>
                         {t(`paymentStatus.${order.payment.status}`)}
-                      </DetailRow>
+                      </OrderDetailRow>
                     </>
                   ) : (
-                    <DetailRow label={t("paymentStatusLabel")}>
+                    <OrderDetailRow label={t("paymentStatusLabel")}>
                       {t("noPayment")}
-                    </DetailRow>
+                    </OrderDetailRow>
                   )}
                 </dl>
               </section>
 
-              <Separator />
+              {order.type === "SERVICE" ? (
+                <>
+                  <Separator />
 
-              <section aria-labelledby="order-evidence-heading">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                  <h3
-                    id="order-evidence-heading"
-                    className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase"
-                  >
-                    {t("evidenceTitle")}
-                  </h3>
-                  <Badge
-                    variant="outline"
-                    className={
-                      order.recordingComplete
-                        ? "bg-success-soft text-success-deep border-transparent"
-                        : "bg-warning-soft text-warning-deep border-transparent"
-                    }
-                  >
-                    {order.recordingComplete ? (
-                      <CircleCheckIcon aria-hidden="true" />
-                    ) : (
-                      <CircleDashedIcon aria-hidden="true" />
-                    )}
-                    {t(
-                      order.recordingComplete
-                        ? "recordingComplete"
-                        : "recordingIncomplete",
-                    )}
-                  </Badge>
-                </div>
-
-                <dl className="space-y-3">
-                  <DetailRow label={t("durationLabel")}>
-                    {order.recordingDurationSec === null
-                      ? t("notAvailable")
-                      : t("durationValue", {
-                          minutes: Math.floor(order.recordingDurationSec / 60),
-                          seconds: order.recordingDurationSec % 60,
-                        })}
-                  </DetailRow>
-                  <DetailRow label={t("recordingLabel")}>
-                    {order.recordingUrl ? (
-                      <a
-                        href={order.recordingUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-link-deep inline-flex min-h-6 items-center gap-1 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                  <section aria-labelledby="order-evidence-heading">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                      <h3
+                        id="order-evidence-heading"
+                        className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase"
                       >
-                        {t("openRecording")}
-                        <ExternalLinkIcon
-                          aria-hidden="true"
-                          className="size-3.5"
-                        />
-                      </a>
-                    ) : (
-                      t("notAvailable")
-                    )}
-                  </DetailRow>
-                </dl>
+                        {t("evidenceTitle")}
+                      </h3>
+                      <Badge
+                        variant="outline"
+                        className={
+                          order.recordingComplete
+                            ? "bg-success-soft text-success-deep border-transparent"
+                            : "bg-warning-soft text-warning-deep border-transparent"
+                        }
+                      >
+                        {order.recordingComplete ? (
+                          <CircleCheckIcon aria-hidden="true" />
+                        ) : (
+                          <CircleDashedIcon aria-hidden="true" />
+                        )}
+                        {t(
+                          order.recordingComplete
+                            ? "recordingComplete"
+                            : "recordingIncomplete",
+                        )}
+                      </Badge>
+                    </div>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <EvidenceGallery
-                    title={t("beforeTitle")}
-                    urls={order.beforeUrls}
-                    emptyLabel={t("noBeforePhotos")}
-                    photoLabel={(number) => t("beforePhoto", { number })}
-                  />
-                  <EvidenceGallery
-                    title={t("afterTitle")}
-                    urls={order.afterUrls}
-                    emptyLabel={t("noAfterPhotos")}
-                    photoLabel={(number) => t("afterPhoto", { number })}
-                  />
-                </div>
+                    <dl className="space-y-3">
+                      <OrderDetailRow label={t("durationLabel")}>
+                        {order.recordingDurationSec === null
+                          ? t("notAvailable")
+                          : t("durationValue", {
+                              minutes: Math.floor(
+                                order.recordingDurationSec / 60,
+                              ),
+                              seconds: order.recordingDurationSec % 60,
+                            })}
+                      </OrderDetailRow>
+                      <OrderDetailRow label={t("recordingLabel")}>
+                        {order.recordingUrl ? (
+                          <a
+                            href={order.recordingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-link-deep inline-flex min-h-6 items-center gap-1 underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+                          >
+                            {t("openRecording")}
+                            <ExternalLinkIcon
+                              aria-hidden="true"
+                              className="size-3.5"
+                            />
+                          </a>
+                        ) : (
+                          t("notAvailable")
+                        )}
+                      </OrderDetailRow>
+                    </dl>
 
-                <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
-                  <h4 className="text-copy-sm mb-1 font-medium">
-                    {t("notesTitle")}
-                  </h4>
-                  <p className="text-muted-foreground text-copy-sm leading-relaxed whitespace-pre-wrap">
-                    {order.workNotes ?? t("noNotes")}
-                  </p>
-                </div>
-              </section>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      <EvidenceGallery
+                        title={t("beforeTitle")}
+                        urls={order.beforeUrls}
+                        emptyLabel={t("noBeforePhotos")}
+                        photoLabel={(number) => t("beforePhoto", { number })}
+                      />
+                      <EvidenceGallery
+                        title={t("afterTitle")}
+                        urls={order.afterUrls}
+                        emptyLabel={t("noAfterPhotos")}
+                        photoLabel={(number) => t("afterPhoto", { number })}
+                      />
+                    </div>
+
+                    <div className="bg-canvas-soft mt-4 rounded-xl border p-4">
+                      <h4 className="text-copy-sm mb-1 font-medium">
+                        {t("notesTitle")}
+                      </h4>
+                      <p className="text-muted-foreground text-copy-sm leading-relaxed whitespace-pre-wrap">
+                        {order.workNotes ?? t("noNotes")}
+                      </p>
+                    </div>
+                  </section>
+                </>
+              ) : null}
 
               <Separator />
 

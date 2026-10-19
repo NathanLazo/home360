@@ -287,9 +287,25 @@
       "workerLabel": "Técnico",
       "noWorker": "Sin asignar",
       "scheduledLabel": "Visita programada",
-      "deliveryAddressLabel": "Dirección de entrega",
       "serviceAddressLabel": "Dirección del servicio",
-      "offerMessageTitle": "Mensaje de tu oferta"
+      "offerMessageTitle": "Mensaje de tu oferta",
+      "fulfillment": {
+        "title": "Entrega",
+        "notAvailable": "No disponible",
+        "addressLabel": "Dirección de entrega",
+        "mapLabel": "Ubicación",
+        "openMap": "Abrir en el mapa",
+        "shipsFromLabel": "Sale de",
+        "pickupBranchLabel": "Sucursal de recolección",
+        "pickupAddressLabel": "Dirección de la sucursal",
+        "pickedUpLabel": "Recogido",
+        "notPickedUp": "Aún no",
+        "evidenceTitle": "Evidencia de entrega",
+        "noEvidence": "Las fotos de entrega aparecerán aquí al marcar el pedido como entregado.",
+        "evidencePhoto": "Foto de entrega {number}",
+        "openPhoto": "Abrir {label}",
+        "noteTitle": "Nota de entrega"
+      }
     },
     "timeline": {
       "label": "Bitácora de la orden",
@@ -315,8 +331,14 @@
         "CANCELLED": "Orden cancelada",
         "WORKER_ASSIGNED": "Técnico asignado",
         "REWORK_REQUESTED": "El cliente pidió un ajuste",
-        "DISPUTE_OPENED": "Disputa abierta"
-      }
+        "DISPUTE_OPENED": "Disputa abierta",
+        "READY_FOR_PICKUP": "Listo para recoger",
+        "OUT_FOR_DELIVERY": "En camino al domicilio",
+        "DELIVERED": "Entregado",
+        "PICKED_UP": "Recogido por el cliente",
+        "PAYMENT_EXPIRED": "Venció el plazo de pago"
+      },
+      "noteGeneric": "Nota: {note}"
     },
     "tabs": {
       "label": "Secciones de órdenes",
@@ -338,8 +360,8 @@
           "description": "La orden se activará cuando el cliente pague. Puedes cancelarla si ya no podrás atenderla."
         },
         "acceptProduct": {
-          "title": "Pedido pagado: acéptalo para enviarlo",
-          "description": "El pago está protegido. Al aceptarlo la orden pasa a envío; el cliente confirmará la entrega para liberar el dinero."
+          "title": "Pedido pagado: acéptalo para prepararlo",
+          "description": "El pago está protegido. Al aceptarlo, prepara el envío o el pedido para que el cliente lo recoja."
         },
         "assignWorker": {
           "title": "Asigna un técnico",
@@ -354,8 +376,8 @@
           "description": "El técnico está atendiendo la orden. Al terminar, el cliente confirma y el pago se libera."
         },
         "shipping": {
-          "title": "En envío",
-          "description": "El cliente confirmará la recepción desde su app; entonces se libera el pago protegido."
+          "title": "Prepara la entrega",
+          "description": "Marca el pedido en camino cuando salga y entregado al dejarlo, con fotos del paquete en el domicilio."
         },
         "completed": {
           "title": "Orden completada",
@@ -368,6 +390,26 @@
         "disputed": {
           "title": "Orden en disputa",
           "description": "El pago queda retenido mientras el equipo de HOME360 revisa la evidencia."
+        },
+        "outForDelivery": {
+          "title": "En camino al domicilio",
+          "description": "Al dejar el paquete, márcalo como entregado con al menos una foto. El cliente lo verá en su app."
+        },
+        "preparePickup": {
+          "title": "Prepara el pedido para recoger",
+          "description": "Cuando esté listo en la sucursal, avisa al cliente. Recibirá un código QR para recogerlo."
+        },
+        "readyForPickup": {
+          "title": "Listo para recoger",
+          "description": "El cliente mostrará su código QR en la sucursal. Canjéalo para entregar el pedido y liberar el pago."
+        },
+        "pickedUp": {
+          "title": "Recogido: liberando el pago",
+          "description": "El cliente ya recogió el pedido. El pago se libera en unos minutos y la orden se completa."
+        },
+        "awaitingCustomerConfirmation": {
+          "title": "Esperando la confirmación del cliente",
+          "description": "El cliente revisa la evidencia desde su app. Si no responde, el pago se libera automáticamente al vencer el plazo."
         }
       },
       "cancelDialog": {
@@ -394,7 +436,71 @@
         "accepted": "Pedido aceptado. Ya está en envío.",
         "cancelled": "Orden cancelada.",
         "workerAssigned": "Técnico asignado.",
-        "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+        "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo.",
+        "outForDelivery": "Pedido marcado en camino.",
+        "delivered": "Entrega registrada. Le pedimos al cliente que la confirme.",
+        "readyForPickup": "Avisamos al cliente que su pedido está listo.",
+        "pickupRedeemed": "Orden #{folio} entregada. Pago liberado.",
+        "pickupRedeemedPending": "Orden #{folio} entregada. El pago se liberará en unos minutos."
+      },
+      "markOutForDelivery": "Marcar en camino",
+      "markDelivered": "Marcar entregado",
+      "markReadyForPickup": "Listo para recoger",
+      "redeemPickup": "Canjear recolección",
+      "readyForPickupDialog": {
+        "title": "¿Avisar que la orden #{folio} está lista?",
+        "description": "El cliente recibirá una notificación con su código QR para recogerla en {branch}. Ten el pedido a la mano.",
+        "yourBranch": "tu sucursal",
+        "confirm": "Avisar al cliente",
+        "cancel": "Todavía no"
+      },
+      "deliveredDialog": {
+        "title": "Marcar la orden #{folio} como entregada",
+        "description": "Sube al menos una foto del paquete en el domicilio. El cliente la verá para confirmar la entrega.",
+        "close": "Cerrar",
+        "photosLabel": "Fotos de entrega",
+        "photosListLabel": "Fotos seleccionadas",
+        "photoCount": "{count} de {max}",
+        "photoLabel": "Foto {number}",
+        "removePhoto": "Quitar {label}",
+        "uploadingPhoto": "Subiendo {label}",
+        "progress": "Subiendo… {percent} %",
+        "uploaded": "Lista",
+        "retryPhoto": "Reintentar",
+        "addPhotos": "Agregar fotos",
+        "addMorePhotos": "Agregar más fotos",
+        "photosHint": "JPG, PNG o WebP de hasta 10 MB. Máximo {max} fotos.",
+        "photosOverflow": "{count, plural, one {Una foto quedó fuera} other {# fotos quedaron fuera}}: el máximo es {max}.",
+        "uploadedStatus": "{uploaded} de {total} fotos subidas",
+        "photoErrors": {
+          "type": "Usa una imagen JPG, PNG o WebP.",
+          "size": "La imagen pesa más de 10 MB.",
+          "upload": "No se pudo subir. Revisa tu conexión y reintenta."
+        },
+        "noteLabel": "Nota para el cliente (opcional)",
+        "notePlaceholder": "Ej. Lo dejé con la persona de recepción.",
+        "noteCount": "{count}/{max}",
+        "waitForUploads": "Espera a que terminen de subir las fotos.",
+        "needPhoto": "Sube al menos una foto para continuar.",
+        "failedPhotosSkipped": "Las fotos con error no se enviarán.",
+        "cancel": "Cancelar",
+        "confirm": "Marcar entregado"
+      },
+      "redeemDialog": {
+        "title": "Canjear recolección",
+        "description": "Escanea el código QR del cliente con un lector o escribe el código que aparece debajo del QR.",
+        "close": "Cerrar",
+        "codeLabel": "Código de recolección",
+        "codePlaceholder": "ABCDE23456",
+        "codeHint": "{length} caracteres: letras de la A a la Z y números del 2 al 7.",
+        "cancel": "Cancelar",
+        "confirm": "Canjear",
+        "errors": {
+          "shape": "El código tiene {length} caracteres: letras de la A a la Z y números del 2 al 7.",
+          "PICKUP_CODE_INVALID": "Este código no corresponde a un pedido listo para recoger en tu negocio. Pide al cliente que lo revise en su app.",
+          "TOO_MANY_REQUESTS": "Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.",
+          "CONFLICT": "Este pedido ya no se puede entregar: revisa si está en disputa o ya se completó."
+        }
       }
     },
     "conversation": {
@@ -402,7 +508,7 @@
       "pollingHint": "Los mensajes nuevos se cargan cada pocos segundos.",
       "loading": "Cargando mensajes",
       "empty": "Aún no hay mensajes. Escribe el primero.",
-      "threadLabel": "Mensajes de la orden",
+      "threadLabel": "Mensajes de la conversación",
       "fromCustomer": "Cliente:",
       "fromBusiness": "Tu equipo:",
       "imageMessage": "Imagen enviada desde la app",
@@ -411,6 +517,16 @@
       "composerPlaceholder": "Escribe un mensaje… (Enter para enviar)",
       "send": "Enviar mensaje",
       "retry": "Reintentar"
+    },
+    "fulfillment": {
+      "short": {
+        "DELIVERY": "Entrega",
+        "PICKUP": "Recoger"
+      },
+      "long": {
+        "DELIVERY": "Entrega a domicilio",
+        "PICKUP": "Recoger en sucursal"
+      }
     }
   },
   "payments": {
@@ -824,8 +940,15 @@
         "identity": "Sucursal",
         "identityDescription": "Datos que verán tus clientes y tu equipo.",
         "coverage": "Cobertura",
-        "coverageDescription": "Define hasta dónde recibes solicitudes."
-      }
+        "coverageDescription": "Define hasta dónde recibes solicitudes.",
+        "fulfillment": "Entrega de productos",
+        "fulfillmentDescription": "Cómo reciben tus clientes los productos que compran en esta sucursal."
+      },
+      "deliveryEnabled": "Envío a domicilio",
+      "deliveryEnabledHelp": "Esta sucursal surte pedidos que se entregan en la dirección del cliente.",
+      "pickupEnabled": "Recoger en sucursal",
+      "pickupEnabledHelp": "Los clientes pueden elegir esta sucursal para recoger su pedido.",
+      "pickupNeedsCoordinates": "Agrega la ubicación de la sucursal: sin coordenadas no aparece como punto de recolección."
     },
     "feedback": {
       "planLimit": "Alcanzaste el límite de sucursales de tu plan.",
@@ -862,6 +985,12 @@
       "emptyTeam": "Aún no tienes trabajadores. Agrégalos en Equipo para asignar un encargado.",
       "cancel": "Cancelar",
       "save": "Guardar"
+    },
+    "fulfillment": {
+      "delivery": "Envío",
+      "pickup": "Recolección",
+      "label": "Entrega de productos",
+      "none": "Sin entrega de productos"
     }
   },
   "products": {
@@ -944,7 +1073,9 @@
       "notCarried": "Sin inventario asignado",
       "lowStock": "Inventario bajo",
       "lowAcrossBranches": "Bajo en {low} de {total} sucursales",
-      "inline": "Inventario: {count}"
+      "inline": "Inventario: {count}",
+      "outOfStock": "Agotado",
+      "outAcrossBranches": "Agotado en todas las sucursales"
     },
     "actions": {
       "open": "Acciones para {name}",
@@ -1000,7 +1131,9 @@
         "notCarried": "Este producto no se maneja en esta sucursal.",
         "invalidRow": "Usa números enteros iguales o mayores que cero.",
         "loadErrorTitle": "No pudimos cargar el inventario",
-        "loadErrorDescription": "Revisa tu conexión e inténtalo de nuevo."
+        "loadErrorDescription": "Revisa tu conexión e inténtalo de nuevo.",
+        "stateLow": "Pocas unidades",
+        "stateOut": "Agotado"
       },
       "image": {
         "label": "Imagen (URL)",
@@ -1024,12 +1157,16 @@
       "deleted": "Producto eliminado.",
       "deleteConflict": "No puedes eliminar este producto porque tiene órdenes activas.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo.",
-      "stockAdjusted": "Stock actualizado."
+      "stockAdjusted": "Stock actualizado.",
+      "stockConflict": "El stock cambió, vuelve a cargar."
     },
     "stockDialog": {
       "title": "Ajustar stock",
       "description": "Existencias y alertas de {name} por sucursal.",
-      "save": "Guardar stock"
+      "save": "Guardar stock",
+      "conflictTitle": "El stock cambió mientras editabas",
+      "conflictDescription": "Alguien registró una venta o un ajuste. Vuelve a cargar para ver las existencias actuales y aplica tu cambio de nuevo.",
+      "reload": "Volver a cargar"
     }
   },
   "placeholder": {
@@ -1345,7 +1482,15 @@
       "sendOffer": "Enviar oferta",
       "updateOffer": "Actualizar oferta",
       "resendOffer": "Reenviar oferta",
-      "notQuotable": "Esta solicitud ya no admite ofertas."
+      "notQuotable": "Esta solicitud ya no admite ofertas.",
+      "targetedBadge": "Dirigida a tu negocio",
+      "targetedHint": "El cliente pidió este servicio directamente a tu negocio: solo tú la ves.",
+      "expiresLabel": "Vence",
+      "chatTitle": "Conversación",
+      "openChat": "Escribir al cliente",
+      "hideChat": "Ocultar conversación",
+      "chatNeedsOffer": "Envía una oferta para abrir el chat con el cliente.",
+      "chatWith": "Conversación con {name}"
     },
     "ownOffer": {
       "title": "Oferta enviada",
@@ -1424,6 +1569,7 @@
       "offerUpdated": "Oferta actualizada.",
       "offerWithdrawn": "Oferta retirada.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
-    }
+    },
+    "targeted": "Para ti"
   }
 }

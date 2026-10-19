@@ -11,7 +11,7 @@ import { Textarea } from "~/components/ui/textarea";
 
 const MAX_BODY_LENGTH = 2_000;
 
-export function OrderMessageComposer({
+export function ConversationMessageComposer({
   sending,
   disabled,
   onSend,

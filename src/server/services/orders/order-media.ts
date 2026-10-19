@@ -45,3 +45,28 @@ export async function resolveOrderMediaUrls(
 
   return urls.filter((url): url is string => url !== null);
 }
+
+export type SignedMedia = { pathname: string; url: string };
+
+/**
+ * Signs private Blob pathnames for the viewer through the MA-02 read rule,
+ * keeping the pathname next to its short-lived URL (the app re-signs per
+ * view). Pathnames the viewer may not read are dropped.
+ */
+export async function signMediaPathnames(
+  db: PrismaClient,
+  input: { userId: string; pathnames: string[] },
+): Promise<SignedMedia[]> {
+  const signed = await Promise.all(
+    input.pathnames.map(async (pathname) => {
+      const url = await resolveOrderMediaUrl(db, {
+        userId: input.userId,
+        reference: pathname,
+      });
+
+      return url === null ? null : { pathname, url };
+    }),
+  );
+
+  return signed.filter((item): item is SignedMedia => item !== null);
+}

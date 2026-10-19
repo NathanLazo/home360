@@ -26,7 +26,7 @@ import { listCorporateRequests } from "~/server/services/corporate/corporate-req
 import { requestDisputeSummary } from "~/server/services/disputes/dispute-summary-hook";
 import { openCustomerDispute } from "~/server/services/disputes/open-dispute";
 import { createServiceRequest } from "~/server/services/marketplace/request";
-import { cancelUnpaidOrder } from "~/server/services/orders/cancel-unpaid-order";
+import { cancelConsumerOrder } from "~/server/services/orders/cancel-consumer-order";
 import { confirmOrderDelivery } from "~/server/services/orders/confirm-delivery";
 import { getConsumerOrderDetail } from "~/server/services/orders/consumer-order-detail";
 import {
@@ -341,8 +341,8 @@ export const corporateConsumerProcedures = {
     .mutation(async ({ ctx, input }) => {
       try {
         return fromService(
-          await cancelUnpaidOrder(
-            { db: ctx.db, stripe: getStripe() },
+          await cancelConsumerOrder(
+            { db: ctx.db, resolveStripe: getStripe },
             { customerId: ctx.session.user.id, orderId: input.orderId },
           ),
           "Order cancelled",

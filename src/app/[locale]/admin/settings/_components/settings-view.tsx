@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { AiSettingsSection } from "./ai-settings-section";
 import { CampaignsSection } from "./campaigns-section";
 import { EscrowSettingsSection } from "./escrow-settings-section";
+import { ExpirationSettingsSection } from "./expiration-settings-section";
 import { FeesSettingsSection } from "./fees-settings-section";
 import { NotificationsSettingsSection } from "./notifications-settings-section";
 import { SettingsSaveBar } from "./settings-save-bar";
@@ -57,6 +58,7 @@ function SettingsForm({ data }: { data: PlatformSettingsResult }) {
       <AiSettingsSection form={form} />
       <FeesSettingsSection form={form} />
       <EscrowSettingsSection form={form} />
+      <ExpirationSettingsSection form={form} />
       <NotificationsSettingsSection form={form} />
       <SettingsSaveBar
         dirty={form.formState.isDirty}

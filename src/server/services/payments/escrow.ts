@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   OrderEventType,
+  OrderStatus,
   PaymentMethod,
   PaymentStatus,
   Prisma,
@@ -31,6 +32,9 @@ const CAPTURE_MAX_SERIALIZABLE_ATTEMPTS = 3;
 export const capturePaymentErrorCodes = [
   "INVALID_TARGET",
   "BUSINESS_NOT_ACTIVE",
+  // F10 review H1: the order is no longer PENDING (expired / cancelled); the
+  // webhook refunds the charge instead of holding it in escrow.
+  "ORDER_NOT_PAYABLE",
 ] as const;
 
 export type CapturePaymentErrorCode = (typeof capturePaymentErrorCodes)[number];
@@ -151,11 +155,13 @@ export async function capturePayment(
           } | null = null;
           let expectedProviderAmountCents: number;
           let paymentLinkServiceFeeCents: number | null = null;
+          let orderStatus: OrderStatus | null = null;
 
           if (input.orderId !== undefined) {
             const order = await tx.order.findFirst({
               where: { id: input.orderId, businessId: input.businessId },
               select: {
+                status: true,
                 amountCents: true,
                 corporateAccountId: true,
                 payment: {
@@ -169,6 +175,7 @@ export async function capturePayment(
             }
 
             expectedProviderAmountCents = order.amountCents;
+            orderStatus = order.status;
             corporateAccountId = order.corporateAccountId;
             targetPayment = order.payment;
           } else {
@@ -203,13 +210,6 @@ export async function capturePayment(
             return svcFail("INVALID_TARGET");
           }
 
-          if (
-            targetPayment !== null &&
-            targetPayment.stripePaymentIntentId !== input.stripePaymentIntentId
-          ) {
-            return svcFail("INVALID_TARGET");
-          }
-
           const existingPayment = await tx.payment.findUnique({
             where: { stripePaymentIntentId: input.stripePaymentIntentId },
             select: {
@@ -228,6 +228,23 @@ export async function capturePayment(
             return matchesExistingPayment(existingPayment, input)
               ? svcOk({ paymentId: existingPayment.id })
               : svcFail("INVALID_TARGET");
+          }
+
+          // H1 defense in depth: a capture that lands on an order the cron
+          // or a cancel already closed (late hosted-checkout payment, an
+          // intent that raced the close) must never become an IN_ESCROW row
+          // nobody can release; the caller refunds it outside this tx.
+          // Checked before the payment-mismatch guard so a second charge on
+          // an order another intent already paid is refunded too.
+          if (orderStatus !== null && orderStatus !== OrderStatus.PENDING) {
+            return svcFail("ORDER_NOT_PAYABLE");
+          }
+
+          if (
+            targetPayment !== null &&
+            targetPayment.stripePaymentIntentId !== input.stripePaymentIntentId
+          ) {
+            return svcFail("INVALID_TARGET");
           }
 
           const settings = await tx.platformSettings.findUnique({
@@ -280,9 +297,15 @@ export async function capturePayment(
             input.providerAmountCents,
             providerPlanPct,
           );
-          const escrowReleaseAt = new Date(
-            Date.now() + escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
-          );
+          // D10-3: an order's auto-release clock arms at CONFIRMATION_REQUESTED
+          // (WORK_DONE / DELIVERED), never at capture. Payment links have no
+          // confirmation step, so they keep the capture-time clock.
+          const escrowReleaseAt =
+            input.orderId !== undefined
+              ? null
+              : new Date(
+                  Date.now() + escrowAutoReleaseHours * MILLISECONDS_PER_HOUR,
+                );
           const payment = await tx.payment.create({
             data: {
               businessId: input.businessId,
@@ -378,6 +401,30 @@ export type ReleaseOrderEvent = {
   type: typeof OrderEventType.CONFIRMED | typeof OrderEventType.AUTO_RELEASED;
   actorUserId?: string;
 };
+
+/** Order states an escrow release closes (D10-3, audit §6 #1 and #8). */
+const RELEASE_COMPLETABLE_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.PAID,
+  OrderStatus.IN_PROGRESS,
+  OrderStatus.SHIPPING,
+];
+
+/**
+ * A released escrow closes its order in the same step that records the
+ * release event (CAS from PAID / IN_PROGRESS / SHIPPING). Disputed orders are
+ * closed by the dispute resolution instead, so they never match here. This
+ * also completes an order whose earlier release got stuck in RELEASING and
+ * succeeded later from the cron (audit §6 #8).
+ */
+async function completeReleasedOrder(
+  db: Pick<PrismaClient, "order">,
+  orderId: string,
+): Promise<void> {
+  await db.order.updateMany({
+    where: { id: orderId, status: { in: RELEASE_COMPLETABLE_ORDER_STATUSES } },
+    data: { status: OrderStatus.COMPLETED },
+  });
+}
 
 async function ensureReleaseOrderEvent(
   db: Pick<PrismaClient, "orderEvent">,
@@ -784,6 +831,10 @@ export async function releasePayment(
       });
     }
 
+    if (payment.order) {
+      await completeReleasedOrder(db, payment.order.id);
+    }
+
     return svcOk({
       paymentId: payment.id,
       stripeTransferId: payment.stripeTransferId,
@@ -864,6 +915,10 @@ export async function releasePayment(
       data: {
         status: PaymentStatus.RELEASING,
         escrowReleaseAttemptedAt: releaseAttemptedAt,
+        // Once claimed, a failed transfer (e.g. NO_CONNECT_ACCOUNT) must be
+        // retried by the cron as soon as possible, not at the original
+        // auto-release deadline (audit §6 #8).
+        escrowReleaseAt: releaseAttemptedAt,
       },
     });
 
@@ -976,6 +1031,10 @@ export async function releasePayment(
           });
         }
 
+        if (payment.order) {
+          await completeReleasedOrder(tx, payment.order.id);
+        }
+
         return svcOk({
           paymentId: payment.id,
           stripeTransferId: transfer.id,
@@ -1007,6 +1066,10 @@ export async function releasePayment(
       });
     }
 
+    if (payment.order) {
+      await completeReleasedOrder(tx, payment.order.id);
+    }
+
     return svcOk({
       paymentId: payment.id,
       stripeTransferId: transfer.id,
@@ -1029,6 +1092,32 @@ const duePaymentWhere = (now: Date) => {
             OR: [
               { escrowReleaseAttemptedAt: null },
               { escrowReleaseAttemptedAt: { lte: retryBefore } },
+            ],
+            // D10-3: an order escrow only auto-releases after the provider
+            // asked for confirmation (or the customer redeemed a pickup).
+            // Guards legacy rows whose clock was armed at capture.
+            AND: [
+              {
+                OR: [
+                  { orderId: null },
+                  {
+                    order: {
+                      is: {
+                        events: {
+                          some: {
+                            type: {
+                              in: [
+                                OrderEventType.CONFIRMATION_REQUESTED,
+                                OrderEventType.PICKED_UP,
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
             ],
           },
           {
@@ -1074,6 +1163,12 @@ export async function releaseDuePayments(
         select: {
           id: true,
           business: { select: { ownerId: true } },
+          // F10 review L3: a redeemed pickup whose inline release failed.
+          events: {
+            where: { type: OrderEventType.PICKED_UP },
+            select: { actorUserId: true },
+            take: 1,
+          },
         },
       },
     },
@@ -1084,15 +1179,26 @@ export async function releaseDuePayments(
   const notifyRelease = await isPaymentReleaseNotificationEnabled(deps.db);
 
   for (const payment of duePayments) {
+    // L3: the customer confirmed a pickup by handing over the code, so the
+    // deferred release is recorded as that CONFIRMED (by the redeeming
+    // cashier), not as an AUTO_RELEASED timeout — and no auto-release push.
+    const pickup = payment.order?.events[0] ?? null;
+    const event: ReleaseOrderEvent = pickup
+      ? {
+          type: OrderEventType.CONFIRMED,
+          ...(pickup.actorUserId ? { actorUserId: pickup.actorUserId } : {}),
+        }
+      : { type: OrderEventType.AUTO_RELEASED };
+
     try {
       const result = await releasePayment(deps, {
         paymentId: payment.id,
-        event: { type: OrderEventType.AUTO_RELEASED },
+        event,
       });
 
       if (result.ok) {
         released += 1;
-        if (payment.order && notifyRelease) {
+        if (payment.order && notifyRelease && !pickup) {
           await sendLocalizedPushToUser(
             deps.db,
             payment.order.business.ownerId,

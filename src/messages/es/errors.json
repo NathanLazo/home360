@@ -52,5 +52,14 @@
   "AI_CREDIT_REQUIRED": "El asistente necesita saldo de tokens para usar este modelo. Compra tokens en tu perfil o cambia a un modelo gratuito.",
   "AI_WALLET_LIMIT": "Tu saldo de tokens ya está en el máximo permitido.",
   "PASSWORD_ALREADY_SET": "Esta cuenta ya tiene contraseña. Usa la opción de cambiar contraseña.",
-  "DEVICE_NOT_FOUND": "Ese dispositivo ya no está vinculado a tu cuenta."
+  "DEVICE_NOT_FOUND": "Ese dispositivo ya no está vinculado a tu cuenta.",
+  "OUT_OF_STOCK": "No hay existencias suficientes para esta cantidad.",
+  "PICKUP_NOT_AVAILABLE": "La recolección no está disponible en esta sucursal.",
+  "DELIVERY_NOT_AVAILABLE": "El envío a domicilio no está disponible para este producto en tu dirección.",
+  "PICKUP_CODE_INVALID": "El código de recolección no corresponde a ninguna orden lista para recoger.",
+  "FULFILLMENT_MISMATCH": "Esta acción no corresponde al método de entrega o al paso actual de la orden.",
+  "REQUEST_EXPIRED": "Esta solicitud venció y ya no acepta ofertas.",
+  "PICKUP_NOT_CONFIGURED": "Los códigos de recolección aún no están configurados. Intenta más tarde.",
+  "ORDER_EXPIRED": "Esta orden venció sin pagarse. Vuelve a hacer el pedido.",
+  "EVIDENCE_REUSED": "Una de estas fotos ya se usó como evidencia en otra orden. Sube fotos nuevas."
 }

@@ -454,7 +454,12 @@
     "CANCELLED": "Order cancelled",
     "WORKER_ASSIGNED": "Technician assigned",
     "REWORK_REQUESTED": "Rework requested",
-    "DISPUTE_OPENED": "Dispute opened"
+    "DISPUTE_OPENED": "Dispute opened",
+    "READY_FOR_PICKUP": "Ready for pickup",
+    "OUT_FOR_DELIVERY": "Out for delivery",
+    "DELIVERED": "Delivered",
+    "PICKED_UP": "Picked up by the customer",
+    "PAYMENT_EXPIRED": "Payment window expired"
   },
   "paymentStatus": {
     "PENDING": "Pending",

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 
-const SECTION_FIELD_COUNTS = [3, 3, 1, 2];
+const SECTION_FIELD_COUNTS = [3, 3, 1, 2, 2];
 
 /**
  * Loading shape of the settings form: one card per section (title + icon,

@@ -66,5 +66,33 @@
   "ratingReminder": {
     "title": "How did it go?",
     "body": "Rate the service you received; your review helps other customers."
+  },
+  "quoteAccepted": {
+    "title": "Your quote was accepted",
+    "body": "A customer accepted your offer. The order starts as soon as the payment is protected."
+  },
+  "productAccepted": {
+    "title": "Order accepted",
+    "body": "The business accepted your product order and is preparing it."
+  },
+  "orderReadyForPickup": {
+    "title": "Ready for pickup",
+    "body": "Your order is ready. Show your pickup QR code at the branch."
+  },
+  "orderOutForDelivery": {
+    "title": "Out for delivery",
+    "body": "Your order is on its way to your address."
+  },
+  "orderDelivered": {
+    "title": "Order delivered",
+    "body": "The business marked your order as delivered. Review the photos and confirm the delivery."
+  },
+  "orderPaymentExpired": {
+    "title": "Order expired",
+    "body": "The order was cancelled because the payment was not completed in time."
+  },
+  "paidOrderCancelledByCustomer": {
+    "title": "Order cancelled by the customer",
+    "body": "The customer cancelled a paid order before it started. The payment was fully refunded."
   }
 }

@@ -27,6 +27,10 @@ export const SETTINGS_RANGES = {
   notifyNewRequestRadiusKm: { min: 1, max: 100 },
   notifyRatingReminderHours: { min: 1, max: 168 },
   commissionPct: { min: 0, max: 30 },
+  // F10 (D10-5), provisional bounds: an unpaid order holds stock, so it
+  // expires within half a day at most; requests stay open up to 30 days.
+  unpaidOrderTtlMinutes: { min: 10, max: 720 },
+  requestTtlHours: { min: 12, max: 720 },
 } as const;
 
 const intInRange = (range: { min: number; max: number }) =>
@@ -54,6 +58,8 @@ export const platformSettingsSchema = z
     notifyRatingReminderHours: intInRange(
       SETTINGS_RANGES.notifyRatingReminderHours,
     ),
+    unpaidOrderTtlMinutes: intInRange(SETTINGS_RANGES.unpaidOrderTtlMinutes),
+    requestTtlHours: intInRange(SETTINGS_RANGES.requestTtlHours),
   })
   .strict();
 

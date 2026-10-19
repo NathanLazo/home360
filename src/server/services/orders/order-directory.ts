@@ -1,12 +1,14 @@
 import "server-only";
 
 import type {
-  Prisma,
-  OrderEventType,
   OrderStatus,
   OrderType,
-  PaymentMethod,
   PaymentStatus,
+  DisputeStatus,
+  FulfillmentMethod,
+  OrderEventType,
+  PaymentMethod,
+  Prisma,
   PrismaClient,
 } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
@@ -15,7 +17,13 @@ import type { OrderListInput } from "~/server/services/orders/order.schema";
 import {
   resolveOrderMediaUrl,
   resolveOrderMediaUrls,
+  signMediaPathnames,
+  type SignedMedia,
 } from "~/server/services/orders/order-media";
+import {
+  effectiveFulfillmentMethod,
+  getBusinessOrderActions,
+} from "~/server/services/orders/order-actions";
 
 const PAGE_SIZE = 20;
 const MAX_PRISMA_INT = 2_147_483_647;
@@ -27,6 +35,7 @@ const orderListSelect = {
   type: true,
   amountCents: true,
   status: true,
+  fulfillmentMethod: true,
   createdAt: true,
   customer: { select: { name: true } },
   branch: { select: { name: true } },
@@ -48,10 +57,17 @@ const orderDetailSelect = {
   afterUrls: true,
   workNotes: true,
   deliveryAddressLine: true,
+  deliveryLatitude: true,
+  deliveryLongitude: true,
+  fulfillmentMethod: true,
+  deliveryEvidenceUrls: true,
+  deliveryNote: true,
+  pickedUpAt: true,
   createdAt: true,
   updatedAt: true,
   customer: { select: { id: true, name: true, email: true } },
-  branch: { select: { id: true, name: true } },
+  branch: { select: { id: true, name: true, address: true } },
+  dispute: { select: { id: true, status: true } },
   worker: { select: { id: true, fullName: true } },
   service: { select: { id: true, name: true, category: true } },
   product: { select: { id: true, name: true, sku: true } },
@@ -116,6 +132,8 @@ export type OrderListItem = {
   workerName: string | null;
   amountCents: number;
   status: OrderStatus;
+  /** PRODUCT only (D10-1); null for SERVICE. */
+  fulfillmentMethod: FulfillmentMethod | null;
   createdAt: Date;
 };
 
@@ -143,8 +161,18 @@ export type OrderDetail = {
   updatedAt: Date;
   /** PRODUCT delivery snapshot or, for SERVICE, the accepted request address. */
   addressLine: string | null;
+  /** PRODUCT DELIVERY snapshot coordinates (null for SERVICE / PICKUP). */
+  deliveryLatitude: number | null;
+  deliveryLongitude: number | null;
+  /** PRODUCT only (D10-1); null for SERVICE. */
+  fulfillmentMethod: FulfillmentMethod | null;
+  /** DELIVERY proof photos, signed for the viewer (D10-2). */
+  deliveryEvidence: SignedMedia[];
+  deliveryNote: string | null;
+  pickedUpAt: Date | null;
   customer: { id: string; name: string | null; email: string | null };
-  branch: { id: string; name: string } | null;
+  branch: { id: string; name: string; address: string } | null;
+  dispute: { id: string; status: DisputeStatus } | null;
   worker: { id: string; fullName: string } | null;
   service: { id: string; name: string; category: string } | null;
   product: { id: string; name: string; sku: string } | null;
@@ -179,12 +207,28 @@ export type OrderDetail = {
     createdAt: Date;
     actorName: string | null;
   }>;
+  /**
+   * Server-computed affordances for the business (web and mobile apply the
+   * same guards; the procedures re-check every one of them).
+   */
+  actions: BusinessOrderActions;
+};
+
+export type BusinessOrderActions = {
+  acceptProduct: boolean;
+  markOutForDelivery: boolean;
+  markDelivered: boolean;
+  markReadyForPickup: boolean;
+  redeemPickup: boolean;
+  assignWorker: boolean;
+  cancel: boolean;
 };
 
 type SignedOrderMedia = {
   recordingUrl: string | null;
   beforeUrls: string[];
   afterUrls: string[];
+  deliveryEvidence: SignedMedia[];
 };
 
 function toOrderListItem(order: OrderListPayload): OrderListItem {
@@ -198,6 +242,10 @@ function toOrderListItem(order: OrderListPayload): OrderListItem {
     workerName: order.worker?.fullName ?? null,
     amountCents: order.amountCents,
     status: order.status,
+    fulfillmentMethod: effectiveFulfillmentMethod(
+      order.type,
+      order.fulfillmentMethod,
+    ),
     createdAt: order.createdAt,
   };
 }
@@ -224,8 +272,18 @@ function toOrderDetail(
     updatedAt: order.updatedAt,
     addressLine:
       order.deliveryAddressLine ?? order.quote?.request.addressLine ?? null,
+    deliveryLatitude: order.deliveryLatitude,
+    deliveryLongitude: order.deliveryLongitude,
+    fulfillmentMethod: effectiveFulfillmentMethod(
+      order.type,
+      order.fulfillmentMethod,
+    ),
+    deliveryEvidence: media.deliveryEvidence,
+    deliveryNote: order.deliveryNote,
+    pickedUpAt: order.pickedUpAt,
     customer: order.customer,
     branch: order.branch,
+    dispute: order.dispute,
     worker: order.worker,
     service: order.service,
     product: order.product,
@@ -254,6 +312,15 @@ function toOrderDetail(
       createdAt: event.createdAt,
       actorName: event.actor?.name ?? null,
     })),
+    actions: getBusinessOrderActions({
+      type: order.type,
+      status: order.status,
+      fulfillmentMethod: order.fulfillmentMethod,
+      paymentStatus: order.payment?.status ?? null,
+      hasDispute: order.dispute !== null,
+      pickedUpAt: order.pickedUpAt,
+      events: order.events,
+    }),
   };
 }
 
@@ -370,23 +437,33 @@ export async function getOrderById(
     return fail("NOT_FOUND", 404, "Order not found");
   }
 
-  const [recordingUrl, beforeUrls, afterUrls] = await Promise.all([
-    resolveOrderMediaUrl(db, {
-      userId: input.userId,
-      reference: order.recordingUrl,
-    }),
-    resolveOrderMediaUrls(db, {
-      userId: input.userId,
-      references: order.beforeUrls,
-    }),
-    resolveOrderMediaUrls(db, {
-      userId: input.userId,
-      references: order.afterUrls,
-    }),
-  ]);
+  const [recordingUrl, beforeUrls, afterUrls, deliveryEvidence] =
+    await Promise.all([
+      resolveOrderMediaUrl(db, {
+        userId: input.userId,
+        reference: order.recordingUrl,
+      }),
+      resolveOrderMediaUrls(db, {
+        userId: input.userId,
+        references: order.beforeUrls,
+      }),
+      resolveOrderMediaUrls(db, {
+        userId: input.userId,
+        references: order.afterUrls,
+      }),
+      signMediaPathnames(db, {
+        userId: input.userId,
+        pathnames: order.deliveryEvidenceUrls,
+      }),
+    ]);
 
   return ok(
-    toOrderDetail(order, { recordingUrl, beforeUrls, afterUrls }),
+    toOrderDetail(order, {
+      recordingUrl,
+      beforeUrls,
+      afterUrls,
+      deliveryEvidence,
+    }),
     "Order loaded",
   );
 }

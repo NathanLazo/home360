@@ -37,6 +37,8 @@ const EMPTY_VALUES: BranchFormValues = {
   coverageRadiusKm: "10",
   latitude: "",
   longitude: "",
+  pickupEnabled: true,
+  deliveryEnabled: true,
 };
 
 export function BranchFormSheet({
@@ -75,6 +77,8 @@ export function BranchFormSheet({
             latitude: branch.latitude === null ? "" : String(branch.latitude),
             longitude:
               branch.longitude === null ? "" : String(branch.longitude),
+            pickupEnabled: branch.pickupEnabled,
+            deliveryEnabled: branch.deliveryEnabled,
           }
         : EMPTY_VALUES,
     );
@@ -126,6 +130,8 @@ export function BranchFormSheet({
       name: values.name,
       address: values.address,
       coverageRadiusKm: Number(values.coverageRadiusKm),
+      pickupEnabled: values.pickupEnabled,
+      deliveryEnabled: values.deliveryEnabled,
     };
     const latitude = parseCoordinate(values.latitude);
     const longitude = parseCoordinate(values.longitude);

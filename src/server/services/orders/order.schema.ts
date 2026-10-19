@@ -48,3 +48,30 @@ export const orderAssignWorkerSchema = z.object({
 });
 
 export type OrderAssignWorkerInput = z.infer<typeof orderAssignWorkerSchema>;
+
+/** D10-2: 1–10 delivery photos (kind `evidence`) plus an optional note. */
+export const DELIVERY_EVIDENCE_MAX = 10;
+export const DELIVERY_NOTE_MAX = 500;
+
+export const orderMarkDeliveredSchema = z.object({
+  id: z.string().cuid(),
+  evidencePathnames: z
+    .array(z.string().trim().min(1).max(500))
+    .min(1)
+    .max(DELIVERY_EVIDENCE_MAX),
+  note: z
+    .string()
+    .trim()
+    .max(DELIVERY_NOTE_MAX)
+    .optional()
+    .transform((value) => (value === "" ? undefined : value)),
+});
+
+export type OrderMarkDeliveredInput = z.infer<typeof orderMarkDeliveredSchema>;
+
+/** Scanned QR or typed code; normalized (case, spaces, dashes) server-side. */
+export const orderRedeemPickupSchema = z.object({
+  code: z.string().trim().min(4).max(32),
+});
+
+export type OrderRedeemPickupInput = z.infer<typeof orderRedeemPickupSchema>;

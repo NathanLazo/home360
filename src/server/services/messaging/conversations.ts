@@ -1,9 +1,11 @@
 import "server-only";
 
-import type {
-  MessageType,
-  PrismaClient,
-  UserRole,
+import {
+  BusinessStatus,
+  ProductStatus,
+  type MessageType,
+  type PrismaClient,
+  type UserRole,
 } from "@generated/prisma";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {
@@ -17,11 +19,18 @@ const MESSAGES_PAGE_SIZE = 30;
 
 export type ConversationRef = { conversationId: string };
 
+export type ConversationKind = "ORDER" | "REQUEST" | "INQUIRY";
+
 export type ConversationListItem = {
   conversationId: string;
+  /** ORDER (post-acceptance), REQUEST (pre-order per quote) or INQUIRY (D10-12). */
+  kind: ConversationKind;
   orderId: string | null;
   requestId: string | null;
-  /** Order folio + title, or the request title (MA-03). */
+  /** INQUIRY: the product the customer asked about, if any. */
+  productId: string | null;
+  /** Order folio + title, the request title or, for an inquiry, the product
+   * (or business) name (MA-03). */
   title: string;
   /** The other side of the chat, resolved against the session role. */
   counterpartName: string;
@@ -66,8 +75,10 @@ export async function getOrCreateForOrder(
 /**
  * Upserts the pre-order conversation of a request×business pair (MA-08).
  * A business owner opens it against their own business — but only with a
- * quote of their own on the request. The customer owning the request must
- * name the `businessId`, which likewise must have quoted. Everything else is
+ * quote of their own on the request, or when the request is targeted at it
+ * (D10-11). The consumer owning the request (CUSTOMER or the CORPORATE
+ * owner) must name the `businessId` (now exposed by `quote.*`), which
+ * likewise must have quoted or be the request's target. Everything else is
  * a generic NOT_FOUND so the response never reveals whether the request or
  * the quote exists.
  */
@@ -89,7 +100,7 @@ export async function getOrCreateForRequest(
     });
 
     businessId = business?.id ?? null;
-  } else if (input.role === "CUSTOMER") {
+  } else if (input.role === "CUSTOMER" || input.role === "CORPORATE") {
     if (!input.businessId) {
       return svcFail("VALIDATION_ERROR", "businessId is required");
     }
@@ -106,15 +117,22 @@ export async function getOrCreateForRequest(
     return svcFail("NOT_FOUND", "Request not found");
   }
 
-  // Both roles converse only across an existing quote of that pair (N2).
-  const quote = await db.quote.findUnique({
-    where: {
-      requestId_businessId: { requestId: input.requestId, businessId },
-    },
-    select: { id: true },
-  });
+  // Both roles converse across an existing quote of that pair (N2) or a
+  // request targeted at that business (D10-11).
+  const [quote, targeted] = await Promise.all([
+    db.quote.findUnique({
+      where: {
+        requestId_businessId: { requestId: input.requestId, businessId },
+      },
+      select: { id: true },
+    }),
+    db.serviceRequest.findFirst({
+      where: { id: input.requestId, targetBusinessId: businessId },
+      select: { id: true },
+    }),
+  ]);
 
-  if (!quote) {
+  if (!quote && !targeted) {
     return svcFail("NOT_FOUND", "Request not found");
   }
 
@@ -124,6 +142,60 @@ export async function getOrCreateForRequest(
     },
     create: { requestId: input.requestId, businessId },
     update: {},
+    select: { id: true },
+  });
+
+  return svcOk({ conversationId: conversation.id });
+}
+
+/**
+ * Pre-sale inquiry chat (D10-12): one conversation per customer × business,
+ * opened by the consumer from a business profile or product page. The
+ * business must be ACTIVE; an optional `productId` must be one of its
+ * PUBLISHED products and becomes the conversation's current subject. Never
+ * re-linked to an order (orders keep their own conversation).
+ */
+export async function getOrCreateInquiry(
+  db: PrismaClient,
+  input: { customerId: string; businessId: string; productId?: string },
+): Promise<ServiceResult<ConversationRef>> {
+  const business = await db.business.findFirst({
+    where: { id: input.businessId, status: BusinessStatus.ACTIVE },
+    select: { id: true, ownerId: true },
+  });
+
+  if (!business || business.ownerId === input.customerId) {
+    return svcFail("NOT_FOUND", "Business not found");
+  }
+
+  if (input.productId) {
+    const product = await db.product.findFirst({
+      where: {
+        id: input.productId,
+        businessId: business.id,
+        status: ProductStatus.PUBLISHED,
+      },
+      select: { id: true },
+    });
+
+    if (!product) {
+      return svcFail("NOT_FOUND", "Product not found");
+    }
+  }
+
+  const conversation = await db.conversation.upsert({
+    where: {
+      businessId_customerId: {
+        businessId: business.id,
+        customerId: input.customerId,
+      },
+    },
+    create: {
+      businessId: business.id,
+      customerId: input.customerId,
+      productId: input.productId ?? null,
+    },
+    update: input.productId ? { productId: input.productId } : {},
     select: { id: true },
   });
 
@@ -147,6 +219,8 @@ export async function listMyConversations(
       id: true,
       orderId: true,
       requestId: true,
+      customerId: true,
+      productId: true,
       createdAt: true,
       order: {
         select: {
@@ -165,6 +239,7 @@ export async function listMyConversations(
         },
       },
       business: { select: { name: true } },
+      customer: { select: { name: true } },
       messages: {
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -180,8 +255,25 @@ export async function listMyConversations(
     },
   });
 
+  const productIds = [
+    ...new Set(
+      conversations.flatMap((conversation) =>
+        conversation.productId ? [conversation.productId] : [],
+      ),
+    ),
+  ];
+  const products =
+    productIds.length === 0
+      ? []
+      : await db.product.findMany({
+          where: { id: { in: productIds } },
+          select: { id: true, name: true },
+        });
+  const productNames = new Map(
+    products.map((product) => [product.id, product.name]),
+  );
   const items = conversations
-    .map((conversation) => toListItem(conversation, input.userId))
+    .map((conversation) => toListItem(conversation, input.userId, productNames))
     .sort((a, b) => b.activityAt.getTime() - a.activityAt.getTime());
 
   const cursorIndex = input.cursor
@@ -208,6 +300,8 @@ type ConversationRow = {
   id: string;
   orderId: string | null;
   requestId: string | null;
+  customerId: string | null;
+  productId: string | null;
   createdAt: Date;
   order: {
     folio: number;
@@ -222,6 +316,7 @@ type ConversationRow = {
     customer: { name: string | null };
   } | null;
   business: { name: string } | null;
+  customer: { name: string | null } | null;
   messages: { type: MessageType; body: string | null; createdAt: Date }[];
   _count: { messages: number };
 };
@@ -229,33 +324,55 @@ type ConversationRow = {
 function toListItem(
   conversation: ConversationRow,
   userId: string,
+  productNames: ReadonlyMap<string, string>,
 ): ConversationListItem & { activityAt: Date } {
   const lastMessage = conversation.messages[0] ?? null;
 
   let title = "";
   let counterpartName = "";
+  let kind: ConversationKind = "INQUIRY";
 
   if (conversation.order) {
-    const { folio, title: orderTitle, customerId, customer, business } =
-      conversation.order;
+    const {
+      folio,
+      title: orderTitle,
+      customerId,
+      customer,
+      business,
+    } = conversation.order;
 
+    kind = "ORDER";
     title = `#${folio} ${orderTitle}`;
     // The customer talks to the business; the business side (owner or
     // assigned worker) talks to the customer.
     counterpartName =
       customerId === userId ? business.name : (customer.name ?? "");
   } else if (conversation.request) {
+    kind = "REQUEST";
     title = conversation.request.title;
     counterpartName =
       conversation.request.customerId === userId
         ? (conversation.business?.name ?? "")
         : (conversation.request.customer.name ?? "");
+  } else {
+    const businessName = conversation.business?.name ?? "";
+
+    title =
+      (conversation.productId
+        ? productNames.get(conversation.productId)
+        : undefined) ?? businessName;
+    counterpartName =
+      conversation.customerId === userId
+        ? businessName
+        : (conversation.customer?.name ?? "");
   }
 
   return {
     conversationId: conversation.id,
+    kind,
     orderId: conversation.orderId,
     requestId: conversation.requestId,
+    productId: conversation.productId,
     title,
     counterpartName,
     lastMessage: lastMessage

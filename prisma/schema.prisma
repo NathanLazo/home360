@@ -64,6 +64,12 @@ enum OrderType {
   PRODUCT
 }
 
+// F10 (D10-1): how a PRODUCT order reaches the customer. Null on SERVICE.
+enum FulfillmentMethod {
+  DELIVERY
+  PICKUP
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -264,6 +270,12 @@ enum OrderEventType {
   // back to the technician; DISPUTE_OPENED freezes the escrow.
   REWORK_REQUESTED
   DISPUTE_OPENED
+  // F10 (D10-2/D10-5): PRODUCT fulfillment sub-state and unpaid expiry.
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  PICKED_UP
+  PAYMENT_EXPIRED
 }
 
 enum AiUrgency {
@@ -372,6 +384,7 @@ model User {
   customerProfile              CustomerProfile?
   addresses                    Address[]
   messages                     Message[]
+  inquiryConversations         Conversation[]               @relation("InquiryConversations")
   orderEvents                  OrderEvent[]                 @relation("OrderEventActor")
   requestDiagnoses             RequestDiagnosis[]
   agentConversations           AgentConversation[]          @relation("UserAgentConversations")
@@ -381,6 +394,7 @@ model User {
   agentDefaultModel            String?
   avatarPathname               String?
   aiUsage                      AiUsage[]
+  stockMovements               StockMovement[]              @relation("StockMovementActor")
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -437,6 +451,7 @@ model Business {
   loyaltyBonuses      LoyaltyBonus[]
   payoutReceipts      PayoutReceipt[]
   conversations       Conversation[]
+  targetedRequests    ServiceRequest[]   @relation("TargetedRequests")
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
@@ -445,7 +460,7 @@ model Business {
 }
 
 model Branch {
-  id               String         @id @default(cuid())
+  id               String          @id @default(cuid())
   name             String
   address          String
   managerName      String?
@@ -454,16 +469,20 @@ model Branch {
   // keep working until each branch is geocoded.
   latitude         Float?
   longitude        Float?
-  coverageRadiusKm Int            @default(10)
-  status           BranchStatus   @default(ACTIVE)
+  coverageRadiusKm Int             @default(10)
+  // F10 (D10-1/D10-6): the branch offers a pickup counter / ships deliveries.
+  pickupEnabled    Boolean         @default(true)
+  deliveryEnabled  Boolean         @default(true)
+  status           BranchStatus    @default(ACTIVE)
   businessId       String
-  business         Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business         Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   orders           Order[]
   quotes           Quote[]
   workers          Worker[]
   productStocks    ProductStock[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  stockMovements   StockMovement[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
   @@index([businessId])
 }
@@ -536,6 +555,7 @@ model Product {
   business       Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   orders         Order[]
   stocks         ProductStock[]
+  stockMovements StockMovement[]
   orderMaterials OrderMaterial[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -557,6 +577,45 @@ model ProductStock {
 
   @@unique([productId, branchId])
   @@index([branchId])
+}
+
+// F10-b: what moved a ProductStock row (D10-4: `stock` is *available*).
+// Written in the same transaction as every ProductStock change:
+// RESERVE (-qty) at PENDING order creation, RELEASE (+qty) when a hold is
+// restored, ADJUST (+/-delta) on business edits/imports/new rows/removed
+// branches. RESTOCK (+qty, returned goods put back on sale) is reserved for
+// a future "restock after refund" action. A handover (DELIVERED/PICKED_UP)
+// moves nothing: the units already left `stock` with the RESERVE.
+// Append-only ledger: no updatedAt.
+enum StockMovementType {
+  RESERVE
+  RELEASE
+  ADJUST
+  RESTOCK
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId    String
+  branch      Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  type        StockMovementType
+  // Signed change applied to ProductStock.stock.
+  quantity    Int
+  // ProductStock.stock right after the movement, read in the same tx.
+  stockAfter  Int
+  orderId     String?
+  order       Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  actorUserId String?
+  actor       User?             @relation("StockMovementActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  reason      String?
+  createdAt   DateTime          @default(now())
+
+  @@index([productId, branchId, createdAt])
+  @@index([orderId])
+  @@index([branchId, createdAt])
+  @@index([actorUserId])
 }
 
 // A service request is separate from an Order: accepting one Quote creates an Order,
@@ -597,12 +656,19 @@ model ServiceRequest {
   corporateAccount    CorporateAccount?  @relation(fields: [corporateAccountId], references: [id], onDelete: SetNull)
   corporateLocationId String?
   corporateLocation   CorporateLocation? @relation(fields: [corporateLocationId], references: [id], onDelete: SetNull)
+  // F10 (D10-11): request aimed at one business (and optionally one of its
+  // services). Only that business sees it on the radar and gets notified.
+  // targetServiceId is a plain id (no FK) like suggestedServiceId.
+  targetBusinessId    String?
+  targetBusiness      Business?          @relation("TargetedRequests", fields: [targetBusinessId], references: [id], onDelete: SetNull)
+  targetServiceId     String?
   quotes              Quote[]
   conversations       Conversation[]
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
   @@index([customerId])
+  @@index([targetBusinessId, status])
   @@index([status, createdAt])
   @@index([category])
   @@index([corporateAccountId, createdAt])
@@ -710,6 +776,27 @@ model Order {
   // finish (RECORDING_JUSTIFICATION_REQUIRED, D6: disputes still favour the
   // customer when the recording is incomplete).
   recordingJustification String?
+  // F10 (D10-1/D10-2): PRODUCT fulfillment. Null on SERVICE.
+  fulfillmentMethod      FulfillmentMethod?
+  // DELIVERY proof photos (kind `evidence`) written by order.markDelivered.
+  deliveryEvidenceUrls   String[]
+  deliveryNote           String?
+  // PICKUP: SHA-256 of the pickup code. The plaintext is derived on demand as
+  // HMAC(PICKUP_CODE_SECRET, order.id) and never stored.
+  pickupCodeHash         String?            @unique
+  pickedUpAt             DateTime?
+  // F10 (D10-4): units taken from ProductStock(productId, branchId) at order
+  // creation. > 0 while held; reset to 0 by the single restore path (CAS).
+  stockHeldQty           Int                @default(0)
+  // F10 review H1: hosted Checkout Session of the web (corporate) checkout,
+  // so the expiry cron can expire it in Stripe before cancelling the order.
+  checkoutSessionId      String?            @unique
+  // F10 review M3: last time the expiry cron tried this order (a PENDING
+  // order it skipped or failed on, or a CANCELLED one it reconciles);
+  // ordered nulls-first and retried after a delay so stuck rows never
+  // starve the batch.
+  expiryAttemptedAt      DateTime?
+  stockMovements         StockMovement[]
   materials              OrderMaterial[]
   recordingSegments      RecordingSegment[]
   payment                Payment?
@@ -729,6 +816,7 @@ model Order {
   @@index([productId])
   @@index([corporateAccountId])
   @@index([corporateLocationId])
+  @@index([status, createdAt])
 }
 
 // Materials are rows instead of JSON so callers get typed selects and an optional Product FK.
@@ -1213,6 +1301,19 @@ model PushToken {
   @@index([userId])
 }
 
+/// Expo push tickets awaiting their delivery receipt. Expo publishes receipts
+/// minutes after sending, so `cron/push-receipts` checks them later and prunes
+/// `DeviceNotRegistered` tokens. No relation to PushToken: the token may be
+/// gone by the time the receipt is read.
+model PushReceipt {
+  receiptId String   @id
+  expoToken String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
 model CustomerProfile {
   id                     String  @id @default(cuid())
   userId                 String  @unique
@@ -1254,11 +1355,19 @@ model Conversation {
   // created directly per order (getOrCreateConversation).
   businessId String?
   business   Business?       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // F10 (D10-12): pre-sale inquiry chat customer × business (no order, no
+  // request). productId is a plain id (the catalog row may be deleted).
+  customerId String?
+  customer   User?           @relation("InquiryConversations", fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String?
   messages   Message[]
   createdAt  DateTime        @default(now())
 
   // One conversation per request×business pair (MA-08).
   @@unique([requestId, businessId])
+  // One inquiry conversation per business×customer pair (D10-12).
+  @@unique([businessId, customerId])
+  @@index([customerId])
   @@index([requestId])
   @@index([businessId])
 }
@@ -1318,6 +1427,10 @@ model PlatformSettings {
   notifyNewRequestRadiusKm    Int      @default(10)
   notifyPaymentRelease        Boolean  @default(true)
   notifyRatingReminderHours   Int      @default(24)
+  // F10 (D10-5): PENDING orders expire after this many minutes; new requests
+  // get expiresAt = createdAt + requestTtlHours.
+  unpaidOrderTtlMinutes       Int      @default(30)
+  requestTtlHours             Int      @default(72)
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
 }
@@ -1372,26 +1485,26 @@ enum AiUsageSettlement {
 /// platform price applied and the wallet it was debited from. Admin usage is
 /// INTERNAL (no charge); free models are FREE.
 model AiUsage {
-  id                 String            @id @default(cuid())
-  userId             String
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessId         String?
-  business           Business?         @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  corporateAccountId String?
-  corporateAccount   CorporateAccount? @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
-  conversationId     String?
+  id                   String            @id @default(cuid())
+  userId               String
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId           String?
+  business             Business?         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  corporateAccountId   String?
+  corporateAccount     CorporateAccount? @relation(fields: [corporateAccountId], references: [id], onDelete: Cascade)
+  conversationId       String?
   /// Id of the assistant message that closed the turn (idempotency key).
-  messageId          String            @unique
-  model              String
-  inputTokens        Int
-  outputTokens       Int
+  messageId            String            @unique
+  model                String
+  inputTokens          Int
+  outputTokens         Int
   /// Platform price (gateway × markup) in USD micros.
-  costUsdMicros      Int
+  costUsdMicros        Int
   /// Gateway list price in USD micros, kept for margin reporting.
   gatewayCostUsdMicros Int
-  settlement         AiUsageSettlement
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  settlement           AiUsageSettlement
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
   @@index([businessId, createdAt])
   @@index([corporateAccountId, createdAt])

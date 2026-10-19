@@ -2,6 +2,13 @@ import "server-only";
 
 import type { Prisma, PrismaClient } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
+import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
+import {
+  productBranchStockSelect,
+  summarizeAvailability,
+  type ProductAvailability,
+} from "~/server/services/catalog/product-availability";
+import type { GeoPoint } from "~/server/services/geo/haversine";
 
 const SEARCH_PAGE_SIZE = 20;
 const FEATURED_PRODUCTS_TAKE = 10;
@@ -21,9 +28,8 @@ export type MarketplaceSearchInput = {
  * surfaces ACTIVE businesses and their published catalog, and never exposes
  * owner ids or financial data.
  */
-const activeBusinessFilter = {
-  status: "ACTIVE",
-} satisfies Prisma.BusinessWhereInput;
+// F10 review L6: ACTIVE and not CANCELED (the `activeBusinessProcedure` rule).
+const activeBusinessFilter = marketplaceBusinessWhere;
 
 export const serviceCatalogFilter = {
   status: "ACTIVE",
@@ -45,6 +51,7 @@ const featuredProductSelect = {
   name: true,
   priceCents: true,
   imageUrl: true,
+  businessId: true,
   business: { select: { name: true } },
 } satisfies Prisma.ProductSelect;
 
@@ -53,6 +60,7 @@ export type MarketplaceFeaturedProduct = {
   name: string;
   priceCents: number;
   imageUrl: string | null;
+  businessId: string;
   businessName: string;
 };
 
@@ -61,6 +69,7 @@ const serviceSearchSelect = {
   name: true,
   category: true,
   basePriceCents: true,
+  businessId: true,
   business: { select: { name: true } },
 } satisfies Prisma.ServiceSelect;
 
@@ -73,6 +82,7 @@ const productSearchSelect = {
   name: true,
   category: true,
   priceCents: true,
+  businessId: true,
   business: { select: { name: true } },
 } satisfies Prisma.ProductSelect;
 
@@ -86,6 +96,7 @@ export type MarketplaceSearchItem = {
   name: string;
   category: string;
   priceCents: number;
+  businessId: string;
   businessName: string;
 };
 
@@ -100,7 +111,8 @@ const productDetailSelect = {
   category: true,
   priceCents: true,
   imageUrl: true,
-  stocks: { select: { stock: true } },
+  businessId: true,
+  stocks: { select: productBranchStockSelect },
   business: { select: { name: true, ratingAvg: true, ratingCount: true } },
 } satisfies Prisma.ProductSelect;
 
@@ -114,7 +126,13 @@ export type MarketplaceProductDetail = {
   category: string;
   priceCents: number;
   imageUrl: string | null;
+  businessId: string;
+  /** Same as `available` (kept for pre-F10 clients; never the raw sum). */
   stock: number;
+  /** Max units at a single eligible branch (D10-6): cap the quantity here. */
+  available: ProductAvailability["available"];
+  lowStock: ProductAvailability["lowStock"];
+  fulfillment: ProductAvailability["fulfillment"];
   business: {
     name: string;
     ratingAvg: number | null;
@@ -179,9 +197,7 @@ export async function listMarketplaceCategories(
 
   const categories = [...countByCategory.entries()]
     .map(([category, count]) => ({ category, count }))
-    .sort(
-      (a, b) => b.count - a.count || a.category.localeCompare(b.category),
-    );
+    .sort((a, b) => b.count - a.count || a.category.localeCompare(b.category));
 
   return ok(categories, "Marketplace categories loaded");
 }
@@ -208,6 +224,7 @@ export async function listFeaturedProducts(
       name: product.name,
       priceCents: product.priceCents,
       imageUrl: product.imageUrl,
+      businessId: product.businessId,
       businessName: product.business.name,
     })),
     "Featured products loaded",
@@ -221,6 +238,7 @@ function serviceSearchItem(row: ServiceSearchRow): MarketplaceSearchItem {
     name: row.name,
     category: row.category,
     priceCents: row.basePriceCents,
+    businessId: row.businessId,
     businessName: row.business.name,
   };
 }
@@ -232,6 +250,7 @@ function productSearchItem(row: ProductSearchRow): MarketplaceSearchItem {
     name: row.name,
     category: row.category,
     priceCents: row.priceCents,
+    businessId: row.businessId,
     businessName: row.business.name,
   };
 }
@@ -342,9 +361,15 @@ export async function searchMarketplace(
   return ok({ items, nextCursor }, "Marketplace search loaded");
 }
 
+/**
+ * Product detail with D10-6 availability: the max units at one eligible
+ * branch, low-stock flag and the fulfillment options (delivery, pickup
+ * branches nearest to `origin` first). Origin = the given point or null.
+ */
 export async function getMarketplaceProduct(
   db: PrismaClient,
   id: string,
+  origin: GeoPoint | null = null,
 ): Promise<TrpcResponse<MarketplaceProductDetail>> {
   const product: ProductDetailRow | null = await db.product.findFirst({
     where: { id, ...productCatalogFilter },
@@ -355,6 +380,8 @@ export async function getMarketplaceProduct(
     return fail("NOT_FOUND", 404, "Product not found");
   }
 
+  const availability = summarizeAvailability(product.stocks, origin);
+
   return ok(
     {
       id: product.id,
@@ -362,7 +389,11 @@ export async function getMarketplaceProduct(
       category: product.category,
       priceCents: product.priceCents,
       imageUrl: product.imageUrl,
-      stock: product.stocks.reduce((total, { stock }) => total + stock, 0),
+      businessId: product.businessId,
+      stock: availability.available,
+      available: availability.available,
+      lowStock: availability.lowStock,
+      fulfillment: availability.fulfillment,
       business: {
         name: product.business.name,
         ratingAvg: product.business.ratingAvg,

@@ -1,15 +1,18 @@
 "use client";
 
 import {
+  CrosshairIcon,
   MapPinIcon,
+  MessageSquareIcon,
   RotateCcwIcon,
   SparklesIcon,
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { ConversationPanel } from "./conversation-panel";
 import { EMPTY_OFFER, OfferForm, toDateTimeLocal } from "./offer-form";
 import type { RadarRequestDetail, WorkerOption } from "./order.types";
 import type { OfferFormValues } from "./orders.schema";
@@ -96,6 +99,15 @@ export function RequestDetailSheet({
   const errorCode =
     query.data?.error ?? (query.error ? toErrorCode(query.error) : null);
   const ownQuote = request?.ownQuote ?? null;
+  const [chatOpen, setChatOpen] = useState(false);
+  // The server opens the pre-sale thread once the business has quoted, or
+  // when the request was addressed to it (D10-11/D10-12).
+  const chatAvailable = ownQuote !== null || request?.targeted === true;
+
+  // Another request (next row, deep link) starts with the chat collapsed.
+  useEffect(() => {
+    setChatOpen(false);
+  }, [requestId]);
   // Remount the form only when the stored offer changes, never on a plain
   // background refetch (it would wipe what the user is typing).
   const offerFormKey = ownQuote
@@ -122,6 +134,12 @@ export function RequestDetailSheet({
             </SheetTitle>
             {request ? (
               <Badge variant="secondary">{request.category}</Badge>
+            ) : null}
+            {request?.targeted ? (
+              <Badge variant="outline" className="gap-1.5">
+                <CrosshairIcon aria-hidden="true" />
+                {t("targetedBadge")}
+              </Badge>
             ) : null}
           </div>
           <SheetDescription>
@@ -209,7 +227,24 @@ export function RequestDetailSheet({
                       }),
                     })}
                   </dd>
+                  {request.expiresAt ? (
+                    <>
+                      <dt className="text-muted-foreground">
+                        {t("expiresLabel")}
+                      </dt>
+                      <dd className="text-right">
+                        <time dateTime={request.expiresAt.toISOString()}>
+                          {formatter.relativeTime(request.expiresAt, now)}
+                        </time>
+                      </dd>
+                    </>
+                  ) : null}
                 </dl>
+                {request.targeted ? (
+                  <p className="text-muted-foreground mt-3 text-xs">
+                    {t("targetedHint")}
+                  </p>
+                ) : null}
                 <p className="text-muted-foreground mt-3 text-xs">
                   {t("privacyHint")}
                 </p>
@@ -323,6 +358,50 @@ export function RequestDetailSheet({
                     {t("notQuotable")}
                   </p>
                 )}
+              </section>
+
+              <Separator />
+
+              <section
+                aria-labelledby="request-chat-heading"
+                className="space-y-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3
+                    id="request-chat-heading"
+                    className="text-muted-foreground text-label font-mono font-medium tracking-wide uppercase"
+                  >
+                    {t("chatTitle")}
+                  </h3>
+                  {chatAvailable ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      aria-expanded={chatOpen}
+                      aria-controls="request-conversation"
+                      onClick={() => setChatOpen((current) => !current)}
+                    >
+                      <MessageSquareIcon aria-hidden="true" />
+                      {t(chatOpen ? "hideChat" : "openChat")}
+                    </Button>
+                  ) : null}
+                </div>
+                {chatAvailable ? null : (
+                  <p className="text-muted-foreground text-copy-sm">
+                    {t("chatNeedsOffer")}
+                  </p>
+                )}
+                {chatAvailable && chatOpen ? (
+                  <ConversationPanel
+                    id="request-conversation"
+                    source={{ kind: "request", requestId: request.id }}
+                    customerId={request.customerId}
+                    title={t("chatWith", {
+                      name: request.customerName ?? t("notAvailable"),
+                    })}
+                    notFoundHint={t("chatNeedsOffer")}
+                  />
+                ) : null}
               </section>
             </div>
           ) : null}

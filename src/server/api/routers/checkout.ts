@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { FulfillmentMethod } from "@generated/prisma";
 import { env } from "~/env";
 import {
   fail,
@@ -10,25 +11,52 @@ import {
 import { consumerProcedure } from "~/server/api/consumer-procedure";
 import { createTRPCRouter, userProcedure } from "~/server/api/trpc";
 import {
-  createProductCheckoutIntent,
   createServiceCheckoutIntent,
   listCustomerPaymentMethods,
 } from "~/server/services/payments/customer-checkout";
+import { createProductCheckoutIntent } from "~/server/services/payments/product-checkout";
 import { getStripe } from "~/server/services/stripe/client";
 
 const createIntentSchema = z.object({ orderId: z.string().cuid() });
 
-const createProductIntentSchema = z.object({
-  productId: z.string().cuid(),
-  quantity: z.number().int().min(1).max(100),
-  addressId: z.string().cuid(),
-});
+/**
+ * D10-1: DELIVERY needs an own `addressId`; PICKUP needs the chosen
+ * `branchId`. `fulfillmentMethod` defaults to DELIVERY so pre-F10 clients
+ * (address only) keep working.
+ */
+const createProductIntentSchema = z
+  .object({
+    productId: z.string().cuid(),
+    quantity: z.number().int().min(1).max(100),
+    fulfillmentMethod: z
+      .nativeEnum(FulfillmentMethod)
+      .default(FulfillmentMethod.DELIVERY),
+    addressId: z.string().cuid().optional(),
+    branchId: z.string().cuid().optional(),
+  })
+  .refine(
+    (input) =>
+      input.fulfillmentMethod !== FulfillmentMethod.DELIVERY ||
+      input.addressId !== undefined,
+    { message: "DELIVERY requires an address", path: ["addressId"] },
+  )
+  .refine(
+    (input) =>
+      input.fulfillmentMethod !== FulfillmentMethod.PICKUP ||
+      input.branchId !== undefined,
+    { message: "PICKUP requires a branch", path: ["branchId"] },
+  );
 
 const serviceErrorStatuses = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   BUSINESS_NOT_ACTIVE: 409,
   STRIPE_ERROR: 502,
+  VALIDATION_ERROR: 422,
+  OUT_OF_STOCK: 409,
+  PICKUP_NOT_AVAILABLE: 409,
+  DELIVERY_NOT_AVAILABLE: 409,
+  ORDER_EXPIRED: 409,
 } as const;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;
@@ -58,7 +86,11 @@ function checkoutDeps(
   };
 }
 
-/** Customer PaymentSheet endpoints for service and direct-product checkout. */
+/**
+ * Customer PaymentSheet endpoints for service and direct-product checkout.
+ * `createIntent` pays or retries any own PENDING order (SERVICE or PRODUCT,
+ * D10-7); `createProductIntent` is idempotent and returns the `orderId`.
+ */
 export const checkoutRouter = createTRPCRouter({
   createIntent: consumerProcedure
     .input(createIntentSchema)
@@ -87,7 +119,9 @@ export const checkoutRouter = createTRPCRouter({
           customerId: ctx.customer.id,
           productId: input.productId,
           quantity: input.quantity,
+          fulfillmentMethod: input.fulfillmentMethod,
           addressId: input.addressId,
+          branchId: input.branchId,
         });
 
         if (!intent.ok) {

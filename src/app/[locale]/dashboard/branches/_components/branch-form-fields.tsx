@@ -7,6 +7,7 @@ import { FormSection, FormSectionDivider } from "~/components/form-section";
 import { GeoCoordinateFields } from "~/components/geo-coordinate-fields";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 
 export function BranchFormFields({
   values,
@@ -176,6 +177,86 @@ export function BranchFormFields({
           onChange={(location) => onChange({ ...values, ...location })}
         />
       </FormSection>
+
+      <FormSectionDivider />
+
+      <FormSection
+        title={t("sections.fulfillment")}
+        description={t("sections.fulfillmentDescription")}
+      >
+        <FulfillmentSwitch
+          id="branch-delivery-enabled"
+          label={t("deliveryEnabled")}
+          help={t("deliveryEnabledHelp")}
+          checked={values.deliveryEnabled}
+          disabled={disabled}
+          onCheckedChange={(deliveryEnabled) =>
+            onChange({ ...values, deliveryEnabled })
+          }
+        />
+        <FulfillmentSwitch
+          id="branch-pickup-enabled"
+          label={t("pickupEnabled")}
+          help={t("pickupEnabledHelp")}
+          warning={
+            values.pickupEnabled &&
+            (values.latitude.trim() === "" || values.longitude.trim() === "")
+              ? t("pickupNeedsCoordinates")
+              : undefined
+          }
+          checked={values.pickupEnabled}
+          disabled={disabled}
+          onCheckedChange={(pickupEnabled) =>
+            onChange({ ...values, pickupEnabled })
+          }
+        />
+      </FormSection>
+    </div>
+  );
+}
+
+/** One D10-1 fulfillment flag: label and help share the switch's hit area. */
+function FulfillmentSwitch({
+  id,
+  label,
+  help,
+  warning,
+  checked,
+  disabled,
+  onCheckedChange,
+}: {
+  id: string;
+  label: string;
+  help: string;
+  warning?: string;
+  checked: boolean;
+  disabled: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  const helpId = `${id}-help`;
+  const warningId = `${id}-warning`;
+
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <Label htmlFor={id}>{label}</Label>
+        <p id={helpId} className="text-muted-foreground text-copy-sm">
+          {help}
+        </p>
+        {warning ? (
+          <p id={warningId} className="text-warning-deep text-copy-sm">
+            {warning}
+          </p>
+        ) : null}
+      </div>
+      <Switch
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        aria-describedby={warning ? `${helpId} ${warningId}` : helpId}
+        onCheckedChange={onCheckedChange}
+        className="mt-0.5 shrink-0"
+      />
     </div>
   );
 }

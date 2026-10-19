@@ -58,6 +58,8 @@ async function authorizeOrderEvidenceRead(
         },
         { beforeUrls: { has: pathname } },
         { afterUrls: { has: pathname } },
+        // PRODUCT DELIVERY proof photos (F10, D10-2).
+        { deliveryEvidenceUrls: { has: pathname } },
         { recordingUrl: pathname },
         { recordingSegments: { some: { pathname } } },
         // Dispute evidence is shared by both parties of the order (W11).

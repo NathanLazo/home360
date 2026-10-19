@@ -14,6 +14,7 @@ import {
   isOwnedMediaPathname,
 } from "~/server/services/media/blob";
 import { currentCycleEvents } from "~/server/services/orders/work-cycle";
+import { armAutoRelease } from "~/server/services/payments/auto-release";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -420,10 +421,20 @@ export async function transitionAssignedOrder(
         }
 
         if (input.to === OrderEventType.EN_ROUTE) {
-          await tx.order.update({
-            where: { id: order.id },
+          // F10 review M6: work only starts while the escrow is held; an
+          // order whose refund is in flight (REFUNDING) never goes en route.
+          const started = await tx.order.updateMany({
+            where: {
+              id: order.id,
+              status: OrderStatus.PAID,
+              payment: { is: { status: PaymentStatus.IN_ESCROW } },
+            },
             data: { status: OrderStatus.IN_PROGRESS },
           });
+
+          if (started.count === 0) {
+            return svcFail("CONFLICT", "Order escrow is no longer held");
+          }
         }
 
         await tx.orderEvent.create({
@@ -735,7 +746,7 @@ export async function finishAssignedOrder(
             customerId: true,
             recordingComplete: true,
             payment: {
-              select: { id: true, status: true, escrowReleaseAt: true },
+              select: { id: true, status: true },
             },
             events: {
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -843,31 +854,10 @@ export async function finishAssignedOrder(
           ],
         });
 
-        // After a rework the auto-release was paused; the new confirmation
-        // window restarts from this finish.
-        if (
-          order.payment?.status === PaymentStatus.IN_ESCROW &&
-          order.payment.escrowReleaseAt === null
-        ) {
-          const settings = await tx.platformSettings.findUnique({
-            where: { id: 1 },
-            select: { escrowAutoReleaseHours: true },
-          });
-
-          if (settings) {
-            await tx.payment.updateMany({
-              where: {
-                id: order.payment.id,
-                status: PaymentStatus.IN_ESCROW,
-                escrowReleaseAt: null,
-              },
-              data: {
-                escrowReleaseAt: new Date(
-                  Date.now() + settings.escrowAutoReleaseHours * 3_600_000,
-                ),
-              },
-            });
-          }
+        // D10-3: the auto-release clock arms at CONFIRMATION_REQUESTED and
+        // every finish (first one or after a rework) restarts the window.
+        if (order.payment?.status === PaymentStatus.IN_ESCROW) {
+          await armAutoRelease(tx, { paymentId: order.payment.id });
         }
 
         await releaseWorkerAvailability(tx, input.workerId);

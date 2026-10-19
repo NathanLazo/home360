@@ -41,6 +41,9 @@ export const branchCreateSchema = z
     // the request radar (Haversine radius needs a point).
     latitude: branchFields.latitude.optional(),
     longitude: branchFields.longitude.optional(),
+    // D10-1 product fulfillment; omitted → the DB default (`true`).
+    pickupEnabled: z.boolean().optional(),
+    deliveryEnabled: z.boolean().optional(),
   })
   .refine(coordinatesPaired, coordinatesPairIssue);
 
@@ -54,6 +57,9 @@ export const branchUpdateSchema = branchIdSchema
     // Same convention: `undefined` keeps, `null` clears (both together).
     latitude: branchFields.latitude.nullable().optional(),
     longitude: branchFields.longitude.nullable().optional(),
+    // `undefined` keeps the current flag.
+    pickupEnabled: z.boolean().optional(),
+    deliveryEnabled: z.boolean().optional(),
   })
   .refine(coordinatesPaired, coordinatesPairIssue);
 

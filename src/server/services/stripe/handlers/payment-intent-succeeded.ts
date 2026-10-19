@@ -1,7 +1,7 @@
 import "server-only";
 
 import { PaymentMethod } from "@generated/prisma";
-import type Stripe from "stripe";
+import Stripe from "stripe";
 
 import { capturePayment } from "~/server/services/payments/escrow";
 import {
@@ -144,12 +144,66 @@ export async function capturePaymentIntent(
   });
 
   if (!capture.ok) {
+    if (
+      capture.code === "ORDER_NOT_PAYABLE" &&
+      origin.data.orderId !== undefined
+    ) {
+      return refundUnpayableOrderCharge(deps, {
+        paymentIntentId: paymentIntent.id,
+        orderId: origin.data.orderId,
+      });
+    }
+
     return handlerFail(capture.code, capture.detail);
   }
 
   if (origin.data.orderId !== undefined) {
     await recordCapturedOrderEscrow(deps, { orderId: origin.data.orderId });
   }
+
+  return svcOk(null);
+}
+
+/**
+ * F10 review H1: a charge that succeeded after its order was closed
+ * (expired by the cron, cancelled) is refunded in full instead of being
+ * held in an escrow nobody can release. No Payment row exists for it, so the
+ * resulting `charge.refunded` is ignored as foreign. The deterministic
+ * idempotency key makes webhook retries safe; a Stripe failure answers 500
+ * so Stripe redelivers and the refund is retried.
+ */
+async function refundUnpayableOrderCharge(
+  { stripe }: StripeWebhookDeps,
+  input: { paymentIntentId: string; orderId: string },
+): Promise<StripeHandlerResult> {
+  try {
+    await stripe.refunds.create(
+      {
+        payment_intent: input.paymentIntentId,
+        metadata: { orderId: input.orderId, reason: "ORDER_NOT_PAYABLE" },
+      },
+      { idempotencyKey: `refund-unpayable-order-${input.paymentIntentId}` },
+    );
+  } catch (error) {
+    if (error instanceof Stripe.errors.StripeError) {
+      console.error("[stripe-webhook] ORDER_NOT_PAYABLE_REFUND_FAILED", {
+        orderId: input.orderId,
+        code: "STRIPE_ERROR",
+      });
+
+      return handlerFail(
+        "STRIPE_ERROR",
+        `Refund of the late charge on order ${input.orderId} failed`,
+      );
+    }
+
+    throw error;
+  }
+
+  console.error("[stripe-webhook] ORDER_NOT_PAYABLE_REFUNDED", {
+    orderId: input.orderId,
+    code: "ORDER_NOT_PAYABLE",
+  });
 
   return svcOk(null);
 }

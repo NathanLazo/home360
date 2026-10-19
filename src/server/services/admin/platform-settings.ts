@@ -42,6 +42,8 @@ const settingsSelect = {
   notifyNewRequestRadiusKm: true,
   notifyPaymentRelease: true,
   notifyRatingReminderHours: true,
+  unpaidOrderTtlMinutes: true,
+  requestTtlHours: true,
   updatedAt: true,
 } as const;
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  OrderStatus,
   Prisma,
   type PrismaClient,
   type ProductStatus,
@@ -16,6 +17,10 @@ import type {
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { ACTIVE_ORDER_STATUSES } from "~/server/services/business/order-activity";
 import { assertBranchInBusiness } from "~/server/services/business/branch-access";
+import {
+  recordStockAdjustments,
+  type StockAdjustment,
+} from "~/server/services/orders/stock-hold";
 import {
   assertPlanLimit,
   type BusinessWithPlan,
@@ -393,6 +398,7 @@ export async function importProductRows(
   businessId: string,
   branchId: string,
   rows: ProductCsvRow[],
+  actorUserId?: string,
 ): Promise<ProductResponse<ProductImportResult>> {
   const seenSkus = new Set<string>();
   const uniqueRows: ProductCsvRow[] = [];
@@ -480,10 +486,13 @@ export async function importProductRows(
               branchId,
               productId: { in: importedProducts.map(({ id }) => id) },
             },
-            select: { productId: true },
+            select: { productId: true, stock: true },
           });
           const stockedProductIds = new Set(
             existingStocks.map(({ productId }) => productId),
+          );
+          const stockBefore = new Map(
+            existingStocks.map(({ productId, stock }) => [productId, stock]),
           );
           const newStocks = productWrites.filter(
             ({ id }) => !stockedProductIds.has(id),
@@ -504,6 +513,17 @@ export async function importProductRows(
           }
 
           await updateImportedStocks(tx, branchId, stocksToUpdate);
+          // F10-b: one ADJUST row per stock the import changed.
+          await recordStockAdjustments(
+            tx,
+            productWrites.map(({ id, row }) => ({
+              productId: id,
+              branchId,
+              before: stockBefore.get(id) ?? 0,
+              after: row.stock,
+            })),
+            { actorUserId, reason: "CSV_IMPORT" },
+          );
 
           return ok(
             {
@@ -533,6 +553,7 @@ export async function createProduct(
   db: PrismaClient,
   business: BusinessWithPlan,
   input: ProductCreateInput,
+  actorUserId?: string,
 ): Promise<ProductResponse<{ id: string }>> {
   if (input.status === "PUBLISHED") {
     const limitFailure = await assertPlanLimit(db, business, "products");
@@ -572,6 +593,17 @@ export async function createProduct(
         select: { id: true },
       });
 
+      await recordStockAdjustments(
+        tx,
+        input.stocks.map((stock) => ({
+          productId: product.id,
+          branchId: stock.branchId,
+          before: 0,
+          after: stock.stock,
+        })),
+        { actorUserId, reason: "PRODUCT_CREATED" },
+      );
+
       return ok(product, "Product created", 201);
     });
   } catch (error) {
@@ -587,6 +619,7 @@ export async function updateProduct(
   db: PrismaClient,
   businessId: string,
   input: ProductUpdateInput,
+  actorUserId?: string,
 ): Promise<ProductResponse<{ id: string }>> {
   try {
     return await db.$transaction(async (tx) => {
@@ -625,40 +658,12 @@ export async function updateProduct(
       });
 
       if (input.stocks) {
-        const includedBranchIds = input.stocks.map(({ branchId }) => branchId);
-
-        await tx.productStock.deleteMany({
-          where: {
-            productId: input.id,
-            branch: { businessId },
-            ...(includedBranchIds.length > 0
-              ? { branchId: { notIn: includedBranchIds } }
-              : {}),
-          },
+        await applyStockChanges(tx, {
+          businessId,
+          productId: input.id,
+          stocks: input.stocks,
+          actorUserId,
         });
-
-        await Promise.all(
-          input.stocks.map((stock) =>
-            tx.productStock.upsert({
-              where: {
-                productId_branchId: {
-                  productId: input.id,
-                  branchId: stock.branchId,
-                },
-              },
-              create: {
-                productId: input.id,
-                branchId: stock.branchId,
-                stock: stock.stock,
-                lowStockThreshold: stock.lowStockThreshold,
-              },
-              update: {
-                stock: stock.stock,
-                lowStockThreshold: stock.lowStockThreshold,
-              },
-            }),
-          ),
-        );
       }
 
       return ok(product, "Product updated");
@@ -666,6 +671,243 @@ export async function updateProduct(
   } catch (error) {
     if (isSkuConflict(error)) {
       return fail("SKU_TAKEN", 409, "Product SKU is already in use");
+    }
+
+    if (error instanceof StockChangedError) {
+      return fail("CONFLICT", 409, error.message);
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Order states whose reservation may still be restored (D10-4): a COMPLETED
+ * order consumed its units, a CANCELLED one already gave them back.
+ */
+const STOCK_HOLDING_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.PENDING,
+  OrderStatus.PAID,
+  OrderStatus.SHIPPING,
+  OrderStatus.DISPUTED,
+];
+
+export type StockChange = {
+  branchId: string;
+  stock: number;
+  lowStockThreshold: number;
+  /**
+   * D10-4 optimistic precondition: the available stock the editor saw. When
+   * present the write only applies if it still matches (else CONFLICT), so a
+   * sale reserved meanwhile is never overwritten.
+   */
+  expectedStock?: number;
+};
+
+class StockChangedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StockChangedError";
+  }
+}
+
+/**
+ * Replace-all stock edit inside the caller's transaction. Branches left out
+ * stop carrying the product — refused while an open order still holds units
+ * there (its restore would resurrect the row). Rows with `expectedStock` are
+ * compare-and-set; rows without it keep the legacy absolute write. Every
+ * changed row writes its F10-b ADJUST movement in this same transaction.
+ */
+async function applyStockChanges(
+  tx: Prisma.TransactionClient,
+  input: {
+    businessId: string;
+    productId: string;
+    stocks: readonly StockChange[];
+    actorUserId?: string;
+  },
+): Promise<void> {
+  const adjustments: StockAdjustment[] = [];
+  const includedBranchIds = input.stocks.map(({ branchId }) => branchId);
+  const removedHeld = await tx.order.count({
+    where: {
+      productId: input.productId,
+      stockHeldQty: { gt: 0 },
+      status: { in: STOCK_HOLDING_ORDER_STATUSES },
+      branch: { businessId: input.businessId },
+      ...(includedBranchIds.length > 0
+        ? { branchId: { notIn: includedBranchIds } }
+        : {}),
+    },
+  });
+
+  if (removedHeld > 0) {
+    throw new StockChangedError("A removed branch still holds reserved units");
+  }
+
+  const removedWhere = {
+    productId: input.productId,
+    branch: { businessId: input.businessId },
+    ...(includedBranchIds.length > 0
+      ? { branchId: { notIn: includedBranchIds } }
+      : {}),
+  } satisfies Prisma.ProductStockWhereInput;
+  const removed = await tx.productStock.findMany({
+    where: removedWhere,
+    select: { branchId: true, stock: true },
+  });
+
+  await tx.productStock.deleteMany({ where: removedWhere });
+  await recordStockAdjustments(
+    tx,
+    removed.map((row) => ({
+      productId: input.productId,
+      branchId: row.branchId,
+      before: row.stock,
+      after: 0,
+    })),
+    { actorUserId: input.actorUserId, reason: "BRANCH_REMOVED" },
+  );
+
+  for (const stock of input.stocks) {
+    if (stock.expectedStock === undefined) {
+      const previous = await tx.productStock.findUnique({
+        where: {
+          productId_branchId: {
+            productId: input.productId,
+            branchId: stock.branchId,
+          },
+        },
+        select: { stock: true },
+      });
+
+      adjustments.push({
+        productId: input.productId,
+        branchId: stock.branchId,
+        before: previous?.stock ?? 0,
+        after: stock.stock,
+      });
+      await tx.productStock.upsert({
+        where: {
+          productId_branchId: {
+            productId: input.productId,
+            branchId: stock.branchId,
+          },
+        },
+        create: {
+          productId: input.productId,
+          branchId: stock.branchId,
+          stock: stock.stock,
+          lowStockThreshold: stock.lowStockThreshold,
+        },
+        update: {
+          stock: stock.stock,
+          lowStockThreshold: stock.lowStockThreshold,
+        },
+      });
+      continue;
+    }
+
+    const changed = await tx.productStock.updateMany({
+      where: {
+        productId: input.productId,
+        branchId: stock.branchId,
+        stock: stock.expectedStock,
+      },
+      data: {
+        stock: stock.stock,
+        lowStockThreshold: stock.lowStockThreshold,
+      },
+    });
+
+    if (changed.count === 1) {
+      adjustments.push({
+        productId: input.productId,
+        branchId: stock.branchId,
+        before: stock.expectedStock,
+        after: stock.stock,
+      });
+      continue;
+    }
+
+    const existing = await tx.productStock.findUnique({
+      where: {
+        productId_branchId: {
+          productId: input.productId,
+          branchId: stock.branchId,
+        },
+      },
+      select: { id: true },
+    });
+
+    // A branch that did not carry the product yet starts from 0.
+    if (existing || stock.expectedStock !== 0) {
+      throw new StockChangedError("Stock changed since it was read");
+    }
+
+    await tx.productStock.create({
+      data: {
+        productId: input.productId,
+        branchId: stock.branchId,
+        stock: stock.stock,
+        lowStockThreshold: stock.lowStockThreshold,
+      },
+    });
+    adjustments.push({
+      productId: input.productId,
+      branchId: stock.branchId,
+      before: 0,
+      after: stock.stock,
+    });
+  }
+
+  await recordStockAdjustments(tx, adjustments, {
+    actorUserId: input.actorUserId,
+    reason: "STOCK_EDIT",
+  });
+}
+
+/**
+ * `product.adjustStock` (D10-4): per-branch stock edit with an optional
+ * `expectedStock` precondition per row; a stale row answers CONFLICT.
+ */
+export async function adjustProductStock(
+  db: PrismaClient,
+  businessId: string,
+  input: { id: string; stocks: StockChange[] },
+  actorUserId?: string,
+): Promise<ProductResponse<{ id: string }>> {
+  try {
+    return await db.$transaction(async (tx) => {
+      const current = await tx.product.findFirst({
+        where: { id: input.id, businessId },
+        select: { id: true },
+      });
+
+      if (!current) {
+        return fail("NOT_FOUND", 404, "Product not found");
+      }
+
+      if (!(await stocksBelongToBusiness(tx, businessId, input.stocks))) {
+        return fail(
+          "VALIDATION_ERROR",
+          422,
+          "Some stock branches do not belong to the business",
+        );
+      }
+
+      await applyStockChanges(tx, {
+        businessId,
+        productId: input.id,
+        stocks: input.stocks,
+        actorUserId,
+      });
+
+      return ok({ id: current.id }, "Product stock updated");
+    });
+  } catch (error) {
+    if (error instanceof StockChangedError) {
+      return fail("CONFLICT", 409, error.message);
     }
 
     throw error;

@@ -4,8 +4,10 @@ import {
   OrderEventType,
   OrderStatus,
   OrderType,
+  PaymentStatus,
   type PrismaClient,
 } from "@generated/prisma";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 export type AcceptProductResult = {
@@ -16,7 +18,9 @@ export type AcceptProductResult = {
 /**
  * Business accepts a paid PRODUCT order (M5-W1 / N1): PAID → SHIPPING plus
  * OrderEvent ACCEPTED. Foreign or non-PRODUCT / non-PAID orders answer a
- * generic NOT_FOUND or CONFLICT so the response never leaks tenancy.
+ * generic NOT_FOUND or CONFLICT so the response never leaks tenancy. The CAS
+ * also requires the escrow to be held (F10 review M6): an order whose refund
+ * is in flight (REFUNDING) can never be shipped.
  */
 export async function acceptProductOrder(
   db: PrismaClient,
@@ -28,7 +32,7 @@ export async function acceptProductOrder(
       businessId: input.businessId,
       type: OrderType.PRODUCT,
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, customerId: true },
   });
 
   if (!order) {
@@ -45,6 +49,7 @@ export async function acceptProductOrder(
       businessId: input.businessId,
       type: OrderType.PRODUCT,
       status: OrderStatus.PAID,
+      payment: { is: { status: PaymentStatus.IN_ESCROW } },
     },
     data: { status: OrderStatus.SHIPPING },
   });
@@ -59,6 +64,12 @@ export async function acceptProductOrder(
       type: OrderEventType.ACCEPTED,
       actorUserId: input.actorUserId,
     },
+  });
+
+  // D10-15: the customer learns the business is preparing the order.
+  await sendLocalizedPushToUser(db, order.customerId, {
+    message: "productAccepted",
+    url: `home360app://orders/${order.id}`,
   });
 
   return svcOk({ orderId: order.id, status: OrderStatus.SHIPPING });

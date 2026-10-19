@@ -10,6 +10,7 @@ import {
   type PrismaClient,
 } from "@generated/prisma";
 import { haversineKm } from "~/server/services/geo/haversine";
+import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 export const QUOTE_SORTS = ["recommended", "cheapest", "bestRated"] as const;
@@ -32,6 +33,11 @@ export type QuoteBusinessSummary = {
 
 export type QuoteListItem = {
   id: string;
+  status: QuoteStatus;
+  /** Lets the customer open the profile and the chat (D10-12). */
+  businessId: string;
+  /** Request×business pre-order conversation, when one exists (D10-12). */
+  conversationId: string | null;
   amountCents: number;
   scheduledFor: Date | null;
   message: string | null;
@@ -55,6 +61,10 @@ export type QuoteBusinessProfile = QuoteBusinessSummary & {
 export type QuoteDetail = {
   id: string;
   status: QuoteStatus;
+  /** D10-12/13: profile + chat, the parent request and, once accepted, the order. */
+  businessId: string;
+  requestId: string;
+  orderId: string | null;
   scheduledFor: Date | null;
   message: string | null;
   business: QuoteBusinessProfile;
@@ -100,13 +110,19 @@ function sortQuotes(quotes: ScoredQuote[], sort: QuoteSort): ScoredQuote[] {
 }
 
 /**
- * PENDING quotes of an own request, ranked for the C4 comparator. A foreign
- * request answers a generic NOT_FOUND. The badge goes to the single best
- * rating×proximity score regardless of the requested sort.
+ * Quotes of an own request in one status (default PENDING, D10-13), ranked
+ * for the C4 comparator. A foreign request answers a generic NOT_FOUND. The
+ * badge goes to the single best rating×proximity score regardless of the
+ * requested sort.
  */
 export async function listQuotesByRequest(
   db: PrismaClient,
-  input: { customerId: string; requestId: string; sort: QuoteSort },
+  input: {
+    customerId: string;
+    requestId: string;
+    sort: QuoteSort;
+    status?: QuoteStatus;
+  },
 ): Promise<ServiceResult<QuoteListItem[]>> {
   const request = await db.serviceRequest.findFirst({
     where: { id: input.requestId, customerId: input.customerId },
@@ -118,9 +134,14 @@ export async function listQuotesByRequest(
   }
 
   const rows = await db.quote.findMany({
-    where: { requestId: input.requestId, status: QuoteStatus.PENDING },
+    where: {
+      requestId: input.requestId,
+      status: input.status ?? QuoteStatus.PENDING,
+    },
     select: {
       id: true,
+      status: true,
+      businessId: true,
       amountCents: true,
       scheduledFor: true,
       message: true,
@@ -136,6 +157,19 @@ export async function listQuotesByRequest(
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   });
+  const conversations = await db.conversation.findMany({
+    where: {
+      requestId: input.requestId,
+      businessId: { in: rows.map((row) => row.businessId) },
+    },
+    select: { id: true, businessId: true },
+  });
+  const conversationByBusiness = new Map(
+    conversations.map((conversation) => [
+      conversation.businessId,
+      conversation.id,
+    ]),
+  );
 
   const scored: ScoredQuote[] = rows.map((row) => {
     const origin =
@@ -151,6 +185,9 @@ export async function listQuotesByRequest(
 
     return {
       id: row.id,
+      status: row.status,
+      businessId: row.businessId,
+      conversationId: conversationByBusiness.get(row.businessId) ?? null,
       amountCents: row.amountCents,
       scheduledFor: row.scheduledFor,
       message: row.message,
@@ -190,6 +227,8 @@ export async function getMyQuote(
       scheduledFor: true,
       message: true,
       businessId: true,
+      requestId: true,
+      order: { select: { id: true } },
       business: {
         select: {
           name: true,
@@ -254,6 +293,9 @@ export async function getMyQuote(
   return svcOk({
     id: quote.id,
     status: quote.status,
+    businessId: quote.businessId,
+    requestId: quote.requestId,
+    orderId: quote.order?.id ?? null,
     scheduledFor: quote.scheduledFor,
     message: quote.message,
     business: {
@@ -281,8 +323,14 @@ export async function getMyQuote(
 export async function acceptQuote(
   db: PrismaClient,
   input: { customerId: string; quoteId: string },
-): Promise<ServiceResult<AcceptQuoteResult>> {
-  return db.$transaction(async (tx) => {
+): Promise<ServiceResult<AcceptQuoteResult, "REQUEST_EXPIRED">> {
+  const now = new Date();
+  const accepted = await db.$transaction<
+    ServiceResult<
+      AcceptQuoteResult & { businessOwnerId: string },
+      "REQUEST_EXPIRED"
+    >
+  >(async (tx) => {
     const quote = await tx.quote.findFirst({
       where: { id: input.quoteId, request: { customerId: input.customerId } },
       select: {
@@ -293,10 +341,12 @@ export async function acceptQuote(
         businessId: true,
         branchId: true,
         workerId: true,
+        business: { select: { ownerId: true } },
         request: {
           select: {
             title: true,
             status: true,
+            expiresAt: true,
             corporateAccountId: true,
             corporateLocationId: true,
           },
@@ -317,6 +367,14 @@ export async function acceptQuote(
       quote.request.status !== RequestStatus.QUOTED
     ) {
       return svcFail("CONFLICT", "Request is no longer open");
+    }
+
+    // D10-5: an expired request no longer accepts offers.
+    if (
+      quote.request.expiresAt !== null &&
+      quote.request.expiresAt.getTime() <= now.getTime()
+    ) {
+      return svcFail("REQUEST_EXPIRED", "Request has expired");
     }
 
     // Conditional claim: a concurrent accept of the same quote loses here
@@ -390,6 +448,21 @@ export async function acceptQuote(
       });
     }
 
-    return svcOk({ orderId: order.id });
+    return svcOk({
+      orderId: order.id,
+      businessOwnerId: quote.business.ownerId,
+    });
   });
+
+  if (!accepted.ok) {
+    return accepted;
+  }
+
+  // D10-15: the winning business learns its quote was accepted.
+  await sendLocalizedPushToUser(db, accepted.data.businessOwnerId, {
+    message: "quoteAccepted",
+    url: `home360app://orders/${accepted.data.orderId}`,
+  });
+
+  return svcOk({ orderId: accepted.data.orderId });
 }

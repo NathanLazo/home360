@@ -1,4 +1,4 @@
-import { CircleAlertIcon } from "lucide-react";
+import { CircleAlertIcon, CircleSlashIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { ProductListItem } from "./product.types";
@@ -20,6 +20,27 @@ export function ProductStockCell({
       <span className="text-muted-foreground text-copy-sm">
         {t(branchSelected ? "notAvailableHere" : "notCarried")}
       </span>
+    );
+  }
+
+  // Zero available units: customers cannot buy it (D10-4 reserves from the
+  // same stock), so "agotado" outranks the low-stock warning.
+  if (product.stock === 0) {
+    const outLabel = t(branchSelected ? "outOfStock" : "outAcrossBranches");
+
+    return compact ? (
+      <span className="text-error-deep inline-flex items-center gap-1 text-xs font-medium">
+        <CircleSlashIcon aria-hidden="true" className="size-3.5" />
+        {outLabel}
+      </span>
+    ) : (
+      <div className="flex flex-col items-start gap-1">
+        <span className="font-mono font-semibold tabular-nums">0</span>
+        <span className="text-error-deep flex items-center gap-1 text-xs font-medium">
+          <CircleSlashIcon aria-hidden="true" className="size-3.5" />
+          {outLabel}
+        </span>
+      </div>
     );
   }
 

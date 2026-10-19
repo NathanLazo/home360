@@ -287,9 +287,25 @@
       "workerLabel": "Technician",
       "noWorker": "Unassigned",
       "scheduledLabel": "Scheduled visit",
-      "deliveryAddressLabel": "Delivery address",
       "serviceAddressLabel": "Service address",
-      "offerMessageTitle": "Your offer message"
+      "offerMessageTitle": "Your offer message",
+      "fulfillment": {
+        "title": "Fulfillment",
+        "notAvailable": "Not available",
+        "addressLabel": "Delivery address",
+        "mapLabel": "Location",
+        "openMap": "Open in maps",
+        "shipsFromLabel": "Ships from",
+        "pickupBranchLabel": "Pickup branch",
+        "pickupAddressLabel": "Branch address",
+        "pickedUpLabel": "Picked up",
+        "notPickedUp": "Not yet",
+        "evidenceTitle": "Delivery proof",
+        "noEvidence": "Delivery photos show up here once you mark the order as delivered.",
+        "evidencePhoto": "Delivery photo {number}",
+        "openPhoto": "Open {label}",
+        "noteTitle": "Delivery note"
+      }
     },
     "timeline": {
       "label": "Order timeline",
@@ -315,8 +331,14 @@
         "CANCELLED": "Order cancelled",
         "WORKER_ASSIGNED": "Technician assigned",
         "REWORK_REQUESTED": "Customer requested a fix",
-        "DISPUTE_OPENED": "Dispute opened"
-      }
+        "DISPUTE_OPENED": "Dispute opened",
+        "READY_FOR_PICKUP": "Ready for pickup",
+        "OUT_FOR_DELIVERY": "Out for delivery",
+        "DELIVERED": "Delivered",
+        "PICKED_UP": "Picked up by the customer",
+        "PAYMENT_EXPIRED": "Payment window expired"
+      },
+      "noteGeneric": "Note: {note}"
     },
     "tabs": {
       "label": "Order sections",
@@ -338,8 +360,8 @@
           "description": "The order activates once the customer pays. You can cancel it if you can no longer take it."
         },
         "acceptProduct": {
-          "title": "Paid order: accept it to ship",
-          "description": "The payment is protected. Accepting moves the order to shipping; the customer confirms delivery to release the money."
+          "title": "Paid order: accept it to prepare it",
+          "description": "The payment is protected. Once accepted, get the delivery ready or the order ready for the customer to pick up."
         },
         "assignWorker": {
           "title": "Assign a technician",
@@ -354,8 +376,8 @@
           "description": "The technician is on the job. When done, the customer confirms and the payment is released."
         },
         "shipping": {
-          "title": "Shipping",
-          "description": "The customer confirms receipt from their app; then the protected payment is released."
+          "title": "Get the delivery ready",
+          "description": "Mark the order out for delivery when it leaves, and delivered when you drop it off, with photos of the package at the address."
         },
         "completed": {
           "title": "Order completed",
@@ -368,6 +390,26 @@
         "disputed": {
           "title": "Order in dispute",
           "description": "The payment stays on hold while the HOME360 team reviews the evidence."
+        },
+        "outForDelivery": {
+          "title": "On its way to the address",
+          "description": "When you drop off the package, mark it delivered with at least one photo. The customer sees it in their app."
+        },
+        "preparePickup": {
+          "title": "Get the order ready for pickup",
+          "description": "When it is ready at the branch, let the customer know. They get a QR code to pick it up."
+        },
+        "readyForPickup": {
+          "title": "Ready for pickup",
+          "description": "The customer shows their QR code at the branch. Redeem it to hand over the order and release the payment."
+        },
+        "pickedUp": {
+          "title": "Picked up: releasing the payment",
+          "description": "The customer already picked up the order. The payment is released in a few minutes and the order completes."
+        },
+        "awaitingCustomerConfirmation": {
+          "title": "Waiting for the customer to confirm",
+          "description": "The customer reviews the evidence in their app. If they do not reply, the payment is released automatically when the window ends."
         }
       },
       "cancelDialog": {
@@ -394,7 +436,71 @@
         "accepted": "Order accepted. It is now shipping.",
         "cancelled": "Order cancelled.",
         "workerAssigned": "Technician assigned.",
-        "transportError": "We couldn't complete the action. Check your connection and try again."
+        "transportError": "We couldn't complete the action. Check your connection and try again.",
+        "outForDelivery": "Order marked out for delivery.",
+        "delivered": "Delivery recorded. We asked the customer to confirm it.",
+        "readyForPickup": "We let the customer know their order is ready.",
+        "pickupRedeemed": "Order #{folio} handed over. Payment released.",
+        "pickupRedeemedPending": "Order #{folio} handed over. The payment is released in a few minutes."
+      },
+      "markOutForDelivery": "Mark out for delivery",
+      "markDelivered": "Mark delivered",
+      "markReadyForPickup": "Ready for pickup",
+      "redeemPickup": "Redeem pickup",
+      "readyForPickupDialog": {
+        "title": "Let the customer know order #{folio} is ready?",
+        "description": "The customer gets a notification with their QR code to pick it up at {branch}. Keep the order at hand.",
+        "yourBranch": "your branch",
+        "confirm": "Notify customer",
+        "cancel": "Not yet"
+      },
+      "deliveredDialog": {
+        "title": "Mark order #{folio} as delivered",
+        "description": "Upload at least one photo of the package at the address. The customer sees it before confirming the delivery.",
+        "close": "Close",
+        "photosLabel": "Delivery photos",
+        "photosListLabel": "Selected photos",
+        "photoCount": "{count} of {max}",
+        "photoLabel": "Photo {number}",
+        "removePhoto": "Remove {label}",
+        "uploadingPhoto": "Uploading {label}",
+        "progress": "Uploading… {percent}%",
+        "uploaded": "Ready",
+        "retryPhoto": "Retry",
+        "addPhotos": "Add photos",
+        "addMorePhotos": "Add more photos",
+        "photosHint": "JPG, PNG or WebP up to 10 MB. Up to {max} photos.",
+        "photosOverflow": "{count, plural, one {One photo was left out} other {# photos were left out}}: the limit is {max}.",
+        "uploadedStatus": "{uploaded} of {total} photos uploaded",
+        "photoErrors": {
+          "type": "Use a JPG, PNG or WebP image.",
+          "size": "The image is larger than 10 MB.",
+          "upload": "Upload failed. Check your connection and retry."
+        },
+        "noteLabel": "Note for the customer (optional)",
+        "notePlaceholder": "E.g. Left it with the front desk.",
+        "noteCount": "{count}/{max}",
+        "waitForUploads": "Wait for the photos to finish uploading.",
+        "needPhoto": "Upload at least one photo to continue.",
+        "failedPhotosSkipped": "Photos with errors will not be sent.",
+        "cancel": "Cancel",
+        "confirm": "Mark delivered"
+      },
+      "redeemDialog": {
+        "title": "Redeem pickup",
+        "description": "Scan the customer's QR code with a reader, or type the code shown under the QR.",
+        "close": "Close",
+        "codeLabel": "Pickup code",
+        "codePlaceholder": "ABCDE23456",
+        "codeHint": "{length} characters: letters A to Z and digits 2 to 7.",
+        "cancel": "Cancel",
+        "confirm": "Redeem",
+        "errors": {
+          "shape": "The code has {length} characters: letters A to Z and digits 2 to 7.",
+          "PICKUP_CODE_INVALID": "This code does not match an order ready for pickup at your business. Ask the customer to check it in their app.",
+          "TOO_MANY_REQUESTS": "Too many failed attempts. Wait a few minutes before trying again.",
+          "CONFLICT": "This order can no longer be handed over: check whether it is in dispute or already completed."
+        }
       }
     },
     "conversation": {
@@ -402,7 +508,7 @@
       "pollingHint": "New messages load every few seconds.",
       "loading": "Loading messages",
       "empty": "No messages yet. Write the first one.",
-      "threadLabel": "Order messages",
+      "threadLabel": "Conversation messages",
       "fromCustomer": "Customer:",
       "fromBusiness": "Your team:",
       "imageMessage": "Image sent from the app",
@@ -411,6 +517,16 @@
       "composerPlaceholder": "Write a message… (Enter to send)",
       "send": "Send message",
       "retry": "Retry"
+    },
+    "fulfillment": {
+      "short": {
+        "DELIVERY": "Delivery",
+        "PICKUP": "Pickup"
+      },
+      "long": {
+        "DELIVERY": "Home delivery",
+        "PICKUP": "Pickup at branch"
+      }
     }
   },
   "payments": {
@@ -824,8 +940,15 @@
         "identity": "Branch",
         "identityDescription": "What customers and your team will see.",
         "coverage": "Coverage",
-        "coverageDescription": "Set how far you take requests from."
-      }
+        "coverageDescription": "Set how far you take requests from.",
+        "fulfillment": "Product fulfillment",
+        "fulfillmentDescription": "How customers get the products they buy from this branch."
+      },
+      "deliveryEnabled": "Home delivery",
+      "deliveryEnabledHelp": "This branch fills orders delivered to the customer's address.",
+      "pickupEnabled": "Pickup at branch",
+      "pickupEnabledHelp": "Customers can choose this branch to pick up their order.",
+      "pickupNeedsCoordinates": "Add the branch location: without coordinates it does not show up as a pickup point."
     },
     "feedback": {
       "planLimit": "You've reached your plan's branch limit.",
@@ -862,6 +985,12 @@
       "emptyTeam": "You have no workers yet. Add them in Team to assign a manager.",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "fulfillment": {
+      "delivery": "Delivery",
+      "pickup": "Pickup",
+      "label": "Product fulfillment",
+      "none": "No product fulfillment"
     }
   },
   "products": {
@@ -944,7 +1073,9 @@
       "notCarried": "No inventory assigned",
       "lowStock": "Low inventory",
       "lowAcrossBranches": "Low in {low} of {total} branches",
-      "inline": "Stock: {count}"
+      "inline": "Stock: {count}",
+      "outOfStock": "Out of stock",
+      "outAcrossBranches": "Out of stock in every branch"
     },
     "actions": {
       "open": "Actions for {name}",
@@ -1000,7 +1131,9 @@
         "notCarried": "This product is not carried at this branch.",
         "invalidRow": "Use whole numbers greater than or equal to zero.",
         "loadErrorTitle": "We couldn't load inventory",
-        "loadErrorDescription": "Check your connection and try again."
+        "loadErrorDescription": "Check your connection and try again.",
+        "stateLow": "Running low",
+        "stateOut": "Out of stock"
       },
       "image": {
         "label": "Image (URL)",
@@ -1024,12 +1157,16 @@
       "deleted": "Product deleted.",
       "deleteConflict": "You can't delete this product because it has active orders.",
       "transportError": "We couldn't complete the action. Check your connection and try again.",
-      "stockAdjusted": "Stock updated."
+      "stockAdjusted": "Stock updated.",
+      "stockConflict": "Stock changed. Reload and try again."
     },
     "stockDialog": {
       "title": "Adjust stock",
       "description": "Stock and alerts for {name} by branch.",
-      "save": "Save stock"
+      "save": "Save stock",
+      "conflictTitle": "Stock changed while you were editing",
+      "conflictDescription": "Someone recorded a sale or an adjustment. Reload to see the current stock and apply your change again.",
+      "reload": "Reload"
     }
   },
   "placeholder": {
@@ -1345,7 +1482,15 @@
       "sendOffer": "Send offer",
       "updateOffer": "Update offer",
       "resendOffer": "Resend offer",
-      "notQuotable": "This request no longer accepts offers."
+      "notQuotable": "This request no longer accepts offers.",
+      "targetedBadge": "Sent to your business",
+      "targetedHint": "The customer asked your business directly for this service: only you can see it.",
+      "expiresLabel": "Expires",
+      "chatTitle": "Conversation",
+      "openChat": "Message the customer",
+      "hideChat": "Hide conversation",
+      "chatNeedsOffer": "Send an offer to open the chat with the customer.",
+      "chatWith": "Conversation with {name}"
     },
     "ownOffer": {
       "title": "Offer sent",
@@ -1424,6 +1569,7 @@
       "offerUpdated": "Offer updated.",
       "offerWithdrawn": "Offer withdrawn.",
       "transportError": "We couldn't complete the action. Check your connection and try again."
-    }
+    },
+    "targeted": "For you"
   }
 }

@@ -2,7 +2,8 @@ import "server-only";
 
 import {
   type DisputeStatus,
-  type OrderEventType,
+  FulfillmentMethod,
+  OrderEventType,
   OrderStatus,
   OrderType,
   PaymentStatus,
@@ -10,7 +11,14 @@ import {
   type Prisma,
   type PrismaClient,
 } from "@generated/prisma";
+import {
+  DEFAULT_UNPAID_ORDER_TTL_MINUTES,
+  isPastUnpaidOrderTtl,
+  resolveUnpaidOrderTtlMinutes,
+} from "~/server/services/orders/unpaid-order-ttl";
 import { createDownloadUrl } from "~/server/services/media/blob";
+import { canConsumerCancelPaidOrder } from "~/server/services/orders/cancel-order";
+import { effectiveFulfillmentMethod } from "~/server/services/orders/order-actions";
 import { isAwaitingConfirmation } from "~/server/services/orders/work-cycle";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -32,6 +40,10 @@ const consumerOrderSelect = {
   recordingComplete: true,
   recordingJustification: true,
   deliveryAddressLine: true,
+  fulfillmentMethod: true,
+  deliveryEvidenceUrls: true,
+  deliveryNote: true,
+  pickedUpAt: true,
   corporateLocation: { select: { id: true, name: true } },
   business: {
     select: {
@@ -42,7 +54,15 @@ const consumerOrderSelect = {
       guaranteeType: true,
     },
   },
-  branch: { select: { name: true } },
+  branch: {
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      latitude: true,
+      longitude: true,
+    },
+  },
   worker: { select: { fullName: true, specialty: true, ratingAvg: true } },
   quote: {
     select: {
@@ -91,6 +111,20 @@ export type ConsumerOrderDetail = {
   createdAt: Date;
   addressLine: string | null;
   location: { id: string; name: string } | null;
+  /** PRODUCT only (D10-1); null for SERVICE. */
+  fulfillmentMethod: FulfillmentMethod | null;
+  /** DELIVERY proof photos, signed for the customer (D10-2). */
+  deliveryEvidence: SignedEvidence[];
+  deliveryNote: string | null;
+  /** PICKUP: where to collect the order (null otherwise). */
+  pickupBranch: {
+    id: string;
+    name: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
+  pickedUpAt: Date | null;
   business: {
     id: string;
     name: string;
@@ -155,9 +189,15 @@ export type ConsumerOrderDetail = {
     canConfirm: boolean;
     canRequestRework: boolean;
     canOpenDispute: boolean;
+    /** Unpaid PENDING order: void and cancel. */
     canCancel: boolean;
+    /** D10-9: PAID before the work starts → cancel with full refund. */
+    canCancelPaid: boolean;
     canReview: boolean;
+    /** PENDING order without a captured payment: pay or retry (D10-7). */
     canPay: boolean;
+    /** PICKUP READY_FOR_PICKUP and not picked up: render the QR (D10-2). */
+    canShowPickupQr: boolean;
   };
 };
 
@@ -214,6 +254,10 @@ export async function getConsumerOrderDetail(
     return svcFail("NOT_FOUND", "Order not found");
   }
 
+  const unpaidTtlMinutes =
+    order.status === OrderStatus.PENDING
+      ? await resolveUnpaidOrderTtlMinutes(db)
+      : DEFAULT_UNPAID_ORDER_TTL_MINUTES;
   const settings = order.payment
     ? null
     : await db.platformSettings.findUnique({
@@ -225,16 +269,25 @@ export async function getConsumerOrderDetail(
     settings?.customerServiceFeeCents ??
     0;
   const laborCents = order.payment?.providerAmountCents ?? order.amountCents;
-  const [before, after] = await Promise.all([
+  const [before, after, deliveryEvidence] = await Promise.all([
     signPathnames(db, order.customerId, order.beforeUrls),
     signPathnames(db, order.customerId, order.afterUrls),
+    signPathnames(db, order.customerId, order.deliveryEvidenceUrls),
   ]);
   const escrowHeld =
     ESCROW_OPEN_STATUSES.includes(order.status) &&
     order.payment?.status === PaymentStatus.IN_ESCROW &&
     order.dispute === null;
-  const awaitingConfirmation =
-    order.type === OrderType.PRODUCT || isAwaitingConfirmation(order.events);
+  // D10-8: PRODUCT confirms only after DELIVERED (CONFIRMATION_REQUESTED).
+  const awaitingConfirmation = isAwaitingConfirmation(order.events);
+  const isPickup = order.fulfillmentMethod === FulfillmentMethod.PICKUP;
+  const canShowPickupQr =
+    isPickup &&
+    order.status === OrderStatus.SHIPPING &&
+    order.pickedUpAt === null &&
+    order.events.some(
+      (event) => event.type === OrderEventType.READY_FOR_PICKUP,
+    );
 
   return svcOk({
     id: order.id,
@@ -247,6 +300,23 @@ export async function getConsumerOrderDetail(
     addressLine:
       order.quote?.request.addressLine ?? order.deliveryAddressLine ?? null,
     location: order.corporateLocation,
+    fulfillmentMethod: effectiveFulfillmentMethod(
+      order.type,
+      order.fulfillmentMethod,
+    ),
+    deliveryEvidence,
+    deliveryNote: order.deliveryNote,
+    pickupBranch:
+      isPickup && order.branch
+        ? {
+            id: order.branch.id,
+            name: order.branch.name,
+            address: order.branch.address,
+            latitude: order.branch.latitude,
+            longitude: order.branch.longitude,
+          }
+        : null,
+    pickedUpAt: order.pickedUpAt,
     business: {
       id: order.business.id,
       name: order.business.name,
@@ -309,9 +379,25 @@ export async function getConsumerOrderDetail(
         order.status === OrderStatus.PENDING &&
         (order.payment === null ||
           order.payment.status === PaymentStatus.PENDING),
+      canCancelPaid: canConsumerCancelPaidOrder({
+        type: order.type,
+        status: order.status,
+        paymentStatus: order.payment?.status ?? null,
+        hasDispute: order.dispute !== null,
+        events: order.events,
+      }),
       canReview:
         order.status === OrderStatus.COMPLETED && order.review === null,
-      canPay: order.status === OrderStatus.PENDING && order.payment === null,
+      // A PENDING Payment row is an abandoned PaymentSheet attempt whose
+      // intent `checkout.createIntent` reuses (PRODUCT retry, D10-7).
+      // F10 review M2: past the unpaid TTL the cron cancels it and
+      // `createIntent` answers ORDER_EXPIRED, so the app must not offer it.
+      canPay:
+        order.status === OrderStatus.PENDING &&
+        (order.payment === null ||
+          order.payment.status === PaymentStatus.PENDING) &&
+        !isPastUnpaidOrderTtl(order.createdAt, unpaidTtlMinutes),
+      canShowPickupQr,
     },
   });
 }
