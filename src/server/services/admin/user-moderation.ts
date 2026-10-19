@@ -103,6 +103,8 @@ export async function reactivateUser(
         id: user.id,
         role: { in: [...MODERATED_ROLES] },
         suspendedAt: { not: null },
+        // A self-deleted account is anonymized for good.
+        deletedAt: null,
       },
       data: { suspendedAt: null, suspensionReason: null },
     });

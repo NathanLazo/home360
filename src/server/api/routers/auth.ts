@@ -15,6 +15,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { deleteMyAccount } from "~/server/services/account/delete-account";
 import { getCurrentUser } from "~/server/services/auth/current-user";
 import {
   requestPasswordReset,
@@ -39,10 +40,42 @@ const passwordResetEmailClient =
     ? createResendEmailClientFromApiKey(env.RESEND_API_KEY, env.EMAIL_FROM)
     : null;
 
+/** Roles that sign up or are invited through the mobile app. */
+const SELF_DELETABLE_ROLES = new Set(["CUSTOMER", "BUSINESS", "WORKER"]);
+
 export const authRouter = createTRPCRouter({
   me: protectedProcedure.query(({ ctx }) =>
     getCurrentUser(ctx.db, ctx.session.user.id),
   ),
+  /**
+   * App Store 5.1.1(v): in-app account deletion. Anonymizes and suspends the
+   * user (traceability is kept); refused while orders or a business
+   * subscription are still active. Admin/corporate accounts are managed on
+   * the web.
+   */
+  deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
+    if (!SELF_DELETABLE_ROLES.has(ctx.session.user.role)) {
+      return fail("FORBIDDEN", 403, "Account deletion not available");
+    }
+
+    try {
+      const deleted = await deleteMyAccount(ctx.db, ctx.session.user.id);
+
+      if (!deleted.ok) {
+        const status = deleted.code === "NOT_FOUND" ? 404 : 409;
+        return fail(deleted.code, status, "Account deletion refused");
+      }
+
+      return ok(deleted.data, "Account deleted");
+    } catch (error) {
+      const normalized = normalizeError(error);
+      return fail(
+        normalized.code,
+        normalized.status,
+        "Account deletion failed",
+      );
+    }
+  }),
   requestPasswordReset: publicProcedure
     .input(requestPasswordResetSchema)
     .mutation(async ({ ctx, input }) => {
