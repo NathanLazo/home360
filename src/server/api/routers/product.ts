@@ -1,6 +1,7 @@
 import { ProductStatus } from "@generated/prisma";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   productCreateSchema,
   productImportSchema,
@@ -30,8 +31,8 @@ import { productStockAdjustSchema } from "~/server/services/catalog/product-stoc
 import { stockMovementListSchema } from "~/server/services/catalog/stock-movement.schema";
 import { listStockMovements } from "~/server/services/catalog/stock-movements";
 
-const productIdSchema = z.object({ id: z.string().cuid() });
-const productStockSchema = z.object({ productId: z.string().cuid() });
+const productIdSchema = z.object({ id: recordIdSchema });
+const productStockSchema = z.object({ productId: recordIdSchema });
 const productStatusSchema = productIdSchema.extend({
   status: z.nativeEnum(ProductStatus),
 });

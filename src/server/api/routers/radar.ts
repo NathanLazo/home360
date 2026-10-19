@@ -1,28 +1,26 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
   ok,
   type TrpcResponse,
 } from "~/server/api/contract";
-import {
-  activeBusinessProcedure,
-  createTRPCRouter,
-} from "~/server/api/trpc";
+import { activeBusinessProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
   getRadarRequest,
   listOpenRequests,
 } from "~/server/services/orders/radar";
 
 const listOpenRequestsSchema = z.object({
-  branchId: z.string().cuid().optional(),
-  cursor: z.string().cuid().optional(),
+  branchId: recordIdSchema.optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 const getRequestSchema = z.object({
-  id: z.string().cuid(),
-  branchId: z.string().cuid().optional(),
+  id: recordIdSchema,
+  branchId: recordIdSchema.optional(),
 });
 
 const serviceErrorStatuses = {

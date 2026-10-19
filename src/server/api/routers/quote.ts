@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { QuoteStatus } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -22,33 +23,33 @@ import {
 } from "~/server/services/orders/quotes";
 
 const listByRequestSchema = z.object({
-  requestId: z.string().cuid(),
+  requestId: recordIdSchema,
   sort: z.enum(QUOTE_SORTS).default("recommended"),
   /** D10-13: quote history by status; defaults to the open offers. */
   status: z.nativeEnum(QuoteStatus).default(QuoteStatus.PENDING),
 });
 
-const quoteIdSchema = z.object({ id: z.string().cuid() });
+const quoteIdSchema = z.object({ id: recordIdSchema });
 
 const QUOTE_MESSAGE_MAX = 500;
 
 const submitSchema = z.object({
-  requestId: z.string().cuid(),
+  requestId: recordIdSchema,
   priceCents: z.number().int().positive(),
   scheduledAt: z.coerce.date(),
-  workerId: z.string().cuid(),
+  workerId: recordIdSchema,
   message: z
     .string()
     .trim()
     .max(QUOTE_MESSAGE_MAX)
     .optional()
     .transform((value) => (value === "" ? undefined : value)),
-  branchId: z.string().cuid().optional(),
+  branchId: recordIdSchema.optional(),
 });
 
 const listMineSchema = z.object({
   status: z.nativeEnum(QuoteStatus).optional(),
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 /** HTTP status per service code surfaced by the quote services. */

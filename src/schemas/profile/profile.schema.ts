@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { AGENT_MODELS } from "~/lib/agent/agent-models";
 import { routing } from "~/i18n/routing";
 import { passwordSchema } from "~/schemas/auth/password.schema";
@@ -41,7 +42,7 @@ export const setPasswordSchema = z
 
 export const removeDeviceSchema = z
   .object({
-    deviceId: z.string().cuid(),
+    deviceId: recordIdSchema,
   })
   .strict();
 

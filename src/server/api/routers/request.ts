@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -45,13 +46,13 @@ const createRequestSchema = z
   .object({
     mediaPathnames: mediaPathnamesSchema.default([]),
     description: z.string().trim().max(1_000).optional(),
-    addressId: z.string().cuid().optional(),
-    corporateLocationId: z.string().cuid().optional(),
-    diagnosisId: z.string().cuid().optional(),
+    addressId: recordIdSchema.optional(),
+    corporateLocationId: recordIdSchema.optional(),
+    diagnosisId: recordIdSchema.optional(),
     category: z.enum(REQUEST_CATEGORIES).optional(),
     // D10-11: targeted request (only that business sees and is notified).
-    businessId: z.string().cuid().optional(),
-    serviceId: z.string().cuid().optional(),
+    businessId: recordIdSchema.optional(),
+    serviceId: recordIdSchema.optional(),
   })
   .refine(
     (input) =>
@@ -73,10 +74,10 @@ const createRequestSchema = z
 
 type CreateRequestSchemaInput = z.infer<typeof createRequestSchema>;
 
-const requestIdSchema = z.object({ id: z.string().cuid() });
+const requestIdSchema = z.object({ id: recordIdSchema });
 
 const listMineSchema = z
-  .object({ cursor: z.string().cuid().optional() })
+  .object({ cursor: recordIdSchema.optional() })
   .optional();
 
 /**

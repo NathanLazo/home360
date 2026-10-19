@@ -2,6 +2,7 @@ import { createAgentUIStreamResponse, validateUIMessages } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { env } from "~/env";
 import { isAgentModelId } from "~/lib/agent/agent-models";
 import type { TokenUsage } from "~/lib/agent/agent-pricing";
@@ -29,7 +30,7 @@ const requestSchema = z.object({
   model: z.string().optional(),
   locale: z.enum(["es", "en"]).default("es"),
   /** Persisted thread id, when the client already saved the conversation. */
-  conversationId: z.string().cuid().nullish(),
+  conversationId: recordIdSchema.nullish(),
 });
 
 /** Calendar date in the platform time zone (Chihuahua), for the prompt. */

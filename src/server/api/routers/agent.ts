@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import type { Prisma } from "@generated/prisma";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { agentAreaForRole, type AgentArea } from "~/lib/agent/agent-area";
 import {
   fail,
@@ -20,7 +21,7 @@ import {
   type AgentConversationSummary,
 } from "~/server/services/agent/conversations";
 
-const conversationIdSchema = z.object({ id: z.string().cuid() });
+const conversationIdSchema = z.object({ id: recordIdSchema });
 
 const titleSchema = z.string().trim().min(1).max(120);
 
@@ -44,7 +45,7 @@ const createSchema = z.object({
 
 const updateSchema = z
   .object({
-    id: z.string().cuid(),
+    id: recordIdSchema,
     title: titleSchema.optional(),
     messages: messagesSchema.optional(),
   })

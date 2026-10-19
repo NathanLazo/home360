@@ -6,6 +6,8 @@ import {
 } from "@generated/prisma";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 const MAX_PROVIDER_AMOUNT_CENTS = 50_000_000;
 
 /**
@@ -44,30 +46,30 @@ export const requestWithdrawalSchema = z.object({
 export const listTransactionsSchema = z.object({
   status: z.nativeEnum(PaymentStatus).optional(),
   method: z.nativeEnum(PaymentMethod).optional(),
-  branchId: z.string().cuid().optional(),
-  cursor: z.string().cuid().optional(),
+  branchId: recordIdSchema.optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const listPaymentLinksSchema = z.object({
   status: z.nativeEnum(PaymentLinkStatus).optional(),
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const deactivatePaymentLinkSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
 });
 
 export const listWithdrawalsSchema = z.object({
   status: z.nativeEnum(WithdrawalStatus).optional(),
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const listLoyaltyBonusesSchema = z.object({
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const confirmDeliverySchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
 });
 
 export type CreatePaymentLinkInput = z.infer<typeof createPaymentLinkSchema>;

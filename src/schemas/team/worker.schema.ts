@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import type { ErrorCode } from "~/server/api/contract";
 
 /**
@@ -13,8 +14,8 @@ export type TeamErrorCode = ErrorCode | (typeof TEAM_ERROR_CODES)[number];
 const emailLocaleSchema = z.enum(["es", "en"]);
 const fullNameSchema = z.string().trim().min(2).max(120);
 const specialtySchema = z.string().trim().min(2).max(120);
-const workerIdValueSchema = z.string().cuid();
-const branchIdValueSchema = z.string().cuid();
+const workerIdValueSchema = recordIdSchema;
+const branchIdValueSchema = recordIdSchema;
 
 export const workerIdSchema = z.object({ id: workerIdValueSchema }).strict();
 

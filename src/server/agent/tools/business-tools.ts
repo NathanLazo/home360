@@ -8,6 +8,7 @@ import {
 import { tool } from "ai";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   branchCreateSchema,
   branchSetStatusSchema,
@@ -46,7 +47,7 @@ import {
 } from "~/server/services/orders/order.schema";
 import { runTool, toDate, type AgentCaller } from "../tool-runtime";
 
-const cuid = z.string().cuid();
+const cuid = recordIdSchema;
 const cursor = cuid.optional().describe("Cursor from the previous page.");
 const branchId = cuid
   .optional()

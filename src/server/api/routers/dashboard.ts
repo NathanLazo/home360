@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { fail, normalizeError, ok } from "~/server/api/contract";
 import { businessProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { assertBranchInBusiness } from "~/server/services/business/branch-access";
@@ -16,7 +17,7 @@ import {
 } from "~/server/services/notifications/business-feed";
 
 const branchScopedSchema = z.object({
-  branchId: z.string().cuid().optional(),
+  branchId: recordIdSchema.optional(),
 });
 
 const getKpisSchema = branchScopedSchema.extend({

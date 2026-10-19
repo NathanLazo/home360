@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { fail, normalizeError, type TrpcResponse } from "~/server/api/contract";
 import {
   createTRPCRouter,
@@ -34,15 +35,15 @@ const originShape = {
 };
 
 const marketplaceProductSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
   ...originShape,
 });
 
-const marketplaceServiceSchema = z.object({ id: z.string().cuid() });
+const marketplaceServiceSchema = z.object({ id: recordIdSchema });
 
 const listBusinessesSchema = z
   .object({
-    cursor: z.string().cuid().optional(),
+    cursor: recordIdSchema.optional(),
     category: z.string().trim().min(1).max(60).optional(),
     kind: z.enum(MARKETPLACE_KINDS).optional(),
     ...originShape,
@@ -50,7 +51,7 @@ const listBusinessesSchema = z
   .optional();
 
 const getBusinessSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
   ...originShape,
 });
 

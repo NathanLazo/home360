@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { env } from "~/env";
 import { splitLocaleFromPathname, type Locale } from "~/i18n/locale-pathname";
 import { routing } from "~/i18n/routing";
@@ -41,7 +42,7 @@ const packCodes = AI_CREDIT_PACKS.map((pack) => pack.code) as [
 ];
 
 const listUsageSchema = z.object({
-  cursor: z.string().cuid().nullish(),
+  cursor: recordIdSchema.nullish(),
 });
 
 const createCheckoutSchema = z.object({
@@ -127,31 +128,36 @@ export const aiBillingRouter = createTRPCRouter({
         });
         return ok(summary, "AI billing summary retrieved");
       } catch (error: unknown) {
-        return unexpectedFailure(error, "Unable to load the AI billing summary");
+        return unexpectedFailure(
+          error,
+          "Unable to load the AI billing summary",
+        );
       }
     },
   ),
 
-  listUsage: aiBillingProcedure.input(listUsageSchema).query(
-    async ({
-      ctx,
-      input,
-    }): Promise<
-      TrpcResponse<{ items: AiUsageRow[]; nextCursor: string | null }>
-    > => {
-      try {
-        const page = await listAiUsage(ctx.db, {
-          tenant: ctx.aiBilling.tenant,
-          userId: ctx.aiBilling.userId,
-          cursor: input.cursor ?? null,
-          limit: USAGE_PAGE_SIZE,
-        });
-        return ok(page, "AI usage retrieved");
-      } catch (error: unknown) {
-        return unexpectedFailure(error, "Unable to list AI usage");
-      }
-    },
-  ),
+  listUsage: aiBillingProcedure
+    .input(listUsageSchema)
+    .query(
+      async ({
+        ctx,
+        input,
+      }): Promise<
+        TrpcResponse<{ items: AiUsageRow[]; nextCursor: string | null }>
+      > => {
+        try {
+          const page = await listAiUsage(ctx.db, {
+            tenant: ctx.aiBilling.tenant,
+            userId: ctx.aiBilling.userId,
+            cursor: input.cursor ?? null,
+            limit: USAGE_PAGE_SIZE,
+          });
+          return ok(page, "AI usage retrieved");
+        } catch (error: unknown) {
+          return unexpectedFailure(error, "Unable to list AI usage");
+        }
+      },
+    ),
 
   listPurchases: aiBillingProcedure.query(
     async ({ ctx }): Promise<TrpcResponse<AiPurchaseRow[]>> => {

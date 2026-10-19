@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
+
 /**
  * `product.adjustStock` input (D10-4). Same rows as the dashboard form plus
  * an optional per-row `expectedStock` precondition: when sent, the write is
@@ -7,14 +9,14 @@ import { z } from "zod";
  * answers CONFLICT. Rows without it keep the legacy absolute write.
  */
 const stockAdjustRowSchema = z.object({
-  branchId: z.string().cuid(),
+  branchId: recordIdSchema,
   stock: z.number().int().min(0).default(0),
   lowStockThreshold: z.number().int().min(0).default(5),
   expectedStock: z.number().int().min(0).optional(),
 });
 
 export const productStockAdjustSchema = z.object({
-  id: z.string().cuid(),
+  id: recordIdSchema,
   stocks: z
     .array(stockAdjustRowSchema)
     .max(100)

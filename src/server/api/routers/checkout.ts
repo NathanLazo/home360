@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { FulfillmentMethod } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { env } from "~/env";
 import {
   fail,
@@ -17,7 +18,7 @@ import {
 import { createProductCheckoutIntent } from "~/server/services/payments/product-checkout";
 import { getStripe } from "~/server/services/stripe/client";
 
-const createIntentSchema = z.object({ orderId: z.string().cuid() });
+const createIntentSchema = z.object({ orderId: recordIdSchema });
 
 /**
  * D10-1: DELIVERY needs an own `addressId`; PICKUP needs the chosen
@@ -26,13 +27,13 @@ const createIntentSchema = z.object({ orderId: z.string().cuid() });
  */
 const createProductIntentSchema = z
   .object({
-    productId: z.string().cuid(),
+    productId: recordIdSchema,
     quantity: z.number().int().min(1).max(100),
     fulfillmentMethod: z
       .nativeEnum(FulfillmentMethod)
       .default(FulfillmentMethod.DELIVERY),
-    addressId: z.string().cuid().optional(),
-    branchId: z.string().cuid().optional(),
+    addressId: recordIdSchema.optional(),
+    branchId: recordIdSchema.optional(),
   })
   .refine(
     (input) =>

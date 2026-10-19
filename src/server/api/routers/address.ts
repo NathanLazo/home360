@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -30,7 +31,7 @@ const createAddressSchema = addressFieldsSchema.extend({
 
 const updateAddressSchema = addressFieldsSchema
   .partial()
-  .extend({ id: z.string().cuid() })
+  .extend({ id: recordIdSchema })
   .refine(
     (input) =>
       input.label !== undefined ||
@@ -41,7 +42,7 @@ const updateAddressSchema = addressFieldsSchema
     { message: "At least one field is required" },
   );
 
-const addressIdSchema = z.object({ id: z.string().cuid() });
+const addressIdSchema = z.object({ id: recordIdSchema });
 
 const serviceErrorStatuses = {
   NOT_FOUND: 404,

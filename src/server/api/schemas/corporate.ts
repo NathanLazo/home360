@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { CorporateTier, OrderStatus } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import { DISPUTE_REASONS } from "~/schemas/disputes/dispute-reasons";
 import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 
@@ -15,13 +16,13 @@ export const corporateMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
 export const corporateOverviewSchema = z.object({
   month: corporateMonthSchema.optional(),
-  locationId: z.string().cuid().optional(),
+  locationId: recordIdSchema.optional(),
 });
 
 export const corporateOrderListSchema = z.object({
-  locationId: z.string().cuid().optional(),
+  locationId: recordIdSchema.optional(),
   status: z.nativeEnum(OrderStatus).optional(),
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 
@@ -70,7 +71,7 @@ export const corporateLocationCreateSchema = z
   .refine(coordinatesPaired, coordinatesPairIssue);
 
 export const corporateLocationIdSchema = z.object({
-  locationId: z.string().cuid(),
+  locationId: recordIdSchema,
 });
 
 export const corporateLocationUpdateSchema = corporateLocationIdSchema
@@ -88,7 +89,7 @@ export const corporateLocationUpdateSchema = corporateLocationIdSchema
   .refine(coordinatesPaired, coordinatesPairIssue);
 
 export const corporateInvoiceListSchema = z.object({
-  cursor: z.string().cuid().optional(),
+  cursor: recordIdSchema.optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 
@@ -101,27 +102,27 @@ export type CorporateOverviewInput = z.infer<typeof corporateOverviewSchema>;
 
 /** Corporate consumer flow (workstream D): request → quotes → order. */
 export const corporateRequestCreateSchema = z.object({
-  corporateLocationId: z.string().cuid(),
+  corporateLocationId: recordIdSchema,
   category: z.enum(REQUEST_CATEGORIES),
   description: z.string().trim().min(10).max(1_000),
   mediaPathnames: z.array(z.string().trim().min(1).max(500)).max(5).default([]),
 });
 
 export const corporateRequestListSchema = z.object({
-  locationId: z.string().cuid().optional(),
-  cursor: z.string().cuid().optional(),
+  locationId: recordIdSchema.optional(),
+  cursor: recordIdSchema.optional(),
 });
 
 export const corporateRequestIdSchema = z.object({
-  requestId: z.string().cuid(),
+  requestId: recordIdSchema,
 });
 
 export const corporateQuoteIdSchema = z.object({
-  quoteId: z.string().cuid(),
+  quoteId: recordIdSchema,
 });
 
 export const corporateOrderIdSchema = z.object({
-  orderId: z.string().cuid(),
+  orderId: recordIdSchema,
 });
 
 export const corporateReworkSchema = corporateOrderIdSchema.extend({

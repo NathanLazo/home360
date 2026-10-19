@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { MessageType } from "@generated/prisma";
+import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   fail,
   normalizeError,
@@ -21,29 +22,29 @@ import { sendMessage } from "~/server/services/messaging/send-message";
 
 const MAX_BODY_LENGTH = 2_000;
 
-const orderIdSchema = z.object({ orderId: z.string().cuid() });
+const orderIdSchema = z.object({ orderId: recordIdSchema });
 
 const forRequestSchema = z.object({
-  requestId: z.string().cuid(),
-  businessId: z.string().cuid().optional(),
+  requestId: recordIdSchema,
+  businessId: recordIdSchema.optional(),
 });
 
 const inquirySchema = z.object({
-  businessId: z.string().cuid(),
-  productId: z.string().cuid().optional(),
+  businessId: recordIdSchema,
+  productId: recordIdSchema.optional(),
 });
 
-const cursorSchema = z.object({ cursor: z.string().cuid().optional() });
+const cursorSchema = z.object({ cursor: recordIdSchema.optional() });
 
 const conversationCursorSchema = z.object({
-  conversationId: z.string().cuid(),
-  cursor: z.string().cuid().optional(),
+  conversationId: recordIdSchema,
+  cursor: recordIdSchema.optional(),
 });
 
-const conversationIdSchema = z.object({ conversationId: z.string().cuid() });
+const conversationIdSchema = z.object({ conversationId: recordIdSchema });
 
 const sendSchema = z.object({
-  conversationId: z.string().cuid(),
+  conversationId: recordIdSchema,
   type: z.nativeEnum(MessageType),
   body: z.string().trim().min(1).max(MAX_BODY_LENGTH).optional(),
   attachmentPathname: z.string().trim().min(1).max(500).optional(),
