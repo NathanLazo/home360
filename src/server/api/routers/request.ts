@@ -18,6 +18,7 @@ import {
   cancelMyRequest,
   createServiceRequest,
   getMyRequest,
+  hideMyRequest,
   listMyRequests,
   type RequestDiagnosisSource,
 } from "~/server/services/marketplace/request";
@@ -262,6 +263,26 @@ export const requestRouter = createTRPCRouter({
         return ok(cancelled.data, "Request cancelled");
       } catch (error) {
         return unexpectedFailure(error, "Request cancel failed");
+      }
+    }),
+
+  /** Customer soft delete: hidden from the customer, kept for traceability. */
+  hide: consumerProcedure
+    .input(requestIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const hidden = await hideMyRequest(ctx.db, {
+          customerId: ctx.consumer.userId,
+          id: input.id,
+        });
+
+        if (!hidden.ok) {
+          return serviceFailure(hidden.code, "Request delete failed");
+        }
+
+        return ok(hidden.data, "Request deleted");
+      } catch (error) {
+        return unexpectedFailure(error, "Request delete failed");
       }
     }),
 });

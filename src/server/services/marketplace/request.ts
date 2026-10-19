@@ -5,6 +5,7 @@ import {
   RequestStatus,
   ServiceStatus,
   type AiUrgency,
+  type Prisma,
   type PrismaClient,
   type ServiceRequest,
 } from "@generated/prisma";
@@ -401,7 +402,11 @@ export async function getMyRequest(
   input: { customerId: string; id: string },
 ): Promise<ServiceResult<RequestDetail>> {
   const row = await db.serviceRequest.findFirst({
-    where: { id: input.id, customerId: input.customerId },
+    where: {
+      id: input.id,
+      customerId: input.customerId,
+      hiddenByCustomerAt: null,
+    },
     include: { targetBusiness: { select: { id: true, name: true } } },
   });
 
@@ -437,7 +442,11 @@ export async function listMyRequests(
 ): Promise<ServiceResult<RequestListResult>> {
   if (input.cursor) {
     const cursorRow = await db.serviceRequest.findFirst({
-      where: { id: input.cursor, customerId: input.customerId },
+      where: {
+        id: input.cursor,
+        customerId: input.customerId,
+        hiddenByCustomerAt: null,
+      },
       select: { id: true },
     });
 
@@ -447,7 +456,7 @@ export async function listMyRequests(
   }
 
   const rows = await db.serviceRequest.findMany({
-    where: { customerId: input.customerId },
+    where: { customerId: input.customerId, hiddenByCustomerAt: null },
     take: PAGE_SIZE + 1,
     ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -493,16 +502,46 @@ const CANCELLABLE_REQUEST_STATUSES: RequestStatus[] = [
 ];
 
 /**
+ * Conditional claim so a concurrent `quote.accept` cannot be overwritten;
+ * pending offers on the request expire with it. Returns false when the
+ * request already left OPEN/QUOTED.
+ */
+async function cancelInTx(
+  tx: Prisma.TransactionClient,
+  requestId: string,
+  extra: Prisma.ServiceRequestUpdateManyMutationInput = {},
+): Promise<boolean> {
+  const claimed = await tx.serviceRequest.updateMany({
+    where: { id: requestId, status: { in: CANCELLABLE_REQUEST_STATUSES } },
+    data: { status: RequestStatus.CANCELLED, ...extra },
+  });
+
+  if (claimed.count === 0) {
+    return false;
+  }
+
+  await tx.quote.updateMany({
+    where: { requestId, status: QuoteStatus.PENDING },
+    data: { status: QuoteStatus.EXPIRED },
+  });
+
+  return true;
+}
+
+/**
  * OPEN or QUOTED requests (no accepted offer yet) can be cancelled; anything
- * else is a CONFLICT. Pending offers on the request expire with it. The claim
- * is conditional so a concurrent `quote.accept` cannot be overwritten.
+ * else is a CONFLICT.
  */
 export async function cancelMyRequest(
   db: PrismaClient,
   input: { customerId: string; id: string },
 ): Promise<ServiceResult<ServiceRequest>> {
   const request = await db.serviceRequest.findFirst({
-    where: { id: input.id, customerId: input.customerId },
+    where: {
+      id: input.id,
+      customerId: input.customerId,
+      hiddenByCustomerAt: null,
+    },
     select: { id: true, status: true },
   });
 
@@ -514,30 +553,71 @@ export async function cancelMyRequest(
     return svcFail("CONFLICT", "Only open requests can be cancelled");
   }
 
-  const cancelled = await db.$transaction(async (tx) => {
-    const claimed = await tx.serviceRequest.updateMany({
-      where: {
-        id: request.id,
-        status: { in: CANCELLABLE_REQUEST_STATUSES },
-      },
-      data: { status: RequestStatus.CANCELLED },
-    });
-
-    if (claimed.count === 0) {
-      return null;
-    }
-
-    await tx.quote.updateMany({
-      where: { requestId: request.id, status: QuoteStatus.PENDING },
-      data: { status: QuoteStatus.EXPIRED },
-    });
-
-    return tx.serviceRequest.findUniqueOrThrow({ where: { id: request.id } });
-  });
+  const cancelled = await db.$transaction(async (tx) =>
+    (await cancelInTx(tx, request.id))
+      ? tx.serviceRequest.findUniqueOrThrow({ where: { id: request.id } })
+      : null,
+  );
 
   if (!cancelled) {
     return svcFail("CONFLICT", "Only open requests can be cancelled");
   }
 
   return svcOk(cancelled);
+}
+
+/**
+ * Customer "delete": a soft delete that hides the request from the
+ * customer's list and detail while keeping the row (and its quotes) for
+ * traceability. A live request (OPEN/QUOTED) is cancelled in the same
+ * transaction so businesses stop quoting it; an ACCEPTED one has an order
+ * and stays visible (CONFLICT).
+ */
+export async function hideMyRequest(
+  db: PrismaClient,
+  input: { customerId: string; id: string },
+): Promise<ServiceResult<{ id: string }>> {
+  const request = await db.serviceRequest.findFirst({
+    where: {
+      id: input.id,
+      customerId: input.customerId,
+      hiddenByCustomerAt: null,
+    },
+    select: { id: true, status: true },
+  });
+
+  if (!request) {
+    return svcFail("NOT_FOUND", "Request not found");
+  }
+
+  if (request.status === RequestStatus.ACCEPTED) {
+    return svcFail(
+      "CONFLICT",
+      "Requests with an accepted offer cannot be deleted",
+    );
+  }
+
+  const hidden = { hiddenByCustomerAt: new Date() };
+  const done = await db.$transaction(async (tx) => {
+    if (CANCELLABLE_REQUEST_STATUSES.includes(request.status)) {
+      return cancelInTx(tx, request.id, hidden);
+    }
+
+    const claimed = await tx.serviceRequest.updateMany({
+      where: {
+        id: request.id,
+        status: request.status,
+        hiddenByCustomerAt: null,
+      },
+      data: hidden,
+    });
+
+    return claimed.count > 0;
+  });
+
+  if (!done) {
+    return svcFail("CONFLICT", "Request changed; try again");
+  }
+
+  return svcOk({ id: request.id });
 }

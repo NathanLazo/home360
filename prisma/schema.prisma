@@ -662,6 +662,9 @@ model ServiceRequest {
   targetBusinessId    String?
   targetBusiness      Business?          @relation("TargetedRequests", fields: [targetBusinessId], references: [id], onDelete: SetNull)
   targetServiceId     String?
+  // Soft delete by the customer: hidden from their list/detail, kept for
+  // traceability (quotes, conversations and audits still reference it).
+  hiddenByCustomerAt  DateTime?
   quotes              Quote[]
   conversations       Conversation[]
   createdAt           DateTime           @default(now())
