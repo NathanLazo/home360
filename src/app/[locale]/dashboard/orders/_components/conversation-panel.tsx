@@ -3,39 +3,50 @@
 import { RotateCcwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { OrderMessageComposer } from "./order-message-composer";
-import { OrderMessageList } from "./order-message-list";
-import { useOrderConversation } from "./use-order-conversation";
+import { ConversationMessageComposer } from "./conversation-message-composer";
+import { ConversationMessageList } from "./conversation-message-list";
+import { useConversation, type ConversationSource } from "./use-conversation";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 
-/** Customer chat of the order, embedded in the detail sheet. */
-export function OrderConversationPanel({
-  orderId,
+/**
+ * Customer chat embedded in a detail sheet: the order thread or the
+ * pre-sale thread of a request (same list, composer and polling).
+ * `notFoundHint` replaces the generic error when the server answers
+ * NOT_FOUND because the thread is not open to this business yet.
+ */
+export function ConversationPanel({
+  id,
+  source,
   customerId,
-  customerName,
+  title,
+  notFoundHint,
 }: {
-  orderId: string;
+  id: string;
+  source: ConversationSource;
   customerId: string;
-  customerName: string;
+  title: string;
+  notFoundHint?: string;
 }) {
   const t = useTranslations("dashboard.orders.conversation");
   const errorsT = useTranslations("errors");
-  const conversation = useOrderConversation(orderId, true);
+  const conversation = useConversation(source, true);
   const { state } = conversation;
+  const headingId = `${id}-heading`;
+  const unavailable =
+    state.status === "error" &&
+    state.code === "NOT_FOUND" &&
+    notFoundHint !== undefined;
 
   return (
     <section
-      id="order-conversation"
-      aria-labelledby="order-conversation-heading"
+      id={id}
+      aria-labelledby={headingId}
       className="space-y-3 rounded-xl border p-4"
     >
       <div className="space-y-0.5">
-        <h3
-          id="order-conversation-heading"
-          className="text-copy-sm font-medium"
-        >
-          {t("title", { name: customerName })}
+        <h3 id={headingId} className="text-copy-sm font-medium">
+          {title}
         </h3>
         <p className="text-muted-foreground text-xs">{t("pollingHint")}</p>
       </div>
@@ -49,7 +60,13 @@ export function OrderConversationPanel({
         </div>
       ) : null}
 
-      {state.status === "error" ? (
+      {unavailable ? (
+        <p className="text-muted-foreground text-copy-sm bg-canvas-soft rounded-md p-3">
+          {notFoundHint}
+        </p>
+      ) : null}
+
+      {state.status === "error" && !unavailable ? (
         <div role="alert" className="flex flex-col items-start gap-2">
           <p className="text-muted-foreground text-copy-sm">
             {errorsT(state.code)}
@@ -62,14 +79,19 @@ export function OrderConversationPanel({
       ) : null}
 
       {state.status === "ready" ? (
-        <OrderMessageList messages={state.messages} customerId={customerId} />
+        <ConversationMessageList
+          messages={state.messages}
+          customerId={customerId}
+        />
       ) : null}
 
-      <OrderMessageComposer
-        sending={conversation.sending}
-        disabled={state.status !== "ready"}
-        onSend={conversation.send}
-      />
+      {unavailable ? null : (
+        <ConversationMessageComposer
+          sending={conversation.sending}
+          disabled={state.status !== "ready"}
+          onSend={conversation.send}
+        />
+      )}
     </section>
   );
 }

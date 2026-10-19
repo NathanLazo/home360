@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { OrderFulfillmentBadge } from "./order-fulfillment-badge";
 import { OrderStatusBadge } from "./order-status-badge";
 import type { OrderListItem } from "./order.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
@@ -66,14 +67,19 @@ export function OrdersTable({
       key: "type",
       header: t("columns.type"),
       cell: (order) => (
-        <Badge variant="secondary" className="gap-1.5">
-          {order.type === "SERVICE" ? (
-            <WrenchIcon aria-hidden="true" />
-          ) : (
-            <PackageIcon aria-hidden="true" />
-          )}
-          {t(order.type === "SERVICE" ? "types.service" : "types.product")}
-        </Badge>
+        <span className="flex flex-wrap items-center gap-1.5">
+          <Badge variant="secondary" className="gap-1.5">
+            {order.type === "SERVICE" ? (
+              <WrenchIcon aria-hidden="true" />
+            ) : (
+              <PackageIcon aria-hidden="true" />
+            )}
+            {t(order.type === "SERVICE" ? "types.service" : "types.product")}
+          </Badge>
+          {order.type === "PRODUCT" && order.fulfillmentMethod ? (
+            <OrderFulfillmentBadge method={order.fulfillmentMethod} />
+          ) : null}
+        </span>
       ),
     },
     {

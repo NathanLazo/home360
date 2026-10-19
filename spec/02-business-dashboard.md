@@ -114,6 +114,14 @@ Mismo patrón que services, más:
 Header muestra "248 productos · 12 con stock bajo" (de `totals`); toggle "Stock bajo"
 como filtro chip.
 
+**F10 (D10-4) — stock disponible y concurrencia.** `ProductStock.stock` es lo disponible
+(la orden PENDING ya reservó sus unidades). El diálogo de stock por sucursal envía en cada
+fila que cargó la existencia que mostró como `expectedStock` (`toStockAdjustRows`); si una
+venta u otro ajuste la movió, `adjustStock` responde `CONFLICT` → aviso inline "El stock
+cambió mientras editabas" con "Volver a cargar" (submit bloqueado hasta recargar) y toast
+`feedback.stockConflict`. Estados derivados en celda y editor: `0` → "Agotado" (supera al
+aviso de bajo), `≤ lowStockThreshold` → "Pocas unidades"; icono + texto, nunca solo color.
+
 ## 4. W8 — Sucursales `/dashboard/branches`
 
 ### Router `branch`
@@ -132,6 +140,13 @@ Activa/Pausada, acciones ⋯. Header: "3 de 5 disponibles en tu plan" (`used/max
 del diseño se representa como placeholder estático (`branch-coverage-map.tsx`) — mapa
 real fuera de alcance.
 
+**F10 (D10-1).** `branch.create/update` aceptan `pickupEnabled` y `deliveryEnabled`
+(opcionales; omitidos conservan el valor / default `true` de la DB) y `branch.list` los
+devuelve. El formulario agrega la sección "Entrega de productos" con dos `Switch`
+etiquetados en positivo ("Envío a domicilio", "Recoger en sucursal"); si la
+recolección está activa sin coordenadas se avisa que la sucursal no aparecerá para recoger
+(PICKUP exige punto). La card muestra los modos activos o "Sin entrega de productos".
+
 ## 5. Órdenes `/dashboard/orders`
 
 ### Router `order`
@@ -144,6 +159,54 @@ real fuera de alcance.
 Solo lectura en esta fase (las órdenes nacen en la app móvil / seed; las transiciones de
 pago llegan en F3). Vista: tabla con filtros por estado/tipo + `order-detail-sheet.tsx`
 (Sheet al hacer clic en fila, con timeline de estado).
+
+### F10 — fulfillment, evidencia de entrega y chat pre-venta
+
+Contrato en `spec/tickets/F10-fulfillment-discovery.md` (D10-1, D10-2, D10-11, D10-12).
+
+| Procedure | Input | Result / Errores |
+|-----------|-------|------------------|
+| `getById` | `{ id }` | + `fulfillmentMethod` (PRODUCT legado → `DELIVERY`), `deliveryEvidence[{ pathname, url }]`, `deliveryNote`, `pickedUpAt`, `deliveryLatitude/Longitude`, `branch.address`, `dispute`, `actions` (booleans calculados en servidor) |
+| `list` | igual | items + `fulfillmentMethod` |
+| `markOutForDelivery` | `{ id }` | evento `OUT_FOR_DELIVERY` · `FULFILLMENT_MISMATCH` · `CONFLICT` |
+| `markDelivered` | `{ id, evidencePathnames[1..10], note? (≤500) }` | `DELIVERED` + `CONFIRMATION_REQUESTED`, arma el reloj de auto-liberación |
+| `markReadyForPickup` | `{ id }` | `READY_FOR_PICKUP` · `PICKUP_NOT_CONFIGURED` |
+| `redeemPickup` | `{ code }` | `{ orderId, folio, released, status }` · `PICKUP_CODE_INVALID` · `TOO_MANY_REQUESTS` · `CONFLICT` |
+
+**Hoja de detalle** (`order-detail-sheet.tsx`):
+
+- Los botones salen de `order.actions` del servidor (mismo cálculo que móvil); la UI solo
+  elige cuál es el CTA primario (`getOrderPrimaryAction`: aceptar → marcar entregado →
+  listo para recoger → canjear → asignar técnico). Un solo metal vivo por pantalla: el
+  primario cede el anillo vivo mientras hay un diálogo abierto. El resto es outline/ghost.
+- Pista "siguiente paso" (`getOrderNextStep`, solo copy): incluye `preparePickup`,
+  `readyForPickup`, `pickedUp`, `outForDelivery`, `awaitingCustomerConfirmation`.
+- "Marcar en camino" sin confirmación; "Listo para recoger" con `ConfirmDialog` (nombra la
+  sucursal); "Marcar entregado" (`order-mark-delivered-dialog.tsx`): 1–10 fotos subidas
+  por `media.createUploadUrl({ kind: "evidence" })` + PUT presignado con progreso por foto
+  (`use-delivery-evidence-upload.ts`, reintento y quitar en sitio), nota opcional con
+  contador; enviar queda deshabilitado (con motivo anunciado) hasta tener ≥1 foto subida y
+  nada en curso; las fotos fallidas no se envían.
+- "Canjear recolección" (`order-redeem-pickup-dialog.tsx`): input mono en mayúsculas,
+  sin espacios ni guiones (un lector de mano teclea igual que un teclado); valida forma
+  base32 de 10 caracteres antes de llamar; errores inline por código con `aria-invalid` y
+  foco de vuelta al campo. También vive como atajo de mostrador en la barra de filtros de
+  la tabla (`redeem-pickup-button.tsx`): el código identifica la orden.
+- Sección "Entrega" solo en PRODUCT (`order-fulfillment-section.tsx`): método, dirección +
+  enlace al mapa o sucursal de recolección + dirección, fecha de recolección, galería de
+  evidencia firmada (`signed-photo-grid.tsx`) y nota de entrega. SERVICE conserva
+  grabación + fotos antes/después.
+- Timeline con `READY_FOR_PICKUP`, `OUT_FOR_DELIVERY`, `DELIVERED`, `PICKED_UP`,
+  `PAYMENT_EXPIRED`; las notas que no son de cancelación se rotulan "Nota:".
+- Tabla: chip de fulfillment (`order-fulfillment-badge.tsx`) junto al tipo en filas PRODUCT.
+
+**Solicitudes (radar)**: badge "Dirigida a tu negocio" en la hoja ("Para ti" en la tabla, `targeted`), fecha
+de vencimiento (`expiresAt`) y panel de chat pre-venta en la hoja vía
+`messaging.getOrCreateForRequest({ requestId })` (el negocio lo resuelve la sesión). La
+conversación reutiliza las piezas del chat de la orden (`conversation-panel.tsx`,
+`use-conversation.ts` con `source: order | request`). Disponible si el negocio ya ofertó o
+la solicitud es dirigida; `NOT_FOUND` muestra "Envía una oferta para abrir el chat
+con el cliente" en lugar del error genérico.
 
 ## 6. Pruebas
 

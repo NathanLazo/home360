@@ -27,6 +27,8 @@ export function toFormValues(data: PlatformSettingsResult): SettingsFormValues {
     notifyNewRequestRadiusKm: settings.notifyNewRequestRadiusKm,
     notifyPaymentRelease: settings.notifyPaymentRelease,
     notifyRatingReminderHours: settings.notifyRatingReminderHours,
+    unpaidOrderTtlMinutes: settings.unpaidOrderTtlMinutes,
+    requestTtlHours: settings.requestTtlHours,
   };
 }
 
@@ -42,6 +44,8 @@ function toSettingsValues(values: SettingsFormValues): PlatformSettingsValues {
     notifyNewRequestRadiusKm: values.notifyNewRequestRadiusKm,
     notifyPaymentRelease: values.notifyPaymentRelease,
     notifyRatingReminderHours: values.notifyRatingReminderHours,
+    unpaidOrderTtlMinutes: values.unpaidOrderTtlMinutes,
+    requestTtlHours: values.requestTtlHours,
   };
 }
 

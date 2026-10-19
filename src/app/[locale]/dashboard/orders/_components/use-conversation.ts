@@ -12,19 +12,28 @@ export type ConversationMessage = NonNullable<
   RouterOutputs["messaging"]["listMessages"]["result"]
 >["items"][number];
 
-export type OrderConversationState =
+/**
+ * What the thread hangs from: an order (`getOrCreateConversation`) or the
+ * pre-sale request×business pair (`getOrCreateForRequest`, MA-08 / D10-12;
+ * the business side never names a businessId, the session resolves it).
+ */
+export type ConversationSource =
+  { kind: "order"; orderId: string } | { kind: "request"; requestId: string };
+
+export type ConversationState =
   | { status: "pending" }
   | { status: "error"; code: TranslatableErrorCode }
   | { status: "ready"; messages: ConversationMessage[] };
 
 /**
- * Opens (or creates) the order conversation once the panel is shown and polls
- * its messages every ~10 s. Real time on web is out of scope: the persisted
+ * Opens (or creates) the conversation once the panel is shown and polls its
+ * messages every ~10 s. Real time on web is out of scope: the persisted
  * `Message` rows rule, as on mobile.
  */
-export function useOrderConversation(orderId: string, enabled: boolean) {
+export function useConversation(source: ConversationSource, enabled: boolean) {
   const utils = api.useUtils();
-  const openMutation = api.messaging.getOrCreateConversation.useMutation();
+  const openOrderMutation = api.messaging.getOrCreateConversation.useMutation();
+  const openRequestMutation = api.messaging.getOrCreateForRequest.useMutation();
   const sendMutation = api.messaging.send.useMutation();
   const markReadMutation = api.messaging.markRead.useMutation();
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -33,22 +42,30 @@ export function useOrderConversation(orderId: string, enabled: boolean) {
   );
   const [attempt, setAttempt] = useState(0);
   const requestedFor = useRef<string | null>(null);
-  const { mutateAsync: openConversation } = openMutation;
+  const { mutateAsync: openOrder } = openOrderMutation;
+  const { mutateAsync: openRequest } = openRequestMutation;
+  const kind = source.kind;
+  const sourceId = source.kind === "order" ? source.orderId : source.requestId;
 
   useEffect(() => {
-    const key = `${orderId}:${attempt}`;
-    if (!enabled || requestedFor.current === key) return;
-    requestedFor.current = key;
+    const requestKey = `${kind}:${sourceId}:${attempt}`;
+    if (!enabled || requestedFor.current === requestKey) return;
+    requestedFor.current = requestKey;
     setConversationId(null);
     setOpenError(null);
 
-    openConversation({ orderId })
+    const opening =
+      kind === "order"
+        ? openOrder({ orderId: sourceId })
+        : openRequest({ requestId: sourceId });
+
+    opening
       .then((response) => {
         if (response.result) setConversationId(response.result.conversationId);
         else setOpenError(response.error ?? "UNKNOWN_ERROR");
       })
       .catch((error: unknown) => setOpenError(toErrorCode(error)));
-  }, [enabled, orderId, attempt, openConversation]);
+  }, [enabled, kind, sourceId, attempt, openOrder, openRequest]);
 
   const messagesQuery = api.messaging.listMessages.useQuery(
     { conversationId: conversationId ?? "" },
@@ -93,7 +110,7 @@ export function useOrderConversation(orderId: string, enabled: boolean) {
     }
   }
 
-  let state: OrderConversationState;
+  let state: ConversationState;
   const response = messagesQuery.data;
 
   if (openError !== null) {

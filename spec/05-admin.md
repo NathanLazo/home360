@@ -3,7 +3,8 @@
 Cubre **W9 (resumen)**, **W10 (usuarios)**, **W11 (disputas)**, **W12 (finanzas)** y
 **W13 (configuración)**. Requiere F3 (dinero); se integra con F4 (crear suscripción al
 aprobar). Todo con `adminProcedure`; routers bajo el namespace `admin` en `root.ts`
-(`admin: createTRPCRouter({ overview, users, disputes, finance, settings })`).
+(`admin: createTRPCRouter({ overview, users, disputes, finance, settings, orders })`;
+`orders` llega con F10, §5b).
 
 `admin/layout.tsx`: `AppSidebar variant="dark"` (fondo `#18181b`, texto claro), badge con
 conteo de disputas abiertas, verificación de rol en servidor.
@@ -138,10 +139,54 @@ settings/  page.tsx  +  _components/
 ├─ ai-settings-section.tsx       # umbral (slider+input), margen ±%, modelo (Select), switch revisión humana
 ├─ fees-settings-section.tsx     # comisiones por plan, tarifa de servicio, bono de lealtad
 ├─ escrow-settings-section.tsx   # horas de auto-liberación
+├─ expiration-settings-section.tsx  # F10 (D10-5) "Vencimientos": plazo de pago (min) y vigencia de solicitud (h)
 ├─ notifications-settings-section.tsx  # switches + radios del diseño
 ├─ settings.schema.ts · settings.types.ts
 └─ use-settings-mutations.ts     # dirty-state → habilita "Guardar cambios"
 ```
+
+**F10 (D10-5) — expiración.** `PlatformSettings.unpaidOrderTtlMinutes` (default 30, rango
+10–720) y `requestTtlHours` (default 72, rango 12–720) viajan en `settings` de
+`admin.settings.save` con el mismo `expectedUpdatedAt` / `SETTINGS_STALE` que el resto de
+la configuración. Sección "Vencimientos" entre Escrow y Notificaciones; nota visible: la
+vigencia aplica a solicitudes nuevas (`expiresAt` se fija al crearlas) y el plazo de pago
+se evalúa cada 15 min sobre todas las órdenes PENDING. Los rangos son provisionales
+(los fija `settings.schema.ts`; el owner puede pedir otros).
+
+## 5b. Órdenes `/admin/orders` (F10, D10-14)
+
+### Router `admin.orders`
+
+| Procedure | Input | Result / Errores |
+|-----------|-------|------------------|
+| `list` | `{ status?, type?, search?, cursor? }` (todo opcional; `search` = folio `123`/`#123`, título, cliente o negocio) | `{ items, nextCursor }`, 25 por página; item: folio, título, tipo, estado, `fulfillmentMethod`, monto, fecha, cliente, negocio, `paymentStatus`, `dispute` |
+| `getById` | `{ id }` | expediente completo: partes, sucursal, técnico, servicio/producto, cuenta corporativa, cotización, pago (desglose, reloj de liberación), disputa, reseña, `fulfillment`, `evidence` (grabación, antes/después, entrega; firmadas para admin), materiales, `timeline` con actor · `NOT_FOUND` |
+
+El código de recolección nunca se expone en admin.
+
+### Módulo
+
+Patrón de tabla compartido por los módulos admin (`DataTable` dentro de
+`ADMIN_TABLE_CARD_CLASS`, `SearchFilterBar`, `TableSkeleton` con la forma real,
+`SectionError` con reintento, `EmptyState` con "Limpiar filtros" cuando hay filtros).
+`h1` solo para lectores de pantalla (la barra de filtros encabeza la vista). Filtros y
+orden abierta en la URL (`?status=&type=&q=&order=`); la búsqueda se escribe en la URL con
+debounce de 300 ms. Paginación por cursor con "Cargar más"; al cambiar filtro las filas
+previas quedan atenuadas hasta que llega la nueva página (`placeholderData`).
+
+```text
+orders/  page.tsx (prefetchInfinite con los filtros de la URL) · loading.tsx · error.tsx
+└─ _components/
+   ├─ admin-orders-view.tsx · admin-order-filters.tsx · admin-orders-table.tsx
+   ├─ admin-order-detail-sheet.tsx  # Sheet con `unwrapEnvelope`; skeleton/error/éxito
+   ├─ admin-order-detail-body.tsx   # resumen, partes (links a W10), entrega, pago, evidencia, materiales, disputa (link a W11) y reseña, bitácora
+   ├─ admin-order-timeline.tsx · admin-order-photo-grid.tsx
+   ├─ admin-order-status-badge.tsx · admin-order-type-badge.tsx (tipo + chip de fulfillment)
+   └─ admin-orders.schema.ts · admin-orders.types.ts · use-admin-orders-*.ts · use-debounced-value.ts
+```
+
+Entrada "Órdenes" en `admin-nav.ts` entre Usuarios y Disputas. Solo lectura: no hay
+acciones sobre la orden desde admin (las disputas siguen en W11).
 
 ## 6. Pruebas
 
@@ -164,3 +209,4 @@ cambiar umbral IA a 90 → persiste y se refleja en W9.
 - [ ] Resolución de disputas y aprobación de retiros son transaccionales e idempotentes.
 - [ ] Ningún router admin accesible con rol BUSINESS/CUSTOMER (403 uniforme).
 - [ ] Settings validan rangos en servidor; cambios de comisión no tocan pagos históricos.
+- [ ] `/admin/orders` lista órdenes de todo tipo con filtros, cursor y expediente completo (F10).

@@ -1,6 +1,11 @@
 "use client";
 
-import { LoaderCircleIcon, RadarIcon, SparklesIcon } from "lucide-react";
+import {
+  CrosshairIcon,
+  LoaderCircleIcon,
+  RadarIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { RadarRequestItem } from "./order.types";
@@ -35,7 +40,15 @@ export function RequestsTable({
       className: "min-w-64",
       cell: (request) => (
         <div className="min-w-0 space-y-0.5">
-          <p className="truncate font-medium">{request.title}</p>
+          <p className="flex min-w-0 items-center gap-2">
+            <span className="truncate font-medium">{request.title}</span>
+            {request.targeted ? (
+              <Badge variant="outline" className="shrink-0 gap-1">
+                <CrosshairIcon aria-hidden="true" />
+                {t("targeted")}
+              </Badge>
+            ) : null}
+          </p>
           <p className="text-muted-foreground truncate text-xs">
             {request.aiDiagnosis ?? t("noDiagnosis")}
           </p>

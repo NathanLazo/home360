@@ -3,12 +3,12 @@
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import type { ProductCreateInput, ProductUpdateInput } from "./product.schema";
 import type {
-  ProductAdjustStockInput,
-  ProductCreateInput,
-  ProductUpdateInput,
-} from "./product.schema";
-import type { ProductListItem, ProductMutationResult } from "./product.types";
+  ProductListItem,
+  ProductMutationResult,
+  ProductStockAdjustRequest,
+} from "./product.types";
 import { api } from "~/trpc/react";
 
 type OperationResponse = {
@@ -107,12 +107,15 @@ export function useProductMutations() {
   }
 
   async function adjustStock(
-    input: ProductAdjustStockInput,
+    input: ProductStockAdjustRequest,
   ): Promise<ProductMutationResult> {
     try {
+      // CONFLICT here is the D10-4 stale `expectedStock`: a sale or another
+      // edit changed the stock after the dialog loaded it.
       return await finish(
         await adjustStockMutation.mutateAsync(input),
         t("stockAdjusted"),
+        t("stockConflict"),
       );
     } catch {
       toast.error(t("transportError"));

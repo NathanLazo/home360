@@ -3,14 +3,14 @@
 import { useEffect, useRef } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import type { ConversationMessage } from "./use-order-conversation";
+import type { ConversationMessage } from "./use-conversation";
 import { cn } from "~/lib/utils";
 
 /**
  * Read-only thread. Messages not sent by the customer belong to the business
  * side (owner or assigned worker) and align to the end.
  */
-export function OrderMessageList({
+export function ConversationMessageList({
   messages,
   customerId,
 }: {

@@ -1,7 +1,9 @@
 "use client";
 
+import { CircleAlertIcon, CircleSlashIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { stockLevel } from "./product-stock.utils";
 import type { ProductFormErrors, ProductStockFormValue } from "./product.types";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -53,6 +55,7 @@ export function ProductStockFields({
         const carriedId = `product-carried-${stock.branchId}`;
         const stockId = `product-stock-${stock.branchId}`;
         const thresholdId = `product-threshold-${stock.branchId}`;
+        const level = stock.isCarried ? stockLevel(stock) : null;
 
         return (
           <div
@@ -70,6 +73,27 @@ export function ProductStockFields({
                 {stock.branchStatus === "PAUSED" ? (
                   <p className="text-muted-foreground text-xs">
                     {t("pausedBranch")}
+                  </p>
+                ) : null}
+                {level === "out" || level === "low" ? (
+                  <p
+                    className={cn(
+                      "mt-0.5 inline-flex items-center gap-1 text-xs font-medium",
+                      level === "out" ? "text-error-deep" : "text-warning-deep",
+                    )}
+                  >
+                    {level === "out" ? (
+                      <CircleSlashIcon
+                        aria-hidden="true"
+                        className="size-3.5"
+                      />
+                    ) : (
+                      <CircleAlertIcon
+                        aria-hidden="true"
+                        className="size-3.5"
+                      />
+                    )}
+                    {t(level === "out" ? "stateOut" : "stateLow")}
                   </p>
                 ) : null}
               </div>

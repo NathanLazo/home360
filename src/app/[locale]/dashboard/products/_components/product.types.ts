@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { RouterInputs, RouterOutputs } from "~/trpc/react";
 
 type ProductOutput = RouterOutputs["product"];
 
@@ -25,7 +25,16 @@ export type ProductStockFormValue = {
   isCarried: boolean;
   stock: string;
   lowStockThreshold: string;
+  /**
+   * Stock the editor loaded for a carried branch: sent back as
+   * `expectedStock` so a sale or another edit in between answers CONFLICT
+   * instead of being overwritten (D10-4). Absent for new rows.
+   */
+  expectedStock?: number;
 };
+
+/** `product.adjustStock` input, rows with the optional `expectedStock`. */
+export type ProductStockAdjustRequest = RouterInputs["product"]["adjustStock"];
 
 export type ProductFormValues = {
   name: string;

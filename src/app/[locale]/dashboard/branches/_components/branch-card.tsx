@@ -6,6 +6,7 @@ import {
   MapPinOffIcon,
   RadiusIcon,
   ShoppingBagIcon,
+  TruckIcon,
   UserRoundIcon,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
@@ -36,6 +37,10 @@ export function BranchCard({
   const t = useTranslations("dashboard.branches");
   const formatter = useFormatter();
   const located = branch.latitude !== null && branch.longitude !== null;
+  const fulfillmentModes = [
+    branch.deliveryEnabled ? t("fulfillment.delivery") : null,
+    branch.pickupEnabled ? t("fulfillment.pickup") : null,
+  ].filter((mode): mode is string => mode !== null);
   const coordinate = (value: number) =>
     formatter.number(value, { maximumFractionDigits: 4 });
   return (
@@ -123,6 +128,20 @@ export function BranchCard({
               {t("card.noLocationHint")}
             </span>
           )}
+        </p>
+        <p className="flex items-center gap-2">
+          <TruckIcon
+            aria-hidden="true"
+            className="text-muted-foreground size-4"
+          />
+          <span className="text-muted-foreground">
+            {t("fulfillment.label")}
+          </span>
+          <span className="ml-auto text-right font-medium">
+            {fulfillmentModes.length > 0
+              ? fulfillmentModes.join(" · ")
+              : t("fulfillment.none")}
+          </span>
         </p>
       </CardContent>
     </Card>

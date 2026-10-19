@@ -11,6 +11,8 @@ type TimelineItem = {
   date: Date | null;
   actorName: string | null;
   note: string | null;
+  /** Cancellation notes are reasons; the rest (delivery note…) are notes. */
+  noteIsReason: boolean;
 };
 
 type ReconstructedKey =
@@ -58,6 +60,7 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
             date: order.createdAt,
             actorName: null,
             note: null,
+            noteIsReason: false,
           },
           ...order.events.map((event) => ({
             id: event.id,
@@ -65,6 +68,7 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
             date: event.createdAt,
             actorName: event.actorName,
             note: event.note,
+            noteIsReason: event.type === "CANCELLED",
           })),
         ]
       : reconstructTimeline(order).map((item) => ({
@@ -73,6 +77,7 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
           date: item.date,
           actorName: null,
           note: null,
+          noteIsReason: false,
         }));
 
   return (
@@ -104,7 +109,9 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
             ) : null}
             {item.note ? (
               <p className="text-muted-foreground text-copy-sm break-words whitespace-pre-wrap">
-                {t("note", { note: item.note })}
+                {t(item.noteIsReason ? "note" : "noteGeneric", {
+                  note: item.note,
+                })}
               </p>
             ) : null}
           </div>

@@ -33,6 +33,7 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 | W3 | web | ✅ Build de producción falla sin Stripe, Blob o AI Gateway (`src/env.js`) | P-WEB-03 |
 | W4 | web | Perfil: avatar, formulario de contraseña único, `NumberTicker`, `SubmitStatusIcon` | F9-01 |
 | W5 | web | ✅ F8-05 reescrito: solo prepago en USD (decisión owner 2026-10-18) | F8-05 |
+| W6b | web | F10 fulfillment/discovery: API + dashboard (órdenes, solicitudes, sucursales, productos) + admin (órdenes, vencimientos). En código; falta `db:push`, `PICKUP_CODE_SECRET` en Vercel y prueba manual | F10 |
 | M2 | móvil | T4: calificación y % a tiempo del trabajador (API + app) | M6-M3 |
 
 ### Fase 2 — Calidad, accesibilidad y diseño
@@ -60,3 +61,4 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 - [`F8-02`](F8-02-don-victor-widget.md) — Don Víctor (en código; falta verificación manual)
 - [`F8-05`](F8-05-ai-models-pricing-credits.md) — créditos IA (implementado; falta `db:push` y verificar precio de Ling)
 - [`F9-01`](F9-01-user-profile.md) — perfil por panel (avatar D2 y D4 pendientes)
+- [`F10`](F10-fulfillment-discovery.md) — fulfillment DELIVERY/PICKUP, evidencia, stock, descubrimiento y chat pre-venta (API + web en código; falta `db:push`, `PICKUP_CODE_SECRET` y E2E; móvil en `M8`)

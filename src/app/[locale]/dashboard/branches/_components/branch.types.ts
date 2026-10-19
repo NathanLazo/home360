@@ -12,6 +12,15 @@ export type BranchFormValues = {
   coverageRadiusKm: string;
   latitude: string;
   longitude: string;
+  /** D10-1: whether customers may pick up products at this branch. */
+  pickupEnabled: boolean;
+  /** D10-1: whether this branch fills home deliveries. */
+  deliveryEnabled: boolean;
 };
 
-export type BranchFormErrors = Partial<Record<keyof BranchFormValues, string>>;
+type BranchTextField = Exclude<
+  keyof BranchFormValues,
+  "pickupEnabled" | "deliveryEnabled"
+>;
+
+export type BranchFormErrors = Partial<Record<BranchTextField, string>>;

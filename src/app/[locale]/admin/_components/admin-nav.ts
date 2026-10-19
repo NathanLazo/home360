@@ -2,6 +2,7 @@ import {
   BanknoteIcon,
   Building2Icon,
   LayoutDashboardIcon,
+  ReceiptTextIcon,
   ScaleIcon,
   SettingsIcon,
   SparklesIcon,
@@ -26,6 +27,12 @@ export const adminNav: SidebarNavDefinition[] = [
     labelKey: "nav.users",
     href: "/admin/users",
     icon: UsersIcon,
+  },
+  {
+    key: "orders",
+    labelKey: "nav.orders",
+    href: "/admin/orders",
+    icon: ReceiptTextIcon,
   },
   {
     key: "disputes",
