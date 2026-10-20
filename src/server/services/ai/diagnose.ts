@@ -11,12 +11,17 @@ import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 /**
- * Same Grok the assistant defaults to (`agent-models.ts`), so the vision
- * diagnosis and the agent share one catalog. The plain string routes the call
- * through the Vercel AI Gateway (authenticated by `AI_GATEWAY_API_KEY`, which
- * the AI SDK reads from `process.env` on its own) — no provider package needed.
+ * Vision diagnosis runs on Claude Sonnet 5.5 through the Vercel AI Gateway
+ * (`AI_GATEWAY_API_KEY`); the gateway bills our own Anthropic key via BYOK,
+ * configured in the Vercel dashboard.
  */
-export const DIAGNOSIS_MODEL: AgentModelId = "spacexai/grok-4.7";
+const DIAGNOSIS_MODEL = "anthropic/claude-sonnet-5-5";
+
+/**
+ * Gateway model reused by text-only flows (dispute summaries); shares the
+ * assistant catalog in `agent-models.ts`.
+ */
+export const GATEWAY_TEXT_MODEL: AgentModelId = "spacexai/grok-4.7";
 
 export {
   REQUEST_CATEGORIES,
@@ -180,7 +185,7 @@ function buildUserMessage(input: {
 }
 
 /**
- * Analyzes the request photos with `DIAGNOSIS_MODEL` through the Vercel AI
+ * Analyzes the request photos with Claude Sonnet 5.5 through the Vercel AI
  * Gateway and returns a structured diagnosis. Backend only — the prompt and
  * any provider error are never exposed to the caller: every failure surfaces
  * as a clean `AI_UNAVAILABLE`.
