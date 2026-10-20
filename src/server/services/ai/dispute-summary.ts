@@ -6,10 +6,10 @@ import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import { evidenceKindFromUrl } from "~/lib/evidence-kind";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
-import { DIAGNOSIS_MODEL } from "./diagnose";
+import { GATEWAY_TEXT_MODEL } from "./diagnose";
 
 /** Same Gateway model as the diagnosis engine: one AI configuration. */
-export const DISPUTE_SUMMARY_MODEL = DIAGNOSIS_MODEL;
+export const DISPUTE_SUMMARY_MODEL = GATEWAY_TEXT_MODEL;
 
 const SUMMARY_TIMEOUT_MS = 45_000;
 
