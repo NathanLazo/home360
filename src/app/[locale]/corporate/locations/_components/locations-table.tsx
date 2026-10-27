@@ -7,7 +7,8 @@ import {
   PowerIcon,
   PowerOffIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { CorporateLocationItem } from "../../_components/corporate.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
@@ -49,7 +50,7 @@ export function LocationsTable({
   onReactivate,
 }: LocationsTableProps) {
   const t = useTranslations("corporate.locations");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   const columns: Array<DataTableColumn<CorporateLocationItem>> = [
     {

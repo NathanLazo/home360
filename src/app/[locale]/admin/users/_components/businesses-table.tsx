@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { BuildingIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { BusinessStatusBadge } from "./business-status-badge";
@@ -32,7 +33,7 @@ export function BusinessesTable({
 }: BusinessesTableProps) {
   const t = useTranslations("admin.users");
   const typesT = useTranslations("admin.businessTypes");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   // Frozen on mount so every relative date is measured against one instant.
   const [now] = useState(() => new Date());
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useFormatter } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 /** MXN formatter shared by the orders, requests and offers tables. */
 export function useMoney() {
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return (cents: number) =>
     formatter.number(cents / 100, {

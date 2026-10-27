@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircleIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -23,7 +24,7 @@ export function DisputeAiSummary({
   onGenerate: () => void;
 }) {
   const t = useTranslations("admin.disputes.aiSummary");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const hasSummary = summary !== null && summary.length > 0;
 
   return (

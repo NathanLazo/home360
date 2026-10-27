@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { UsersIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { CustomerRowActions } from "./customer-row-actions";
@@ -25,7 +26,7 @@ export function CustomersTable({
   emptyAction?: ReactNode;
 }) {
   const t = useTranslations("admin.users");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
 
   const columns: Array<DataTableColumn<CustomerRow>> = [

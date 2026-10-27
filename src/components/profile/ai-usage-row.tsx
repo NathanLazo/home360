@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { AiUsageRow as AiUsageRowData } from "./profile.types";
 import { getAgentModel, isAgentModelId } from "~/lib/agent/agent-models";
@@ -12,7 +13,7 @@ import { formatTokenCount, formatUsdMicros } from "~/lib/agent/agent-pricing";
  */
 export function AiUsageRow({ row }: { row: AiUsageRowData }) {
   const t = useTranslations("profile.billing");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const locale = useLocale();
   const model = isAgentModelId(row.model)
     ? getAgentModel(row.model).label

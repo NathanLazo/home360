@@ -3,6 +3,7 @@ import {
   type AgentModelId,
   type AgentModelOption,
 } from "./agent-models";
+import { intlLocaleFor } from "~/i18n/intl-locale";
 
 /**
  * Pricing rules of the assistant (owner decision, 2026-09-23):
@@ -46,7 +47,8 @@ export function platformPricePerMillion(
   }
 
   return {
-    inputUsdPerMillion: model.gatewayPricing.inputUsdPerMillion * AI_PRICE_MARKUP,
+    inputUsdPerMillion:
+      model.gatewayPricing.inputUsdPerMillion * AI_PRICE_MARKUP,
     outputUsdPerMillion:
       model.gatewayPricing.outputUsdPerMillion * AI_PRICE_MARKUP,
   };
@@ -90,7 +92,7 @@ export function usdMicrosToUsd(micros: number): number {
 
 /** Formats a micro-dollar amount as USD with cent precision. */
 export function formatUsdMicros(micros: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(intlLocaleFor(locale), {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
@@ -100,7 +102,7 @@ export function formatUsdMicros(micros: number, locale: string): string {
 
 /** Compact token count: `950`, `12.4k`, `1.2M`. */
 export function formatTokenCount(count: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(intlLocaleFor(locale), {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(count);

@@ -9,7 +9,8 @@ import {
   TruckIcon,
   UserRoundIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { BranchCardActions } from "./branch-card-actions";
 import type { BranchListItem } from "./branch.types";
@@ -35,7 +36,7 @@ export function BranchCard({
   onDelete: () => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.branches");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const located = branch.latitude !== null && branch.longitude !== null;
   const fulfillmentModes = [
     branch.deliveryEnabled ? t("fulfillment.delivery") : null,

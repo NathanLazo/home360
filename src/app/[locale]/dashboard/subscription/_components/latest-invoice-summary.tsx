@@ -1,7 +1,8 @@
 "use client";
 
 import { DownloadIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { InvoiceStatusBadge } from "./invoice-status-badge";
 import type { InvoiceListItem } from "./subscription.types";
@@ -20,7 +21,7 @@ export function LatestInvoiceSummary({
   invoice: InvoiceListItem;
 }) {
   const t = useTranslations("dashboard.subscription.invoices");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   return (
@@ -50,11 +51,7 @@ export function LatestInvoiceSummary({
           </a>
         </Button>
       ) : (
-        <Button
-          type="button"
-          disabled
-          title={t("downloadUnavailable")}
-        >
+        <Button type="button" disabled title={t("downloadUnavailable")}>
           <DownloadIcon aria-hidden="true" />
           {t("download")}
         </Button>

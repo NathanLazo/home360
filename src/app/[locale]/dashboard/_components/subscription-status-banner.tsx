@@ -1,7 +1,8 @@
 "use client";
 
 import { AlertTriangle, Lock } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { SubscriptionStatus } from "@generated/prisma";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -24,7 +25,7 @@ export function SubscriptionStatusBanner({
   renewsAt,
 }: SubscriptionStatusBannerProps) {
   const t = useTranslations("dashboard.subscriptionBanner");
-  const format = useFormatter();
+  const format = useAppFormatter();
 
   if (status === null || status === "ACTIVE") {
     return null;

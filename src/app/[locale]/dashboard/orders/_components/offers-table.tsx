@@ -1,7 +1,8 @@
 "use client";
 
 import { HandCoinsIcon, LoaderCircleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { OfferRowActions } from "./offer-row-actions";
@@ -34,7 +35,7 @@ export function OffersTable({
 }) {
   const t = useTranslations("dashboard.requests.offers");
   const statusT = useTranslations("dashboard.requests.offerStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
   const money = useMoney();
   const columns: Array<DataTableColumn<MyQuoteItem>> = [

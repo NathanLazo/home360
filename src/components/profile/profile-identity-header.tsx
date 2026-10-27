@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { ProfileSummary } from "./profile.types";
 import { UserAvatar } from "~/components/user-avatar";
@@ -17,7 +18,7 @@ export function ProfileIdentityHeader({
 }) {
   const t = useTranslations("profile.identity");
   const roles = useTranslations("common.userMenu.roles");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const name = profile.name?.trim() ? profile.name : t("nameFallback");
 
   return (

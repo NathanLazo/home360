@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useState } from "react";
 
 import { ConfirmButtonContent } from "../../_components/confirm-button-content";
@@ -62,7 +63,7 @@ export function ApproveBusinessDialog({
   const doneT = useTranslations("admin.feedback.done");
   const documentTypeT = useTranslations("admin.documentTypes");
   const documentStatusT = useTranslations("admin.documentStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [planCode, setPlanCode] = useState<PlanCode | null>(null);
 
   const plansQuery = api.admin.users.listApprovalPlans.useQuery(undefined, {

@@ -12,7 +12,10 @@ import { useTranslations } from "next-intl";
 
 import type { MyQuoteItem } from "./order.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -40,9 +43,9 @@ export function OfferRowActions({
   onWithdraw: (quoteId: string) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.requests.offers.actions");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
-  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
+  const readOnlyTitle = isReadOnly ? readOnlyNotice : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const requestOpen =
     quote.request.status === "OPEN" || quote.request.status === "QUOTED";

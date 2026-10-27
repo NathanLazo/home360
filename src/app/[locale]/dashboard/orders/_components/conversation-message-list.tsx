@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { ConversationMessage } from "./use-conversation";
 import { cn } from "~/lib/utils";
@@ -18,7 +19,7 @@ export function ConversationMessageList({
   customerId: string;
 }) {
   const t = useTranslations("dashboard.orders.conversation");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const endRef = useRef<HTMLLIElement>(null);
   const lastId = messages.at(-1)?.id;
 

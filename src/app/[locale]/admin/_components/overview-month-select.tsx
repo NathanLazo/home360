@@ -1,7 +1,8 @@
 "use client";
 
 import { CalendarIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { monthKeyAnchor, recentMonthKeys } from "./overview-months";
 import { OVERVIEW_MONTH_OPTIONS } from "./overview.schema";
@@ -27,7 +28,7 @@ export function OverviewMonthSelect({
   onChange,
 }: OverviewMonthSelectProps) {
   const t = useTranslations("admin.overview.month");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const options = recentMonthKeys(currentMonth, OVERVIEW_MONTH_OPTIONS);
   // A deep link to an older month still renders as a selectable option.
   const keys = options.includes(value) ? options : [value, ...options];
@@ -47,10 +48,7 @@ export function OverviewMonthSelect({
         onChange(next === currentMonth ? undefined : next)
       }
     >
-      <SelectTrigger
-        className="w-48"
-        aria-label={t("label")}
-      >
+      <SelectTrigger className="w-48" aria-label={t("label")}>
         <CalendarIcon aria-hidden="true" className="text-muted-foreground" />
         <SelectValue />
       </SelectTrigger>

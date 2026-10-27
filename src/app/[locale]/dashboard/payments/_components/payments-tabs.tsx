@@ -61,7 +61,7 @@ export function PaymentsTabs() {
 
   return (
     <Tabs value={tab} onValueChange={selectTab} className="gap-4">
-      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div className="-mx-4 overflow-x-auto overflow-y-hidden px-4 sm:mx-0 sm:px-0">
         <TabsList aria-label={t("label")} animatedIndicator>
           {PAYMENTS_TABS.map((value) => (
             <TabsTrigger key={value} value={value} className="px-3">

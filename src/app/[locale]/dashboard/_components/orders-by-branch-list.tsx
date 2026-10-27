@@ -2,7 +2,8 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { Building2Icon, RotateCcwIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import {
   DonutDistributionChart,
@@ -30,7 +31,7 @@ export function OrdersByBranchList({
 }: OrdersByBranchListProps) {
   const t = useTranslations("dashboard.home");
   const errors = useTranslations("errors");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const input = branchId ? { branchId, days } : { days };
   const query = api.dashboard.getOrdersByBranch.useQuery(input, {
     placeholderData: keepPreviousData,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 /**
  * Formats server-provided cents as MXN. Dividing by 100 is the only arithmetic
@@ -8,7 +8,7 @@ import { useFormatter } from "next-intl";
  * by the server.
  */
 export function useCurrencyFormatter(): (cents: number) => string {
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return (cents: number) =>
     formatter.number(cents / 100, {

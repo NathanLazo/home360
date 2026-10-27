@@ -1,7 +1,8 @@
 "use client";
 
 import { InboxIcon, LoaderCircleIcon, SearchXIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateOrderStatusBadge } from "../../_components/corporate-order-status-badge";
 import type { CorporateOrderItem } from "../../_components/corporate.types";
@@ -31,7 +32,7 @@ export function CorporateOrdersTable({
 }: CorporateOrdersTableProps) {
   const t = useTranslations("corporate.orders");
   const statusT = useTranslations("corporate.orderStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   const columns: Array<DataTableColumn<CorporateOrderItem>> = [
     {

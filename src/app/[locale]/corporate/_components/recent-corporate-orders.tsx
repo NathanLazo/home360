@@ -1,7 +1,8 @@
 "use client";
 
 import { ArrowRightIcon, InboxIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateOrderStatusBadge } from "./corporate-order-status-badge";
 import type { CorporateOrderItem } from "./corporate.types";
@@ -28,7 +29,7 @@ export function RecentCorporateOrders({
   const t = useTranslations("corporate.home");
   const ordersT = useTranslations("corporate.orders.table");
   const statusT = useTranslations("corporate.orderStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const query = api.corporate.listOrders.useQuery({
     limit,
     ...(locationId ? { locationId } : {}),

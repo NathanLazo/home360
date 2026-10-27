@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { AnimatedNumber, MXN_FORMAT } from "../../_components/animated-number";
 import type { RevenueBreakdown } from "./finance.types";
@@ -14,7 +15,7 @@ export function RevenueBreakdownList({
   breakdown: RevenueBreakdown;
 }) {
   const t = useTranslations("admin.finance.breakdown");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = (cents: number) =>
     formatter.number(cents / 100, {
       style: "currency",

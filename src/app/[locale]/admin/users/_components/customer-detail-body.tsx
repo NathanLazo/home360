@@ -1,7 +1,8 @@
 "use client";
 
 import { StarIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
 import { useCurrencyFormatter } from "../../_components/use-currency-formatter";
@@ -16,7 +17,7 @@ export function CustomerDetailBody({ detail }: { detail: CustomerDetail }) {
   const t = useTranslations("admin.users.customerDetail");
   const orderStatusT = useTranslations("admin.orderStatus");
   const disputeStatusT = useTranslations("admin.disputeStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   return (

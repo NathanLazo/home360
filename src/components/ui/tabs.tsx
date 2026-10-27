@@ -141,8 +141,12 @@ const triggerStaticActiveClasses = [
   "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
   "data-[state=active]:bg-card data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground",
 ];
+// The underline pseudo-element sits 5px below the trigger. Even at opacity 0
+// it still counts as scrollable overflow, so in the pill (default) variant it
+// is removed (`after:hidden`): otherwise any `overflow-x-auto` wrapper around
+// the list grows a 1px vertical scroll range and shows scroll arrows.
 const triggerLineClasses =
-  "after:bg-foreground after:absolute after:opacity-0 after:transition-opacity after:duration-150 group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100";
+  "group-data-[variant=default]/tabs-list:after:hidden after:bg-foreground after:absolute after:opacity-0 after:transition-opacity after:duration-150 group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100";
 
 function TabsTrigger({
   className,
@@ -182,7 +186,7 @@ function TabsTrigger({
                   ? INSTANT_TRANSITION
                   : INDICATOR_TRANSITION
               }
-              className="bg-card dark:border-input dark:bg-input/30 absolute -inset-px rounded-pill border border-transparent shadow-sm"
+              className="bg-card dark:border-input dark:bg-input/30 rounded-pill absolute -inset-px border border-transparent shadow-sm"
             />
           ) : null}
           <span className="relative inline-flex items-center gap-1.5">

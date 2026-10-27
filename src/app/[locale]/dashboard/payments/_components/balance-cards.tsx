@@ -6,7 +6,8 @@ import {
   PercentIcon,
   WalletIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { BusinessBalances } from "./payment.types";
 import { KpiCard } from "~/components/kpi-card";
@@ -26,7 +27,7 @@ const CURRENCY_FORMAT = {
 
 export function BalanceCards({ balances, commissionPct }: BalanceCardsProps) {
   const t = useTranslations("dashboard.payments");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   // The only arithmetic allowed on the client: cents -> major units for
   // `Intl.NumberFormat`. Every amount below arrives already derived from the
   // server (XC-03 net formula).

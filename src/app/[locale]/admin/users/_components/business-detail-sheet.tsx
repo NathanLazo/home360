@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
 import { CopyIdButton } from "../../_components/copy-id-button";
@@ -66,7 +67,7 @@ function DetailBody({
   const typesT = useTranslations("admin.businessTypes");
   const orderStatusT = useTranslations("admin.orderStatus");
   const disputeStatusT = useTranslations("admin.disputeStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   const currency = (cents: number) =>
     formatter.number(cents / 100, {

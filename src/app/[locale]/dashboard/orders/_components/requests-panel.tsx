@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { MapPinOffIcon, RadarIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import {
   RadarBranchSelect,
   type RadarBranchOption,
 } from "./radar-branch-select";
+import { QuotingLockedState } from "./quoting-locked-state";
 import { RequestDetailSheet } from "./request-detail-sheet";
 import { RequestsTable } from "./requests-table";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
 import { TableSkeleton } from "~/components/table-skeleton";
@@ -54,7 +57,8 @@ export function RequestsPanel({
   onCloseRequest: () => void;
 }) {
   const t = useTranslations("dashboard.requests");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
+  const { isReadOnly } = useSubscriptionAccess();
   const branchesQuery = api.branch.list.useQuery();
   const workersQuery = api.service.listWorkers.useQuery();
   const workers = workersQuery.data?.result ?? [];
@@ -82,7 +86,9 @@ export function RequestsPanel({
   const listQuery = api.radar.listOpenRequests.useInfiniteQuery(
     radarBranchId ? { branchId: radarBranchId } : {},
     {
-      enabled: branchesQuery.isSuccess && !headerBranchBlocked,
+      // The radar is an `activeBusinessProcedure`: a read-only account would
+      // only get a 403, so it is not asked.
+      enabled: branchesQuery.isSuccess && !headerBranchBlocked && !isReadOnly,
       getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
     },
   );
@@ -98,6 +104,10 @@ export function RequestsPanel({
       ?.name ?? null;
   const loading =
     branchesQuery.isPending || (!headerBranchBlocked && listQuery.isPending);
+
+  if (isReadOnly) {
+    return <QuotingLockedState />;
+  }
 
   return (
     <>

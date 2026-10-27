@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { CorporateMembershipSummary } from "../../_components/corporate.types";
 import {
@@ -54,7 +55,7 @@ export function MembershipSummaryCard({
 }) {
   const t = useTranslations("corporate.membership");
   const tierT = useTranslations("corporate.tier");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return (
     <Card>

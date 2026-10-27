@@ -2,7 +2,8 @@
 
 import { ArrowLeftIcon, ScaleIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import {
@@ -34,7 +35,7 @@ import { api } from "~/trpc/react";
 function PaymentSummary({ dispute }: { dispute: DisputeDetailType }) {
   const t = useTranslations("admin.disputes.payment");
   const paymentStatusT = useTranslations("admin.paymentStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const payment = dispute.payment;
 
   if (!payment) {
@@ -102,7 +103,7 @@ export function DisputeDetail({
 }) {
   const t = useTranslations("admin.disputes.detail");
   const reduceMotion = useReducedMotion();
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [resolution, setResolution] = useState<DisputeResolution | null>(null);
   const [requestingEvidence, setRequestingEvidence] = useState(false);
   const successBeat = useSuccessBeat();

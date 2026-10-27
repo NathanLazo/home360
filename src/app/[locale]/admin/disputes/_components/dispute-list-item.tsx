@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { PRESS_SURFACE_CLASS } from "../../_components/admin-motion";
 import {
@@ -41,7 +42,7 @@ export function DisputeListItem({
 }) {
   const t = useTranslations("admin.disputes");
   const toneT = useTranslations("admin.disputes.tone");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const tone = toTone(dispute);
 
   return (

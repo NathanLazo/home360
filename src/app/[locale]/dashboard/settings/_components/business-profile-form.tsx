@@ -16,7 +16,10 @@ import type {
   BusinessTypeValue,
 } from "./settings.types";
 import type { MutationOutcome } from "./use-settings-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { GlassDock } from "~/components/glass";
 import { Button } from "~/components/ui/button";
 import {
@@ -57,7 +60,7 @@ export function BusinessProfileForm({
   onSubmit: (input: UpdateBusinessProfileInput) => Promise<MutationOutcome>;
 }) {
   const t = useTranslations("dashboard.settings.profile");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const initialValues: BusinessProfileFormValues = {
     businessName: profile.name,
@@ -73,7 +76,7 @@ export function BusinessProfileForm({
     values.businessType !== initialValues.businessType ||
     values.guaranteeNotes !== initialValues.guaranteeNotes;
   const notice = isReadOnly
-    ? readOnlyT("actionDisabled")
+    ? readOnlyNotice
     : blocked
       ? t("notActiveNotice")
       : null;

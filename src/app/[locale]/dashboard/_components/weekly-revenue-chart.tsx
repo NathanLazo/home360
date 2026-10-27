@@ -2,7 +2,8 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { BarChart3Icon, RotateCcwIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { WeeklyRevenuePoint } from "./dashboard.types";
 import { EmptyState } from "~/components/empty-state";
@@ -36,7 +37,7 @@ export function WeeklyRevenueChart({
 }: WeeklyRevenueChartProps) {
   const t = useTranslations("dashboard.home");
   const errors = useTranslations("errors");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const weeks = rangeToWeeks(days);
   const input = branchId ? { branchId, weeks } : { weeks };
   const query = api.dashboard.getWeeklyRevenue.useQuery(input, {
@@ -163,10 +164,7 @@ export function WeeklyRevenueChart({
             className="self-start sm:self-end"
           >
             {(["all", "services", "products"] as const).map((mode) => (
-              <TabsTrigger
-                key={mode}
-                value={mode}
-              >
+              <TabsTrigger key={mode} value={mode}>
                 {t(`${mode}Tab`)}
               </TabsTrigger>
             ))}

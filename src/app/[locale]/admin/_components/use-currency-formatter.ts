@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useCallback } from "react";
 
 /**
@@ -8,7 +8,7 @@ import { useCallback } from "react";
  * `Intl.NumberFormat`. Every amount arrives already derived from the server.
  */
 export function useCurrencyFormatter(): (cents: number) => string {
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return useCallback(
     (cents: number) =>

@@ -9,7 +9,10 @@ import { TeamTable } from "./team-table";
 import type { WorkerListItem } from "./team.types";
 import { useTeamMutations } from "./use-team-mutations";
 import { WorkerFormSheet } from "./worker-form-sheet";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -18,7 +21,7 @@ import { api } from "~/trpc/react";
 export function TeamView() {
   const t = useTranslations("dashboard.team");
   const errors = useTranslations("errors");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<WorkerListItem | null>(null);
@@ -64,10 +67,7 @@ export function TeamView() {
         title={t("queryErrorTitle")}
         description={code ? errors(code) : t("queryErrorDescription")}
         action={
-          <Button
-            type="button"
-            onClick={() => void listQuery.refetch()}
-          >
+          <Button type="button" onClick={() => void listQuery.refetch()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
@@ -86,7 +86,7 @@ export function TeamView() {
           ? t("unlimited", { used: limit.used })
           : t("noPlan");
   const createBlockedReason = isReadOnly
-    ? readOnlyT("actionDisabled")
+    ? readOnlyNotice
     : limit?.canCreate === false
       ? limit.max === null
         ? t("noPlanHint")

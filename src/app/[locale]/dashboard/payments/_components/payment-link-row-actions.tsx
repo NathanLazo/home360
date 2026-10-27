@@ -13,7 +13,10 @@ import type { PaymentLinkListItem } from "./payment.types";
 import { useCopyPaymentLink } from "./use-copy-payment-link";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -29,7 +32,7 @@ export function PaymentLinkRowActions({
   paymentLink: PaymentLinkListItem;
 }) {
   const t = useTranslations("dashboard.payments.paymentLinks");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   // The menu stays reachable on a read-only plan; only deactivation, the one
   // mutating entry, is blocked (the server enforces it too).
   const { isReadOnly } = useSubscriptionAccess();
@@ -82,7 +85,7 @@ export function PaymentLinkRowActions({
             variant="destructive"
             onSelect={() => setConfirmOpen(true)}
             disabled={isReadOnly}
-            title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            title={isReadOnly ? readOnlyNotice : undefined}
           >
             <BanIcon aria-hidden="true" />
             {t("actions.deactivate")}

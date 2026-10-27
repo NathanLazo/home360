@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { Undo2Icon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { OfferStatusBadge } from "./offer-status-badge";
 import type { RadarOwnQuote } from "./order.types";
 import { useMoney } from "./use-money";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 
 /** The business's own offer on the request, with withdraw when pending. */
@@ -23,9 +27,9 @@ export function RequestOwnOffer({
 }) {
   const t = useTranslations("dashboard.requests.ownOffer");
   const statusT = useTranslations("dashboard.requests.offerStatus");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const money = useMoney();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -65,7 +69,7 @@ export function RequestOwnOffer({
           type="button"
           variant="outline"
           disabled={withdrawing || isReadOnly}
-          title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+          title={isReadOnly ? readOnlyNotice : undefined}
           onClick={() => setConfirmOpen(true)}
         >
           <Undo2Icon aria-hidden="true" />

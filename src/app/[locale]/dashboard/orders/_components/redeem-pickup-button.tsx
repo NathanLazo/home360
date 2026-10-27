@@ -6,7 +6,10 @@ import { useTranslations } from "next-intl";
 
 import { OrderRedeemPickupDialog } from "./order-redeem-pickup-dialog";
 import { useOrderMutations } from "./use-order-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 
 /**
@@ -16,7 +19,7 @@ import { Button } from "~/components/ui/button";
  */
 export function RedeemPickupButton() {
   const t = useTranslations("dashboard.orders.actions");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const mutations = useOrderMutations();
   const [open, setOpen] = useState(false);
@@ -28,7 +31,7 @@ export function RedeemPickupButton() {
         variant="outline"
         className="shrink-0 self-start"
         disabled={isReadOnly}
-        title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+        title={isReadOnly ? readOnlyNotice : undefined}
         onClick={() => setOpen(true)}
       >
         <ScanLineIcon aria-hidden="true" />

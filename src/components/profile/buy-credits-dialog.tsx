@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { LoaderCircleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { toast } from "sonner";
 
 import type { AiCreditPack } from "./profile.types";
@@ -38,7 +39,7 @@ export function BuyCreditsDialog({
   const t = useTranslations("profile.billing.packs");
   const errors = useTranslations("errors");
   const feedback = useTranslations("profile.feedback");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const [selected, setSelected] = useState<PackCode | null>(
     packs[1]?.code ?? packs[0]?.code ?? null,
   );

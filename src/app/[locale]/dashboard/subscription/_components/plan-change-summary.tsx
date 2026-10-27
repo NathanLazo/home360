@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { PlanChangePreview } from "./subscription.types";
 import { useCurrencyFormatter } from "./use-currency-formatter";
@@ -14,7 +15,7 @@ import { useCurrencyFormatter } from "./use-currency-formatter";
  */
 export function PlanChangeSummary({ preview }: { preview: PlanChangePreview }) {
   const t = useTranslations("dashboard.subscription");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   const effectiveAt = format.dateTime(preview.effectiveAt, {

@@ -6,7 +6,8 @@ import {
   RadarIcon,
   SparklesIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { RadarRequestItem } from "./order.types";
 import { useMoney } from "./use-money";
@@ -30,7 +31,7 @@ export function RequestsTable({
   onSelect: (request: RadarRequestItem) => void;
 }) {
   const t = useTranslations("dashboard.requests");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const money = useMoney();
   const columns: Array<DataTableColumn<RadarRequestItem>> = [
     {

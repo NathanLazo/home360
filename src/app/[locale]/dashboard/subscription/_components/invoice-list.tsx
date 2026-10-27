@@ -1,7 +1,8 @@
 "use client";
 
 import { DownloadIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { InvoiceStatusBadge } from "./invoice-status-badge";
 import type { InvoiceListItem } from "./subscription.types";
@@ -14,7 +15,7 @@ import { Button } from "~/components/ui/button";
  */
 export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
   const t = useTranslations("dashboard.subscription.invoices");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   if (invoices.length === 0) {
@@ -43,11 +44,7 @@ export function InvoiceList({ invoices }: { invoices: InvoiceListItem[] }) {
             label={t(`status.${invoice.status}`)}
           />
           {invoice.pdfUrl ? (
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-            >
+            <Button asChild variant="ghost" size="sm">
               <a
                 href={invoice.pdfUrl}
                 target="_blank"

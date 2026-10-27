@@ -9,13 +9,16 @@ import { toast } from "sonner";
 import { usePaymentMutations } from "./use-payment-mutations";
 import { usePathname, useRouter } from "~/i18n/navigation";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
 export function ConnectOnboardingBanner() {
   const t = useTranslations("dashboard.payments.onboarding");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const router = useRouter();
   const pathname = usePathname();
@@ -81,7 +84,7 @@ export function ConnectOnboardingBanner() {
         <Button
           type="button"
           disabled={busy || isReadOnly}
-          title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+          title={isReadOnly ? readOnlyNotice : undefined}
           onClick={() => void startOnboarding()}
         >
           {busy ? (

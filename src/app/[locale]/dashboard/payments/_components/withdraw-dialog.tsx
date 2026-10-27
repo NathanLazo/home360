@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircleIcon, WalletIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -64,7 +65,7 @@ export function WithdrawDialog({
   // A cancellation arriving mid-edit closes the form instead of letting the
   // user finish something the server will reject.
   useCloseWhenReadOnly(open, onOpenChange);
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const { requestWithdrawal, requestingWithdrawal } = usePaymentMutations();
   const [confirming, setConfirming] = useState(false);
   const shakeInvalid = useErrorShake();

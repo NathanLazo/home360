@@ -1,7 +1,8 @@
 "use client";
 
 import { CreditCardIcon, EyeIcon, MapPinIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateQuoteRow } from "./corporate-quote-row";
 import type { CorporateRequestItem } from "./corporate-requests.types";
@@ -47,7 +48,7 @@ export function CorporateRequestCard({
 }: CorporateRequestCardProps) {
   const t = useTranslations("corporate.orders.requests");
   const categoryT = useTranslations("corporate.requestCategory");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const acceptedOrder =
     request.quotes.find((quote) => quote.order !== null)?.order ?? null;
   const openForOffers =

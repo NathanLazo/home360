@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import {
   Select,
@@ -48,7 +49,7 @@ export type OverviewFiltersProps = {
  */
 export function OverviewFilters({ month, locationId }: OverviewFiltersProps) {
   const t = useTranslations("corporate.home.filters");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -88,10 +89,7 @@ export function OverviewFilters({ month, locationId }: OverviewFiltersProps) {
           setParam("month", value === CURRENT ? null : value)
         }
       >
-        <SelectTrigger
-          className="w-full sm:w-52"
-          aria-label={t("monthLabel")}
-        >
+        <SelectTrigger className="w-full sm:w-52" aria-label={t("monthLabel")}>
           <SelectValue placeholder={t("currentMonth")} />
         </SelectTrigger>
         <SelectContent>

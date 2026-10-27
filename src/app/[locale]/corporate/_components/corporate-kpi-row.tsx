@@ -7,7 +7,8 @@ import {
   MapPinIcon,
   PiggyBankIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { KpiCard } from "~/components/kpi-card";
 import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
@@ -35,7 +36,7 @@ export type CorporateKpiRowProps = {
 export function CorporateKpiRow({ month, locationId }: CorporateKpiRowProps) {
   const t = useTranslations("corporate.home");
   const tierT = useTranslations("corporate.tier");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const overviewInput = {
     ...(month ? { month } : {}),
     ...(locationId ? { locationId } : {}),

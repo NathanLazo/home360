@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useId, useState } from "react";
 
 import type { LoyaltyBonusRow } from "./finance.types";
@@ -42,7 +43,7 @@ export function PayLoyaltyBonusDialog({
 }) {
   const t = useTranslations("admin.finance.loyalty.payDialog");
   const methodsT = useTranslations("admin.loyaltyPayoutMethod");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [method, setMethod] = useState<LoyaltyPayoutMethod>(
     LoyaltyPayoutMethod.VOUCHER,
   );

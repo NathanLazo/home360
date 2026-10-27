@@ -16,6 +16,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { intlLocaleFor } from "~/i18n/intl-locale";
 import { toast } from "sonner";
 
 import { parseProductsCsv } from "./product-csv.utils";
@@ -95,7 +96,7 @@ export function ProductImportDialog({
   const [dragActive, setDragActive] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [importLocked, setImportLocked] = useState(false);
-  const priceFormatter = new Intl.NumberFormat(locale, {
+  const priceFormatter = new Intl.NumberFormat(intlLocaleFor(locale), {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2,

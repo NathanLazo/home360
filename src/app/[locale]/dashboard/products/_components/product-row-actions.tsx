@@ -13,7 +13,10 @@ import { useTranslations } from "next-intl";
 
 import type { ProductListItem } from "./product.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -39,11 +42,11 @@ export function ProductRowActions({
   onDelete: (product: ProductListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.products");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   // The menu stays reachable so the reason is visible; only the mutating
   // entries are blocked.
   const { isReadOnly } = useSubscriptionAccess();
-  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
+  const readOnlyTitle = isReadOnly ? readOnlyNotice : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const publishing = product.status === "DRAFT";
 

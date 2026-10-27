@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
+import { BUSINESS_TIME_ZONE } from "~/i18n/intl-locale";
 import { routing } from "~/i18n/routing";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -75,6 +76,11 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  // `suppressHydrationWarning` on <html> only: the next-themes inline script
+  // sets the theme class and `color-scheme` on <html> before React hydrates.
+  // The client provider inherits locale, messages and formats from the
+  // request config; the zone is pinned explicitly so client-side date
+  // formatting never falls back to the browser's zone.
   return (
     <html
       lang={locale}
@@ -83,7 +89,7 @@ export default async function LocaleLayout({
     >
       <body className="antialiased">
         <ThemeProvider>
-          <NextIntlClientProvider>
+          <NextIntlClientProvider timeZone={BUSINESS_TIME_ZONE}>
             <TRPCReactProvider>
               {children}
               <Toaster />

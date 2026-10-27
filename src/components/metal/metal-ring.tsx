@@ -11,7 +11,9 @@ import {
   type MetalFxVariant,
 } from "metal-fx";
 
+import { MetalFxFallback } from "./metal-fx-fallback";
 import { useMetalMotion } from "./use-metal-motion";
+import { useHydrated } from "~/hooks/use-hydrated";
 
 type MetalRingProps = {
   children: ReactNode;
@@ -37,8 +39,28 @@ const BEND_ON: BendConfig = { ...BEND_DEFAULTS, enabled: true };
  * The child always renders: without WebGL2 or under reduced motion the ring
  * is simply absent and the shader paused, so layout never shifts.
  * `normalizeHostStyles` is off to keep the child's focus-visible ring.
+ *
+ * SSR and the hydration render paint `MetalFxFallback` (the library's own
+ * no-WebGL markup); the live ring mounts right after hydration. `MetalFx`
+ * picks its tree from WebGL2 support during render, so mounting it directly
+ * made server and client markup differ (React #418 on every page).
  */
-export function MetalRing({
+export function MetalRing(props: MetalRingProps) {
+  const hydrated = useHydrated();
+
+  if (!hydrated) {
+    return (
+      <MetalFxFallback className={props.className}>
+        {props.children}
+      </MetalFxFallback>
+    );
+  }
+
+  return <LiveMetalRing {...props} />;
+}
+
+/** Mounted only after hydration so `useMetalBend` binds to the live tree. */
+function LiveMetalRing({
   children,
   preset = "silver",
   variant = "button",

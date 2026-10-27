@@ -1,7 +1,8 @@
 "use client";
 
 import { ExternalLinkIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { OrderDetailRow } from "./order-detail-row";
 import { OrderFulfillmentBadge } from "./order-fulfillment-badge";
@@ -17,7 +18,7 @@ const LINK_CLASS =
  */
 export function OrderFulfillmentSection({ order }: { order: OrderDetail }) {
   const t = useTranslations("dashboard.orders.detail.fulfillment");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const method = order.fulfillmentMethod ?? "DELIVERY";
   const hasPoint =
     order.deliveryLatitude !== null && order.deliveryLongitude !== null;

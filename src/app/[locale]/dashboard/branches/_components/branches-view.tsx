@@ -16,7 +16,10 @@ import { BranchesSkeleton } from "./branches-skeleton";
 import { BranchFormSheet } from "./branch-form-sheet";
 import type { BranchListItem } from "./branch.types";
 import { useBranchMutations } from "./use-branch-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -25,7 +28,7 @@ import { api } from "~/trpc/react";
 export function BranchesView() {
   const t = useTranslations("dashboard.branches");
   const errors = useTranslations("errors");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const query = api.branch.list.useQuery();
   const mutations = useBranchMutations();
@@ -50,10 +53,7 @@ export function BranchesView() {
           responseError ? errors(responseError) : t("errorDescription")
         }
         action={
-          <Button
-            type="button"
-            onClick={() => void query.refetch()}
-          >
+          <Button type="button" onClick={() => void query.refetch()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
@@ -92,7 +92,7 @@ export function BranchesView() {
             <span
               title={
                 isReadOnly
-                  ? readOnlyT("actionDisabled")
+                  ? readOnlyNotice
                   : atLimit
                     ? t("limitTooltip")
                     : undefined
@@ -135,7 +135,7 @@ export function BranchesView() {
               type="button"
               onClick={create}
               disabled={isReadOnly}
-              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+              title={isReadOnly ? readOnlyNotice : undefined}
             >
               <PlusIcon aria-hidden="true" />
               {t("emptyAction")}

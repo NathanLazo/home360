@@ -50,7 +50,13 @@
     },
     "readOnly": {
       "actionDisabled": "Your account is read-only because your subscription is canceled.",
-      "badge": "Read-only"
+      "badge": "Read-only",
+      "reasons": {
+        "businessPending": "Available once we approve your business. Your application is under review.",
+        "businessSuspended": "Your business is suspended; you cannot create or edit records.",
+        "businessRejected": "Your application was not approved; you cannot create or edit records.",
+        "subscriptionCanceled": "Your account is read-only because your subscription is canceled."
+      }
     },
     "changeDialog": {
       "title": "Switch to {plan}",
@@ -121,7 +127,7 @@
     "kpisLabel": "Key metrics",
     "revenue": "Revenue, last {days} days",
     "orders": "Orders, last {days} days",
-    "escrow": "In escrow",
+    "escrow": "In escrow (total charged)",
     "rating": "Rating",
     "revenueComparison": "{delta} vs. previous period",
     "ordersBreakdown": "{services, plural, one {# service} other {# services}} · {products, plural, one {# product} other {# products}}",
@@ -548,7 +554,7 @@
     "balances": {
       "available": "Available",
       "availableHint": "Ready to withdraw",
-      "escrow": "Held in escrow",
+      "escrow": "Held in escrow (total charged)",
       "escrowOrders": "{count, plural, =0 {No active orders} one {# active order} other {# active orders}}",
       "commission": "Monthly commission",
       "commissionHint": "Accrued in the current month",
@@ -559,7 +565,7 @@
     "columns": {
       "customer": "Customer",
       "concept": "Concept",
-      "amount": "Amount",
+      "amount": "Total charged",
       "method": "Method",
       "status": "Status",
       "date": "Date",
@@ -676,7 +682,7 @@
       "branch": "Branch",
       "noBranch": "No branch",
       "total": "Total charged to customer",
-      "providerAmount": "Service amount",
+      "providerAmount": "Order amount",
       "serviceFee": "Service fee",
       "commission": "Commission ({percent}%)",
       "refunded": "Refunded",
@@ -1570,6 +1576,23 @@
       "offerWithdrawn": "Offer withdrawn.",
       "transportError": "We couldn't complete the action. Check your connection and try again."
     },
-    "targeted": "For you"
+    "targeted": "For you",
+    "locked": {
+      "title": "Requests are not available yet"
+    }
+  },
+  "businessStatusBanner": {
+    "pending": {
+      "title": "Your business is under review",
+      "description": "Our team is validating your information. Meanwhile you can explore the dashboard and prepare your profile; you will be able to publish services and products, create payment links, quote requests and manage your team as soon as we approve your business. We will let you know by email."
+    },
+    "suspended": {
+      "title": "Your business is suspended",
+      "description": "You can review your information, but you cannot create or edit records or receive new orders. Contact support to learn why and reactivate your account."
+    },
+    "rejected": {
+      "title": "Your application was not approved",
+      "description": "You can review your information, but you cannot operate on HOME360. Contact support if you believe this is a mistake."
+    }
   }
 }

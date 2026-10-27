@@ -1,7 +1,8 @@
 "use client";
 
 import { BanknoteIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState, type ReactNode } from "react";
 
 import type { WithdrawalRow } from "./finance.types";
@@ -44,7 +45,7 @@ export function WithdrawalsTable({
 }) {
   const t = useTranslations("admin.finance.withdrawals");
   const statusT = useTranslations("admin.withdrawalStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
 
   const isSuspended = (row: WithdrawalRow) =>
