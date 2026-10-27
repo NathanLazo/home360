@@ -1,6 +1,7 @@
 import type { RegisterAccountStep } from "./register.schema";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/ui/password-input";
 
 export type AccountErrors = {
   ownerName: string | undefined;
@@ -92,10 +93,9 @@ export function RegisterStepAccount({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="register-password">{passwordLabel}</Label>
-        <Input
+        <PasswordInput
           id="register-password"
           name="password"
-          type="password"
           autoComplete="new-password"
           value={values.password}
           onChange={(event) =>

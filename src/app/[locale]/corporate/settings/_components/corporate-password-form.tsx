@@ -10,8 +10,8 @@ import { corporatePasswordFormSchema } from "./corporate-password.schema";
 import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/ui/password-input";
 import { getPathname } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
 import { api } from "~/trpc/react";
@@ -132,9 +132,8 @@ export function CorporatePasswordForm({
             {FIELDS.map(({ key, autoComplete }) => (
               <div key={key} className="flex flex-col gap-2">
                 <Label htmlFor={`corporate-${key}`}>{t(key)}</Label>
-                <Input
+                <PasswordInput
                   id={`corporate-${key}`}
-                  type="password"
                   autoComplete={autoComplete}
                   value={values[key]}
                   disabled={mutation.isPending}

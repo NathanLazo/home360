@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/ui/password-input";
 import { Link, useRouter } from "~/i18n/navigation";
 import { resetPasswordSchema } from "~/schemas/auth/password-reset.schema";
 import { api } from "~/trpc/react";
@@ -128,10 +128,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <div className="flex flex-col gap-2">
         <Label htmlFor="reset-password-password">{t("passwordLabel")}</Label>
-        <Input
+        <PasswordInput
           id="reset-password-password"
           name="password"
-          type="password"
           autoComplete="new-password"
           value={password}
           onChange={(event) => {
@@ -158,10 +157,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <Label htmlFor="reset-password-confirm-password">
           {t("confirmPasswordLabel")}
         </Label>
-        <Input
+        <PasswordInput
           id="reset-password-confirm-password"
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => {

@@ -15,6 +15,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/ui/password-input";
 import { Link, useRouter } from "~/i18n/navigation";
 import {
   prepareSignIn,
@@ -149,10 +150,9 @@ export function LoginForm({ callbackUrl }: LoginFormProps) {
               {t("forgotPassword")}
             </Link>
           </div>
-          <Input
+          <PasswordInput
             id="login-password"
             name="password"
-            type="password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}

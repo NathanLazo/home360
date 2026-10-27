@@ -91,7 +91,9 @@ export function useDonVictorAnimator(
     const loop = (now: number) => {
       rafId = window.requestAnimationFrame(loop);
 
-      const frameIndex = Math.floor((now - start) / tickMs) % frameCount;
+      // The rAF timestamp is the frame's start time and can precede `start`.
+      const elapsed = Math.max(0, now - start);
+      const frameIndex = Math.floor(elapsed / tickMs) % frameCount;
 
       if (choreography.blink && now >= blinkAt) {
         blinkUntil = now + BLINK_HOLD_MS;

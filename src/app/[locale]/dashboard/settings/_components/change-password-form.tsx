@@ -12,8 +12,8 @@ import type {
 } from "./settings.types";
 import type { MutationOutcome } from "./use-settings-mutations";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { PasswordInput } from "~/components/ui/password-input";
 import { getPathname } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
 import { useErrorShake } from "~/components/motion";
@@ -203,10 +203,9 @@ function PasswordField({
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <Input
+      <PasswordInput
         id={id}
         name={name}
-        type="password"
         autoComplete={autoComplete}
         value={value}
         onChange={(event) => onChange(event.target.value)}
