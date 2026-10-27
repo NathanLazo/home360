@@ -57,15 +57,12 @@ export type CorporateAccountsDeps = CorporateBillingDeps;
 export type CorporateTermsErrorCode = "VALIDATION_ERROR";
 
 export type CreateCorporateAccountErrorCode =
-  | "VALIDATION_ERROR"
-  | "EMAIL_TAKEN"
-  | "EMAIL_DELIVERY_FAILED";
+  "VALIDATION_ERROR" | "EMAIL_TAKEN" | "EMAIL_DELIVERY_FAILED";
 
 export type ActivateCorporateAccountErrorCode = "PLAN_NOT_SYNCED";
 
 export type UpdateCorporateTermsErrorCode =
-  | "VALIDATION_ERROR"
-  | "PLAN_NOT_SYNCED";
+  "VALIDATION_ERROR" | "PLAN_NOT_SYNCED";
 
 /**
  * Location ranges per tier (spec/09 §2). The upper bound caps the configured
@@ -115,7 +112,10 @@ async function resolveTermsForTier(
 ): Promise<ServiceResult<ResolvedCorporateTerms, CorporateTermsErrorCode>> {
   const accountManagerId = input.accountManagerId ?? null;
 
-  if (TIERS_REQUIRING_MANAGER.includes(input.tier) && accountManagerId === null) {
+  if (
+    TIERS_REQUIRING_MANAGER.includes(input.tier) &&
+    accountManagerId === null
+  ) {
     return svcFail("VALIDATION_ERROR", "Tier requires an account manager");
   }
 
@@ -126,7 +126,10 @@ async function resolveTermsForTier(
     });
 
     if (manager?.role !== UserRole.ADMIN) {
-      return svcFail("VALIDATION_ERROR", "Account manager must be an ADMIN user");
+      return svcFail(
+        "VALIDATION_ERROR",
+        "Account manager must be an ADMIN user",
+      );
     }
   }
 
@@ -194,7 +197,11 @@ async function resolveTermsForTier(
     input.maxLocations === undefined ? config.maxLocations : input.maxLocations;
   const range = TIER_LOCATION_RANGES[input.tier];
 
-  if (maxLocations === null || maxLocations < range.min || maxLocations > range.max) {
+  if (
+    maxLocations === null ||
+    maxLocations < range.min ||
+    maxLocations > range.max
+  ) {
     return svcFail(
       "VALIDATION_ERROR",
       `Location limit for ${input.tier} must be between ${range.min} and ${range.max}`,
@@ -214,7 +221,8 @@ async function resolveTermsForTier(
     input.monthlyFeeCents !== config.monthlyFeeCents
       ? "monthlyFeeCents"
       : null,
-    input.maxLocations !== undefined && input.maxLocations !== config.maxLocations
+    input.maxLocations !== undefined &&
+    input.maxLocations !== config.maxLocations
       ? "maxLocations"
       : null,
   ].filter((field) => field !== null);
@@ -338,7 +346,9 @@ function buildAccountWhere(
       ? {
           OR: [
             { name: { contains: input.search, mode: "insensitive" } },
-            { owner: { name: { contains: input.search, mode: "insensitive" } } },
+            {
+              owner: { name: { contains: input.search, mode: "insensitive" } },
+            },
             {
               owner: { email: { contains: input.search, mode: "insensitive" } },
             },
@@ -706,7 +716,10 @@ export async function createCorporateAccount(
   if (!delivered) {
     // The account stays PENDING on purpose: retrying `create` with the same
     // email resends the invitation without duplicating user or account.
-    return svcFail("EMAIL_DELIVERY_FAILED", "Corporate invitation was not sent");
+    return svcFail(
+      "EMAIL_DELIVERY_FAILED",
+      "Corporate invitation was not sent",
+    );
   }
 
   return svcOk({ id: created.id });
@@ -893,7 +906,10 @@ export async function reconcileCorporateBilling(
     return svcFail("CONFLICT", "Cancelled accounts cannot be reconciled");
   }
 
-  if (account.membership === null && account.status === CorporateStatus.PENDING) {
+  if (
+    account.membership === null &&
+    account.status === CorporateStatus.PENDING
+  ) {
     // Nothing was ever provisioned: there is no interrupted activation to
     // repair, `activate` is the entry point.
     return svcFail("CONFLICT", "Corporate account activation has not started");
@@ -988,7 +1004,10 @@ export async function reconcileCorporateBilling(
   if (synced.data.membershipId === null) {
     // The subscription resolved to no local membership: the remote object
     // belongs to someone else and reconciliation must not guess.
-    return svcFail("CONFLICT", "Stripe subscription does not match the account");
+    return svcFail(
+      "CONFLICT",
+      "Stripe subscription does not match the account",
+    );
   }
 
   // Same final flip as activate: only a PENDING account becomes ACTIVE, and
@@ -1171,7 +1190,10 @@ export async function updateCorporateTerms(
       error instanceof TermsClaimLostError ||
       error instanceof RequestClaimLostError
     ) {
-      return svcFail("CONFLICT", "Terms changed concurrently; reload and retry");
+      return svcFail(
+        "CONFLICT",
+        "Terms changed concurrently; reload and retry",
+      );
     }
 
     throw error;

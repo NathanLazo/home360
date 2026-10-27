@@ -265,7 +265,11 @@ export async function previewPlanChange(
     return context;
   }
 
-  const proration = await computeProration(deps, context.data, input.businessId);
+  const proration = await computeProration(
+    deps,
+    context.data,
+    input.businessId,
+  );
 
   if (!proration.ok) {
     return proration;

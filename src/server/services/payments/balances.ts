@@ -1,7 +1,4 @@
-import {
-  LoyaltyBonusStatus,
-  type PrismaClient,
-} from "@generated/prisma";
+import { LoyaltyBonusStatus, type PrismaClient } from "@generated/prisma";
 
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import {

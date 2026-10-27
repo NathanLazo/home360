@@ -90,7 +90,10 @@ export async function ensureCorporateStripeCustomer(
       });
 
       if (!current?.stripeCustomerId) {
-        return svcFail("CONFLICT", "Corporate account lost its Stripe customer");
+        return svcFail(
+          "CONFLICT",
+          "Corporate account lost its Stripe customer",
+        );
       }
 
       return svcOk({ stripeCustomerId: current.stripeCustomerId });
@@ -252,7 +255,9 @@ export async function createCorporateBillingSubscription(
           corporateTier: input.tier,
         },
       },
-      { idempotencyKey: `corporate-billing-subscription-${input.membershipId}` },
+      {
+        idempotencyKey: `corporate-billing-subscription-${input.membershipId}`,
+      },
     );
 
     return svcOk({
@@ -267,7 +272,10 @@ export async function createCorporateBillingSubscription(
         code: error.code,
       });
 
-      return svcFail("STRIPE_ERROR", "Stripe subscription could not be created");
+      return svcFail(
+        "STRIPE_ERROR",
+        "Stripe subscription could not be created",
+      );
     }
 
     throw error;
@@ -337,7 +345,10 @@ export async function findCorporateSubscriptionForMembership(
         code: error.code,
       });
 
-      return svcFail("STRIPE_ERROR", "Stripe subscriptions could not be listed");
+      return svcFail(
+        "STRIPE_ERROR",
+        "Stripe subscriptions could not be listed",
+      );
     }
 
     throw error;

@@ -53,9 +53,7 @@ export const handleCheckoutSessionCompleted: StripeEventHandler = async (
       currency: session.currency,
     });
 
-    return applied.ok
-      ? svcOk(null)
-      : handlerFail(applied.code, applied.detail);
+    return applied.ok ? svcOk(null) : handlerFail(applied.code, applied.detail);
   }
 
   const paymentLinkId = metadata.data.paymentLinkId;

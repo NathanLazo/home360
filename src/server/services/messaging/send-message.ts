@@ -1,10 +1,6 @@
 import "server-only";
 
-import type {
-  Message,
-  MessageType,
-  PrismaClient,
-} from "@generated/prisma";
+import type { Message, MessageType, PrismaClient } from "@generated/prisma";
 import { isOwnedMediaPathname } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { conversationChannel } from "./channels";

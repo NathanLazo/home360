@@ -103,9 +103,7 @@ class InvalidResetTokenError extends Error {}
 export async function resetPassword(
   db: PrismaClient,
   input: ResetPasswordTransportInput,
-): Promise<
-  TrpcResponse<{ userId: string }, AuthErrorCode>
-> {
+): Promise<TrpcResponse<{ userId: string }, AuthErrorCode>> {
   const parsed = resetPasswordSchema.safeParse(input);
   if (!parsed.success) {
     return fail("VALIDATION_ERROR", 400, "Password reset validation failed");

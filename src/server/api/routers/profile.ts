@@ -90,42 +90,48 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  setPassword: profileProcedure.input(setPasswordSchema).mutation(
-    async ({
-      ctx,
-      input,
-    }): Promise<
-      TrpcResponse<null, "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET">
-    > => {
-      try {
-        const result = await setPassword(ctx.db, ctx.userId, input);
+  setPassword: profileProcedure
+    .input(setPasswordSchema)
+    .mutation(
+      async ({
+        ctx,
+        input,
+      }): Promise<
+        TrpcResponse<null, "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET">
+      > => {
+        try {
+          const result = await setPassword(ctx.db, ctx.userId, input);
 
-        if (!result.ok) {
+          if (!result.ok) {
+            return fail<
+              never,
+              "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET"
+            >(
+              result.code,
+              result.code === "PASSWORD_ALREADY_SET" ? 409 : 400,
+              "Password check failed",
+            );
+          }
+
+          return {
+            result: null,
+            error: null,
+            status: 200,
+            message: "Password updated",
+          };
+        } catch (error: unknown) {
+          const normalized = normalizeError(error);
           return fail<
             never,
             "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET"
           >(
-            result.code,
-            result.code === "PASSWORD_ALREADY_SET" ? 409 : 400,
-            "Password check failed",
+            normalized.code,
+            normalized.status,
+            "Unable to update the password",
           );
         }
-
-        return {
-          result: null,
-          error: null,
-          status: 200,
-          message: "Password updated",
-        };
-      } catch (error: unknown) {
-        const normalized = normalizeError(error);
-        return fail<
-          never,
-          "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET"
-        >(normalized.code, normalized.status, "Unable to update the password");
-      }
-    },
-  ),
+      },
+    ),
 
   signOutEverywhere: profileProcedure.mutation(
     async ({ ctx }): Promise<TrpcResponse<null>> => {
@@ -138,36 +144,38 @@ export const profileRouter = createTRPCRouter({
     },
   ),
 
-  removeDevice: profileProcedure.input(removeDeviceSchema).mutation(
-    async ({
-      ctx,
-      input,
-    }): Promise<TrpcResponse<null, "DEVICE_NOT_FOUND">> => {
-      try {
-        const result = await removeDevice(ctx.db, ctx.userId, input.deviceId);
+  removeDevice: profileProcedure
+    .input(removeDeviceSchema)
+    .mutation(
+      async ({
+        ctx,
+        input,
+      }): Promise<TrpcResponse<null, "DEVICE_NOT_FOUND">> => {
+        try {
+          const result = await removeDevice(ctx.db, ctx.userId, input.deviceId);
 
-        if (!result.ok) {
+          if (!result.ok) {
+            return fail<never, "DEVICE_NOT_FOUND">(
+              "DEVICE_NOT_FOUND",
+              404,
+              "Device not found",
+            );
+          }
+
+          return {
+            result: null,
+            error: null,
+            status: 200,
+            message: "Device removed",
+          };
+        } catch (error: unknown) {
+          const normalized = normalizeError(error);
           return fail<never, "DEVICE_NOT_FOUND">(
-            "DEVICE_NOT_FOUND",
-            404,
-            "Device not found",
+            normalized.code,
+            normalized.status,
+            "Unable to remove the device",
           );
         }
-
-        return {
-          result: null,
-          error: null,
-          status: 200,
-          message: "Device removed",
-        };
-      } catch (error: unknown) {
-        const normalized = normalizeError(error);
-        return fail<never, "DEVICE_NOT_FOUND">(
-          normalized.code,
-          normalized.status,
-          "Unable to remove the device",
-        );
-      }
-    },
-  ),
+      },
+    ),
 });

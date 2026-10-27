@@ -64,7 +64,11 @@ export const adminCorporateRouter = createTRPCRouter({
         const result = await listCorporateAccounts({ db: ctx.db }, input);
 
         if (!result.ok) {
-          return fail(result.code, statusFor(result.code), "Corporate directory unavailable");
+          return fail(
+            result.code,
+            statusFor(result.code),
+            "Corporate directory unavailable",
+          );
         }
 
         return ok(result.data, "Corporate accounts loaded");
@@ -80,7 +84,11 @@ export const adminCorporateRouter = createTRPCRouter({
         const result = await getCorporateAccountDetail({ db: ctx.db }, input);
 
         if (!result.ok) {
-          return fail(result.code, statusFor(result.code), "Corporate account not found");
+          return fail(
+            result.code,
+            statusFor(result.code),
+            "Corporate account not found",
+          );
         }
 
         return ok(result.data, "Corporate account loaded");
@@ -210,7 +218,10 @@ export const adminCorporateRouter = createTRPCRouter({
 
         return ok(result.data, "Corporate billing reconciled");
       } catch (error) {
-        return corporateFailure(error, "Corporate billing reconciliation failed");
+        return corporateFailure(
+          error,
+          "Corporate billing reconciliation failed",
+        );
       }
     }),
 

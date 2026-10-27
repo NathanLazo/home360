@@ -7,6 +7,8 @@ import {
 } from "@generated/prisma";
 import type {
   ServiceCreateInput,
+  ServiceImportError,
+  ServiceImportRow,
   ServiceListInput,
   ServiceUpdateInput,
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
@@ -14,6 +16,8 @@ import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { ACTIVE_ORDER_STATUSES } from "~/server/services/business/order-activity";
 
 const PAGE_SIZE = 20;
+/** Up to 500 sequential upserts: well past Prisma's 5 s interactive default. */
+const IMPORT_TRANSACTION_TIMEOUT_MS = 30_000;
 
 const serviceListSelect = {
   id: true,
@@ -221,6 +225,120 @@ export async function updateService(
 
     return ok(service, "Service updated");
   });
+}
+
+export type ServiceImportResult = {
+  created: number;
+  updated: number;
+  errors: ServiceImportError[];
+};
+
+function serviceKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+/**
+ * Bulk upsert of services keyed by name (case-insensitive) inside the
+ * business: existing services get category, price, durations and (when the
+ * row names them) workers overwritten; new ones are created ACTIVE, like the
+ * dashboard form. Rows naming an unknown worker are skipped and reported.
+ * One transaction: either every valid row lands or none does.
+ */
+export async function importServiceRows(
+  db: PrismaClient,
+  businessId: string,
+  rows: ServiceImportRow[],
+): Promise<TrpcResponse<ServiceImportResult>> {
+  return db.$transaction(
+    async (tx) => {
+      const [workers, existing] = await Promise.all([
+        tx.worker.findMany({
+          where: { businessId },
+          select: { id: true, fullName: true, invitedEmail: true },
+        }),
+        tx.service.findMany({
+          where: { businessId },
+          select: { id: true, name: true },
+        }),
+      ]);
+
+      const workerByKey = new Map<string, string>();
+
+      for (const worker of workers) {
+        workerByKey.set(serviceKey(worker.fullName), worker.id);
+
+        if (worker.invitedEmail) {
+          workerByKey.set(serviceKey(worker.invitedEmail), worker.id);
+        }
+      }
+
+      const serviceByKey = new Map(
+        existing.map((service) => [serviceKey(service.name), service.id]),
+      );
+      const errors: ServiceImportError[] = [];
+      const seen = new Set<string>();
+      let created = 0;
+      let updated = 0;
+
+      for (const row of rows) {
+        const key = serviceKey(row.name);
+
+        if (seen.has(key)) {
+          errors.push({ line: row.line, code: "DUPLICATE_NAME_IN_FILE" });
+          continue;
+        }
+
+        seen.add(key);
+
+        const workerIds = row.workerNames?.map((name) =>
+          workerByKey.get(serviceKey(name)),
+        );
+
+        if (workerIds?.some((id) => id === undefined)) {
+          errors.push({ line: row.line, code: "SERVICE_UNKNOWN_WORKER" });
+          continue;
+        }
+
+        const workerConnect = workerIds
+          ?.filter((id): id is string => id !== undefined)
+          .map((id) => ({ id }));
+        const fields = {
+          category: row.category,
+          basePriceCents: row.basePriceCents,
+          durationMinutes: row.durationMinutes,
+          durationMaxMinutes: row.durationMaxMinutes ?? null,
+        };
+        const existingId = serviceByKey.get(key);
+
+        if (existingId) {
+          await tx.service.update({
+            where: { id: existingId, businessId },
+            data: {
+              ...fields,
+              ...(workerConnect ? { workers: { set: workerConnect } } : {}),
+            },
+            select: { id: true },
+          });
+          updated += 1;
+          continue;
+        }
+
+        await tx.service.create({
+          data: {
+            ...fields,
+            name: row.name,
+            businessId,
+            ...(workerConnect ? { workers: { connect: workerConnect } } : {}),
+          },
+          select: { id: true },
+        });
+        created += 1;
+      }
+
+      return ok({ created, updated, errors }, "Services imported");
+    },
+    { timeout: IMPORT_TRANSACTION_TIMEOUT_MS },
+  );
 }
 
 export async function setServiceStatus(
