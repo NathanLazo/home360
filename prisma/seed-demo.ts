@@ -1413,6 +1413,33 @@ async function main() {
       ],
     },
     {
+      // Backs Miguel's unpaid order: the app resumes a SERVICE payment from
+      // its accepted quote, so an order without one has no pay button.
+      key: "apertura",
+      customer: "miguel",
+      title: "Me quedé afuera y la llave no abre",
+      category: "Otro",
+      diagnosis:
+        "La llave entra pero no gira; probable cilindro desgastado. Se requiere apertura sin daño.",
+      confidence: 85,
+      min: 45000,
+      max: 70000,
+      urgency: AiUrgency.HIGH,
+      status: RequestStatus.ACCEPTED,
+      daysAgo: 0,
+      suggestedService: ["cerrajeria-24", "apertura"],
+      quotes: [
+        {
+          biz: "cerrajeria-24",
+          amount: 55000,
+          worker: "pepe",
+          message: "Puedo llegar en 30 min.",
+          status: QuoteStatus.ACCEPTED,
+          days: 1,
+        },
+      ],
+    },
+    {
       key: "chapa",
       customer: "carlos",
       title: "La chapa de la puerta principal está trabada",
@@ -1696,6 +1723,7 @@ async function main() {
       status: OrderStatus.PENDING,
       daysAgo: 0,
       service: "apertura",
+      quote: "demo-quote-apertura-cerrajeria-24",
       events: [],
     },
     // Products
@@ -1820,6 +1848,7 @@ async function main() {
               status: OrderStatus.PENDING,
               createdAt: new Date(),
               expiryAttemptedAt: null,
+              quoteId: quote?.id ?? null,
             },
           });
           if (reset.count > 0) {
