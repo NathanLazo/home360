@@ -3,7 +3,11 @@ import "server-only";
 import type Stripe from "stripe";
 
 import type { InvoiceStatus, PrismaClient } from "@generated/prisma";
-import { svcFail, svcOk, type ServiceResult } from "~/server/services/service-result";
+import {
+  svcFail,
+  svcOk,
+  type ServiceResult,
+} from "~/server/services/service-result";
 import { resolveInvoiceSubscriptionId } from "~/server/services/stripe/handlers/invoice-paid";
 import {
   findCorporateMembershipForSubscription,
@@ -110,7 +114,10 @@ export async function upsertCorporateInvoiceFromStripe(
   // The stored account must match the membership's account: a mismatch means
   // the invoice was re-attributed remotely and must be triaged, not silently
   // rewritten onto another tenant.
-  if (existing && existing.corporateAccountId !== membership.corporateAccountId) {
+  if (
+    existing &&
+    existing.corporateAccountId !== membership.corporateAccountId
+  ) {
     console.error("[corporate-billing] INVOICE_ACCOUNT_MISMATCH", {
       stripeInvoiceId,
       storedAccountId: existing.corporateAccountId,

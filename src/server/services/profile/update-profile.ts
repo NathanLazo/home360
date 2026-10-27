@@ -38,8 +38,7 @@ export async function updateAssistantPreferences(
 }
 
 export type SetPasswordErrorCode =
-  | "CURRENT_PASSWORD_INVALID"
-  | "PASSWORD_ALREADY_SET";
+  "CURRENT_PASSWORD_INVALID" | "PASSWORD_ALREADY_SET";
 
 /**
  * Change or create the local password. An account without a hash (Google
@@ -68,7 +67,10 @@ export async function setPassword(
       return svcFail("PASSWORD_ALREADY_SET");
     }
 
-    const valid = await verifyPassword(input.currentPassword, user.passwordHash);
+    const valid = await verifyPassword(
+      input.currentPassword,
+      user.passwordHash,
+    );
 
     if (!valid) {
       return svcFail("CURRENT_PASSWORD_INVALID");

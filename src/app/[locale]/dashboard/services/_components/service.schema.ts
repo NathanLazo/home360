@@ -58,6 +58,46 @@ export const serviceListSchema = z.object({
   cursor: recordIdSchema.optional(),
 });
 
+export const serviceImportErrorCodes = [
+  "SERVICE_INVALID_NAME",
+  "SERVICE_INVALID_CATEGORY",
+  "SERVICE_INVALID_PRICE",
+  "SERVICE_INVALID_DURATION",
+  "SERVICE_INVALID_DURATION_MAX",
+  "SERVICE_UNKNOWN_WORKER",
+  "DUPLICATE_NAME_IN_FILE",
+] as const;
+
+export type ServiceImportErrorCode = (typeof serviceImportErrorCodes)[number];
+
+/**
+ * One spreadsheet row of a bulk service load. `workerNames` are matched by
+ * full name or invitation email inside the business; `undefined` keeps the
+ * workers of an existing service untouched.
+ */
+export const serviceImportRowSchema = z
+  .object({
+    line: z.number().int().positive(),
+    name: serviceFields.name,
+    category: serviceFields.category,
+    basePriceCents: serviceFields.basePriceCents,
+    durationMinutes: serviceFields.durationMinutes,
+    durationMaxMinutes: durationMaxSchema.optional(),
+    workerNames: z.array(z.string().trim().min(1).max(120)).max(50).optional(),
+  })
+  .refine(
+    (value) =>
+      value.durationMaxMinutes === undefined ||
+      value.durationMaxMinutes >= value.durationMinutes,
+    { path: ["durationMaxMinutes"] },
+  );
+
+export const serviceImportSchema = z.object({
+  rows: z.array(serviceImportRowSchema).min(1).max(500),
+});
+
 export type ServiceCreateInput = z.infer<typeof serviceCreateSchema>;
 export type ServiceUpdateInput = z.infer<typeof serviceUpdateSchema>;
 export type ServiceListInput = z.infer<typeof serviceListSchema>;
+export type ServiceImportRow = z.infer<typeof serviceImportRowSchema>;
+export type ServiceImportError = { line: number; code: ServiceImportErrorCode };

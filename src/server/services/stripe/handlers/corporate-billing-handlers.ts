@@ -47,9 +47,8 @@ const handleCorporateInvoicePaid: StripeEventHandler = async (
     return svcOk(null);
   }
 
-  const subscription = await stripe.subscriptions.retrieve(
-    stripeSubscriptionId,
-  );
+  const subscription =
+    await stripe.subscriptions.retrieve(stripeSubscriptionId);
   const synced = await syncCorporateMembershipFromStripe(
     { db },
     // A fresh retrieve reflects the state at this instant, so the observation

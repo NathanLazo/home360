@@ -40,7 +40,7 @@ function parseNonNegativeInteger(value: unknown, defaultValue?: number) {
   return Number.isSafeInteger(parsed) ? parsed : Number.NaN;
 }
 
-function parsePriceCents(value: unknown) {
+export function parsePriceCents(value: unknown) {
   const normalized = typeof value === "string" ? value.trim() : "";
   const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(normalized);
 

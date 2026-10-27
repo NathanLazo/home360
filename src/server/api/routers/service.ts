@@ -4,6 +4,7 @@ import { z } from "zod";
 import { recordIdSchema } from "~/schemas/record-id.schema";
 import {
   serviceCreateSchema,
+  serviceImportSchema,
   serviceListSchema,
   serviceUpdateSchema,
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
@@ -16,6 +17,7 @@ import {
 import {
   createService,
   deleteService,
+  importServiceRows,
   listServiceCategories,
   listServices,
   listServiceWorkers,
@@ -65,6 +67,16 @@ export const serviceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         return await createService(ctx.db, ctx.business.id, input);
+      } catch (error) {
+        return serviceFailure(error);
+      }
+    }),
+
+  importRows: activeBusinessProcedure
+    .input(serviceImportSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await importServiceRows(ctx.db, ctx.business.id, input.rows);
       } catch (error) {
         return serviceFailure(error);
       }

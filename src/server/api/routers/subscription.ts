@@ -180,7 +180,10 @@ export const subscriptionRouter = createTRPCRouter({
         return serviceFailure("CONFLICT", "Plan catalogue is misconfigured");
       }
 
-      return ok(items.filter((item) => item !== null), "Plans loaded");
+      return ok(
+        items.filter((item) => item !== null),
+        "Plans loaded",
+      );
     } catch (error) {
       return unexpectedFailure(error, "Plan listing failed");
     }
@@ -237,9 +240,7 @@ export const subscriptionRouter = createTRPCRouter({
           // Multitenancy lives in the `where`, never in the input.
           where: { subscription: { businessId: ctx.business.id } },
           take: INVOICE_PAGE_SIZE + 1,
-          ...(input.cursor
-            ? { cursor: { id: input.cursor }, skip: 1 }
-            : {}),
+          ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
           orderBy: [{ issuedAt: "desc" }, { id: "desc" }],
           select: {
             id: true,

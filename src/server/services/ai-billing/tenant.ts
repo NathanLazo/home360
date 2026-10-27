@@ -15,7 +15,11 @@ export type AiBillingTenant =
 
 export type AiBillingDb = Pick<
   PrismaClient,
-  "business" | "corporateAccount" | "aiUsage" | "aiCreditPurchase" | "$transaction"
+  | "business"
+  | "corporateAccount"
+  | "aiUsage"
+  | "aiCreditPurchase"
+  | "$transaction"
 >;
 
 /** Resolves the wallet owner of a panel session by area and owner id. */

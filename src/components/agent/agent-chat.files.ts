@@ -2,9 +2,12 @@ import type { FileUIPart } from "ai";
 
 import type { AttachmentUploadItem } from "~/components/motion/attachment-upload";
 
-/** Types the model reads natively through the AI Gateway. */
+/**
+ * Types the model reads natively through the AI Gateway, plus Excel: .xlsx
+ * never reaches the model, the inventory import tools parse it server-side.
+ */
 export const AGENT_ATTACHMENT_ACCEPT =
-  "image/*,application/pdf,text/plain,text/csv,text/markdown";
+  "image/*,application/pdf,text/plain,text/csv,text/markdown,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 export const AGENT_ATTACHMENT_MAX_FILES = 5;
 export const AGENT_ATTACHMENT_MAX_SIZE = 10 * 1024 * 1024;
 

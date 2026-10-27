@@ -3,7 +3,12 @@ import "server-only";
 import type { Prisma } from "@generated/prisma";
 import { AGENT_MODELS } from "~/lib/agent/agent-models";
 import { listAiCreditPacks, type AiCreditPack } from "./credit-packs";
-import { ensureWelcomeCredit, tenantWhere, type AiBillingDb, type AiBillingTenant } from "./tenant";
+import {
+  ensureWelcomeCredit,
+  tenantWhere,
+  type AiBillingDb,
+  type AiBillingTenant,
+} from "./tenant";
 
 export type AiModelUsage = {
   model: string;

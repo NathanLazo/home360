@@ -145,8 +145,9 @@ async function readImage(pathname: string): Promise<ImageBytes> {
   // Fall back to the pathname extension when the store answers a generic type.
   const mediaType = media.contentType.startsWith("image/")
     ? media.contentType
-    : (IMAGE_TYPE_BY_EXTENSION[pathname.split(".").pop()?.toLowerCase() ?? ""] ??
-      "image/jpeg");
+    : (IMAGE_TYPE_BY_EXTENSION[
+        pathname.split(".").pop()?.toLowerCase() ?? ""
+      ] ?? "image/jpeg");
 
   return { data: media.data, mediaType };
 }

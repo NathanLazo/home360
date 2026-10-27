@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  AdminAuditAction,
-  type PrismaClient,
-} from "@generated/prisma";
+import { AdminAuditAction, type PrismaClient } from "@generated/prisma";
 
 import { writeAdminAudit } from "./admin-audit";
 
@@ -185,7 +182,10 @@ export async function saveAdminSettings(
     await writeAdminAudit(tx, input.adminId, {
       action: AdminAuditAction.SETTINGS_UPDATED,
       before: before.ok
-        ? { ...before.data.settings, updatedAt: before.data.settings.updatedAt.toISOString() }
+        ? {
+            ...before.data.settings,
+            updatedAt: before.data.settings.updatedAt.toISOString(),
+          }
         : {},
       after: { ...(input.settings ?? {}), ...(input.commissions ?? {}) },
     });

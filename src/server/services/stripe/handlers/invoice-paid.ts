@@ -52,9 +52,7 @@ async function resolveLocalSubscriptionId(
     where: {
       OR: [
         ...(stripeSubscriptionId ? [{ stripeSubscriptionId }] : []),
-        ...(customerId
-          ? [{ business: { stripeCustomerId: customerId } }]
-          : []),
+        ...(customerId ? [{ business: { stripeCustomerId: customerId } }] : []),
       ],
     },
     select: { id: true },
@@ -151,9 +149,8 @@ export const handleInvoicePaid: StripeEventHandler = async (
 
   // The invoice alone does not carry the new period: read the subscription so
   // `status` and `renewsAt` come from the authoritative object.
-  const subscription = await stripe.subscriptions.retrieve(
-    stripeSubscriptionId,
-  );
+  const subscription =
+    await stripe.subscriptions.retrieve(stripeSubscriptionId);
   const synced = await syncSubscriptionFromStripe({ db }, subscription);
 
   return synced.ok ? svcOk(null) : synced;

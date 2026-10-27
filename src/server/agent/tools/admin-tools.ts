@@ -58,6 +58,10 @@ import {
 import { recordIdSchema } from "~/schemas/record-id.schema";
 import type { AgentAttachmentStore } from "../agent-attachments";
 import {
+  attachmentNotFound,
+  createListChatAttachmentsTool,
+} from "./attachment-tools";
+import {
   runTool,
   type AgentCaller,
   type AgentToolFailure,
@@ -112,20 +116,6 @@ function isReceiptContentType(
   value: string,
 ): value is PayoutReceiptContentType {
   return (PAYOUT_RECEIPT_CONTENT_TYPES as readonly string[]).includes(value);
-}
-
-function attachmentFailure(
-  missing: string[],
-  available: string[],
-): AgentToolFailure {
-  return {
-    result: null,
-    error: "ATTACHMENT_NOT_FOUND",
-    status: 404,
-    message: `No attachment named: ${missing.join(", ")}. Available in this conversation: ${
-      available.length > 0 ? available.join(", ") : "none"
-    }. Ask the user to attach the receipt files.`,
-  };
 }
 
 /**
@@ -374,28 +364,10 @@ export function createAdminTools(
     }),
 
     // Payment receipts
-    listChatAttachments: tool({
-      description:
-        "Files the admin attached in this conversation (name, type, size). Use it to pick the exact filenames before registering payment receipts.",
-      inputSchema: z.object({}),
-      execute: () =>
-        runTool(() =>
-          Promise.resolve({
-            result: {
-              attachments: [...attachments.values()].map(
-                ({ filename, mediaType, sizeBytes }) => ({
-                  filename,
-                  mediaType,
-                  sizeBytes,
-                }),
-              ),
-            },
-            error: null,
-            status: 200,
-            message: "Conversation attachments listed",
-          }),
-        ),
-    }),
+    listChatAttachments: createListChatAttachmentsTool(
+      attachments,
+      "Files the admin attached in this conversation (name, type, size). Use it to pick the exact filenames before registering payment receipts.",
+    ),
     registerPaymentReceipts: tool({
       description:
         "Register payment receipt files (JPEG, PNG, WebP or PDF) attached in this conversation as proof of a transfer, against exactly one withdrawal or loyalty bonus. Pass the exact attachment filenames. Files are stored privately and linked to the payout; the action is audited. Confirm target and files with the user first.",
@@ -407,7 +379,11 @@ export function createAdminTools(
 
         if (missing.length > 0) {
           return Promise.resolve(
-            attachmentFailure(missing, [...attachments.keys()]),
+            attachmentNotFound(
+              missing,
+              [...attachments.keys()],
+              "Ask the user to attach the receipt files.",
+            ),
           );
         }
 

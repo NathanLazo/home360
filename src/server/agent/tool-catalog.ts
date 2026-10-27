@@ -13,8 +13,9 @@ import { createCorporateTools } from "./tools/corporate-tools";
 /**
  * One catalog per area. The area comes from the session role, so a business
  * owner can never see an admin tool, not even its name. Tool authorization is
- * still re-checked by the tRPC procedures on every call. Only the admin
- * catalog consumes the chat attachments (payment receipt registration).
+ * still re-checked by the tRPC procedures on every call. Chat attachments are
+ * consumed by the admin (payment receipts) and business (inventory import)
+ * catalogs.
  */
 export function createAgentTools(
   area: AgentArea,
@@ -23,7 +24,7 @@ export function createAgentTools(
 ): ToolSet {
   switch (area) {
     case "business":
-      return createBusinessTools(caller);
+      return createBusinessTools(caller, attachments);
     case "corporate":
       return createCorporateTools(caller);
     case "admin":

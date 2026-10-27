@@ -64,13 +64,18 @@ export async function createCreditCheckout(
     return svcFail("NOT_FOUND", "Tenant not found");
   }
 
-  if (wallet.aiCreditUsdMicros + pack.creditUsdMicros > AI_WALLET_MAX_USD_MICROS) {
+  if (
+    wallet.aiCreditUsdMicros + pack.creditUsdMicros >
+    AI_WALLET_MAX_USD_MICROS
+  ) {
     return svcFail("AI_WALLET_LIMIT", "Wallet ceiling reached");
   }
 
   const customer =
     input.tenant.kind === "business"
-      ? await ensureStripeCustomer(deps, { businessId: input.tenant.businessId })
+      ? await ensureStripeCustomer(deps, {
+          businessId: input.tenant.businessId,
+        })
       : await ensureCorporateStripeCustomer(deps, {
           accountId: input.tenant.corporateAccountId,
         });

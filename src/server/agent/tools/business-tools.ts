@@ -26,7 +26,11 @@ import {
   serviceUpdateSchema,
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
 import { planChangeSchema } from "~/lib/subscription/subscription.schemas";
-import { updateBusinessProfileSchema } from "~/schemas/settings/business-settings.schema";
+import {
+  updateBusinessProfileSchema,
+  updateOwnerSchema,
+} from "~/schemas/settings/business-settings.schema";
+import { stockMovementListSchema } from "~/server/services/catalog/stock-movement.schema";
 import {
   workerCreateSchema,
   workerResendInvitationSchema,
@@ -45,7 +49,9 @@ import {
   orderAssignWorkerSchema,
   orderCancelSchema,
 } from "~/server/services/orders/order.schema";
+import type { AgentAttachmentStore } from "../agent-attachments";
 import { runTool, toDate, type AgentCaller } from "../tool-runtime";
+import { createCatalogImportTools } from "./catalog-import-tools";
 
 const cuid = recordIdSchema;
 const cursor = cuid.optional().describe("Cursor from the previous page.");
@@ -61,9 +67,12 @@ const isoDate = z
  * Business (dashboard) catalog. Every tool delegates to the `business*`
  * procedures, so tenant scoping, plan limits, subscription state and the
  * impersonation read-only rule are enforced by tRPC, never here. There are no
- * delete tools on purpose.
+ * delete tools on purpose. `attachments` feed the spreadsheet inventory import.
  */
-export function createBusinessTools(caller: AgentCaller) {
+export function createBusinessTools(
+  caller: AgentCaller,
+  attachments: AgentAttachmentStore,
+) {
   return {
     // Dashboard
     getDashboardKpis: tool({
@@ -218,6 +227,18 @@ export function createBusinessTools(caller: AgentCaller) {
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.payment.getConnectStatus()),
     }),
+    refreshConnectStatus: tool({
+      description:
+        "Re-read the Stripe Connect account from Stripe (after the owner finished onboarding) and return the updated payout status.",
+      inputSchema: z.object({}),
+      execute: () => runTool(() => caller.payment.refreshConnectStatus()),
+    }),
+    startConnectOnboarding: tool({
+      description:
+        "Create the Stripe Connect onboarding link the owner must open to set up bank payouts. Returns a URL: share it as a Markdown link; the owner completes it in Stripe, never in the chat.",
+      inputSchema: z.object({}),
+      execute: () => runTool(() => caller.payment.startOnboarding()),
+    }),
 
     // Catalog: products
     listProducts: tool({
@@ -236,6 +257,19 @@ export function createBusinessTools(caller: AgentCaller) {
       inputSchema: z.object({ productId: cuid }),
       execute: (input) => runTool(() => caller.product.getStockByBranch(input)),
     }),
+    listStockBranches: tool({
+      description:
+        "Branches that can hold product stock (id, name, status). Use it to pick the branch of a stock adjustment or inventory import.",
+      inputSchema: z.object({}),
+      execute: () => runTool(() => caller.product.listStockBranches()),
+    }),
+    listStockMovements: tool({
+      description:
+        "Stock ledger of one product, newest first: every adjustment, sale and import with before/after quantities and branch.",
+      inputSchema: stockMovementListSchema,
+      execute: (input) =>
+        runTool(() => caller.product.listStockMovements(input)),
+    }),
     createProduct: tool({
       description:
         "Create a product (price in MXN cents, optional initial stock per branch). Confirm name, SKU and price when the request was ambiguous.",
@@ -252,6 +286,7 @@ export function createBusinessTools(caller: AgentCaller) {
       inputSchema: productAdjustStockSchema,
       execute: (input) => runTool(() => caller.product.adjustStock(input)),
     }),
+    ...createCatalogImportTools(caller, attachments),
     setProductStatus: tool({
       description: "Publish or unpublish a product (DRAFT or PUBLISHED).",
       inputSchema: z.object({
@@ -385,6 +420,12 @@ export function createBusinessTools(caller: AgentCaller) {
       inputSchema: updateBusinessProfileSchema,
       execute: (input) =>
         runTool(() => caller.businessSettings.updateBusinessProfile(input)),
+    }),
+    updateOwnerName: tool({
+      description: "Update the display name of the business owner.",
+      inputSchema: updateOwnerSchema,
+      execute: (input) =>
+        runTool(() => caller.businessSettings.updateOwner(input)),
     }),
 
     // Marketplace: radar and quotes

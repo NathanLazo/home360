@@ -19,9 +19,7 @@ export type BillingDeps = {
 };
 
 export type EnsureSubscriptionErrorCode =
-  | "NO_SUBSCRIPTION"
-  | "PLAN_NOT_SYNCED"
-  | "NOT_FOUND";
+  "NO_SUBSCRIPTION" | "PLAN_NOT_SYNCED" | "NOT_FOUND";
 
 /**
  * Creates or returns the Stripe Billing customer of a business.
@@ -199,7 +197,10 @@ export async function ensureBillingSubscription(
         code: error.code,
       });
 
-      return svcFail("STRIPE_ERROR", "Stripe subscription could not be created");
+      return svcFail(
+        "STRIPE_ERROR",
+        "Stripe subscription could not be created",
+      );
     }
 
     throw error;

@@ -1,8 +1,4 @@
-import {
-  Prisma,
-  UserRole,
-  type PrismaClient,
-} from "@generated/prisma";
+import { Prisma, UserRole, type PrismaClient } from "@generated/prisma";
 import type { AuthErrorCode } from "~/schemas/auth/auth-errors";
 import type { CustomerRegisterInput } from "~/server/api/schemas/customer-register.schema";
 import {

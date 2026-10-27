@@ -55,7 +55,10 @@ export async function applyCreditPurchase(
   }
 
   if (input.currency !== "usd") {
-    return svcFail("UNSUPPORTED_CURRENCY", `Settled in ${input.currency ?? "none"}`);
+    return svcFail(
+      "UNSUPPORTED_CURRENCY",
+      `Settled in ${input.currency ?? "none"}`,
+    );
   }
 
   if (input.amountTotalUsdCents !== purchase.amountUsdCents) {
