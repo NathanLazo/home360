@@ -4,6 +4,7 @@ import NumberFlow, { type Format } from "@number-flow/react";
 import { useLocale } from "next-intl";
 
 import { MOTION_DURATION_MS, MOTION_EASE_CSS } from "~/components/motion";
+import { intlLocaleFor } from "~/i18n/intl-locale";
 
 export type KpiValueProps = {
   value: number;
@@ -32,7 +33,7 @@ export function KpiValue({ value, format }: KpiValueProps) {
   return (
     <NumberFlow
       value={value}
-      locales={locale}
+      locales={intlLocaleFor(locale)}
       format={format}
       transformTiming={TRANSFORM_TIMING}
       spinTiming={TRANSFORM_TIMING}

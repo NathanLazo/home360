@@ -4,6 +4,7 @@ import NumberFlow, { type Format } from "@number-flow/react";
 import { useLocale } from "next-intl";
 
 import { ADMIN_DURATION_MS, ADMIN_EASE_OUT_CSS } from "./admin-motion";
+import { intlLocaleFor } from "~/i18n/intl-locale";
 import { cn } from "~/lib/utils";
 
 const TRANSFORM_TIMING = {
@@ -36,7 +37,7 @@ export function AnimatedNumber({
   return (
     <NumberFlow
       value={value}
-      locales={locale}
+      locales={intlLocaleFor(locale)}
       format={format}
       transformTiming={TRANSFORM_TIMING}
       spinTiming={TRANSFORM_TIMING}
