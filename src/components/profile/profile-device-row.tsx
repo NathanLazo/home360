@@ -2,7 +2,8 @@
 
 import { LoaderCircleIcon, SmartphoneIcon, XIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { ProfileDevice } from "./profile.types";
 import { MOTION_DURATION_MS, MOTION_EASE } from "~/components/motion";
@@ -27,7 +28,7 @@ export function ProfileDeviceRow({
   onRemove: (deviceId: string) => void;
 }) {
   const t = useTranslations("profile.devices");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const reduceMotion = useReducedMotion() === true;
   const name = device.deviceName?.trim() ? device.deviceName : t("unnamed");
   const platform = t(`platform.${device.platform}`);

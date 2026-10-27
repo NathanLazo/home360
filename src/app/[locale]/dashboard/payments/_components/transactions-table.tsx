@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { FilterXIcon, ReceiptTextIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { PaymentStatusBadge } from "./payment-status-badge";
 import type { TransactionListItem } from "./payment.types";
@@ -36,7 +37,7 @@ export function TransactionsTable({
   const t = useTranslations("dashboard.payments");
   const statusT = useTranslations("dashboard.payments.status");
   const methodT = useTranslations("dashboard.payments.methods");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const { currency } = useMoneyFormat();
   // Frozen on mount so every relative date in the table is measured against
   // the same instant and re-renders stay stable.

@@ -1,7 +1,8 @@
 "use client";
 
 import { GiftIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState, type ReactNode } from "react";
 
 import type { LoyaltyBonusRow } from "./finance.types";
@@ -33,7 +34,7 @@ export function LoyaltyBonusesTable({
   const t = useTranslations("admin.finance.loyalty");
   const statusT = useTranslations("admin.loyaltyBonusStatus");
   const methodT = useTranslations("admin.loyaltyPayoutMethod");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
 
   const currency = (cents: number) =>

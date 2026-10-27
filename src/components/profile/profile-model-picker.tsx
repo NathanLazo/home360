@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import {
   AGENT_MODELS,
@@ -59,7 +60,7 @@ function ModelOption({
   onChange: () => void;
 }) {
   const t = useTranslations("profile.assistant");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const pricing = platformPricePerMillion(model);
   const usd = (value: number) =>
     format.number(value, { style: "currency", currency: "USD" });

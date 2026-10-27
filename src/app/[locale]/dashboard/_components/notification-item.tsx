@@ -11,7 +11,8 @@ import {
   TimerResetIcon,
   type LucideIcon,
 } from "lucide-react";
-import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useNow, useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { NotificationItem as FeedItem } from "./dashboard.types";
 import { DropdownMenuItem } from "~/components/ui/dropdown-menu";
@@ -45,7 +46,7 @@ function itemHref(item: FeedItem): string {
 
 export function NotificationItem({ item }: { item: FeedItem }) {
   const t = useTranslations("dashboard.notifications");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   // Re-render relative times on the same cadence as the feed poll.
   const now = useNow({ updateInterval: 60_000 });
   const Icon = KIND_ICONS[item.kind];

@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircleIcon, WrenchIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { ServiceRowActions } from "./service-row-actions";
 import { ServiceStatusBadge } from "./service-status-badge";
@@ -10,6 +11,7 @@ import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { useReadOnlyNotice } from "~/components/dashboard/subscription-access-context";
 
 export function ServicesTable({
   services,
@@ -38,8 +40,8 @@ export function ServicesTable({
   onDelete: (service: ServiceListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.services");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
-  const formatter = useFormatter();
+  const readOnlyNotice = useReadOnlyNotice();
+  const formatter = useAppFormatter();
   const currency = (cents: number) =>
     formatter.number(cents / 100, {
       style: "currency",
@@ -166,7 +168,7 @@ export function ServicesTable({
                       type="button"
                       onClick={onCreate}
                       disabled={readOnly}
-                      title={readOnly ? readOnlyT("actionDisabled") : undefined}
+                      title={readOnly ? readOnlyNotice : undefined}
                     >
                       {t("newService")}
                     </Button>

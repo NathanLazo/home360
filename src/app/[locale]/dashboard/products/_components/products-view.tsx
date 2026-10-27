@@ -18,7 +18,10 @@ import type { ProductFiltersState, ProductListItem } from "./product.types";
 import { ProductsSkeleton } from "./products-skeleton";
 import { ProductsTable } from "./products-table";
 import { useProductMutations } from "./use-product-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -34,7 +37,7 @@ const INITIAL_FILTERS: ProductFiltersState = {
 export function ProductsView({ branchId }: { branchId?: string }) {
   const t = useTranslations("dashboard.products");
   const errors = useTranslations("errors");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -108,10 +111,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
           responseError ? errors(responseError) : t("queryErrorDescription")
         }
         action={
-          <Button
-            type="button"
-            onClick={() => void retryAll()}
-          >
+          <Button type="button" onClick={() => void retryAll()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
@@ -135,7 +135,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
               variant="outline"
               onClick={() => setImportOpen(true)}
               disabled={isReadOnly}
-              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+              title={isReadOnly ? readOnlyNotice : undefined}
             >
               <FileUpIcon aria-hidden="true" />
               {t("import.action")}
@@ -149,7 +149,7 @@ export function ProductsView({ branchId }: { branchId?: string }) {
                 setSheetOpen(true);
               }}
               disabled={isReadOnly}
-              title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+              title={isReadOnly ? readOnlyNotice : undefined}
             >
               <PlusIcon aria-hidden="true" />
               {t("newProduct")}

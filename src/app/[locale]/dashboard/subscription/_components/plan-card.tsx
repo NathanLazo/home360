@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { PlanFeatureList } from "./plan-feature-list";
 import type { PlanListItem } from "./subscription.types";
 import { useCurrencyFormatter } from "./use-currency-formatter";
+import { useReadOnlyNotice } from "~/components/dashboard/subscription-access-context";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -45,6 +46,7 @@ export function PlanCard({
 }: PlanCardProps) {
   const t = useTranslations("dashboard.subscription");
   const currency = useCurrencyFormatter();
+  const readOnlyNotice = useReadOnlyNotice();
 
   const isUpgrade =
     currentPriceCents !== null && plan.priceCents > currentPriceCents;
@@ -82,7 +84,7 @@ export function PlanCard({
             ? t("actions.unavailableHint")
             : canChangePlan
               ? undefined
-              : t("readOnly.actionDisabled")
+              : (readOnlyNotice ?? t("readOnly.actionDisabled"))
         }
       >
         {isUpgrade

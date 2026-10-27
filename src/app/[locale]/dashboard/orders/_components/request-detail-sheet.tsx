@@ -9,7 +9,8 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useState } from "react";
 
 import { ConversationPanel } from "./conversation-panel";
@@ -85,7 +86,7 @@ export function RequestDetailSheet({
 }) {
   const t = useTranslations("dashboard.requests.detail");
   const errorsT = useTranslations("errors");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
   const money = useMoney();
   const { isReadOnly } = useSubscriptionAccess();

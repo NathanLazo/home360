@@ -1,7 +1,8 @@
 "use client";
 
 import { DownloadIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateInvoiceStatusBadge } from "./corporate-invoice-status-badge";
 import type { CorporateInvoiceItem } from "../../_components/corporate.types";
@@ -17,7 +18,7 @@ export function CorporateInvoiceList({
   invoices: CorporateInvoiceItem[];
 }) {
   const t = useTranslations("corporate.membership.invoices");
-  const format = useFormatter();
+  const format = useAppFormatter();
 
   if (invoices.length === 0) {
     return null;

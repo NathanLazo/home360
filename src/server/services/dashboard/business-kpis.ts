@@ -81,6 +81,16 @@ function orderScope(businessId: string, branchId?: string) {
   };
 }
 
+/**
+ * Order-count KPIs (home "Órdenes", orders by branch) measure demand the
+ * business can still serve or has served: a cancelled order is neither, and
+ * counting it inflated the KPI (QA: a branch showed "1 servicio" that was a
+ * cancelled order). The recent-orders table keeps every status on purpose.
+ */
+const COUNTED_ORDER_FILTER = {
+  status: { not: "CANCELLED" },
+} satisfies Prisma.OrderWhereInput;
+
 function paymentScope(businessId: string, branchId?: string) {
   return { order: { is: orderScope(businessId, branchId) } };
 }
@@ -139,6 +149,7 @@ export async function getBusinessKpis(
         by: ["type"],
         where: {
           ...scopedOrder,
+          ...COUNTED_ORDER_FILTER,
           createdAt: { gte: currentStart, lte: now },
         },
         _count: true,
@@ -268,6 +279,7 @@ export async function getOrdersByBranch(
       by: ["branchId"],
       where: {
         ...orderScope(businessId, input.branchId),
+        ...COUNTED_ORDER_FILTER,
         createdAt: { gte: periodStart, lte: now },
       },
       _count: true,

@@ -1,7 +1,8 @@
 "use client";
 
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { ADMIN_EYEBROW_CLASS } from "./admin-surface";
@@ -18,7 +19,7 @@ import { Link } from "~/i18n/navigation";
 
 export function AiConfigCard({ config }: { config: AiConfigSummary }) {
   const t = useTranslations("admin.overview");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
 
   return (
@@ -69,11 +70,7 @@ export function AiConfigCard({ config }: { config: AiConfigSummary }) {
             when: formatter.relativeTime(config.updatedAt, now),
           })}
         </p>
-        <Button
-          asChild
-          variant="outline"
-          className="group justify-between"
-        >
+        <Button asChild variant="outline" className="group justify-between">
           <Link href="/admin/settings#ai">
             {t("ai.openSettings")}
             <ArrowRightIcon

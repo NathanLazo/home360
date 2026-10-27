@@ -10,6 +10,7 @@ import { InvoicesSection } from "./invoices-section";
 import { PlanCards } from "./plan-cards";
 import type { PlanListItem } from "./subscription.types";
 import { useSubscriptionMutations } from "./use-subscription-mutations";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -21,6 +22,7 @@ export function SubscriptionView() {
   const errorsT = useTranslations("errors");
   const { openBillingPortal, openingBillingPortal } =
     useSubscriptionMutations();
+  const { isReadOnly } = useSubscriptionAccess();
 
   const [targetPlanCode, setTargetPlanCode] = useState<
     PlanListItem["code"] | null
@@ -80,10 +82,7 @@ export function SubscriptionView() {
           title={t("currentErrorTitle")}
           description={errorsT(currentError)}
           action={
-            <Button
-              type="button"
-              onClick={() => void currentQuery.refetch()}
-            >
+            <Button type="button" onClick={() => void currentQuery.refetch()}>
               <RotateCcwIcon aria-hidden="true" />
               {t("retry")}
             </Button>
@@ -117,10 +116,7 @@ export function SubscriptionView() {
           title={t("plansErrorTitle")}
           description={errorsT(plansError)}
           action={
-            <Button
-              type="button"
-              onClick={() => void plansQuery.refetch()}
-            >
+            <Button type="button" onClick={() => void plansQuery.refetch()}>
               <RotateCcwIcon aria-hidden="true" />
               {t("retry")}
             </Button>
@@ -132,9 +128,10 @@ export function SubscriptionView() {
         <PlanCards
           plans={plans}
           currentPriceCents={current?.plan.priceCents ?? null}
-          // A canceled subscription is read-only; the guard rejects the
-          // mutation anyway, so the button never leads to a pointless 403.
-          canChangePlan={current !== null && current.status !== "CANCELED"}
+          // A canceled subscription or a non-ACTIVE business is read-only;
+          // the guard rejects the mutation anyway, so the button never leads
+          // to a pointless 403.
+          canChangePlan={current !== null && !isReadOnly}
           onSelectPlan={handleSelectPlan}
           onManagePlan={() => void openBillingPortal()}
           managing={openingBillingPortal}

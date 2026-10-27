@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { CorporateReasonDialog } from "./corporate-reason-dialog";
@@ -33,7 +34,7 @@ export function CorporateTierRequests({
   onReject,
 }: CorporateTierRequestsProps) {
   const t = useTranslations("admin.corporate.requests");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [rejectTarget, setRejectTarget] =
     useState<CorporateTierRequestItem | null>(null);
 

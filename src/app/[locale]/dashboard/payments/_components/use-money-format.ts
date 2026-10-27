@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormatter } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 const CURRENCY_FORMAT = {
   style: "currency",
@@ -19,7 +19,7 @@ const DATE_TIME_FORMAT = {
  * single client-side operation is cents -> major units for `Intl`.
  */
 export function useMoneyFormat() {
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return {
     currency: (cents: number) => formatter.number(cents / 100, CURRENCY_FORMAT),

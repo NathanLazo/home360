@@ -1,7 +1,8 @@
 "use client";
 
 import { BarChart3Icon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { RevenuePoint } from "./finance.types";
 import { ChartSeriesLegend } from "~/components/chart-series-legend";
@@ -21,7 +22,7 @@ function monthAnchor(month: string): Date {
 
 export function PlatformRevenueChart({ series }: { series: RevenuePoint[] }) {
   const t = useTranslations("admin.finance.chart");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   if (series.length === 0) {
     return (

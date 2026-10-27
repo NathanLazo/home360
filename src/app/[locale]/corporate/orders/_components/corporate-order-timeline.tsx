@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { CorporateOrderDetail } from "./corporate-requests.types";
 
@@ -14,7 +15,7 @@ export function CorporateOrderTimeline({
 }: CorporateOrderTimelineProps) {
   const t = useTranslations("corporate.orders.detail");
   const eventT = useTranslations("corporate.orderEvent");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   if (events.length === 0) {
     return (

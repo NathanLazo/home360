@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useId, useState } from "react";
 
 import { withdrawalReasonSchema } from "./finance.schema";
@@ -37,7 +38,7 @@ export function WithdrawalRowActions({
   onReject: (input: { withdrawalId: string; reason: string }) => void;
 }) {
   const t = useTranslations("admin.finance.actions");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [dialog, setDialog] = useState<OpenDialog>(null);
   const [reason, setReason] = useState("");
   const fieldId = useId();

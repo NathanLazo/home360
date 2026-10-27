@@ -13,7 +13,10 @@ import { useTranslations } from "next-intl";
 
 import type { BranchListItem } from "./branch.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -41,11 +44,11 @@ export function BranchCardActions({
   onDelete: () => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.branches");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   // The menu stays reachable so the reason is visible; only the mutating
   // entries are blocked.
   const { isReadOnly } = useSubscriptionAccess();
-  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
+  const readOnlyTitle = isReadOnly ? readOnlyNotice : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const nextStatus = branch.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
 

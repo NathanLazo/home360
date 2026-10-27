@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { AdminOrderEvent } from "./admin-orders.types";
 
@@ -14,7 +15,7 @@ export function AdminOrderTimeline({
   events: AdminOrderEvent[];
 }) {
   const t = useTranslations("admin.orders.timeline");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const items = [
     {
       id: "created",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { DisputeRecordingSegment } from "./disputes.types";
 import {
@@ -39,7 +40,7 @@ export function DisputeRecordingSegments({
   segments: DisputeRecordingSegment[];
 }) {
   const t = useTranslations("admin.disputes.recording.segments");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   if (segments.length === 0) {
     return <p className="text-muted-foreground text-copy-sm">{t("empty")}</p>;

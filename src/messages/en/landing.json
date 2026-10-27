@@ -145,9 +145,9 @@
   },
   "pricing": {
     "title": "Plans for *businesses.*",
-    "subtitle": "A monthly subscription plus a per-service commission that drops as your operation grows.",
+    "subtitle": "A monthly subscription plus a per-sale commission that drops as your operation grows.",
     "perMonth": "/month",
-    "commission": "{pct} % commission per service",
+    "commission": "{pct} % commission per sale",
     "unlimited": "Unlimited",
     "recommended": "Recommended",
     "cta": "Register your business",

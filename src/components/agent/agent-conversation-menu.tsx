@@ -8,7 +8,8 @@ import {
   PinIcon,
   Trash2Icon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -102,7 +103,7 @@ export function AgentConversationMenu({
   onDelete,
 }: AgentConversationMenuProps) {
   const t = useTranslations("agent.conversations");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const active = conversations.find((item) => item.id === activeId);
   const [pins, setPins] = useState<Set<string>>(new Set());
 

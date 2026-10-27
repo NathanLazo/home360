@@ -2,6 +2,8 @@ import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { appFormats } from "./formats";
+import { BUSINESS_TIME_ZONE } from "./intl-locale";
 import { routing } from "./routing";
 
 async function loadSpanishMessages() {
@@ -103,14 +105,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
   return {
     locale: requestedLocale,
     messages,
-    formats: {
-      number: {
-        // Pattern: format.number(cents / 100, "mxnCurrency").
-        mxnCurrency: {
-          style: "currency",
-          currency: "MXN",
-        },
-      },
-    },
+    // An explicit zone keeps server (UTC) and browser renders identical.
+    timeZone: BUSINESS_TIME_ZONE,
+    // Names only: next-intl still formats with the route locale (`es`), so
+    // UI code formats through `useAppFormatter` / `getAppFormatter`
+    // (`es-MX` / `en-US`), which share these same named formats.
+    formats: appFormats,
   };
 });

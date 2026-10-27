@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { BusinessDocumentPreview } from "./business-document-preview";
 import type { BusinessDocumentItem as BusinessDocument } from "./users.types";
@@ -40,7 +41,7 @@ export function BusinessDocumentItem({
   const t = useTranslations("admin.users.documents");
   const documentTypeT = useTranslations("admin.documentTypes");
   const documentStatusT = useTranslations("admin.documentStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const label = documentTypeT(document.type);
 
   return (

@@ -26,7 +26,10 @@ import { OrderRedeemPickupDialog } from "./order-redeem-pickup-dialog";
 import type { OrderDetail, WorkerOption } from "./order.types";
 import { useOrderMutations } from "./use-order-mutations";
 import { ConfirmDialog } from "~/components/confirm-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 
 type OpenDialog =
@@ -67,9 +70,9 @@ export function OrderDetailActions({
   onToggleConversation: () => void;
 }) {
   const t = useTranslations("dashboard.orders.actions");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
-  const readOnlyTitle = isReadOnly ? readOnlyT("actionDisabled") : undefined;
+  const readOnlyTitle = isReadOnly ? readOnlyNotice : undefined;
   const mutations = useOrderMutations();
   const [dialog, setDialog] = useState<OpenDialog>(null);
   const { actions } = order;

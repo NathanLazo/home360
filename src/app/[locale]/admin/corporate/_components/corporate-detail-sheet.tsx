@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { skipToken } from "@tanstack/react-query";
 import { MapPinIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { isDormantCorporate } from "./corporate-dormancy";
 import { CorporateStatusBadge } from "./corporate-status-badge";
@@ -67,7 +68,7 @@ function DetailBody({
   const t = useTranslations("admin.corporate.detail");
   const orderStatusT = useTranslations("admin.orderStatus");
   const membershipT = useTranslations("admin.corporate.membershipStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   return (

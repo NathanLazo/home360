@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { CorporateOrderDetail } from "./corporate-requests.types";
 
@@ -23,7 +24,7 @@ export function CorporateOrderReceipt({
 }: CorporateOrderReceiptProps) {
   const t = useTranslations("corporate.orders.detail.receipt");
   const paymentT = useTranslations("corporate.paymentStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const money = (cents: number) => formatter.number(cents / 100, CURRENCY);
   const rows: Array<[string, string]> = [
     [t("labor"), money(amounts.laborCents)],

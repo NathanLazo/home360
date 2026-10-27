@@ -11,7 +11,10 @@ import type { ServiceFiltersState, ServiceListItem } from "./service.types";
 import { ServicesSkeleton } from "./services-skeleton";
 import { ServicesTable } from "./services-table";
 import { useServiceMutations } from "./use-service-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -26,7 +29,7 @@ const INITIAL_FILTERS: ServiceFiltersState = {
 export function ServicesView() {
   const t = useTranslations("dashboard.services");
   const errors = useTranslations("errors");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -107,10 +110,7 @@ export function ServicesView() {
           responseError ? errors(responseError) : t("queryErrorDescription")
         }
         action={
-          <Button
-            type="button"
-            onClick={() => void retryAll()}
-          >
+          <Button type="button" onClick={() => void retryAll()}>
             <RotateCcwIcon aria-hidden="true" />
             {t("retry")}
           </Button>
@@ -131,7 +131,7 @@ export function ServicesView() {
             type="button"
             onClick={openCreate}
             disabled={isReadOnly}
-            title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+            title={isReadOnly ? readOnlyNotice : undefined}
           >
             <PlusIcon aria-hidden="true" />
             {t("newService")}

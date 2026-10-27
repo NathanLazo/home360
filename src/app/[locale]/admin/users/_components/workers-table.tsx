@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { HardHatIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import type { UserAccessAction } from "./user-access-dialogs";
@@ -39,7 +40,7 @@ export function WorkersTable({
 }) {
   const t = useTranslations("admin.users");
   const availabilityT = useTranslations("admin.workerAvailability");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
 
   const columns: Array<DataTableColumn<WorkerRow>> = [

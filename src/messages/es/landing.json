@@ -145,9 +145,9 @@
   },
   "pricing": {
     "title": "Planes para *negocios.*",
-    "subtitle": "Suscripción mensual más una comisión por servicio que baja conforme crece tu operación.",
+    "subtitle": "Suscripción mensual más una comisión por venta que baja conforme crece tu operación.",
     "perMonth": "/mes",
-    "commission": "{pct} % de comisión por servicio",
+    "commission": "{pct} % de comisión por venta",
     "unlimited": "Ilimitado",
     "recommended": "Recomendado",
     "cta": "Registra tu negocio",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { PlanUsageList } from "./plan-usage-list";
 import type { CurrentSubscription } from "./subscription.types";
@@ -19,7 +20,7 @@ export function CurrentPlanBanner({
   subscription: CurrentSubscription;
 }) {
   const t = useTranslations("dashboard.subscription");
-  const format = useFormatter();
+  const format = useAppFormatter();
 
   return (
     <Card>

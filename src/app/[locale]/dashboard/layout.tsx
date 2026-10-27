@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { BusinessStatusBanner } from "./_components/business-status-banner";
 import { DashboardHeader } from "./_components/dashboard-header";
 import { SubscriptionStatusBanner } from "./_components/subscription-status-banner";
 import {
@@ -127,14 +128,18 @@ export default async function DashboardLayout({
           <AppShellContent id="dashboard-content">
             <SubscriptionAccessProvider
               initialStatus={shell.subscription?.status ?? null}
+              businessStatus={shell.business.status}
             >
               {user.impersonator ? (
                 <ImpersonationBanner subjectName={shell.business.name} />
               ) : null}
-              <SubscriptionStatusBanner
-                status={shell.subscription?.status ?? null}
-                renewsAt={shell.subscription?.renewsAt ?? null}
-              />
+              <BusinessStatusBanner status={shell.business.status} />
+              {shell.business.status === "ACTIVE" ? (
+                <SubscriptionStatusBanner
+                  status={shell.subscription?.status ?? null}
+                  renewsAt={shell.subscription?.renewsAt ?? null}
+                />
+              ) : null}
               {children}
             </SubscriptionAccessProvider>
           </AppShellContent>

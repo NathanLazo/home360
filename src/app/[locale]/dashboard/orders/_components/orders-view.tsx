@@ -32,7 +32,7 @@ export function OrdersView({ branchId }: { branchId?: string }) {
       >
         <TabsList
           animatedIndicator
-          className="max-w-full justify-start overflow-x-auto"
+          className="max-w-full justify-start overflow-x-auto overflow-y-hidden"
           aria-label={t("tabs.label")}
         >
           {ordersTabSchema.options.map((tab) => (

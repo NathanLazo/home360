@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronRightIcon, ScaleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import { OpenDisputeEvidenceLink } from "./open-dispute-evidence-link";
@@ -27,7 +28,7 @@ export function OpenDisputesList({
 }) {
   const t = useTranslations("admin.overview");
   const urgencyT = useTranslations("admin.disputeUrgency");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [now] = useState(() => new Date());
   const currency = useCurrencyFormatter();
 

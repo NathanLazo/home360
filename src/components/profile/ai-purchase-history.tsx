@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { SectionError } from "~/components/section-error";
 import { StatusBadge } from "~/components/status-badge";
@@ -17,7 +18,7 @@ const STATUS_VARIANTS = {
 /** Token packs bought through Stripe: date, pack, amount and status. */
 export function AiPurchaseHistory() {
   const t = useTranslations("profile.billing");
-  const format = useFormatter();
+  const format = useAppFormatter();
   const query = api.aiBilling.listPurchases.useQuery();
   const state = unwrapEnvelope(query);
 

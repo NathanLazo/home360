@@ -1,6 +1,7 @@
 import "server-only";
 
 import type {
+  BusinessStatus,
   PrismaClient,
   SubscriptionStatus,
 } from "@generated/prisma";
@@ -10,7 +11,8 @@ export type DashboardShellData = {
   business: {
     id: string;
     name: string;
-    status: string;
+    /** Drives the approval banner and read-only CTAs (`activeBusinessProcedure`). */
+    status: BusinessStatus;
   };
   /** Drives the global subscription banner (F4-07). `null` = no plan yet. */
   subscription: {

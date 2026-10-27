@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircleIcon, MegaphoneIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { EmptyState } from "~/components/empty-state";
 import { SectionError } from "~/components/section-error";
@@ -14,7 +15,7 @@ import { api } from "~/trpc/react";
 export function CampaignHistory() {
   const t = useTranslations("admin.settings.campaigns");
   const audienceT = useTranslations("admin.settings.campaigns.audience");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const query = api.admin.settings.listCampaigns.useInfiniteQuery(
     {},
     {

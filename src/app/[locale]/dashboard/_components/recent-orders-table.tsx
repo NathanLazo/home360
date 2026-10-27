@@ -2,7 +2,8 @@
 
 import { keepPreviousData } from "@tanstack/react-query";
 import { InboxIcon, RotateCcwIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { RecentOrder } from "./dashboard.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
@@ -39,7 +40,7 @@ export function RecentOrdersTable({ branchId, days }: RecentOrdersTableProps) {
   const t = useTranslations("dashboard.home");
   const status = useTranslations("dashboard.orderStatus");
   const errors = useTranslations("errors");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const router = useRouter();
   // Must match the server prefetch in `dashboard/page.tsx` exactly.
   const input = branchId ? { branchId, days } : { days };

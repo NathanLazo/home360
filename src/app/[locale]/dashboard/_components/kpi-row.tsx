@@ -7,7 +7,8 @@ import {
   LockKeyholeIcon,
   StarIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { KpiCard } from "~/components/kpi-card";
 import { KpiRowSkeleton } from "~/components/kpi-row-skeleton";
@@ -34,7 +35,7 @@ const RATING_FORMAT = {
 
 export function KpiRow({ branchId, days }: KpiRowProps) {
   const t = useTranslations("dashboard.home");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const input = branchId ? { branchId, days } : { days };
   // Keep the previous figures on screen while a branch switch refetches, so
   // the numbers roll to their new values instead of flashing a skeleton.

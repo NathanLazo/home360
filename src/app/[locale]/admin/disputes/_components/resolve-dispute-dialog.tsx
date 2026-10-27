@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useId, useState } from "react";
 
 import { ConfirmButtonContent } from "../../_components/confirm-button-content";
@@ -57,7 +58,7 @@ export function ResolveDisputeDialog({
   const doneT = useTranslations("admin.feedback.done");
   const busy = loading || succeeded;
   const resolutionsT = useTranslations("admin.disputes.resolutions");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [providerRefund, setProviderRefund] = useState("");
   const [serviceFeeRefund, setServiceFeeRefund] = useState("");
   const [justification, setJustification] = useState("");

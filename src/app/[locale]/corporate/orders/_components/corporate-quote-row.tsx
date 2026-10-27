@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckIcon, StarIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { CorporateRequestItem } from "./corporate-requests.types";
 import { Button } from "~/components/ui/button";
@@ -30,7 +31,7 @@ export function CorporateQuoteRow({
   onAccept,
 }: CorporateQuoteRowProps) {
   const t = useTranslations("corporate.orders.requests");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
 
   return (
     <li className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">

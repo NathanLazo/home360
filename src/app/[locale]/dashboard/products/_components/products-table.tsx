@@ -1,14 +1,18 @@
 "use client";
 
 import { BoxIcon, LoaderCircleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { ProductRowActions } from "./product-row-actions";
 import { ProductStatusBadge } from "./product-status-badge";
 import { ProductStockCell } from "./product-stock-cell";
 import type { ProductListItem } from "./product.types";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -41,9 +45,9 @@ export function ProductsTable({
   onDelete: (product: ProductListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.products");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const columns: Array<DataTableColumn<ProductListItem>> = [
     {
       key: "name",
@@ -168,9 +172,7 @@ export function ProductsTable({
                       type="button"
                       onClick={onCreate}
                       disabled={isReadOnly}
-                      title={
-                        isReadOnly ? readOnlyT("actionDisabled") : undefined
-                      }
+                      title={isReadOnly ? readOnlyNotice : undefined}
                     >
                       {t("newProduct")}
                     </Button>

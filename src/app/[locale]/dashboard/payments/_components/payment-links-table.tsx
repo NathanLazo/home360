@@ -10,7 +10,10 @@ import { PaymentsLoadMore } from "./payments-panel-states";
 import { useMoneyFormat } from "./use-money-format";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 
@@ -28,7 +31,7 @@ export function PaymentLinksTable({
   onCreate: () => void;
 }) {
   const t = useTranslations("dashboard.payments.paymentLinks");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
   const { currency, dateTime } = useMoneyFormat();
 
@@ -126,7 +129,7 @@ export function PaymentLinksTable({
                   <Button
                     type="button"
                     disabled={isReadOnly}
-                    title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+                    title={isReadOnly ? readOnlyNotice : undefined}
                     onClick={onCreate}
                   >
                     <LinkIcon aria-hidden="true" />

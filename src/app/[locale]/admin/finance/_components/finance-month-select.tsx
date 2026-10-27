@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useState } from "react";
 
 import {
@@ -33,7 +34,7 @@ export function FinanceMonthSelect({
   onChange: (month: string) => void;
 }) {
   const t = useTranslations("admin.finance.month");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   // Frozen on mount so the option list never shifts under the pointer.
   const [options] = useState(() => {
     const now = new Date();
@@ -47,10 +48,7 @@ export function FinanceMonthSelect({
 
   return (
     <Select value={selected} onValueChange={onChange}>
-      <SelectTrigger
-        className="w-48"
-        aria-label={t("label")}
-      >
+      <SelectTrigger className="w-48" aria-label={t("label")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

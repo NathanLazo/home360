@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { ReceiptTextIcon, ScaleIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { AdminOrderStatusBadge } from "./admin-order-status-badge";
 import { AdminOrderTypeBadge } from "./admin-order-type-badge";
@@ -25,7 +26,7 @@ export function AdminOrdersTable({
 }) {
   const t = useTranslations("admin.orders");
   const paymentT = useTranslations("admin.paymentStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = useCurrencyFormatter();
 
   const columns: Array<DataTableColumn<AdminOrderRow>> = [
@@ -121,13 +122,8 @@ export function AdminOrdersTable({
         <time
           dateTime={row.createdAt.toISOString()}
           className="text-muted-foreground text-copy-sm tabular-nums"
-          suppressHydrationWarning
         >
-          {formatter.dateTime(row.createdAt, {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
+          {formatter.dateTime(row.createdAt, "shortDate")}
         </time>
       ),
     },

@@ -47,6 +47,12 @@ const SERVICE_FEE_CENTS = 2500;
 const DAY = 24 * 60 * 60 * 1000;
 const daysAgo = (days: number) => new Date(Date.now() - days * DAY);
 const daysFromNow = (days: number) => new Date(Date.now() + days * DAY);
+/**
+ * Live (OPEN/QUOTED) requests and their PENDING quotes must survive a whole
+ * QA week: the `expire-unpaid-orders` cron expires requests past `expiresAt`
+ * and their PENDING quotes with them.
+ */
+const LIVE_REQUEST_TTL_DAYS = 30;
 const image = (tag: string, lock: number) =>
   `https://loremflickr.com/640/640/${tag}?lock=${lock}`;
 
@@ -92,6 +98,8 @@ type WorkerSeed = {
   /** Invitation still pending (no account yet). */
   invited?: boolean;
   availability?: WorkerAvailability;
+  /** Service keys of the same business this technician covers. */
+  services?: string[];
 };
 
 type BusinessSeed = {
@@ -205,13 +213,14 @@ const BUSINESSES: BusinessSeed[] = [
         specialty: "Plomería residencial",
         branch: "centro",
         login: true,
+        services: ["fuga", "destape", "wc"],
       },
       {
         key: "mario",
         fullName: "Mario Ochoa",
         specialty: "Calentadores",
         branch: "norte",
-        availability: WorkerAvailability.ON_SERVICE,
+        services: ["boiler"],
       },
     ],
   },
@@ -338,15 +347,17 @@ const BUSINESSES: BusinessSeed[] = [
         specialty: "Electricista certificada",
         branch: "periferico",
         login: true,
+        services: ["contacto", "corto", "centro-carga"],
       },
       {
         key: "jorge",
         fullName: "Jorge Salas",
         specialty: "Instalaciones",
         branch: "sur",
+        services: ["contacto", "lamparas"],
       },
       {
-        key: "invitado",
+        key: "andres",
         fullName: "Andrés Villa",
         specialty: "Ayudante",
         branch: "sur",
@@ -434,6 +445,7 @@ const BUSINESSES: BusinessSeed[] = [
         specialty: "Refrigeración",
         branch: "campestre",
         login: true,
+        services: ["mantenimiento", "instalacion", "gas", "cooler"],
       },
     ],
   },
@@ -442,7 +454,8 @@ const BUSINESSES: BusinessSeed[] = [
     name: "Ferretería La Llave",
     owner: "Patricia Domínguez",
     type: BusinessType.PRODUCTS,
-    plan: "basic",
+    // Two branches (Pacheco is pickup-only): needs Estándar (maxBranches 3).
+    plan: "standard",
     rating: [4.4, 88],
     branches: [
       {
@@ -585,13 +598,16 @@ const BUSINESSES: BusinessSeed[] = [
         specialty: "Limpieza profunda",
         branch: "san-felipe",
         login: true,
+        services: ["profunda", "post-obra", "vidrios"],
       },
       {
+        // QA scenario: off-shift technician that cannot be assigned.
         key: "alma",
         fullName: "Alma Juárez",
         specialty: "Tapicería",
         branch: "san-felipe",
         availability: WorkerAvailability.OFF,
+        services: ["salas"],
       },
     ],
   },
@@ -666,6 +682,7 @@ const BUSINESSES: BusinessSeed[] = [
         fullName: "Alberto Chávez",
         specialty: "Paisajismo",
         branch: "quintas",
+        services: ["poda", "pasto", "riego"],
       },
     ],
   },
@@ -741,6 +758,10 @@ const BUSINESSES: BusinessSeed[] = [
         fullName: "Iván Torres",
         specialty: "Pintor",
         branch: "sierra",
+        login: true,
+        // Works the IN_PROGRESS "Impermeabilización de azotea" order.
+        availability: WorkerAvailability.ON_SERVICE,
+        services: ["recamara", "impermeabilizacion"],
       },
     ],
   },
@@ -790,6 +811,7 @@ const BUSINESSES: BusinessSeed[] = [
         fullName: "José Ibarra",
         specialty: "Cerrajero",
         branch: "centro",
+        services: ["apertura", "chapa", "copia"],
       },
     ],
   },
@@ -975,7 +997,7 @@ async function seedBusiness(
   if (plan) {
     await prisma.subscription.upsert({
       where: { businessId },
-      update: {},
+      update: { planId: plan.id },
       create: {
         id: `demo-sub-${seed.key}`,
         businessId,
@@ -1078,6 +1100,9 @@ async function seedBusiness(
 
   for (const worker of seed.workers) {
     const id = `demo-worker-${seed.key}-${worker.key}`;
+    const serviceIds = (worker.services ?? []).map((key) => ({
+      id: need(services.get(key), `${seed.key} service ${key}`).id,
+    }));
     const user = worker.login
       ? await upsertUser({
           email: emailFor(`tecnico.${worker.key}`),
@@ -1087,9 +1112,19 @@ async function seedBusiness(
         })
       : null;
 
+    const availability = worker.availability ?? WorkerAvailability.AVAILABLE;
+    const invitedEmail = worker.invited
+      ? emailFor(`invitado.${worker.key}`)
+      : null;
+
     await prisma.worker.upsert({
       where: { id },
-      update: {},
+      update: {
+        userId: user?.id ?? null,
+        availability,
+        invitedEmail,
+        services: { set: serviceIds },
+      },
       create: {
         id,
         businessId,
@@ -1097,15 +1132,14 @@ async function seedBusiness(
         fullName: worker.fullName,
         specialty: worker.specialty,
         branchId: branches.get(worker.branch) ?? null,
-        availability: worker.availability ?? WorkerAvailability.AVAILABLE,
+        availability,
         ratingAvg: worker.invited ? null : 4.7,
         invitationStatus: worker.invited
           ? InvitationStatus.PENDING
           : InvitationStatus.ACCEPTED,
-        invitedEmail: worker.invited
-          ? emailFor(`invitado.${worker.key}`)
-          : null,
+        invitedEmail,
         invitationExpiresAt: worker.invited ? daysFromNow(5) : null,
+        services: { connect: serviceIds },
       },
     });
     workers.set(worker.key, id);
@@ -1127,8 +1161,24 @@ function need<T>(value: T | undefined, label: string): T {
   return value;
 }
 
+/**
+ * Rows earlier versions of this seed created and the current one no longer
+ * does; upserts never remove anything, so re-runs delete them explicitly.
+ */
+async function removeRetiredDemoRows() {
+  // Invited worker key renamed "invitado" → "andres" (email invitado.andres@).
+  await prisma.worker.deleteMany({
+    where: { id: "demo-worker-electrohogar-invitado" },
+  });
+  // Pinturas Sierra has no reviews ("sin reseñas" QA scenario).
+  await prisma.review.deleteMany({
+    where: { orderId: "demo-order-pintura-entregada" },
+  });
+}
+
 async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+  await removeRetiredDemoRows();
   const plans = await seedPlans();
   const biz = new Map<string, SeededBusiness>();
 
@@ -1229,8 +1279,9 @@ async function main() {
           biz: "plomeria-norte",
           amount: 65000,
           worker: "luis",
-          message: "Puedo ir hoy en la tarde, incluye empaques.",
-          days: 1,
+          message: "Puedo ir por la tarde del día propuesto, incluye empaques.",
+          // PENDING visits stay in the future for a whole QA week.
+          days: 9,
         },
         {
           biz: "ferreteria-llave",
@@ -1260,15 +1311,15 @@ async function main() {
           biz: "clima-total",
           amount: 95000,
           worker: "ramon",
-          message: "Mantenimiento completo + revisión de gas. Mañana 10:00.",
-          days: 1,
+          message: "Mantenimiento completo + revisión de gas, a las 10:00.",
+          days: 10,
         },
         {
           biz: "electrohogar",
           amount: 120000,
           worker: "sofia",
           message: "Revisamos la parte eléctrica y la tarjeta.",
-          days: 2,
+          days: 11,
         },
       ],
     },
@@ -1403,6 +1454,10 @@ async function main() {
 
   const ensureQuoteAmount = (quote: QuoteSeed) =>
     quote.amount > 0 ? quote.amount : 60000;
+  const LIVE_REQUEST_STATUSES: RequestStatus[] = [
+    RequestStatus.OPEN,
+    RequestStatus.QUOTED,
+  ];
 
   for (const request of REQUESTS) {
     const customer = need(customers.get(request.customer), request.customer);
@@ -1441,7 +1496,7 @@ async function main() {
         expiresAt:
           request.status === RequestStatus.EXPIRED
             ? daysAgo(request.daysAgo - 2)
-            : daysFromNow(3),
+            : daysFromNow(LIVE_REQUEST_TTL_DAYS),
         suggestedServiceId,
         suggestedProductId,
         targetBusinessId: request.target
@@ -1450,6 +1505,21 @@ async function main() {
         createdAt: daysAgo(request.daysAgo),
       },
     });
+
+    // Re-run refresh: a live request the cron expired comes back with a new
+    // validity. One a tester already accepted or cancelled is left alone.
+    if (LIVE_REQUEST_STATUSES.includes(request.status)) {
+      await prisma.serviceRequest.updateMany({
+        where: {
+          id,
+          status: { in: [...LIVE_REQUEST_STATUSES, RequestStatus.EXPIRED] },
+        },
+        data: {
+          status: request.status,
+          expiresAt: daysFromNow(LIVE_REQUEST_TTL_DAYS),
+        },
+      });
+    }
 
     for (const quote of request.quotes) {
       const business = need(biz.get(quote.biz), quote.biz);
@@ -1472,6 +1542,22 @@ async function main() {
           createdAt: daysAgo(Math.max(request.daysAgo - 0.5, 0)),
         },
       });
+
+      // Re-run refresh: PENDING offers expired with their request become
+      // acceptable again, with the visit back in the future.
+      if (quote.status === undefined && quote.days !== undefined) {
+        await prisma.quote.updateMany({
+          where: {
+            id: `demo-quote-${request.key}-${quote.biz}`,
+            status: { in: [QuoteStatus.PENDING, QuoteStatus.EXPIRED] },
+            request: { status: { in: LIVE_REQUEST_STATUSES } },
+          },
+          data: {
+            status: QuoteStatus.PENDING,
+            scheduledFor: daysFromNow(quote.days),
+          },
+        });
+      }
     }
   }
 
@@ -1663,8 +1749,8 @@ async function main() {
       daysAgo: 22,
       product: "vinilica",
       method: FulfillmentMethod.DELIVERY,
+      // No review: Pinturas Sierra is the "sin reseñas" QA scenario.
       events: [OrderEventType.ESCROW_HELD, OrderEventType.CONFIRMED],
-      review: [4, "Buena pintura, llegó al día siguiente."],
     },
     {
       key: "manguera-envio",
@@ -1719,7 +1805,30 @@ async function main() {
       where: { id },
       select: { id: true },
     });
-    if (existing) continue;
+    if (existing) {
+      // Unpaid orders are auto-cancelled by `expire-unpaid-orders` after the
+      // TTL (30 min): a re-run right before QA puts them back as fresh PENDING.
+      if (order.status === OrderStatus.PENDING) {
+        await prisma.$transaction(async (tx) => {
+          const reset = await tx.order.updateMany({
+            where: {
+              id,
+              status: { in: [OrderStatus.PENDING, OrderStatus.CANCELLED] },
+              payment: { is: null },
+            },
+            data: {
+              status: OrderStatus.PENDING,
+              createdAt: new Date(),
+              expiryAttemptedAt: null,
+            },
+          });
+          if (reset.count > 0) {
+            await tx.orderEvent.deleteMany({ where: { orderId: id } });
+          }
+        });
+      }
+      continue;
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.order.create({

@@ -15,6 +15,7 @@ import {
 import type { AgentUIMessage } from "~/server/agent/home360-agent";
 
 import { AgentDataCard } from "./agent-data-card";
+import { BUSINESS_TIME_ZONE, intlLocaleFor } from "~/i18n/intl-locale";
 
 type AgentPart = AgentUIMessage["parts"][number];
 
@@ -61,14 +62,18 @@ type Formatters = {
 };
 
 function buildFormatters(locale: string): Formatters {
-  const money = new Intl.NumberFormat(locale, {
+  const intlLocale = intlLocaleFor(locale);
+  const money = new Intl.NumberFormat(intlLocale, {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  const int = new Intl.NumberFormat(locale);
-  const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const int = new Intl.NumberFormat(intlLocale);
+  const date = new Intl.DateTimeFormat(intlLocale, {
+    dateStyle: "medium",
+    timeZone: BUSINESS_TIME_ZONE,
+  });
 
   return {
     money: (cents) => money.format(cents / 100),

@@ -50,7 +50,13 @@
     },
     "readOnly": {
       "actionDisabled": "Tu cuenta está en solo lectura porque tu suscripción está cancelada.",
-      "badge": "Solo lectura"
+      "badge": "Solo lectura",
+      "reasons": {
+        "businessPending": "Disponible cuando aprobemos tu negocio. Tu solicitud está en revisión.",
+        "businessSuspended": "Tu negocio está suspendido; no puedes crear ni modificar registros.",
+        "businessRejected": "Tu solicitud no fue aprobada; no puedes crear ni modificar registros.",
+        "subscriptionCanceled": "Tu cuenta está en solo lectura porque tu suscripción está cancelada."
+      }
     },
     "changeDialog": {
       "title": "Cambiar a {plan}",
@@ -121,7 +127,7 @@
     "kpisLabel": "Indicadores principales",
     "revenue": "Ingresos últimos {days} días",
     "orders": "Órdenes últimos {days} días",
-    "escrow": "En escrow",
+    "escrow": "En escrow (total cobrado)",
     "rating": "Calificación",
     "revenueComparison": "{delta} vs. periodo anterior",
     "ordersBreakdown": "{services, plural, one {# servicio} other {# servicios}} · {products, plural, one {# producto} other {# productos}}",
@@ -548,7 +554,7 @@
     "balances": {
       "available": "Disponible",
       "availableHint": "Listo para retirar",
-      "escrow": "Retenido en garantía",
+      "escrow": "Retenido en garantía (total cobrado)",
       "escrowOrders": "{count, plural, =0 {Sin órdenes activas} one {# orden activa} other {# órdenes activas}}",
       "commission": "Comisión del mes",
       "commissionHint": "Acumulado del mes en curso",
@@ -559,7 +565,7 @@
     "columns": {
       "customer": "Cliente",
       "concept": "Concepto",
-      "amount": "Monto",
+      "amount": "Total cobrado",
       "method": "Método",
       "status": "Estado",
       "date": "Fecha",
@@ -676,7 +682,7 @@
       "branch": "Sucursal",
       "noBranch": "Sin sucursal",
       "total": "Total cobrado al cliente",
-      "providerAmount": "Monto del servicio",
+      "providerAmount": "Monto de la orden",
       "serviceFee": "Tarifa de servicio",
       "commission": "Comisión ({percent}%)",
       "refunded": "Reembolsado",
@@ -1570,6 +1576,23 @@
       "offerWithdrawn": "Oferta retirada.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
     },
-    "targeted": "Para ti"
+    "targeted": "Para ti",
+    "locked": {
+      "title": "Las solicitudes aún no están disponibles"
+    }
+  },
+  "businessStatusBanner": {
+    "pending": {
+      "title": "Tu negocio está en revisión",
+      "description": "Nuestro equipo está validando tu información. Mientras tanto puedes explorar el panel y preparar tu perfil; podrás publicar servicios y productos, crear links de cobro, cotizar solicitudes y gestionar tu equipo en cuanto aprobemos tu negocio. Te avisaremos por correo."
+    },
+    "suspended": {
+      "title": "Tu negocio está suspendido",
+      "description": "Puedes consultar tu información, pero no crear ni modificar registros ni recibir órdenes nuevas. Contacta a soporte para conocer el motivo y reactivar tu cuenta."
+    },
+    "rejected": {
+      "title": "Tu solicitud no fue aprobada",
+      "description": "Puedes consultar tu información, pero no operar en HOME360. Contacta a soporte si crees que se trata de un error."
+    }
   }
 }

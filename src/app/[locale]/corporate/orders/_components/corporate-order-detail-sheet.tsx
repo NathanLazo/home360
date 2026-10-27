@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { XIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateOrderDetailActions } from "./corporate-order-detail-actions";
 import { CorporateOrderEvidence } from "./corporate-order-evidence";
@@ -83,7 +84,7 @@ export function CorporateOrderDetailSheet({
   const t = useTranslations("corporate.orders.detail");
   const statusT = useTranslations("corporate.orderStatus");
   const typeT = useTranslations("corporate.orderType");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const query = api.corporate.getOrder.useQuery(
     { orderId: orderId ?? "" },
     { enabled: orderId !== null },

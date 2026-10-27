@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { BanknoteArrowDownIcon, LinkIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useSearchParams } from "next/navigation";
 
 import { CreatePaymentLinkDialog } from "./create-payment-link-dialog";
 import { WithdrawDialog } from "./withdraw-dialog";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { Button } from "~/components/ui/button";
 import { usePathname, useRouter } from "~/i18n/navigation";
 import { api } from "~/trpc/react";
@@ -18,9 +22,9 @@ export function PaymentsHeaderActions({
   availableCents: number | null;
 }) {
   const t = useTranslations("dashboard.payments.actions");
-  const readOnlyT = useTranslations("dashboard.subscription.readOnly");
+  const readOnlyNotice = useReadOnlyNotice();
   const { isReadOnly } = useSubscriptionAccess();
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const searchParams = useSearchParams();
@@ -69,7 +73,7 @@ export function PaymentsHeaderActions({
         variant="outline"
         onClick={() => setLinkDialogOpen(true)}
         disabled={isReadOnly}
-        title={isReadOnly ? readOnlyT("actionDisabled") : undefined}
+        title={isReadOnly ? readOnlyNotice : undefined}
       >
         <LinkIcon aria-hidden="true" />
         {t("createLink")}
@@ -84,7 +88,7 @@ export function PaymentsHeaderActions({
         disabled={!canWithdraw || isReadOnly}
         title={
           isReadOnly
-            ? readOnlyT("actionDisabled")
+            ? readOnlyNotice
             : payoutsReady
               ? undefined
               : t("withdrawNeedsConnect")

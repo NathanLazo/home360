@@ -8,8 +8,10 @@ import {
   quoteStatusFilterSchema,
   type QuoteStatusFilter,
 } from "./orders.schema";
+import { QuotingLockedState } from "./quoting-locked-state";
 import { RequestDetailSheet } from "./request-detail-sheet";
 import { useOfferMutations } from "./use-offer-mutations";
+import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { SectionError } from "~/components/section-error";
 import { TableSkeleton } from "~/components/table-skeleton";
 import { Card, CardContent } from "~/components/ui/card";
@@ -39,10 +41,13 @@ export function OffersPanel({
   const statusT = useTranslations("dashboard.requests.offerStatus");
   const [status, setStatus] = useState<QuoteStatusFilter | undefined>();
   const mutations = useOfferMutations();
+  const { isReadOnly } = useSubscriptionAccess();
   const workersQuery = api.service.listWorkers.useQuery();
   const listQuery = api.quote.listMine.useInfiniteQuery(
     status ? { status } : {},
     {
+      // `quote.listMine` is an `activeBusinessProcedure`: skip the 403.
+      enabled: !isReadOnly,
       getNextPageParam: (lastPage) => lastPage.result?.nextCursor ?? undefined,
     },
   );
@@ -52,6 +57,10 @@ export function OffersPanel({
   const errorCode =
     responseError ?? (listQuery.error ? toErrorCode(listQuery.error) : null);
   const quotes = pages?.flatMap((page) => page.result?.items ?? []) ?? [];
+
+  if (isReadOnly) {
+    return <QuotingLockedState />;
+  }
 
   return (
     <>

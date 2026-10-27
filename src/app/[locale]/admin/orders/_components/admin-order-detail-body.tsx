@@ -8,7 +8,8 @@ import {
   ScaleIcon,
   StarIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { AdminOrderPhotoGrid } from "./admin-order-photo-grid";
 import { AdminOrderStatusBadge } from "./admin-order-status-badge";
@@ -82,7 +83,7 @@ export function AdminOrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
   const paymentT = useTranslations("admin.paymentStatus");
   const disputeStatusT = useTranslations("admin.disputeStatus");
   const resolutionT = useTranslations("admin.disputes.resolutions");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = useCurrencyFormatter();
   const dateTime = (value: Date) =>
     formatter.dateTime(value, { dateStyle: "medium", timeStyle: "short" });

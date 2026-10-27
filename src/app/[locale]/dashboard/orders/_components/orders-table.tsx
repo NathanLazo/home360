@@ -6,7 +6,8 @@ import {
   PackageIcon,
   WrenchIcon,
 } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { OrderFulfillmentBadge } from "./order-fulfillment-badge";
 import { OrderStatusBadge } from "./order-status-badge";
@@ -36,7 +37,7 @@ export function OrdersTable({
 }) {
   const t = useTranslations("dashboard.orders");
   const statusT = useTranslations("dashboard.orderStatus");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const currency = (cents: number) =>
     formatter.number(cents / 100, {
       style: "currency",
@@ -142,11 +143,7 @@ export function OrdersTable({
           dateTime={order.createdAt.toISOString()}
           className="text-muted-foreground text-copy-sm tabular-nums"
         >
-          {formatter.dateTime(order.createdAt, {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
+          {formatter.dateTime(order.createdAt, "shortDate")}
         </time>
       ),
     },

@@ -10,7 +10,9 @@ import {
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { intlLocaleFor } from "~/i18n/intl-locale";
+import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useState } from "react";
 
 import { ConversationPanel } from "./conversation-panel";
@@ -68,7 +70,7 @@ export function OrderDetailSheet({
   const statusT = useTranslations("dashboard.orderStatus");
   const errorsT = useTranslations("errors");
   const conversationT = useTranslations("dashboard.orders.conversation");
-  const formatter = useFormatter();
+  const formatter = useAppFormatter();
   const locale = useLocale();
   const [conversationOpen, setConversationOpen] = useState(false);
   const orderId = order?.id ?? null;
@@ -77,13 +79,13 @@ export function OrderDetailSheet({
   useEffect(() => {
     setConversationOpen(false);
   }, [orderId]);
-  const exactCurrencyFormatter = new Intl.NumberFormat(locale, {
+  const exactCurrencyFormatter = new Intl.NumberFormat(intlLocaleFor(locale), {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  const integerFormatter = new Intl.NumberFormat(locale, {
+  const integerFormatter = new Intl.NumberFormat(intlLocaleFor(locale), {
     useGrouping: true,
     maximumFractionDigits: 0,
   });
