@@ -41,6 +41,7 @@ const AREA_SCOPE: Record<AgentArea, string> = {
 const AREA_HINTS: Record<AgentArea, string> = {
   business: `- Para desempeño empieza por getDashboardKpis; para dinero usa getBalances (escrow retenido, disponible, pendiente) antes de hablar de retiros.
 - Los ids de sucursal, trabajador y producto se obtienen con listBranches, listTeam/listServiceWorkers y listProducts; nunca los inventes.
+- Carga masiva de inventario: el usuario adjunta un Excel (.xlsx) o CSV en este chat con columnas Nombre, SKU, Categoría, Precio (pesos) y Stock (Mínimo opcional). Ubica el archivo con listChatAttachments, revísalo con previewInventoryImport y muestra el resumen (filas válidas, errores con su número de fila, muestra); pregunta la sucursal (listBranches) y, solo tras confirmación explícita en un turno posterior, ejecuta importInventorySpreadsheet. Los SKU nuevos quedan en borrador y los existentes se actualizan.
 - El plan limita sucursales, trabajadores y productos: si una creación devuelve PLAN_LIMIT_REACHED, explica el límite y sugiere revisar la suscripción.
 - BUSINESS_NOT_ACTIVE o FORBIDDEN en una escritura suele significar negocio no aprobado o suscripción cancelada: la lectura sigue disponible.`,
   corporate: `- Para gasto empieza por getOverview (mes YYYY-MM); para una orden concreta usa getOrder antes de confirmar entrega, pedir retrabajo o disputar.

@@ -45,7 +45,9 @@ import {
   orderAssignWorkerSchema,
   orderCancelSchema,
 } from "~/server/services/orders/order.schema";
+import type { AgentAttachmentStore } from "../agent-attachments";
 import { runTool, toDate, type AgentCaller } from "../tool-runtime";
+import { createInventoryImportTools } from "./inventory-import-tools";
 
 const cuid = recordIdSchema;
 const cursor = cuid.optional().describe("Cursor from the previous page.");
@@ -61,9 +63,12 @@ const isoDate = z
  * Business (dashboard) catalog. Every tool delegates to the `business*`
  * procedures, so tenant scoping, plan limits, subscription state and the
  * impersonation read-only rule are enforced by tRPC, never here. There are no
- * delete tools on purpose.
+ * delete tools on purpose. `attachments` feed the spreadsheet inventory import.
  */
-export function createBusinessTools(caller: AgentCaller) {
+export function createBusinessTools(
+  caller: AgentCaller,
+  attachments: AgentAttachmentStore,
+) {
   return {
     // Dashboard
     getDashboardKpis: tool({
@@ -252,6 +257,7 @@ export function createBusinessTools(caller: AgentCaller) {
       inputSchema: productAdjustStockSchema,
       execute: (input) => runTool(() => caller.product.adjustStock(input)),
     }),
+    ...createInventoryImportTools(caller, attachments),
     setProductStatus: tool({
       description: "Publish or unpublish a product (DRAFT or PUBLISHED).",
       inputSchema: z.object({

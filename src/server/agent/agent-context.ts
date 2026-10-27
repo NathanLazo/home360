@@ -73,17 +73,31 @@ function compactToolMessage(
   };
 }
 
+/** Media the providers read natively; anything else (Excel) is tool-only. */
+function isModelReadable(mediaType: string): boolean {
+  return (
+    mediaType.startsWith("image/") ||
+    mediaType.startsWith("text/") ||
+    mediaType === "application/pdf"
+  );
+}
+
 /**
- * Files of past turns already did their job for the model; their bytes stay
- * available to the receipt tools through the attachment store (filename).
+ * Replaces file parts with a short note. Past turns drop every file (they
+ * already did their job for the model); the current turn only drops files the
+ * provider cannot read, which would otherwise fail the whole request. Their
+ * bytes stay available to the tools through the attachment store (filename).
  */
-function stripPastFiles(message: ModelMessage): ModelMessage {
+function stripFiles(
+  message: ModelMessage,
+  keepReadable: boolean,
+): ModelMessage {
   if (message.role !== "user" || typeof message.content === "string") {
     return message;
   }
 
   const content: UserContent = message.content.map((part) =>
-    part.type === "file"
+    part.type === "file" && !(keepReadable && isModelReadable(part.mediaType))
       ? {
           type: "text" as const,
           text: `[Attached file "${part.filename ?? "unnamed"}" (${part.mediaType}); tools can use it by filename.]`,
@@ -108,7 +122,8 @@ function lastUserIndex(messages: readonly ModelMessage[]): number {
  * Keeps the prompt of every agent step inside the budget:
  *
  * 1. Past turns: tool results shrink to a preview and attached files become a
- *    short note (the base64 would otherwise travel on every turn).
+ *    short note (the base64 would otherwise travel on every turn). Files the
+ *    provider cannot read (Excel) become that note in every turn.
  * 2. Current turn over budget: older tool results of this turn shrink too,
  *    keeping the latest ones intact.
  * 3. Still over budget: the oldest turns are dropped whole, always cutting at
@@ -121,8 +136,8 @@ export function compactAgentMessages(
 
   let compacted = messages.map((message, index) =>
     index < currentTurnStart
-      ? stripPastFiles(compactToolMessage(message, PAST_TOOL_RESULT_CHARS))
-      : message,
+      ? stripFiles(compactToolMessage(message, PAST_TOOL_RESULT_CHARS), false)
+      : stripFiles(message, true),
   );
 
   if (sizeOf(compacted) <= MAX_CONTEXT_CHARS) {
