@@ -1531,7 +1531,20 @@
       "scheduledAtError": "Elige una fecha y hora futuras.",
       "messageLabel": "Mensaje para el cliente (opcional)",
       "messagePlaceholder": "Incluye qué cubre el precio, materiales o garantía…",
-      "messageCount": "{count}/{max}"
+      "messageCount": "{count}/{max}",
+      "prefilledHint": "Llenamos la oferta con el técnico, precio y horario que mejor encajan. Revísala y envíala.",
+      "noWorkersAction": "Ir a Equipo",
+      "suggestions": {
+        "label": "Precios sugeridos",
+        "service": "Tu servicio",
+        "min": "Mínimo",
+        "mid": "Sugerido",
+        "max": "Máximo"
+      },
+      "priceWarning": {
+        "tooHigh": "Este precio es mucho mayor que el estimado por la IA. ¿Le sobra un cero?",
+        "tooLow": "Este precio es mucho menor que el estimado por la IA. ¿Le falta un cero?"
+      }
     },
     "offers": {
       "loading": "Cargando ofertas",

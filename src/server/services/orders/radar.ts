@@ -14,6 +14,7 @@ import {
 import { approximateCoordinate } from "~/server/services/geo/approximate";
 import { createDownloadUrl } from "~/server/services/media/blob";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
+import { buildOfferDraft, type OfferDraft } from "./offer-draft";
 import {
   getEffectiveRadiusKm,
   listBusinessCategories,
@@ -292,6 +293,11 @@ export type RadarRequestDetail = RadarRequestItem & {
   quotable: boolean;
   /** The business's own quote on this request, if any (P-WEB-02). */
   ownQuote: RadarOwnQuote | null;
+  /**
+   * Smart defaults for a first offer (worker, price, slot); null once an own
+   * quote exists (the form pre-fills from it) or when not quotable.
+   */
+  offerDraft: OfferDraft | null;
 };
 
 /**
@@ -329,6 +335,8 @@ export async function getRadarRequest(
       createdAt: true,
       expiresAt: true,
       targetBusinessId: true,
+      targetServiceId: true,
+      suggestedServiceId: true,
       status: true,
       customerId: true,
       customer: { select: { name: true } },
@@ -387,10 +395,32 @@ export async function getRadarRequest(
         )
       : 0;
 
-  const evidence = await signEvidence(db, {
-    userId: input.userId,
-    photoUrls: request.photoUrls,
-  });
+  const quotable =
+    onRadar &&
+    (ownQuote === null ||
+      ownQuote.status === QuoteStatus.PENDING ||
+      ownQuote.status === QuoteStatus.WITHDRAWN);
+
+  const [evidence, offerDraft] = await Promise.all([
+    signEvidence(db, {
+      userId: input.userId,
+      photoUrls: request.photoUrls,
+    }),
+    quotable && ownQuote === null
+      ? buildOfferDraft(db, {
+          businessId: input.businessId,
+          branchId: branch.ok ? branch.data.id : null,
+          request: {
+            category: request.category,
+            aiUrgency: request.aiUrgency,
+            aiMinPriceCents: request.aiMinPriceCents,
+            aiMaxPriceCents: request.aiMaxPriceCents,
+            targetServiceId: request.targetServiceId,
+            suggestedServiceId: request.suggestedServiceId,
+          },
+        })
+      : Promise.resolve(null),
+  ]);
 
   return svcOk({
     id: request.id,
@@ -415,11 +445,8 @@ export async function getRadarRequest(
     ),
     evidence,
     status: request.status,
-    quotable:
-      onRadar &&
-      (ownQuote === null ||
-        ownQuote.status === QuoteStatus.PENDING ||
-        ownQuote.status === QuoteStatus.WITHDRAWN),
+    quotable,
+    offerDraft,
     ownQuote: ownQuote
       ? {
           id: ownQuote.id,

@@ -1,9 +1,22 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { LoaderCircleIcon, SendIcon } from "lucide-react";
+import {
+  LoaderCircleIcon,
+  SendIcon,
+  SparklesIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import {
+  centsToPesos,
+  pesosToCents,
+  priceWarning,
+  type AiPriceRange,
+  type PriceSuggestion,
+} from "./offer-price";
+import { OfferPriceSuggestions } from "./offer-price-suggestions";
 import {
   OFFER_MESSAGE_MAX,
   offerFormSchema,
@@ -23,6 +36,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { Link } from "~/i18n/navigation";
 
 export type ParsedOffer = {
   workerId: string;
@@ -54,6 +68,10 @@ export const EMPTY_OFFER: OfferFormValues = {
  * optional note for the customer. Validates with the same bounds the server
  * enforces before calling `quote.submit`. `initialValues` is read once:
  * callers remount with a `key` when the stored offer changes.
+ *
+ * Friction removers: `prefilled` flags values taken from the server draft,
+ * price pills fill the amount in one tap, and a soft warning catches
+ * amounts far outside the AI range (an extra or missing zero).
  */
 export function OfferForm({
   initialValues,
@@ -61,9 +79,15 @@ export function OfferForm({
   submitting,
   disabled,
   submitLabel,
+  prefilled,
+  priceRange,
+  suggestions,
   onSubmit,
 }: {
   initialValues: OfferFormValues;
+  prefilled: boolean;
+  priceRange: AiPriceRange | null;
+  suggestions: PriceSuggestion[];
   workers: WorkerOption[];
   submitting: boolean;
   disabled: boolean;
@@ -79,6 +103,7 @@ export function OfferForm({
   const shakeInvalid = useErrorShake();
   const fieldId = (field: OfferFormField) => `${baseId}-${field}`;
   const errorId = (field: OfferFormField) => `${baseId}-${field}-error`;
+  const priceWarningId = `${baseId}-price-warning`;
 
   function update(field: OfferFormField, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -124,9 +149,20 @@ export function OfferForm({
   }
 
   const busy = submitting || disabled;
+  const priceCents = pesosToCents(values.price);
+  const warning = errors.price ? null : priceWarning(priceCents, priceRange);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      {prefilled ? (
+        <p className="bg-canvas-soft text-muted-foreground text-copy-sm inline-flex items-start gap-2 rounded-lg border px-3 py-2.5">
+          <SparklesIcon
+            aria-hidden="true"
+            className="mt-0.5 size-3.5 shrink-0"
+          />
+          {t("prefilledHint")}
+        </p>
+      ) : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor={fieldId("workerId")}>{t("workerLabel")}</Label>
         {workers.length > 0 ? (
@@ -154,7 +190,15 @@ export function OfferForm({
             </SelectContent>
           </Select>
         ) : (
-          <p className="text-muted-foreground text-copy-sm">{t("noWorkers")}</p>
+          <p className="text-muted-foreground text-copy-sm">
+            {t("noWorkers")}{" "}
+            <Link
+              href="/dashboard/team"
+              className="text-foreground font-medium underline underline-offset-4"
+            >
+              {t("noWorkersAction")}
+            </Link>
+          </p>
         )}
         {errors.workerId ? (
           <p
@@ -180,10 +224,35 @@ export function OfferForm({
             disabled={busy}
             placeholder={t("pricePlaceholder")}
             aria-invalid={errors.price}
-            aria-describedby={errors.price ? errorId("price") : undefined}
+            aria-describedby={
+              errors.price
+                ? errorId("price")
+                : warning
+                  ? priceWarningId
+                  : undefined
+            }
             onChange={(event) => update("price", event.target.value)}
             className="font-mono tabular-nums"
           />
+          <OfferPriceSuggestions
+            suggestions={suggestions}
+            selectedCents={priceCents}
+            disabled={busy}
+            onPick={(cents) => update("price", centsToPesos(cents))}
+          />
+          {warning ? (
+            <p
+              id={priceWarningId}
+              aria-live="polite"
+              className="text-warning-deep text-copy-sm inline-flex items-start gap-1.5"
+            >
+              <TriangleAlertIcon
+                aria-hidden="true"
+                className="mt-0.5 size-3.5 shrink-0"
+              />
+              {t(`priceWarning.${warning}`)}
+            </p>
+          ) : null}
           {errors.price ? (
             <p
               id={errorId("price")}

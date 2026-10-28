@@ -1531,7 +1531,20 @@
       "scheduledAtError": "Choose a future date and time.",
       "messageLabel": "Message to the customer (optional)",
       "messagePlaceholder": "Include what the price covers, materials or warranty…",
-      "messageCount": "{count}/{max}"
+      "messageCount": "{count}/{max}",
+      "prefilledHint": "We filled in the best-fitting technician, price and time. Review it and send.",
+      "noWorkersAction": "Go to Team",
+      "suggestions": {
+        "label": "Suggested prices",
+        "service": "Your service",
+        "min": "Low",
+        "mid": "Suggested",
+        "max": "High"
+      },
+      "priceWarning": {
+        "tooHigh": "This price is far above the AI estimate. An extra zero?",
+        "tooLow": "This price is far below the AI estimate. A missing zero?"
+      }
     },
     "offers": {
       "loading": "Loading offers",

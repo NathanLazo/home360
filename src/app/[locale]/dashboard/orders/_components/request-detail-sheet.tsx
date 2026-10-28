@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 
 import { ConversationPanel } from "./conversation-panel";
 import { EMPTY_OFFER, OfferForm, toDateTimeLocal } from "./offer-form";
+import { centsToPesos, priceSuggestions, toAiPriceRange } from "./offer-price";
 import type { RadarRequestDetail, WorkerOption } from "./order.types";
 import type { OfferFormValues } from "./orders.schema";
 import { RequestEvidenceGrid } from "./request-evidence-grid";
@@ -37,10 +38,35 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
 
-function offerDefaults(request: RadarRequestDetail | null): OfferFormValues {
-  const quote = request?.ownQuote;
+/** Single selectable technician: nothing to decide, pick it. */
+function soleWorkerId(workers: WorkerOption[]): string {
+  return workers.length === 1 ? (workers[0]?.id ?? "") : "";
+}
 
-  if (!quote) return EMPTY_OFFER;
+function offerDefaults(
+  request: RadarRequestDetail | null,
+  workers: WorkerOption[],
+): OfferFormValues {
+  const quote = request?.ownQuote;
+  const draft = request?.offerDraft;
+
+  if (!quote && draft) {
+    const draftWorker = workers.some((worker) => worker.id === draft.workerId)
+      ? (draft.workerId ?? "")
+      : soleWorkerId(workers);
+
+    return {
+      workerId: draftWorker,
+      price: draft.priceCents !== null ? centsToPesos(draft.priceCents) : "",
+      scheduledAt:
+        draft.scheduledAt.getTime() > Date.now()
+          ? toDateTimeLocal(draft.scheduledAt)
+          : "",
+      message: "",
+    };
+  }
+
+  if (!quote) return { ...EMPTY_OFFER, workerId: soleWorkerId(workers) };
 
   return {
     workerId: quote.workerId ?? "",
@@ -111,9 +137,20 @@ export function RequestDetailSheet({
   }, [requestId]);
   // Remount the form only when the stored offer changes, never on a plain
   // background refetch (it would wipe what the user is typing).
+  // Workers arrive in parallel: re-seed the (untouched) draft once they load.
   const offerFormKey = ownQuote
     ? `${ownQuote.id}:${ownQuote.status}:${ownQuote.updatedAt.getTime()}`
-    : (request?.id ?? "none");
+    : `${request?.id ?? "none"}:${workers.length}`;
+  const priceRange = request
+    ? toAiPriceRange(request.aiMinPriceCents, request.aiMaxPriceCents)
+    : null;
+  const suggestions = priceSuggestions({
+    range: priceRange,
+    serviceCents:
+      request?.offerDraft?.priceSource === "SERVICE"
+        ? request.offerDraft.priceCents
+        : null,
+  });
   const submitLabel = t(
     ownQuote?.status === "PENDING"
       ? "updateOffer"
@@ -338,7 +375,10 @@ export function RequestDetailSheet({
                 {request.quotable ? (
                   <OfferForm
                     key={offerFormKey}
-                    initialValues={offerDefaults(request)}
+                    initialValues={offerDefaults(request, workers)}
+                    prefilled={ownQuote === null && request.offerDraft !== null}
+                    priceRange={priceRange}
+                    suggestions={suggestions}
                     workers={workers}
                     submitting={mutations.submitting}
                     disabled={isReadOnly}
