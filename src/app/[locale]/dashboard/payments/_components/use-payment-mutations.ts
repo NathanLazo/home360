@@ -9,14 +9,15 @@ import type {
   CreatedPaymentLink,
   RequestWithdrawalInput,
 } from "./payment.types";
+import { toErrorCode } from "~/lib/trpc-errors";
 import { api } from "~/trpc/react";
 
 /**
  * TanStack's `onSuccess` only means the transport succeeded. Domain outcome
  * lives in the `TrpcResponse` envelope, so every mutation is unwrapped here:
  * `error === null && result !== null` is the only success, a stable `error`
- * code is translated from `errors.json`, and a thrown request is the sole
- * responsibility of the `catch`.
+ * code is translated from `errors.json`, and a thrown request (role guard,
+ * read-only impersonation, network) is mapped by `toErrorCode` in the `catch`.
  */
 function unwrap<TResult>(response: {
   result: TResult | null;
@@ -32,6 +33,11 @@ export function usePaymentMutations() {
 
   function reportFailure(code: string | null) {
     toast.error(code === null ? t("unexpectedError") : errorsT(code));
+  }
+
+  function reportThrown(error: unknown) {
+    const code = toErrorCode(error);
+    reportFailure(code === "UNKNOWN_ERROR" ? null : code);
   }
 
   async function invalidateMoney() {
@@ -63,8 +69,8 @@ export function usePaymentMutations() {
       // Stripe-hosted onboarding lives outside the app, so this is a full
       // document navigation rather than a client-side route change.
       window.location.href = created.url;
-    } catch {
-      reportFailure(null);
+    } catch (error) {
+      reportThrown(error);
     }
   }
 
@@ -81,8 +87,8 @@ export function usePaymentMutations() {
       await utils.payment.getConnectStatus.invalidate();
 
       return status;
-    } catch {
-      reportFailure(null);
+    } catch (error) {
+      reportThrown(error);
       return null;
     }
   }
@@ -105,8 +111,8 @@ export function usePaymentMutations() {
       ]);
 
       return created;
-    } catch {
-      reportFailure(null);
+    } catch (error) {
+      reportThrown(error);
       return null;
     }
   }
@@ -126,8 +132,8 @@ export function usePaymentMutations() {
       toast.success(t("withdraw.success"));
 
       return true;
-    } catch {
-      reportFailure(null);
+    } catch (error) {
+      reportThrown(error);
       return false;
     }
   }
@@ -145,8 +151,8 @@ export function usePaymentMutations() {
       toast.success(t("paymentLinks.deactivate.success"));
 
       return true;
-    } catch {
-      reportFailure(null);
+    } catch (error) {
+      reportThrown(error);
       return false;
     }
   }
