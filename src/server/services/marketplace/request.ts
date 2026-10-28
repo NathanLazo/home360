@@ -621,3 +621,43 @@ export async function hideMyRequest(
 
   return svcOk({ id: request.id });
 }
+
+/** Hard cap on `ServiceRequest.customerNotes` (§4); the router enforces it too. */
+export const CUSTOMER_NOTES_MAX_LENGTH = 2_000;
+
+/**
+ * Customer notes on the AI diagnosis (§4): free text the business reads next
+ * to the diagnosis on the radar. Owner only; a foreign or soft-hidden request
+ * answers NOT_FOUND. The text is trimmed and an empty note clears it (null).
+ */
+export async function updateMyRequestNotes(
+  db: PrismaClient,
+  input: { customerId: string; id: string; notes: string },
+): Promise<
+  ServiceResult<
+    { id: string; customerNotes: string | null },
+    "VALIDATION_ERROR"
+  >
+> {
+  const notes = input.notes.trim();
+
+  if (notes.length > CUSTOMER_NOTES_MAX_LENGTH) {
+    return svcFail("VALIDATION_ERROR", "Notes are too long");
+  }
+
+  const customerNotes = notes.length > 0 ? notes : null;
+  const updated = await db.serviceRequest.updateMany({
+    where: {
+      id: input.id,
+      customerId: input.customerId,
+      hiddenByCustomerAt: null,
+    },
+    data: { customerNotes },
+  });
+
+  if (updated.count === 0) {
+    return svcFail("NOT_FOUND", "Request not found");
+  }
+
+  return svcOk({ id: input.id, customerNotes });
+}

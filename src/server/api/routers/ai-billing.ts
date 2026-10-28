@@ -5,7 +5,7 @@ import { recordIdSchema } from "~/schemas/record-id.schema";
 import { env } from "~/env";
 import { splitLocaleFromPathname, type Locale } from "~/i18n/locale-pathname";
 import { routing } from "~/i18n/routing";
-import { agentAreaForRole, type AgentArea } from "~/lib/agent/agent-area";
+import { panelAreaForRole, type PanelAgentArea } from "~/lib/agent/agent-area";
 import {
   fail,
   normalizeError,
@@ -53,7 +53,7 @@ const createCheckoutSchema = z.object({
 
 /** Same guard as the assistant: only panel roles have a wallet or a ledger. */
 const aiBillingProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const area = agentAreaForRole(ctx.session.user.role);
+  const area = panelAreaForRole(ctx.session.user.role);
 
   if (!area) {
     throw new TRPCError({ code: "FORBIDDEN" });
@@ -107,8 +107,12 @@ function localeFromHeaders(headers: Headers): Locale {
 }
 
 /** Profile page of the area, where the wallet lives. */
-function profileUrl(locale: Locale, area: AgentArea, query: string): string {
-  const base: Record<AgentArea, string> = {
+function profileUrl(
+  locale: Locale,
+  area: PanelAgentArea,
+  query: string,
+): string {
+  const base: Record<PanelAgentArea, string> = {
     business: "/dashboard/settings/profile",
     corporate: "/corporate/settings/profile",
     admin: "/admin/settings/profile",

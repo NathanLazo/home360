@@ -71,6 +71,9 @@ export const DOMAIN_ERROR_CODES = [
   // Self-service account deletion blockers (money or work still in flight).
   "ACCOUNT_HAS_ACTIVE_ORDERS",
   "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION",
+  // §3 geo: provider not configured/reachable; address outside coverage.
+  "GEO_UNAVAILABLE",
+  "LOCATION_OUT_OF_COVERAGE",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

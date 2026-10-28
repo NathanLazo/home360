@@ -37,7 +37,7 @@ const VIDEO_CONTENT_TYPES = ["video/mp4", "video/quicktime"] as const;
 
 /**
  * Upload policy per kind. Sizes/types come from the M0-W3 spec: photos and
- * chat attachments are images up to 10 MB, request videos up to 60 MB and
+ * chat attachments are images (attachments also PDFs) up to 10 MB, request videos up to 60 MB and
  * job recordings (T2) up to 2 GB.
  */
 const MEDIA_POLICIES: Record<
@@ -54,8 +54,9 @@ const MEDIA_POLICIES: Record<
   },
   evidence: { allowedContentTypes: IMAGE_CONTENT_TYPES, maxSizeBytes: 10 * MB },
   recording: { allowedContentTypes: VIDEO_CONTENT_TYPES, maxSizeBytes: 2 * GB },
+  // Images (chat photos) and PDFs (documents shared with the concierge).
   chatAttachment: {
-    allowedContentTypes: IMAGE_CONTENT_TYPES,
+    allowedContentTypes: [...IMAGE_CONTENT_TYPES, "application/pdf"],
     maxSizeBytes: 10 * MB,
   },
 };
@@ -67,6 +68,7 @@ const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {
   "image/webp": "webp",
   "video/mp4": "mp4",
   "video/quicktime": "mov",
+  "application/pdf": "pdf",
 };
 
 /** Upload URLs stay valid long enough for a 2 GB recording upload. */

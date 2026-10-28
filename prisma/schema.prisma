@@ -668,6 +668,9 @@ model ServiceRequest {
   // Soft delete by the customer: hidden from their list/detail, kept for
   // traceability (quotes, conversations and audits still reference it).
   hiddenByCustomerAt  DateTime?
+  // Free-text notes the customer adds to the AI diagnosis (<= 2000 chars);
+  // the business sees them next to the diagnosis on the radar.
+  customerNotes       String?
   quotes              Quote[]
   conversations       Conversation[]
   createdAt           DateTime           @default(now())
@@ -1340,6 +1343,8 @@ model Address {
   neighborhood String?
   latitude     Float
   longitude    Float
+  // Google Places id when the address was picked from autocomplete (geo.resolve).
+  placeId      String?
   isDefault    Boolean  @default(false)
   createdAt    DateTime @default(now())
 
@@ -1463,6 +1468,8 @@ enum AgentArea {
   BUSINESS
   CORPORATE
   ADMIN
+  // Mobile customer concierge (Don Víctor); customers have no web panel.
+  CUSTOMER
 }
 
 /// AI assistant thread (F8). `messages` is the full UIMessage[] snapshot

@@ -58,6 +58,9 @@ export const env = createEnv({
     // F10 (D10-2): HMAC key deriving the PICKUP QR code from the order id.
     // Optional in dev/previews (pickup readiness fails with a stable code).
     PICKUP_CODE_SECRET: requiredInProduction,
+    // Google Places API (New) + Geocoding (§3 geo). Optional: without it the
+    // geo router answers GEO_UNAVAILABLE and the app uses its native geocoder.
+    GOOGLE_MAPS_API_KEY: z.string().optional(),
   },
 
   /**
@@ -102,6 +105,7 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_CONNECT_WEBHOOK_SECRET: process.env.STRIPE_CONNECT_WEBHOOK_SECRET,
     PICKUP_CODE_SECRET: process.env.PICKUP_CODE_SECRET,
+    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

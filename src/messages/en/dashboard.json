@@ -1469,6 +1469,7 @@
       "customerNoteTitle": "Customer note",
       "aiTitle": "AI diagnosis",
       "noDiagnosis": "No diagnosis available.",
+      "diagnosisNotesTitle": "Customer notes on the diagnosis",
       "priceRangeLabel": "Estimated range",
       "priceRangeValue": "{min} – {max}",
       "confidenceLabel": "Confidence",

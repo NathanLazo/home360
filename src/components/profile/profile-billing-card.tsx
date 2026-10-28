@@ -18,12 +18,12 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Link } from "~/i18n/navigation";
-import type { AgentArea } from "~/lib/agent/agent-area";
+import type { PanelAgentArea } from "~/lib/agent/agent-area";
 import type { EnvelopeState } from "~/lib/trpc-envelope";
 
 const CREDITS_PARAM = "credits";
 
-const INVOICES_HREF: Partial<Record<AgentArea, string>> = {
+const INVOICES_HREF: Partial<Record<PanelAgentArea, string>> = {
   business: "/dashboard/subscription",
   corporate: "/corporate/membership",
 };
@@ -41,7 +41,7 @@ export function ProfileBillingCard({
   onRetry,
   onPurchaseSettled,
 }: {
-  area: AgentArea;
+  area: PanelAgentArea;
   state: EnvelopeState<AiBillingSummary>;
   available: boolean;
   disabled: boolean;

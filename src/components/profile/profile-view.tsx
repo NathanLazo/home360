@@ -16,12 +16,12 @@ import { ProfileWorkspaceCard } from "./profile-workspace-card";
 import { useProfileMutations } from "./use-profile-mutations";
 import { PageHeader } from "~/components/page-header";
 import { SectionError } from "~/components/section-error";
-import type { AgentArea } from "~/lib/agent/agent-area";
+import type { PanelAgentArea } from "~/lib/agent/agent-area";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
 
 export type ProfileViewProps = {
-  area: AgentArea;
+  area: PanelAgentArea;
   /** True while an admin impersonates: every write is refused server-side. */
   readOnly: boolean;
   /** False without a gateway key: assistant and billing explain it. */

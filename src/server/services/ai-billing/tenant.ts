@@ -6,7 +6,7 @@ import { AI_WELCOME_CREDIT_USD_MICROS } from "~/lib/agent/agent-pricing";
 
 /**
  * Who pays for the assistant. Business and corporate owners pay from their
- * tenant wallet; admins are internal (no wallet, no charge).
+ * tenant wallet; admins and customers are internal (no wallet, no charge).
  */
 export type AiBillingTenant =
   | { kind: "business"; businessId: string }
@@ -44,7 +44,9 @@ export async function resolveAiBillingTenant(
         ? { kind: "corporate", corporateAccountId: account.id }
         : null;
     }
+    // Admins and the mobile customer concierge are absorbed by the platform.
     case "admin":
+    case "customer":
       return { kind: "internal" };
   }
 }

@@ -287,6 +287,8 @@ export type RadarRequestDetail = RadarRequestItem & {
    */
   customerId: string;
   description: string | null;
+  /** Notes the customer added to the AI diagnosis (§4), shown next to it. */
+  customerNotes: string | null;
   status: RequestStatus;
   /** Whether a new/revived offer can still be sent (P-WEB-02 / N2). */
   quotable: boolean;
@@ -316,6 +318,7 @@ export async function getRadarRequest(
       id: true,
       title: true,
       description: true,
+      customerNotes: true,
       category: true,
       aiDiagnosis: true,
       aiConfidencePct: true,
@@ -396,6 +399,7 @@ export async function getRadarRequest(
     id: request.id,
     title: request.title,
     description: request.description,
+    customerNotes: request.customerNotes,
     category: request.category,
     aiDiagnosis: request.aiDiagnosis,
     aiConfidencePct: request.aiConfidencePct,

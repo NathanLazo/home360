@@ -63,5 +63,7 @@
   "ORDER_EXPIRED": "This order expired before it was paid. Place the order again.",
   "EVIDENCE_REUSED": "One of these photos was already used as evidence on another order. Upload new photos.",
   "ACCOUNT_HAS_ACTIVE_ORDERS": "You have orders in progress. Finish or cancel them before deleting your account.",
-  "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION": "Cancel your business subscription before deleting your account."
+  "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION": "Cancel your business subscription before deleting your account.",
+  "GEO_UNAVAILABLE": "Address search isn't available right now. Type the address or try again in a moment.",
+  "LOCATION_OUT_OF_COVERAGE": "That location is outside our service area. For now we only serve addresses in Mexico."
 }

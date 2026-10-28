@@ -17,6 +17,7 @@ import { ConversationPanel } from "./conversation-panel";
 import { EMPTY_OFFER, OfferForm, toDateTimeLocal } from "./offer-form";
 import type { RadarRequestDetail, WorkerOption } from "./order.types";
 import type { OfferFormValues } from "./orders.schema";
+import { RequestDiagnosisNotes } from "./request-diagnosis-notes";
 import { RequestEvidenceGrid } from "./request-evidence-grid";
 import { RequestOwnOffer } from "./request-own-offer";
 import { useMoney } from "./use-money";
@@ -274,6 +275,7 @@ export function RequestDetailSheet({
                 <p className="text-copy-sm leading-relaxed">
                   {request.aiDiagnosis ?? t("noDiagnosis")}
                 </p>
+                <RequestDiagnosisNotes notes={request.customerNotes} />
                 <dl className="text-copy-sm mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
                   <dt className="text-muted-foreground">
                     {t("priceRangeLabel")}

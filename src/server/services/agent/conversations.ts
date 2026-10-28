@@ -16,6 +16,7 @@ const AREA_TO_PRISMA: Record<AgentArea, PrismaAgentArea> = {
   business: "BUSINESS",
   corporate: "CORPORATE",
   admin: "ADMIN",
+  customer: "CUSTOMER",
 };
 
 /** Newest threads first; the menu never needs more than this. */
