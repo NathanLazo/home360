@@ -82,6 +82,7 @@ const productSearchSelect = {
   name: true,
   category: true,
   priceCents: true,
+  imageUrl: true,
   businessId: true,
   business: { select: { name: true } },
 } satisfies Prisma.ProductSelect;
@@ -98,6 +99,8 @@ export type MarketplaceSearchItem = {
   priceCents: number;
   businessId: string;
   businessName: string;
+  /** Product photo; services have no image. */
+  imageUrl: string | null;
 };
 
 export type MarketplaceSearchResult = {
@@ -240,6 +243,7 @@ function serviceSearchItem(row: ServiceSearchRow): MarketplaceSearchItem {
     priceCents: row.basePriceCents,
     businessId: row.businessId,
     businessName: row.business.name,
+    imageUrl: null,
   };
 }
 
@@ -252,6 +256,7 @@ function productSearchItem(row: ProductSearchRow): MarketplaceSearchItem {
     priceCents: row.priceCents,
     businessId: row.businessId,
     businessName: row.business.name,
+    imageUrl: row.imageUrl,
   };
 }
 

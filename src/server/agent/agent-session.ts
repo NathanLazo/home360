@@ -13,7 +13,7 @@ export type AgentSession = {
 
 /**
  * Session guard of the assistant: a valid session whose role owns an area.
- * Customers and workers get `null` (they have no web panel). Impersonation
+ * Customers get the mobile concierge area; workers get `null`. Impersonation
  * passes through: tRPC keeps every mutation refused, and the prompt says so.
  */
 export async function resolveAgentSession(
@@ -60,6 +60,44 @@ export async function resolveAgentTenantName(
       return account?.name ?? null;
     }
     case "admin":
+    case "customer":
       return null;
   }
+}
+
+export type CustomerPromptContext = {
+  /** Bearer sessions carry no name, so it is read from the user row. */
+  userName: string | null;
+  defaultAddress: {
+    label: string;
+    neighborhood: string | null;
+    latitude: number;
+    longitude: number;
+  } | null;
+};
+
+/**
+ * Prompt context of the mobile concierge: the user's name and the default
+ * (else newest) saved address, so Don Víctor greets by name and can confirm
+ * where a project happens. Two indexed lookups scoped to the session user.
+ */
+export async function resolveCustomerPromptContext(
+  db: PrismaClient,
+  userId: string,
+): Promise<CustomerPromptContext> {
+  const [user, address] = await Promise.all([
+    db.user.findUnique({ where: { id: userId }, select: { name: true } }),
+    db.address.findFirst({
+      where: { userId },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+      select: {
+        label: true,
+        neighborhood: true,
+        latitude: true,
+        longitude: true,
+      },
+    }),
+  ]);
+
+  return { userName: user?.name ?? null, defaultAddress: address };
 }

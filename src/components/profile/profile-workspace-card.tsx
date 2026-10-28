@@ -13,11 +13,11 @@ import { useTranslations } from "next-intl";
 
 import { ProfileSectionCard } from "./profile-section-card";
 import { Link } from "~/i18n/navigation";
-import type { AgentArea } from "~/lib/agent/agent-area";
+import type { PanelAgentArea } from "~/lib/agent/agent-area";
 
 type WorkspaceLink = { key: string; href: string; icon: LucideIcon };
 
-const LINKS: Record<AgentArea, WorkspaceLink[]> = {
+const LINKS: Record<PanelAgentArea, WorkspaceLink[]> = {
   business: [
     { key: "settings", href: "/dashboard/settings", icon: SettingsIcon },
     {
@@ -40,7 +40,7 @@ const LINKS: Record<AgentArea, WorkspaceLink[]> = {
 };
 
 /** Outgoing links: what belongs to the tenant lives on its own screen. */
-export function ProfileWorkspaceCard({ area }: { area: AgentArea }) {
+export function ProfileWorkspaceCard({ area }: { area: PanelAgentArea }) {
   const t = useTranslations("profile.workspace");
 
   return (

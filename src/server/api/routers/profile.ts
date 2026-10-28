@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { agentAreaForRole } from "~/lib/agent/agent-area";
+import { panelAreaForRole } from "~/lib/agent/agent-area";
 import {
   removeDeviceSchema,
   setPasswordSchema,
@@ -33,7 +33,7 @@ import {
  * `protectedProcedure` (IMPERSONATION_READ_ONLY).
  */
 const profileProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (!agentAreaForRole(ctx.session.user.role)) {
+  if (!panelAreaForRole(ctx.session.user.role)) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
 

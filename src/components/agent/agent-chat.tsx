@@ -34,7 +34,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Link } from "~/i18n/navigation";
-import { agentProfileBillingHref, type AgentArea } from "~/lib/agent/agent-area";
+import {
+  agentProfileBillingHref,
+  type PanelAgentArea,
+} from "~/lib/agent/agent-area";
 import {
   AGENT_MODELS,
   DEFAULT_AGENT_MODEL_ID,
@@ -42,10 +45,7 @@ import {
   isAgentModelId,
   type AgentModelId,
 } from "~/lib/agent/agent-models";
-import {
-  formatUsdMicros,
-  turnCostUsdMicros,
-} from "~/lib/agent/agent-pricing";
+import { formatUsdMicros, turnCostUsdMicros } from "~/lib/agent/agent-pricing";
 import { EASE_OUT, SPRING_LAYOUT } from "~/lib/ease";
 import { cn } from "~/lib/utils";
 import type { AgentUIMessage } from "~/server/agent/home360-agent";
@@ -94,7 +94,7 @@ function writeThreadParam(id: string | null) {
 }
 
 export type AgentChatProps = {
-  area: AgentArea;
+  area: PanelAgentArea;
   /** True while an admin impersonates: writes are refused server-side. */
   readOnly: boolean;
   /** False when the gateway key is missing: the composer explains it. */
@@ -303,8 +303,7 @@ export function AgentChat({
     return null;
   }, [messages, model]);
 
-  const creditRequired =
-    error?.message.includes(CREDIT_REQUIRED_CODE) ?? false;
+  const creditRequired = error?.message.includes(CREDIT_REQUIRED_CODE) ?? false;
   const turnCost = usage
     ? formatUsdMicros(
         turnCostUsdMicros(model, {
@@ -508,7 +507,7 @@ export function AgentChat({
                     transparent and the page's tint wash must show through. */}
                 <MessageScroller
                   className={cn(
-                    "h-full min-h-0 pb-4 [mask-image:linear-gradient(to_bottom,transparent_1.25rem,black_5rem)]",
+                    "h-full min-h-0 [mask-image:linear-gradient(to_bottom,transparent_1.25rem,black_5rem)] pb-4",
                     isDock ? "px-3" : "pr-12 sm:pr-16",
                   )}
                   contentClassName={isDock ? "pt-4" : "pt-16"}

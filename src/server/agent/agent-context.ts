@@ -119,6 +119,31 @@ function lastUserIndex(messages: readonly ModelMessage[]): number {
 }
 
 /**
+ * The mobile concierge opens the thread with a greeting generated on the
+ * device (role `assistant`). Some providers reject a prompt that does not
+ * start with a user turn, so a short marker turn is prepended; the greeting
+ * itself stays in context so the model does not greet twice.
+ */
+function ensureUserFirst(messages: ModelMessage[]): ModelMessage[] {
+  const firstConversational = messages.find(
+    (message) => message.role !== "system",
+  );
+
+  if (firstConversational?.role !== "assistant") {
+    return messages;
+  }
+
+  return [
+    {
+      role: "user",
+      content:
+        "[Conversation opened in the app; the assistant greeting below was already shown to the user.]",
+    },
+    ...messages,
+  ];
+}
+
+/**
  * Keeps the prompt of every agent step inside the budget:
  *
  * 1. Past turns: tool results shrink to a preview and attached files become a
@@ -141,7 +166,7 @@ export function compactAgentMessages(
   );
 
   if (sizeOf(compacted) <= MAX_CONTEXT_CHARS) {
-    return compacted;
+    return ensureUserFirst(compacted);
   }
 
   const toolIndexes = compacted
@@ -170,5 +195,5 @@ export function compactAgentMessages(
     compacted = compacted.slice(nextUser);
   }
 
-  return compacted;
+  return ensureUserFirst(compacted);
 }

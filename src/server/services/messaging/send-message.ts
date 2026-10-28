@@ -49,7 +49,9 @@ export async function sendMessage(
       !input.attachmentPathname ||
       !isOwnedMediaPathname(input.attachmentPathname, input.senderId, [
         "chatAttachment",
-      ])
+      ]) ||
+      // chatAttachment also accepts PDFs (concierge documents); IMAGE only images.
+      input.attachmentPathname.toLowerCase().endsWith(".pdf")
     ) {
       return svcFail(
         "VALIDATION_ERROR",

@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import type { AgentArea } from "~/lib/agent/agent-area";
+import type { PanelAgentArea } from "~/lib/agent/agent-area";
 
 export type AgentDockChat = {
   key: string;
@@ -18,7 +18,7 @@ export type AgentDockChat = {
 };
 
 export type AgentDockState = {
-  area: AgentArea;
+  area: PanelAgentArea;
   /** True while an admin impersonates: writes are refused server-side. */
   readOnly: boolean;
   /** False when the gateway key is missing: the composer explains it. */
@@ -38,7 +38,7 @@ export type AgentDockState = {
 const AgentDockContext = createContext<AgentDockState | null>(null);
 
 export type AgentDockProviderProps = {
-  area: AgentArea;
+  area: PanelAgentArea;
   readOnly: boolean;
   available: boolean;
   children: ReactNode;

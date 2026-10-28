@@ -69,3 +69,51 @@ export function collectAgentAttachments(
 
   return store;
 }
+
+/** Scheme of the mobile app's uploaded-media references (`media:<pathname>`). */
+const MEDIA_REFERENCE_PREFIX = "media:";
+
+/**
+ * The mobile app uploads files first (`media.createUploadUrl` + PUT) and sends
+ * a file part whose url is `media:<blob pathname>`. Those private blobs are
+ * never handed to the model as files: each one becomes a text note carrying
+ * its pathname, which the customer tools (`diagnoseProject`,
+ * `createProjectRequest`) take as `mediaPathnames`. Ownership is re-checked by
+ * the tRPC procedures, so a forged pathname only yields a tool error.
+ */
+export function convertMediaReferences(
+  messages: readonly UIMessage[],
+): UIMessage[] {
+  return messages.map((message) => {
+    const hasReference = message.parts.some(
+      (part) =>
+        part.type === "file" && part.url.startsWith(MEDIA_REFERENCE_PREFIX),
+    );
+
+    if (!hasReference) {
+      return message;
+    }
+
+    return {
+      ...message,
+      parts: message.parts.map((part) => {
+        if (
+          part.type !== "file" ||
+          !part.url.startsWith(MEDIA_REFERENCE_PREFIX)
+        ) {
+          return part;
+        }
+
+        const pathname = part.url.slice(MEDIA_REFERENCE_PREFIX.length).trim();
+        const filename = part.filename?.trim().length
+          ? part.filename.trim()
+          : (pathname.split("/").pop() ?? "archivo");
+
+        return {
+          type: "text" as const,
+          text: `[Adjunto "${filename}" (${part.mediaType}) mediaPathname=${pathname}]`,
+        };
+      }),
+    };
+  });
+}

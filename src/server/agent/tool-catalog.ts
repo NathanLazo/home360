@@ -9,13 +9,15 @@ import type { AgentCaller } from "./tool-runtime";
 import { createAdminTools } from "./tools/admin-tools";
 import { createBusinessTools } from "./tools/business-tools";
 import { createCorporateTools } from "./tools/corporate-tools";
+import { createCustomerTools } from "./tools/customer-tools";
 
 /**
  * One catalog per area. The area comes from the session role, so a business
  * owner can never see an admin tool, not even its name. Tool authorization is
  * still re-checked by the tRPC procedures on every call. Chat attachments are
  * consumed by the admin (payment receipts) and business (inventory import)
- * catalogs.
+ * catalogs; the mobile customer sends uploaded media as `media:` references
+ * that the tools take as pathnames.
  */
 export function createAgentTools(
   area: AgentArea,
@@ -29,5 +31,7 @@ export function createAgentTools(
       return createCorporateTools(caller);
     case "admin":
       return createAdminTools(caller, attachments);
+    case "customer":
+      return createCustomerTools(caller);
   }
 }

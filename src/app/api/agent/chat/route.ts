@@ -4,12 +4,20 @@ import { z } from "zod";
 
 import { recordIdSchema } from "~/schemas/record-id.schema";
 import { env } from "~/env";
-import { isAgentModelId } from "~/lib/agent/agent-models";
+import {
+  DEFAULT_AGENT_MODEL_ID,
+  isAgentModelId,
+  type AgentModelId,
+} from "~/lib/agent/agent-models";
 import type { TokenUsage } from "~/lib/agent/agent-pricing";
-import { collectAgentAttachments } from "~/server/agent/agent-attachments";
+import {
+  collectAgentAttachments,
+  convertMediaReferences,
+} from "~/server/agent/agent-attachments";
 import {
   resolveAgentSession,
   resolveAgentTenantName,
+  resolveCustomerPromptContext,
 } from "~/server/agent/agent-session";
 import {
   AGENT_MODEL,
@@ -33,14 +41,33 @@ const requestSchema = z.object({
   conversationId: recordIdSchema.nullish(),
 });
 
+const PLATFORM_TIME_ZONE = "America/Chihuahua";
+
+/**
+ * Model of the mobile customer concierge: the free catalog default (tools
+ * supported, cost absorbed by the platform). The client never picks it;
+ * photos are read server-side by `diagnoseProject`, so no vision is needed.
+ */
+const CUSTOMER_AGENT_MODEL: AgentModelId = DEFAULT_AGENT_MODEL_ID;
+
 /** Calendar date in the platform time zone (Chihuahua), for the prompt. */
-function todayInPlatformTimeZone(): string {
+function todayInPlatformTimeZone(now: Date): string {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Chihuahua",
+    timeZone: PLATFORM_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(now);
+}
+
+/** Wall-clock time (HH:mm, 24 h) in the platform time zone, for greetings. */
+function timeInPlatformTimeZone(now: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: PLATFORM_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(now);
 }
 
 /**
@@ -80,18 +107,23 @@ export async function POST(request: Request) {
   let uiMessages;
 
   try {
-    uiMessages = await validateUIMessages({ messages: parsed.data.messages });
+    // Mobile `media:<pathname>` file parts become text notes: private blobs
+    // never reach the model as files (customer tools take the pathnames).
+    uiMessages = convertMediaReferences(
+      await validateUIMessages({ messages: parsed.data.messages }),
+    );
   } catch {
     return NextResponse.json({ error: "VALIDATION_ERROR" }, { status: 400 });
   }
 
-  const requestedModel = parsed.data.model;
-  const model =
-    requestedModel && isAgentModelId(requestedModel)
-      ? requestedModel
-      : AGENT_MODEL;
-
   const { session, area } = agentSession;
+  const requestedModel = parsed.data.model;
+  const model: AgentModelId =
+    area === "customer"
+      ? CUSTOMER_AGENT_MODEL
+      : requestedModel && isAgentModelId(requestedModel)
+        ? requestedModel
+        : AGENT_MODEL;
   const tenant = await resolveAiBillingTenant(db, {
     area,
     userId: session.user.id,
@@ -109,6 +141,11 @@ export async function POST(request: Request) {
 
   const caller = createCaller({ db, session, headers: request.headers });
   const tenantName = await resolveAgentTenantName(db, agentSession);
+  const customer =
+    area === "customer"
+      ? await resolveCustomerPromptContext(db, session.user.id)
+      : undefined;
+  const now = new Date();
 
   const agent = createHome360Agent({
     area,
@@ -118,10 +155,12 @@ export async function POST(request: Request) {
     context: {
       area,
       locale: parsed.data.locale,
-      userName: session.user.name ?? null,
+      userName: customer?.userName ?? session.user.name ?? null,
       tenantName,
-      today: todayInPlatformTimeZone(),
+      today: todayInPlatformTimeZone(now),
+      localTime: timeInPlatformTimeZone(now),
       readOnly: session.user.impersonator !== null,
+      customer,
     },
   });
 

@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Link } from "~/i18n/navigation";
-import { agentAreaForRole, AGENT_PROFILE_PATH } from "~/lib/agent/agent-area";
+import { AGENT_PROFILE_PATH, panelAreaForRole } from "~/lib/agent/agent-area";
 import { cn } from "~/lib/utils";
 
 export type UserMenuProps = {
@@ -47,7 +47,7 @@ export async function UserMenu({
   const t = await getTranslations("common.userMenu");
   const seed = id ?? email;
   // Panel roles own a profile screen (F9-01); customers and workers do not.
-  const area = agentAreaForRole(role);
+  const area = panelAreaForRole(role);
   const profileHref = area ? AGENT_PROFILE_PATH[area] : null;
   const botTheme = variant === "dark" ? "dark" : "light";
 
