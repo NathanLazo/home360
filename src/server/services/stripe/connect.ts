@@ -8,6 +8,7 @@ import {
   svcOk,
   type ServiceResult,
 } from "~/server/services/service-result";
+import { logStripeError } from "~/server/services/stripe/log-stripe-error";
 
 export type ConnectServiceDeps = {
   db: PrismaClient;
@@ -59,6 +60,7 @@ export async function createConnectAccount(
     );
   } catch (error) {
     if (isStripeError(error)) {
+      logStripeError("accounts.create", error);
       return svcFail("STRIPE_ERROR");
     }
 
@@ -116,6 +118,7 @@ export async function createOnboardingLink(
     return svcOk({ url: link.url });
   } catch (error) {
     if (isStripeError(error)) {
+      logStripeError("accountLinks.create", error);
       return svcFail("STRIPE_ERROR");
     }
 
@@ -156,6 +159,7 @@ export async function getAccountStatus(
     stripeAccount = await stripe.accounts.retrieve(consultedStripeAccountId);
   } catch (error) {
     if (isStripeError(error)) {
+      logStripeError("accounts.retrieve", error);
       return svcFail("STRIPE_ERROR");
     }
 

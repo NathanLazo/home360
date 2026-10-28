@@ -8,6 +8,7 @@ import {
   svcOk,
   type ServiceResult,
 } from "~/server/services/service-result";
+import { logStripeError } from "~/server/services/stripe/log-stripe-error";
 
 const MAX_PRISMA_INT = 2_147_483_647;
 
@@ -128,6 +129,7 @@ async function publishPaymentLink(
     );
   } catch (error) {
     if (isStripeError(error)) {
+      logStripeError("paymentLinks.create", error);
       return {
         ok: false,
         code: "STRIPE_ERROR",
@@ -343,6 +345,7 @@ export async function deactivatePaymentLink(
     });
   } catch (error) {
     if (isStripeError(error)) {
+      logStripeError("paymentLinks.update", error);
       return svcFail("STRIPE_ERROR");
     }
 
