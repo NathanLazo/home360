@@ -19,8 +19,10 @@ import {
   cancelMyRequest,
   createServiceRequest,
   getMyRequest,
+  CUSTOMER_NOTES_MAX_LENGTH,
   hideMyRequest,
   listMyRequests,
+  updateMyRequestNotes,
   type RequestDiagnosisSource,
 } from "~/server/services/marketplace/request";
 
@@ -76,6 +78,12 @@ const createRequestSchema = z
 type CreateRequestSchemaInput = z.infer<typeof createRequestSchema>;
 
 const requestIdSchema = z.object({ id: recordIdSchema });
+
+// §4: empty (after trim) clears the notes.
+const updateNotesSchema = z.object({
+  id: recordIdSchema,
+  notes: z.string().max(CUSTOMER_NOTES_MAX_LENGTH),
+});
 
 const listMineSchema = z
   .object({ cursor: recordIdSchema.optional() })
@@ -264,6 +272,27 @@ export const requestRouter = createTRPCRouter({
         return ok(cancelled.data, "Request cancelled");
       } catch (error) {
         return unexpectedFailure(error, "Request cancel failed");
+      }
+    }),
+
+  /** §4: customer notes on the diagnosis, visible to businesses on the radar. */
+  updateNotes: consumerProcedure
+    .input(updateNotesSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const updated = await updateMyRequestNotes(ctx.db, {
+          customerId: ctx.consumer.userId,
+          id: input.id,
+          notes: input.notes,
+        });
+
+        if (!updated.ok) {
+          return serviceFailure(updated.code, "Request notes update failed");
+        }
+
+        return ok(updated.data, "Request notes updated");
+      } catch (error) {
+        return unexpectedFailure(error, "Request notes update failed");
       }
     }),
 

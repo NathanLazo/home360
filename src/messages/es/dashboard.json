@@ -1469,6 +1469,7 @@
       "customerNoteTitle": "Nota del cliente",
       "aiTitle": "Diagnóstico con IA",
       "noDiagnosis": "Sin diagnóstico disponible.",
+      "diagnosisNotesTitle": "Notas del cliente sobre el diagnóstico",
       "priceRangeLabel": "Rango estimado",
       "priceRangeValue": "{min} – {max}",
       "confidenceLabel": "Confianza",

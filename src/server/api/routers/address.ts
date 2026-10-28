@@ -23,6 +23,8 @@ const addressFieldsSchema = z.object({
   neighborhood: z.string().trim().min(1).max(120).optional(),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
+  // Google Places id from geo.resolve (§3); informational, never trusted for coords.
+  placeId: z.string().trim().min(1).max(300).optional(),
 });
 
 const createAddressSchema = addressFieldsSchema.extend({
@@ -38,7 +40,8 @@ const updateAddressSchema = addressFieldsSchema
       input.addressLine !== undefined ||
       input.neighborhood !== undefined ||
       input.latitude !== undefined ||
-      input.longitude !== undefined,
+      input.longitude !== undefined ||
+      input.placeId !== undefined,
     { message: "At least one field is required" },
   );
 
@@ -48,6 +51,7 @@ const serviceErrorStatuses = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   ADDRESS_LIMIT_REACHED: 409,
+  LOCATION_OUT_OF_COVERAGE: 422,
   STRIPE_ERROR: 502,
 } as const satisfies Record<string, number>;
 

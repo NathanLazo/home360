@@ -1,6 +1,9 @@
 import "server-only";
 
 import type { Address, PrismaClient } from "@generated/prisma";
+import { isWithinMexico } from "../geo/coverage";
+import type { GeoPoint } from "../geo/haversine";
+import { isGeoConfigured, reverseGeocode } from "../geo/places";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
 /** Hard cap per user; the mobile picker is not paginated. */
@@ -12,6 +15,8 @@ export type CreateAddressInput = {
   neighborhood?: string;
   latitude: number;
   longitude: number;
+  /** Google Places id when picked from `geo.suggest`/`geo.resolve` (§3). */
+  placeId?: string;
   isDefault?: boolean;
 };
 
@@ -22,9 +27,30 @@ export type UpdateAddressInput = {
   neighborhood?: string;
   latitude?: number;
   longitude?: number;
+  placeId?: string;
 };
 
-type CreateAddressError = "ADDRESS_LIMIT_REACHED";
+type CoverageError = "LOCATION_OUT_OF_COVERAGE";
+
+type CreateAddressError = "ADDRESS_LIMIT_REACHED" | CoverageError;
+
+/**
+ * Best-effort colonia (§3): reverse-geocodes the point when the geo provider
+ * is configured. Any failure yields null — it never blocks the save.
+ */
+async function inferNeighborhood(point: GeoPoint): Promise<string | null> {
+  if (!isGeoConfigured()) {
+    return null;
+  }
+
+  try {
+    const place = await reverseGeocode({ ...point, locale: "es" });
+    return place.ok ? place.data.neighborhood : null;
+  } catch (error) {
+    console.error("[address] neighborhood lookup failed", error);
+    return null;
+  }
+}
 
 /** Default first, then newest — the order the picker renders. */
 export async function listAddresses(
@@ -49,6 +75,15 @@ export async function createAddress(
   userId: string,
   input: CreateAddressInput,
 ): Promise<ServiceResult<Address, CreateAddressError>> {
+  const point = { latitude: input.latitude, longitude: input.longitude };
+
+  if (!isWithinMexico(point)) {
+    return svcFail("LOCATION_OUT_OF_COVERAGE", "Address outside Mexico");
+  }
+
+  // Network lookup stays outside the transaction.
+  const neighborhood = input.neighborhood ?? (await inferNeighborhood(point));
+
   return db.$transaction(async (tx) => {
     const count = await tx.address.count({ where: { userId } });
 
@@ -70,9 +105,10 @@ export async function createAddress(
         userId,
         label: input.label,
         addressLine: input.addressLine,
-        neighborhood: input.neighborhood ?? null,
+        neighborhood,
         latitude: input.latitude,
         longitude: input.longitude,
+        placeId: input.placeId ?? null,
         isDefault,
       },
     });
@@ -89,15 +125,31 @@ export async function updateAddress(
   db: PrismaClient,
   userId: string,
   input: UpdateAddressInput,
-): Promise<ServiceResult<Address>> {
+): Promise<ServiceResult<Address, CoverageError>> {
   const existing = await db.address.findFirst({
     where: { id: input.id, userId },
-    select: { id: true },
+    select: { id: true, latitude: true, longitude: true, neighborhood: true },
   });
 
   if (!existing) {
     return svcFail("NOT_FOUND", "Address not found");
   }
+
+  const point = {
+    latitude: input.latitude ?? existing.latitude,
+    longitude: input.longitude ?? existing.longitude,
+  };
+  const moved = input.latitude !== undefined || input.longitude !== undefined;
+
+  if (moved && !isWithinMexico(point)) {
+    return svcFail("LOCATION_OUT_OF_COVERAGE", "Address outside Mexico");
+  }
+
+  // A moved pin without a colonia (sent or stored) gets one best-effort.
+  const inferredNeighborhood =
+    moved && input.neighborhood === undefined && existing.neighborhood === null
+      ? await inferNeighborhood(point)
+      : null;
 
   const address = await db.address.update({
     where: { id: existing.id },
@@ -108,7 +160,10 @@ export async function updateAddress(
         : {}),
       ...(input.neighborhood !== undefined
         ? { neighborhood: input.neighborhood }
-        : {}),
+        : inferredNeighborhood !== null
+          ? { neighborhood: inferredNeighborhood }
+          : {}),
+      ...(input.placeId !== undefined ? { placeId: input.placeId } : {}),
       ...(input.latitude !== undefined ? { latitude: input.latitude } : {}),
       ...(input.longitude !== undefined ? { longitude: input.longitude } : {}),
     },
