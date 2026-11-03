@@ -45,7 +45,8 @@ home360/
    ├─ middleware.ts        # Locale (next-intl) + guards de auth
    ├─ env.js               # Variables de entorno tipadas (@t3-oss/env-nextjs)
    ├─ app/
-   │  ├─ api/              # Route handlers: auth, trpc, webhooks (Stripe), cron, mobile (API Bearer JWT)
+   │  ├─ api/              # Route handlers: auth, trpc, webhooks (Stripe), cron, mobile (API Bearer JWT),
+   │  │                    #   mcp (servidor MCP por rol, token personal), public-media (logos/avatares/catálogo)
    │  └─ [locale]/         # Todo lo visible vive bajo locale
    │     ├─ (public)/      # W1 landing — único lugar con mesh hero, beams y entradas por scroll
    │     ├─ dashboard/     # W3–W8: negocio (KPIs, catálogos, cobros, suscripción, sucursales)

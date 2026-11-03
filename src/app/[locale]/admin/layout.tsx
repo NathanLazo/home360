@@ -25,6 +25,8 @@ import { SidebarProvider } from "~/components/ui/sidebar";
 import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
+import { getPanelAvatarUrl } from "~/server/services/profile/profile-summary";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 /**
@@ -64,11 +66,12 @@ export default async function AdminLayout({
 
   setRequestLocale(locale);
   const user = await requireRole(UserRole.ADMIN, locale, "/admin");
-  const [t, common, cookieStore, openDisputes] = await Promise.all([
+  const [t, common, cookieStore, openDisputes, avatarUrl] = await Promise.all([
     getTranslations({ locale, namespace: "admin" }),
     getTranslations({ locale, namespace: "common" }),
     cookies(),
     getOpenDisputeCount(),
+    getPanelAvatarUrl(db, user.id),
   ]);
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState === undefined || sidebarState === "true";
@@ -103,7 +106,7 @@ export default async function AdminLayout({
         user={{
           name: userName,
           seed: user.id,
-          image: user.image ?? null,
+          image: avatarUrl,
         }}
       />
       <AppShellInset>
@@ -117,7 +120,7 @@ export default async function AdminLayout({
               id: user.id,
               name: userName,
               email: userEmail,
-              image: user.image ?? null,
+              image: avatarUrl,
               role: user.role,
             }}
             toggleSidebarLabel={t("header.toggleSidebar")}

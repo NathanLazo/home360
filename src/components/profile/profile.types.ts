@@ -23,6 +23,7 @@ export const PROFILE_SECTIONS = [
   "security",
   "devices",
   "assistant",
+  "mcp",
   "billing",
   "workspace",
 ] as const;

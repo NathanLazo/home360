@@ -15,7 +15,8 @@
     "devices": "Devices",
     "assistant": "Assistant",
     "billing": "AI billing",
-    "workspace": "Workspace"
+    "workspace": "Workspace",
+    "mcp": "Claude Code"
   },
   "identity": {
     "memberSince": "Member since {date}",
@@ -186,5 +187,26 @@
     "deviceRemoved": "Device removed.",
     "sessionsRevoked": "Sessions ended.",
     "transportError": "We couldn't complete the action. Check your connection and try again."
+  },
+  "mcp": {
+    "title": "Connect to Claude Code",
+    "description": "Run your account from Claude Code or any MCP client with the same assistant tools, scoped to your role.",
+    "connect": "Connect to Claude Code",
+    "howTo": "One click creates a personal connection and copies the command; paste it in your terminal and restart Claude Code.",
+    "defaultName": "Claude Code",
+    "copied": "Command copied. Paste it in your terminal.",
+    "created": "Connection created. Copy the command.",
+    "revoked": "Connection revoked.",
+    "oneTime": "This command holds your key and is shown only now. If you lose it, create another connection.",
+    "copyLabel": "Copy command",
+    "copiedLabel": "Command copied",
+    "endpoint": "MCP server:",
+    "empty": "No active connections yet.",
+    "listLabel": "Active connections",
+    "lastUsed": "Last used {date}",
+    "neverUsed": "Created {date} · never used",
+    "revoke": "Revoke",
+    "revokeLabel": "Revoke connection {name}",
+    "loadError": "We couldn't load your connections"
   }
 }

@@ -26,6 +26,8 @@ const serviceListSelect = {
   basePriceCents: true,
   durationMinutes: true,
   durationMaxMinutes: true,
+  description: true,
+  imageUrl: true,
   status: true,
   createdAt: true,
   workers: {
@@ -152,6 +154,8 @@ export async function createService(
         basePriceCents: input.basePriceCents,
         durationMinutes: input.durationMinutes,
         durationMaxMinutes: input.durationMaxMinutes,
+        description: input.description ?? null,
+        imageUrl: input.imageUrl ?? null,
         businessId,
         workers: { connect: input.workerIds.map((id) => ({ id })) },
       },
@@ -219,6 +223,10 @@ export async function updateService(
         ...(input.workerIds
           ? { workers: { set: input.workerIds.map((id) => ({ id })) } }
           : {}),
+        ...(input.description !== undefined
+          ? { description: input.description }
+          : {}),
+        ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
       },
       select: { id: true },
     });

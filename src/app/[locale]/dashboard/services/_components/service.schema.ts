@@ -21,6 +21,15 @@ const serviceFields = {
     .max(24 * 60),
   durationMaxMinutes: durationMaxSchema.optional(),
   workerIds: z.array(recordIdSchema).max(50).default([]),
+  description: z.string().trim().min(1).max(1_000).optional(),
+  // Public catalog image (Service.imageUrl): HTTPS only, like products.
+  imageUrl: z
+    .string()
+    .trim()
+    .url()
+    .max(500)
+    .refine((value) => value.startsWith("https://"))
+    .optional(),
 };
 
 export const serviceCreateSchema = z
@@ -41,6 +50,9 @@ export const serviceUpdateSchema = z
     durationMinutes: serviceFields.durationMinutes.optional(),
     durationMaxMinutes: durationMaxSchema.nullable().optional(),
     workerIds: z.array(recordIdSchema).max(50).optional(),
+    // `undefined` keeps the current value; `null` removes it.
+    description: serviceFields.description.unwrap().nullable().optional(),
+    imageUrl: serviceFields.imageUrl.unwrap().nullable().optional(),
   })
   .refine(
     (value) =>

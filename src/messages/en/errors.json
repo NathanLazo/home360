@@ -65,5 +65,6 @@
   "ACCOUNT_HAS_ACTIVE_ORDERS": "You have orders in progress. Finish or cancel them before deleting your account.",
   "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION": "Cancel your business subscription before deleting your account.",
   "GEO_UNAVAILABLE": "Address search isn't available right now. Type the address or try again in a moment.",
-  "LOCATION_OUT_OF_COVERAGE": "That location is outside our service area. For now we only serve addresses in Mexico."
+  "LOCATION_OUT_OF_COVERAGE": "That location is outside our service area. For now we only serve addresses in Mexico.",
+  "MCP_TOKEN_LIMIT_REACHED": "You reached the limit of 10 active connections. Revoke one to create another."
 }

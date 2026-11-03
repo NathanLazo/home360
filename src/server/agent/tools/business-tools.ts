@@ -27,6 +27,7 @@ import {
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
 import { planChangeSchema } from "~/lib/subscription/subscription.schemas";
 import {
+  updateBusinessContactSchema,
   updateBusinessProfileSchema,
   updateOwnerSchema,
 } from "~/schemas/settings/business-settings.schema";
@@ -51,6 +52,8 @@ import {
 } from "~/server/services/orders/order.schema";
 import type { AgentAttachmentStore } from "../agent-attachments";
 import { runTool, toDate, type AgentCaller } from "../tool-runtime";
+import { createBusinessMediaTools } from "./business-media-tools";
+import { createBusinessMessagingTools } from "./business-messaging-tools";
 import { createCatalogImportTools } from "./catalog-import-tools";
 
 const cuid = recordIdSchema;
@@ -272,7 +275,7 @@ export function createBusinessTools(
     }),
     createProduct: tool({
       description:
-        "Create a product (price in MXN cents, optional initial stock per branch). Confirm name, SKU and price when the request was ambiguous.",
+        "Create a product (price in MXN cents, optional description and initial stock per branch). Confirm name, SKU and price when the request was ambiguous. Add the photo afterwards with setProductImage.",
       inputSchema: productCreateSchema,
       execute: (input) => runTool(() => caller.product.create(input)),
     }),
@@ -316,7 +319,7 @@ export function createBusinessTools(
     }),
     createService: tool({
       description:
-        "Create a service (base price in MXN cents, duration in minutes, assigned workers).",
+        "Create a service (base price in MXN cents, duration in minutes, optional description, assigned workers). Add the photo afterwards with setServiceImage.",
       inputSchema: serviceCreateSchema,
       execute: (input) => runTool(() => caller.service.create(input)),
     }),
@@ -410,7 +413,7 @@ export function createBusinessTools(
     }),
     getBusinessSettings: tool({
       description:
-        "Business profile: name, type, guarantee notes and owner data.",
+        "Business profile: name, type, guarantee notes, public description, logo, contact (phone, WhatsApp, email, website) and owner data.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.businessSettings.get()),
     }),
@@ -420,6 +423,13 @@ export function createBusinessTools(
       inputSchema: updateBusinessProfileSchema,
       execute: (input) =>
         runTool(() => caller.businessSettings.updateBusinessProfile(input)),
+    }),
+    updateBusinessContact: tool({
+      description:
+        "Update the public description and contact card of the business (phone, WhatsApp, email, website). Omitted fields are kept; null clears one.",
+      inputSchema: updateBusinessContactSchema,
+      execute: (input) =>
+        runTool(() => caller.businessSettings.updateContact(input)),
     }),
     updateOwnerName: tool({
       description: "Update the display name of the business owner.",
@@ -431,13 +441,13 @@ export function createBusinessTools(
     // Marketplace: radar and quotes
     listOpenRequests: tool({
       description:
-        "Service requests near an active branch that the business can quote (the radar). Excludes requests already quoted.",
+        "Open customer requests (with AI diagnosis, price range and urgency) the business can attend and quote — the radar. Already filtered to the business line: only categories of its own service catalog, inside the branch coverage radius, plus requests targeted at the business. Excludes requests the business already quoted (see listMyQuotes).",
       inputSchema: z.object({ branchId, cursor }),
       execute: (input) => runTool(() => caller.radar.listOpenRequests(input)),
     }),
     getOpenRequest: tool({
       description:
-        "Detail of one radar request, including the AI diagnosis when available.",
+        "Detail of one radar request: description, customer notes, AI diagnosis, price range, evidence photos, whether it is still quotable and the business's own quote if any.",
       inputSchema: z.object({ id: cuid, branchId }),
       execute: (input) => runTool(() => caller.radar.getRequest(input)),
     }),
@@ -466,10 +476,14 @@ export function createBusinessTools(
         ),
     }),
     withdrawQuote: tool({
-      description: "Withdraw a pending quote.",
+      description:
+        "Withdraw a pending quote. A withdrawn quote can be re-sent with submitQuote while the request is open.",
       inputSchema: z.object({ id: cuid }),
       execute: (input) => runTool(() => caller.quote.withdraw(input)),
     }),
+
+    ...createBusinessMessagingTools(caller),
+    ...createBusinessMediaTools(caller, attachments),
 
     // Disputes
     getDisputeForOrder: tool({

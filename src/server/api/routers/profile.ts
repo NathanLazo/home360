@@ -6,6 +6,7 @@ import {
   setPasswordSchema,
   updateAssistantPreferencesSchema,
   updateIdentitySchema,
+  updateAvatarSchema,
 } from "~/schemas/profile/profile.schema";
 import {
   fail,
@@ -24,6 +25,7 @@ import {
   signOutEverywhere,
   updateAssistantPreferences,
   updateIdentity,
+  updateAvatar,
 } from "~/server/services/profile/update-profile";
 
 /**
@@ -73,6 +75,27 @@ export const profileRouter = createTRPCRouter({
         return ok(null, "Identity updated");
       } catch (error: unknown) {
         return unexpectedFailure(error, "Unable to update the identity");
+      }
+    }),
+
+  updateAvatar: profileProcedure
+    .input(updateAvatarSchema)
+    .mutation(async ({ ctx, input }): Promise<TrpcResponse<null>> => {
+      try {
+        const updated = await updateAvatar(ctx.db, ctx.userId, input);
+
+        if (!updated.ok) {
+          return fail(updated.code, 422, "Avatar must be uploaded first");
+        }
+
+        return ok(
+          null,
+          input.avatarPathname
+            ? "Profile photo updated"
+            : "Profile photo removed",
+        );
+      } catch (error: unknown) {
+        return unexpectedFailure(error, "Unable to update the profile photo");
       }
     }),
 

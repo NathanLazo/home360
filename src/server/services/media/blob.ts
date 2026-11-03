@@ -25,6 +25,9 @@ export const MEDIA_KINDS = [
   "evidence",
   "recording",
   "chatAttachment",
+  // Files an MCP client (Claude Code) uploads for the assistant tools:
+  // catalog spreadsheets and images (`createFileUpload`).
+  "agentFile",
 ] as const;
 
 export type MediaKind = (typeof MEDIA_KINDS)[number];
@@ -34,6 +37,8 @@ const GB = 1024 * MB;
 
 const IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const VIDEO_CONTENT_TYPES = ["video/mp4", "video/quicktime"] as const;
+const XLSX_CONTENT_TYPE =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 /**
  * Upload policy per kind. Sizes/types come from the M0-W3 spec: photos and
@@ -59,6 +64,15 @@ const MEDIA_POLICIES: Record<
     allowedContentTypes: [...IMAGE_CONTENT_TYPES, "application/pdf"],
     maxSizeBytes: 10 * MB,
   },
+  agentFile: {
+    allowedContentTypes: [
+      ...IMAGE_CONTENT_TYPES,
+      "application/pdf",
+      "text/csv",
+      XLSX_CONTENT_TYPE,
+    ],
+    maxSizeBytes: 10 * MB,
+  },
 };
 
 /** File extension per allowed content type; keeps pathnames self-descriptive. */
@@ -69,6 +83,8 @@ const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {
   "video/mp4": "mp4",
   "video/quicktime": "mov",
   "application/pdf": "pdf",
+  "text/csv": "csv",
+  [XLSX_CONTENT_TYPE]: "xlsx",
 };
 
 /** Upload URLs stay valid long enough for a 2 GB recording upload. */

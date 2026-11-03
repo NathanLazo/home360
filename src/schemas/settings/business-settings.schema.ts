@@ -25,6 +25,46 @@ export const updateBusinessProfileSchema = z
   })
   .strict();
 
+const optionalText = (max: number) =>
+  z.string().trim().min(1).max(max).nullable().optional();
+
+/**
+ * Public contact card of the business. `undefined` keeps a field, `null`
+ * clears it. Phones are stored normalized as typed (digits, +, spaces, dashes).
+ */
+const phoneSchema = z
+  .string()
+  .trim()
+  .regex(/^\+?[0-9 ()-]{7,20}$/u)
+  .nullable()
+  .optional();
+
+export const updateBusinessContactSchema = z
+  .object({
+    description: optionalText(1_000),
+    phone: phoneSchema,
+    whatsapp: phoneSchema,
+    contactEmail: z.string().trim().email().max(200).nullable().optional(),
+    website: z
+      .string()
+      .trim()
+      .url()
+      .max(300)
+      .refine(
+        (value) => value.startsWith("https://") || value.startsWith("http://"),
+      )
+      .nullable()
+      .optional(),
+  })
+  .strict();
+
+/** Logo pathname from `media.uploadPublicImage` (scope "logo"), or `null`. */
+export const updateBusinessLogoSchema = z
+  .object({
+    logoPathname: z.string().trim().min(1).max(200).nullable(),
+  })
+  .strict();
+
 export const updateOwnerSchema = z
   .object({
     ownerName: z.string().trim().min(2).max(100),
@@ -45,5 +85,9 @@ export const changePasswordSchema = z
 export type UpdateBusinessProfileInput = z.infer<
   typeof updateBusinessProfileSchema
 >;
+export type UpdateBusinessContactInput = z.infer<
+  typeof updateBusinessContactSchema
+>;
+export type UpdateBusinessLogoInput = z.infer<typeof updateBusinessLogoSchema>;
 export type UpdateOwnerInput = z.infer<typeof updateOwnerSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

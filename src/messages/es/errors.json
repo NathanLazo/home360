@@ -65,5 +65,6 @@
   "ACCOUNT_HAS_ACTIVE_ORDERS": "Tienes órdenes en curso. Termínalas o cancélalas antes de eliminar tu cuenta.",
   "ACCOUNT_HAS_ACTIVE_SUBSCRIPTION": "Cancela la suscripción de tu negocio antes de eliminar tu cuenta.",
   "GEO_UNAVAILABLE": "La búsqueda de direcciones no está disponible por ahora. Escribe la dirección o intenta de nuevo en un momento.",
-  "LOCATION_OUT_OF_COVERAGE": "Esa ubicación está fuera de nuestra zona de servicio. Por ahora solo atendemos direcciones en México."
+  "LOCATION_OUT_OF_COVERAGE": "Esa ubicación está fuera de nuestra zona de servicio. Por ahora solo atendemos direcciones en México.",
+  "MCP_TOKEN_LIMIT_REACHED": "Alcanzaste el máximo de 10 conexiones activas. Revoca una para crear otra."
 }

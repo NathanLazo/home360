@@ -1,5 +1,7 @@
 import {
   changePasswordSchema,
+  updateBusinessContactSchema,
+  updateBusinessLogoSchema,
   updateBusinessProfileSchema,
   updateOwnerSchema,
 } from "~/schemas/settings/business-settings.schema";
@@ -12,6 +14,8 @@ import {
 import {
   changePassword,
   getSettings,
+  updateBusinessContact,
+  updateBusinessLogo,
   updateBusinessProfile,
   updateOwner,
 } from "~/server/services/settings/business-settings";
@@ -36,6 +40,30 @@ export const businessSettingsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         return await updateBusinessProfile(ctx.db, ctx.business.id, input);
+      } catch (error: unknown) {
+        return settingsFailure(error);
+      }
+    }),
+
+  updateContact: activeBusinessProcedure
+    .input(updateBusinessContactSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await updateBusinessContact(ctx.db, ctx.business.id, input);
+      } catch (error: unknown) {
+        return settingsFailure(error);
+      }
+    }),
+
+  updateLogo: activeBusinessProcedure
+    .input(updateBusinessLogoSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await updateBusinessLogo(ctx.db, {
+          ...input,
+          businessId: ctx.business.id,
+          ownerId: ctx.session.user.id,
+        });
       } catch (error: unknown) {
         return settingsFailure(error);
       }

@@ -27,6 +27,7 @@ import { SidebarProvider } from "~/components/ui/sidebar";
 import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { requireRole } from "~/server/auth/require-role";
+import { getPanelAvatarUrl } from "~/server/services/profile/profile-summary";
 import { db } from "~/server/db";
 
 type CorporateLayoutProps = Readonly<{
@@ -52,7 +53,7 @@ export default async function CorporateLayout({
 
   setRequestLocale(locale);
   const user = await requireRole(UserRole.CORPORATE, locale, "/corporate");
-  const [account, t, common, cookieStore] = await Promise.all([
+  const [account, t, common, cookieStore, avatarUrl] = await Promise.all([
     db.corporateAccount.findUnique({
       where: { ownerId: user.id },
       select: { name: true, status: true, statusReason: true, tier: true },
@@ -60,6 +61,7 @@ export default async function CorporateLayout({
     getTranslations({ locale, namespace: "corporate" }),
     getTranslations({ locale, namespace: "common" }),
     cookies(),
+    getPanelAvatarUrl(db, user.id),
   ]);
 
   if (!account) {
@@ -104,7 +106,7 @@ export default async function CorporateLayout({
           name: userName,
           subtitle: account.name,
           seed: user.id,
-          image: user.image ?? null,
+          image: avatarUrl,
         }}
         tierChip={{
           label: t(`tier.${account.tier}`),
@@ -122,7 +124,7 @@ export default async function CorporateLayout({
               id: user.id,
               name: userName,
               email: userEmail,
-              image: user.image ?? null,
+              image: avatarUrl,
               role: user.role,
             }}
             toggleSidebarLabel={t("header.toggleSidebar")}
