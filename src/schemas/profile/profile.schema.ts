@@ -17,6 +17,16 @@ export const updateIdentitySchema = z
   })
   .strict();
 
+/**
+ * Avatar URL of the session user, or `null` to remove it. The service only
+ * accepts images this user uploaded through `media.uploadPublicImage`.
+ */
+export const updateImageSchema = z
+  .object({
+    image: z.string().trim().url().max(500).nullable(),
+  })
+  .strict();
+
 const agentModelIds = AGENT_MODELS.map((model) => model.id) as [
   (typeof AGENT_MODELS)[number]["id"],
   ...(typeof AGENT_MODELS)[number]["id"][],
@@ -47,6 +57,7 @@ export const removeDeviceSchema = z
   .strict();
 
 export type UpdateIdentityInput = z.infer<typeof updateIdentitySchema>;
+export type UpdateImageInput = z.infer<typeof updateImageSchema>;
 export type UpdateAssistantPreferencesInput = z.infer<
   typeof updateAssistantPreferencesSchema
 >;

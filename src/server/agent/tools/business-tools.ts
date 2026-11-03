@@ -51,6 +51,8 @@ import {
 } from "~/server/services/orders/order.schema";
 import type { AgentAttachmentStore } from "../agent-attachments";
 import { runTool, toDate, type AgentCaller } from "../tool-runtime";
+import { createBusinessMediaTools } from "./business-media-tools";
+import { createBusinessMessagingTools } from "./business-messaging-tools";
 import { createCatalogImportTools } from "./catalog-import-tools";
 
 const cuid = recordIdSchema;
@@ -431,13 +433,13 @@ export function createBusinessTools(
     // Marketplace: radar and quotes
     listOpenRequests: tool({
       description:
-        "Service requests near an active branch that the business can quote (the radar). Excludes requests already quoted.",
+        "Open customer requests (with AI diagnosis, price range and urgency) the business can attend and quote — the radar. Already filtered to the business line: only categories of its own service catalog, inside the branch coverage radius, plus requests targeted at the business. Excludes requests the business already quoted (see listMyQuotes).",
       inputSchema: z.object({ branchId, cursor }),
       execute: (input) => runTool(() => caller.radar.listOpenRequests(input)),
     }),
     getOpenRequest: tool({
       description:
-        "Detail of one radar request, including the AI diagnosis when available.",
+        "Detail of one radar request: description, customer notes, AI diagnosis, price range, evidence photos, whether it is still quotable and the business's own quote if any.",
       inputSchema: z.object({ id: cuid, branchId }),
       execute: (input) => runTool(() => caller.radar.getRequest(input)),
     }),
@@ -466,10 +468,14 @@ export function createBusinessTools(
         ),
     }),
     withdrawQuote: tool({
-      description: "Withdraw a pending quote.",
+      description:
+        "Withdraw a pending quote. A withdrawn quote can be re-sent with submitQuote while the request is open.",
       inputSchema: z.object({ id: cuid }),
       execute: (input) => runTool(() => caller.quote.withdraw(input)),
     }),
+
+    ...createBusinessMessagingTools(caller),
+    ...createBusinessMediaTools(caller, attachments),
 
     // Disputes
     getDisputeForOrder: tool({

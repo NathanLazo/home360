@@ -1,4 +1,7 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
+import { panelAreaForRole } from "~/lib/agent/agent-area";
 
 import {
   fail,
@@ -12,6 +15,11 @@ import {
   createUploadUrl,
   MEDIA_KINDS,
 } from "~/server/services/media/blob";
+import {
+  PUBLIC_IMAGE_MAX_SIZE_BYTES,
+  PUBLIC_IMAGE_SCOPES,
+  uploadPublicImage,
+} from "~/server/services/media/public-image";
 
 /**
  * The zod layer only checks shape; the per-kind content-type and size policy
@@ -24,6 +32,16 @@ const createUploadUrlSchema = z.object({
   kind: z.enum(MEDIA_KINDS),
   contentType: z.string().trim().min(1).max(100),
   sizeBytes: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
+});
+
+// Base64 grows 4/3 over the decoded bytes; the service re-checks the size.
+const uploadPublicImageSchema = z.object({
+  scope: z.enum(PUBLIC_IMAGE_SCOPES),
+  contentType: z.string().trim().min(1).max(100),
+  dataBase64: z
+    .string()
+    .min(1)
+    .max(Math.ceil((PUBLIC_IMAGE_MAX_SIZE_BYTES * 4) / 3) + 4),
 });
 
 const getDownloadUrlSchema = z.object({
@@ -103,6 +121,39 @@ export const mediaRouter = createTRPCRouter({
         return ok(grant.data, "Download URL created");
       } catch (error) {
         return unexpectedFailure(error, "Download URL creation failed");
+      }
+    }),
+
+  /**
+   * Public panel image (owner avatar, product photo) uploaded server-side —
+   * used by the assistant with chat attachments. Panel roles only; product
+   * photos only for businesses. Product/profile ownership is checked by the
+   * procedure that stores the returned URL.
+   */
+  uploadPublicImage: protectedProcedure
+    .input(uploadPublicImageSchema)
+    .mutation(async ({ ctx, input }) => {
+      const area = panelAreaForRole(ctx.session.user.role);
+
+      if (!area || (input.scope === "product" && area !== "business")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      try {
+        const upload = await uploadPublicImage({
+          userId: ctx.session.user.id,
+          scope: input.scope,
+          contentType: input.contentType,
+          dataBase64: input.dataBase64,
+        });
+
+        if (!upload.ok) {
+          return serviceFailure(upload.code, "Image upload failed");
+        }
+
+        return ok(upload.data, "Image uploaded", 201);
+      } catch (error) {
+        return unexpectedFailure(error, "Image upload failed");
       }
     }),
 });
