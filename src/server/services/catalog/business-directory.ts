@@ -161,8 +161,17 @@ function catalogWhere(
   input: Pick<ListBusinessesInput, "category" | "kind">,
 ): Prisma.BusinessWhereInput {
   const category = input.category ? { category: input.category } : {};
+  // Services declare several categories; legacy rows only the primary one.
+  const serviceCategory: Prisma.ServiceWhereInput = input.category
+    ? {
+        OR: [
+          { categories: { has: input.category } },
+          { category: input.category },
+        ],
+      }
+    : {};
   const services: Prisma.BusinessWhereInput = {
-    services: { some: { status: ServiceStatus.ACTIVE, ...category } },
+    services: { some: { status: ServiceStatus.ACTIVE, ...serviceCategory } },
   };
   const products: Prisma.BusinessWhereInput = {
     products: { some: { status: ProductStatus.PUBLISHED, ...category } },
@@ -248,8 +257,7 @@ export async function listMarketplaceBusinesses(
       },
       services: {
         where: { status: ServiceStatus.ACTIVE },
-        distinct: ["category"],
-        select: { category: true },
+        select: { category: true, categories: true },
       },
       products: {
         where: { status: ProductStatus.PUBLISHED },
@@ -288,7 +296,11 @@ export async function listMarketplaceBusinesses(
       distanceKm: nearestDistance(input.origin, row.branches),
       categories: [
         ...new Set([
-          ...row.services.map(({ category }) => category),
+          ...row.services.flatMap((service) =>
+            service.categories.length > 0
+              ? service.categories
+              : [service.category],
+          ),
           ...row.products.map(({ category }) => category),
         ]),
       ].sort((a, b) => a.localeCompare(b)),

@@ -430,16 +430,6 @@
   "checkout": {
     "serviceFeeLabel": "HOME360 service fee"
   },
-  "requestCategory": {
-    "Plomería": "Plumbing",
-    "Eléctrico": "Electrical",
-    "Pintura": "Painting",
-    "Carpintería": "Carpentry",
-    "Limpieza": "Cleaning",
-    "Jardinería": "Gardening",
-    "Clima": "HVAC",
-    "Otro": "Other"
-  },
   "orderEvent": {
     "ACCEPTED": "Offer accepted",
     "ESCROW_HELD": "Payment held in escrow",

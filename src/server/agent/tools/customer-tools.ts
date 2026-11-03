@@ -148,8 +148,7 @@ export function createCustomerTools(caller: AgentCaller) {
     }),
 
     searchBusinesses: tool({
-      description:
-        "ACTIVE businesses nearest to the customer's default address first. `query` matches business name, category or what they sell; `category` is an exact marketplace category (Plomería, Eléctrico, Pintura, Carpintería, Limpieza, Jardinería, Clima, Otro).",
+      description: `ACTIVE businesses nearest to the customer's default address first. "query" matches business name, category or what they sell; "category" is an exact marketplace category: ${REQUEST_CATEGORIES.join(", ")}.`,
       inputSchema: z.object({
         query: z.string().trim().min(1).max(100).optional(),
         category: z.string().trim().min(1).max(60).optional(),

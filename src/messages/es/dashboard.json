@@ -846,8 +846,6 @@
       "editDescription": "Actualiza precio, duración y trabajadores asignados.",
       "nameLabel": "Nombre",
       "namePlaceholder": "Ej. Reparación de fugas",
-      "categoryLabel": "Categoría",
-      "categoryPlaceholder": "Ej. Plomería",
       "priceLabel": "Precio desde (MXN)",
       "pricePlaceholder": "350.00",
       "durationLabel": "Duración mínima (min)",
@@ -872,7 +870,13 @@
         "teamDescription": "Quiénes pueden atender este servicio."
       },
       "minutesUnit": "min",
-      "workersSelected": "{count, plural, =0 {Sin seleccionar} one {# seleccionado} other {# seleccionados}}"
+      "workersSelected": "{count, plural, =0 {Sin seleccionar} one {# seleccionado} other {# seleccionados}}",
+      "categoriesLabel": "Categorías",
+      "categoriesSelected": "{count}/{max}",
+      "categoriesSearchPlaceholder": "Buscar categoría…",
+      "categoriesEmpty": "Sin coincidencias",
+      "categoriesHint": "Elige todas las que cubre el servicio; la primera es la principal. Recibirás solicitudes de estas categorías.",
+      "categoryRemove": "Quitar {category}"
     },
     "feedback": {
       "created": "Servicio creado.",
@@ -882,7 +886,8 @@
       "deleted": "Servicio eliminado.",
       "deleteConflict": "No puedes eliminar este servicio porque tiene órdenes activas.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
-    }
+    },
+    "categoriesMore": "+{count}"
   },
   "branches": {
     "title": "Sucursales",

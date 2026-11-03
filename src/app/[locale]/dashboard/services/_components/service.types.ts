@@ -1,3 +1,4 @@
+import type { RequestCategory } from "~/schemas/marketplace/request-categories";
 import type { RouterOutputs } from "~/trpc/react";
 
 type ServiceOutput = RouterOutputs["service"];
@@ -10,13 +11,13 @@ export type ServiceWorker = NonNullable<
 
 export type ServiceFiltersState = {
   search: string;
-  category: string;
+  category: "" | RequestCategory;
   status: "" | ServiceListItem["status"];
 };
 
 export type ServiceFormValues = {
   name: string;
-  category: string;
+  categories: RequestCategory[];
   price: string;
   duration: string;
   durationMax: string;

@@ -7,7 +7,7 @@ import {
   ServiceStatus,
   type PrismaClient,
 } from "@generated/prisma";
-import { toRequestCategory } from "~/schemas/marketplace/request-category-match";
+import { serviceCategoriesOf } from "~/server/services/catalog/service-categories";
 import { haversineKm, type GeoPoint } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -96,8 +96,7 @@ export async function resolveRadarBranch(
 
 /**
  * Request categories covered by the business's ACTIVE services (radar
- * catalog gate). Free-text service categories are mapped to their canonical
- * `RequestCategory`; the raw values are kept too so exact matches still hold.
+ * catalog gate): the declared `categories`, or the mapped legacy `category`.
  */
 export async function listBusinessCategories(
   db: PrismaClient,
@@ -105,21 +104,10 @@ export async function listBusinessCategories(
 ): Promise<string[]> {
   const rows = await db.service.findMany({
     where: { businessId, status: ServiceStatus.ACTIVE },
-    select: { category: true },
-    distinct: ["category"],
+    select: { category: true, categories: true },
   });
-  const categories = new Set<string>();
 
-  for (const { category } of rows) {
-    categories.add(category);
-    const canonical = toRequestCategory(category);
-
-    if (canonical) {
-      categories.add(canonical);
-    }
-  }
-
-  return [...categories];
+  return [...new Set(rows.flatMap(serviceCategoriesOf))];
 }
 
 /**

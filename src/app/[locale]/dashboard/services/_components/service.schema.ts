@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 import { recordIdSchema } from "~/schemas/record-id.schema";
 
 import { ServiceStatus } from "@generated/prisma";
@@ -10,9 +11,18 @@ const durationMaxSchema = z
   .positive()
   .max(7 * 24 * 60);
 
+export const SERVICE_CATEGORIES_MAX = 8;
+
+/** One or more categories of the fixed marketplace taxonomy, deduplicated. */
+const serviceCategoriesSchema = z
+  .array(z.enum(REQUEST_CATEGORIES))
+  .min(1)
+  .max(SERVICE_CATEGORIES_MAX)
+  .transform((categories) => [...new Set(categories)]);
+
 const serviceFields = {
   name: z.string().trim().min(2).max(120),
-  category: z.string().trim().min(2).max(60),
+  categories: serviceCategoriesSchema,
   basePriceCents: z.number().int().positive(),
   durationMinutes: z
     .number()
@@ -45,7 +55,7 @@ export const serviceUpdateSchema = z
   .object({
     id: recordIdSchema,
     name: serviceFields.name.optional(),
-    category: serviceFields.category.optional(),
+    categories: serviceFields.categories.optional(),
     basePriceCents: serviceFields.basePriceCents.optional(),
     durationMinutes: serviceFields.durationMinutes.optional(),
     durationMaxMinutes: durationMaxSchema.nullable().optional(),
@@ -65,7 +75,7 @@ export const serviceUpdateSchema = z
 
 export const serviceListSchema = z.object({
   search: z.string().trim().min(1).max(100).optional(),
-  category: z.string().trim().max(60).optional(),
+  category: z.enum(REQUEST_CATEGORIES).optional(),
   status: z.nativeEnum(ServiceStatus).optional(),
   cursor: recordIdSchema.optional(),
 });
@@ -91,7 +101,7 @@ export const serviceImportRowSchema = z
   .object({
     line: z.number().int().positive(),
     name: serviceFields.name,
-    category: serviceFields.category,
+    categories: serviceFields.categories,
     basePriceCents: serviceFields.basePriceCents,
     durationMinutes: serviceFields.durationMinutes,
     durationMaxMinutes: durationMaxSchema.optional(),

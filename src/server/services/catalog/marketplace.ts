@@ -196,11 +196,10 @@ function decodeCursor(
 export async function listMarketplaceCategories(
   db: PrismaClient,
 ): Promise<TrpcResponse<MarketplaceCategory[]>> {
-  const [serviceGroups, productGroups] = await Promise.all([
-    db.service.groupBy({
-      by: ["category"],
+  const [services, productGroups] = await Promise.all([
+    db.service.findMany({
       where: serviceCatalogFilter,
-      _count: { _all: true },
+      select: { category: true, categories: true },
     }),
     db.product.groupBy({
       by: ["category"],
@@ -210,7 +209,17 @@ export async function listMarketplaceCategories(
   ]);
   const countByCategory = new Map<string, number>();
 
-  for (const group of [...serviceGroups, ...productGroups]) {
+  // A multi-category service counts once in each of its categories.
+  for (const service of services) {
+    const categories =
+      service.categories.length > 0 ? service.categories : [service.category];
+
+    for (const category of categories) {
+      countByCategory.set(category, (countByCategory.get(category) ?? 0) + 1);
+    }
+  }
+
+  for (const group of productGroups) {
     countByCategory.set(
       group.category,
       (countByCategory.get(group.category) ?? 0) + group._count._all,

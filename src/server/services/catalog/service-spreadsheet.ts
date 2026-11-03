@@ -1,3 +1,4 @@
+import { parseRequestCategories } from "~/schemas/marketplace/request-category-match";
 import { parsePriceCents } from "~/app/[locale]/dashboard/products/_components/product-csv.utils";
 import {
   serviceImportRowSchema,
@@ -105,9 +106,18 @@ function splitWorkers(value: string | undefined): string[] | undefined {
     .filter((name) => name.length > 0);
 }
 
+/**
+ * "Plomería, gas / calentador" → canonical categories. Any value outside the
+ * fixed taxonomy invalidates the row (returned as-is so Zod rejects it).
+ */
+function categoriesFromCell(value: string | undefined): string[] {
+  const { categories, unknown } = parseRequestCategories(value ?? "");
+  return unknown.length > 0 ? unknown : categories;
+}
+
 function issueCode(path: PropertyKey | undefined): ServiceImportErrorCode {
   switch (path) {
-    case "category":
+    case "categories":
       return "SERVICE_INVALID_CATEGORY";
     case "basePriceCents":
       return "SERVICE_INVALID_PRICE";
@@ -142,7 +152,7 @@ export async function parseServiceSpreadsheet(
     const parsed = serviceImportRowSchema.safeParse({
       line,
       name: record.name,
-      category: record.category,
+      categories: categoriesFromCell(record.category),
       basePriceCents: parsePriceCents(cleanMoneyText(record.price)),
       durationMinutes: parseDurationMinutes(record.duration),
       durationMaxMinutes: parseDurationMinutes(record.duration_max),

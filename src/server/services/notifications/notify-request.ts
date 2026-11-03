@@ -147,24 +147,20 @@ export async function notifyNearbyBusinesses(
       select: { notifyNewRequestRadiusKm: true },
     });
     const radiusKm = settings?.notifyNewRequestRadiusKm ?? DEFAULT_RADIUS_KM;
-    // Service categories are free text: collect every raw value that maps to
-    // the request's canonical category (same rule as the radar gate).
-    const serviceCategories = await db.service.findMany({
-      where: { status: "ACTIVE" },
+    // Legacy rows (free-text `category`, empty `categories`) still match
+    // through the canonical mapping; new rows declare `categories`.
+    const legacyCategories = await db.service.findMany({
+      where: { status: "ACTIVE", categories: { isEmpty: true } },
       select: { category: true },
       distinct: ["category"],
     });
-    const matchingCategories = serviceCategories
+    const matchingLegacy = legacyCategories
       .map((row) => row.category)
-      .filter(
-        (category) =>
-          category === request.category ||
-          toRequestCategory(category) === request.category,
-      );
-
-    if (matchingCategories.length === 0) {
-      return svcOk({ businessIds: [] });
-    }
+      .filter((category) => toRequestCategory(category) === request.category);
+    const legacySql =
+      matchingLegacy.length === 0
+        ? Prisma.sql`FALSE`
+        : Prisma.sql`s."category" IN (${Prisma.join(matchingLegacy)})`;
 
     const origin = {
       latitude: request.latitude,
@@ -185,7 +181,10 @@ export async function notifyNearbyBusinesses(
           FROM "Service" AS s
           WHERE s."businessId" = biz."id"
             AND s."status"::text = 'ACTIVE'
-            AND s."category" IN (${Prisma.join(matchingCategories)})
+            AND (
+              ${request.category} = ANY(s."categories")
+              OR (cardinality(s."categories") = 0 AND ${legacySql})
+            )
         )
         AND ${haversineKmSql(
           origin,

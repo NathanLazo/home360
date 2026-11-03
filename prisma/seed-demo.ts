@@ -1046,6 +1046,7 @@ async function seedBusiness(
         businessId,
         name: service.name,
         category: service.category,
+        categories: [service.category],
         basePriceCents: service.price,
         durationMinutes: service.minutes,
         durationMaxMinutes: service.maxMinutes ?? null,

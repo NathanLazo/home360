@@ -14,6 +14,11 @@ import type {
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { ACTIVE_ORDER_STATUSES } from "~/server/services/business/order-activity";
+import {
+  REQUEST_CATEGORIES,
+  type RequestCategory,
+} from "~/schemas/marketplace/request-categories";
+import { primaryCategory, serviceCategoriesOf } from "./service-categories";
 
 const PAGE_SIZE = 20;
 /** Up to 500 sequential upserts: well past Prisma's 5 s interactive default. */
@@ -23,6 +28,7 @@ const serviceListSelect = {
   id: true,
   name: true,
   category: true,
+  categories: true,
   basePriceCents: true,
   durationMinutes: true,
   durationMaxMinutes: true,
@@ -84,7 +90,14 @@ export async function listServices(
       ...(input.search
         ? { name: { contains: input.search, mode: "insensitive" } }
         : {}),
-      ...(input.category ? { category: input.category } : {}),
+      ...(input.category
+        ? {
+            OR: [
+              { categories: { has: input.category } },
+              { category: input.category },
+            ],
+          }
+        : {}),
       ...(input.status ? { status: input.status } : {}),
     },
     take: PAGE_SIZE + 1,
@@ -104,18 +117,25 @@ export async function listServices(
   );
 }
 
+/** Categories used by the business catalog, in taxonomy order. */
 export async function listServiceCategories(
   db: PrismaClient,
   businessId: string,
-): Promise<TrpcResponse<string[]>> {
-  const categories = await db.service.groupBy({
-    by: ["category"],
+): Promise<TrpcResponse<RequestCategory[]>> {
+  const rows = await db.service.findMany({
     where: { businessId },
-    orderBy: { category: "asc" },
+    select: { category: true, categories: true },
   });
+  const used = new Set<string>();
+
+  for (const row of rows) {
+    for (const category of serviceCategoriesOf(row)) {
+      used.add(category);
+    }
+  }
 
   return ok(
-    categories.map(({ category }) => category),
+    REQUEST_CATEGORIES.filter((category) => used.has(category)),
     "Service categories loaded",
   );
 }
@@ -150,7 +170,8 @@ export async function createService(
     const service = await tx.service.create({
       data: {
         name: input.name,
-        category: input.category,
+        category: primaryCategory(input.categories),
+        categories: input.categories,
         basePriceCents: input.basePriceCents,
         durationMinutes: input.durationMinutes,
         durationMaxMinutes: input.durationMaxMinutes,
@@ -210,7 +231,12 @@ export async function updateService(
       where: { id: input.id, businessId },
       data: {
         ...(input.name !== undefined ? { name: input.name } : {}),
-        ...(input.category !== undefined ? { category: input.category } : {}),
+        ...(input.categories !== undefined
+          ? {
+              category: primaryCategory(input.categories),
+              categories: input.categories,
+            }
+          : {}),
         ...(input.basePriceCents !== undefined
           ? { basePriceCents: input.basePriceCents }
           : {}),
@@ -311,7 +337,8 @@ export async function importServiceRows(
           ?.filter((id): id is string => id !== undefined)
           .map((id) => ({ id }));
         const fields = {
-          category: row.category,
+          category: primaryCategory(row.categories),
+          categories: row.categories,
           basePriceCents: row.basePriceCents,
           durationMinutes: row.durationMinutes,
           durationMaxMinutes: row.durationMaxMinutes ?? null,

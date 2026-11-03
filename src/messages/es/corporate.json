@@ -430,16 +430,6 @@
   "checkout": {
     "serviceFeeLabel": "Tarifa de servicio HOME360"
   },
-  "requestCategory": {
-    "Plomería": "Plomería",
-    "Eléctrico": "Eléctrico",
-    "Pintura": "Pintura",
-    "Carpintería": "Carpintería",
-    "Limpieza": "Limpieza",
-    "Jardinería": "Jardinería",
-    "Clima": "Clima",
-    "Otro": "Otro"
-  },
   "orderEvent": {
     "ACCEPTED": "Oferta aceptada",
     "ESCROW_HELD": "Pago retenido en garantía",

@@ -17,6 +17,7 @@ import type {
   ServiceListItem,
   ServiceWorker,
 } from "./service.types";
+import { serviceCategoriesOf } from "~/schemas/marketplace/request-category-match";
 import { useCloseWhenReadOnly } from "~/components/dashboard/subscription-access-context";
 import { SheetFormDock } from "~/components/sheet-form-dock";
 import { Button } from "~/components/ui/button";
@@ -32,7 +33,7 @@ import {
 
 const EMPTY_VALUES: ServiceFormValues = {
   name: "",
-  category: "",
+  categories: [],
   price: "",
   duration: "",
   durationMax: "",
@@ -42,7 +43,6 @@ const EMPTY_VALUES: ServiceFormValues = {
 export function ServiceFormSheet({
   open,
   service,
-  categories,
   workers,
   submitting,
   onOpenChange,
@@ -51,7 +51,6 @@ export function ServiceFormSheet({
 }: {
   open: boolean;
   service: ServiceListItem | null;
-  categories: string[];
   workers: ServiceWorker[];
   submitting: boolean;
   onOpenChange: (open: boolean) => void;
@@ -72,7 +71,7 @@ export function ServiceFormSheet({
       service
         ? {
             name: service.name,
-            category: service.category,
+            categories: serviceCategoriesOf(service),
             price: String(service.basePriceCents / 100),
             duration: String(service.durationMinutes),
             durationMax: service.durationMaxMinutes
@@ -91,7 +90,7 @@ export function ServiceFormSheet({
     const formElement = event.currentTarget;
     const common = {
       name: values.name,
-      category: values.category,
+      categories: values.categories,
       basePriceCents: Math.round(Number(values.price) * 100),
       durationMinutes: Number(values.duration),
       workerIds: values.workerIds,
@@ -109,7 +108,7 @@ export function ServiceFormSheet({
           next.durationMax = t("form.durationRangeError");
         else if (
           field === "name" ||
-          field === "category" ||
+          field === "categories" ||
           field === "workerIds"
         )
           next[field] = t("form.invalidField");
@@ -125,7 +124,7 @@ export function ServiceFormSheet({
               ? "service-duration-max"
               : firstField === "workerIds"
                 ? "service-workers-search"
-                : firstField === "name" || firstField === "category"
+                : firstField === "name" || firstField === "categories"
                   ? `service-${firstField}`
                   : null;
       if (targetId) {
@@ -207,7 +206,6 @@ export function ServiceFormSheet({
             <ServiceFormFields
               values={values}
               errors={errors}
-              categories={categories}
               workers={workers}
               disabled={submitting}
               onChange={setValues}
