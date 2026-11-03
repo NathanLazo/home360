@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  BranchKind,
   Prisma,
   type BranchStatus,
   type PrismaClient,
@@ -22,6 +23,7 @@ const branchListSelect = {
   name: true,
   address: true,
   managerName: true,
+  kind: true,
   status: true,
   coverageRadiusKm: true,
   latitude: true,
@@ -134,18 +136,19 @@ export async function createBranch(
             );
           }
 
+          const kind = input.kind ?? BranchKind.STORE;
           const branch = await tx.branch.create({
             data: {
               businessId: business.id,
               name: input.name,
               address: input.address,
+              kind,
               managerName: input.managerName,
               coverageRadiusKm: input.coverageRadiusKm,
               latitude: input.latitude ?? null,
               longitude: input.longitude ?? null,
-              ...(input.pickupEnabled !== undefined
-                ? { pickupEnabled: input.pickupEnabled }
-                : {}),
+              // F11: a warehouse is delivery-only unless pickup is opted in.
+              pickupEnabled: input.pickupEnabled ?? kind === BranchKind.STORE,
               ...(input.deliveryEnabled !== undefined
                 ? { deliveryEnabled: input.deliveryEnabled }
                 : {}),

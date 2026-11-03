@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { recordIdSchema } from "~/schemas/record-id.schema";
 
-import { BranchStatus } from "@generated/prisma";
+import { BranchKind, BranchStatus } from "@generated/prisma";
 
 const branchFields = {
   name: z.string().trim().min(2).max(80),
@@ -37,6 +37,9 @@ export const branchCreateSchema = z
   .object({
     name: branchFields.name,
     address: branchFields.address,
+    // F11: fixed at creation; a warehouse holds stock only (no workers,
+    // never a radar origin). Omitted → STORE.
+    kind: z.nativeEnum(BranchKind).optional(),
     managerName: branchFields.managerName.optional(),
     coverageRadiusKm: branchFields.coverageRadiusKm,
     // Optional: a branch without coordinates is saved but never matched by

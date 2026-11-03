@@ -38,7 +38,10 @@ export function TeamView() {
   const listResponse = listQuery.data;
   const workers = listResponse?.result?.items ?? [];
   const limit = listResponse?.result?.limit ?? null;
-  const branches = branchesQuery.data?.result?.items ?? [];
+  // F11: workers belong to storefronts; warehouses only hold stock.
+  const branches = (branchesQuery.data?.result?.items ?? []).filter(
+    (branch) => branch.kind === "STORE",
+  );
   const mutationBusy =
     mutations.creating ||
     mutations.updating ||

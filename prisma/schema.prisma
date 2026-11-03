@@ -49,6 +49,13 @@ enum BranchStatus {
   PAUSED
 }
 
+/// F11: a location is a storefront (services, workers, radar) or a warehouse
+/// (holds stock only; ranked by proximity, never a radar origin).
+enum BranchKind {
+  STORE
+  WAREHOUSE
+}
+
 enum ServiceStatus {
   ACTIVE
   PAUSED
@@ -476,6 +483,7 @@ model Branch {
   name             String
   address          String
   managerName      String?
+  kind             BranchKind      @default(STORE)
   // Geo added by M2-W3: notifyNearbyBusinesses / M5-W1 radar need branch
   // coordinates for the Haversine radius match. Nullable so existing rows
   // keep working until each branch is geocoded.

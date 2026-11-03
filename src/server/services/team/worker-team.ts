@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  BranchKind,
   Prisma,
   type BusinessStatus,
   type PrismaClient,
@@ -138,7 +139,8 @@ async function assertBranchBelongsToBusiness(
   branchId: string,
 ): Promise<boolean> {
   const branch = await db.branch.findFirst({
-    where: { id: branchId, businessId },
+    // F11: workers belong to storefronts; a warehouse only holds stock.
+    where: { id: branchId, businessId, kind: BranchKind.STORE },
     select: { id: true },
   });
 

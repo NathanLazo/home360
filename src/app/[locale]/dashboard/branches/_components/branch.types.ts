@@ -5,7 +5,11 @@ type BranchOutput = RouterOutputs["branch"];
 export type BranchListResult = NonNullable<BranchOutput["list"]["result"]>;
 export type BranchListItem = BranchListResult["items"][number];
 
+export type BranchKindValue = BranchListItem["kind"];
+
 export type BranchFormValues = {
+  /** F11: storefront or warehouse; fixed after creation. */
+  kind: BranchKindValue;
   name: string;
   address: string;
   managerName: string;
@@ -20,7 +24,7 @@ export type BranchFormValues = {
 
 type BranchTextField = Exclude<
   keyof BranchFormValues,
-  "pickupEnabled" | "deliveryEnabled"
+  "kind" | "pickupEnabled" | "deliveryEnabled"
 >;
 
 export type BranchFormErrors = Partial<Record<BranchTextField, string>>;

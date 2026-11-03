@@ -34,6 +34,7 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 | W4 | web | Perfil: avatar, formulario de contraseña único, `NumberTicker`, `SubmitStatusIcon` | F9-01 |
 | W5 | web | ✅ F8-05 reescrito: solo prepago en USD (decisión owner 2026-10-18) | F8-05 |
 | W6b | web | F10 fulfillment/discovery: API + dashboard (órdenes, solicitudes, sucursales, productos) + admin (órdenes, vencimientos). En código; falta `db:push`, `PICKUP_CODE_SECRET` en Vercel y prueba manual | F10 |
+| W6c | web | F11 almacenes (`Branch.kind`) + recomendación de productos por cercanía. En código; falta `db:push` y el consumo en la app (M9) | F11 |
 | M2 | móvil | T4: calificación y % a tiempo del trabajador (API + app) | M6-M3 |
 
 ### Fase 2 — Calidad, accesibilidad y diseño

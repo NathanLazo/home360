@@ -910,7 +910,9 @@
       "kilometers": "{count} km",
       "noLocation": "No location",
       "noLocationHint": "Won’t receive requests",
-      "location": "Location"
+      "location": "Location",
+      "warehouse": "Warehouse",
+      "noLocationHintWarehouse": "Won't be recommended by proximity"
     },
     "actions": {
       "open": "Open actions for {name}",
@@ -948,13 +950,27 @@
         "coverage": "Coverage",
         "coverageDescription": "Set how far you take requests from.",
         "fulfillment": "Product fulfillment",
-        "fulfillmentDescription": "How customers get the products they buy from this branch."
+        "fulfillmentDescription": "How customers get the products they buy from this branch.",
+        "location": "Location",
+        "locationDescription": "Place the warehouse so its stock is recommended to the nearest customers."
       },
       "deliveryEnabled": "Home delivery",
       "deliveryEnabledHelp": "This branch fills orders delivered to the customer's address.",
       "pickupEnabled": "Pickup at branch",
       "pickupEnabledHelp": "Customers can choose this branch to pick up their order.",
-      "pickupNeedsCoordinates": "Add the branch location: without coordinates it does not show up as a pickup point."
+      "pickupNeedsCoordinates": "Add the branch location: without coordinates it does not show up as a pickup point.",
+      "kind": {
+        "legend": "Location type",
+        "store": {
+          "label": "Branch",
+          "help": "Handles services, team and requests."
+        },
+        "warehouse": {
+          "label": "Warehouse",
+          "help": "Holds stock and is recommended by proximity."
+        },
+        "locked": "The type is set when the location is created."
+      }
     },
     "feedback": {
       "planLimit": "You've reached your plan's branch limit.",

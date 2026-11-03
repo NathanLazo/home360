@@ -4,7 +4,10 @@ import type { Prisma, PrismaClient } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { marketplaceBusinessWhere } from "~/server/services/catalog/marketplace-business";
 import {
+  compareDistance,
+  nearestStockKm,
   productBranchStockSelect,
+  sellableStockWhere,
   summarizeAvailability,
   type ProductAvailability,
 } from "~/server/services/catalog/product-availability";
@@ -12,6 +15,8 @@ import type { GeoPoint } from "~/server/services/geo/haversine";
 
 const SEARCH_PAGE_SIZE = 20;
 const FEATURED_PRODUCTS_TAKE = 10;
+/** F11: candidate pool ranked by proximity before cutting to the feed size. */
+const FEATURED_CANDIDATES_TAKE = 100;
 
 export const MARKETPLACE_KINDS = ["service", "product"] as const;
 
@@ -21,7 +26,15 @@ export type MarketplaceSearchInput = {
   query: string;
   kind?: MarketplaceKind;
   cursor?: string;
+  /** F11: distance origin (explicit point or default address). */
+  origin: GeoPoint | null;
 };
+
+/** Stock rows a customer can buy from, for proximity ranking. */
+const sellableStocksSelect = {
+  where: { ...sellableStockWhere, stock: { gt: 0 } },
+  select: productBranchStockSelect,
+} satisfies Prisma.Product$stocksArgs;
 
 /**
  * The marketplace is the customer-facing, cross-tenant read model: it only ever
@@ -53,6 +66,7 @@ const featuredProductSelect = {
   imageUrl: true,
   businessId: true,
   business: { select: { name: true } },
+  stocks: sellableStocksSelect,
 } satisfies Prisma.ProductSelect;
 
 export type MarketplaceFeaturedProduct = {
@@ -62,6 +76,8 @@ export type MarketplaceFeaturedProduct = {
   imageUrl: string | null;
   businessId: string;
   businessName: string;
+  /** F11: km to the nearest location with stock; null without origin/geo. */
+  distanceKm: number | null;
 };
 
 const serviceSearchSelect = {
@@ -85,6 +101,7 @@ const productSearchSelect = {
   imageUrl: true,
   businessId: true,
   business: { select: { name: true } },
+  stocks: sellableStocksSelect,
 } satisfies Prisma.ProductSelect;
 
 type ProductSearchRow = Prisma.ProductGetPayload<{
@@ -101,6 +118,8 @@ export type MarketplaceSearchItem = {
   businessName: string;
   /** Product photo; services have no image. */
   imageUrl: string | null;
+  /** F11: products only — km to the nearest location with stock. */
+  distanceKm: number | null;
 };
 
 export type MarketplaceSearchResult = {
@@ -205,33 +224,51 @@ export async function listMarketplaceCategories(
   return ok(categories, "Marketplace categories loaded");
 }
 
+/**
+ * F11 recommendations: in-stock products nearest to the origin first (the
+ * closest store or warehouse holding units). The pool is pre-ordered by
+ * business rating (M3-W0) then recency, so that order breaks distance ties
+ * and is the whole ranking when there is no origin.
+ */
 export async function listFeaturedProducts(
   db: PrismaClient,
+  origin: GeoPoint | null,
 ): Promise<TrpcResponse<MarketplaceFeaturedProduct[]>> {
-  // Best-rated businesses first (denormalized Business.ratingAvg, M3-W0);
-  // unrated businesses rank last, newest products break ties.
-  const featured = await db.product.findMany({
-    where: productCatalogFilter,
+  const candidates = await db.product.findMany({
+    where: {
+      ...productCatalogFilter,
+      stocks: { some: { ...sellableStockWhere, stock: { gt: 0 } } },
+    },
     select: featuredProductSelect,
     orderBy: [
       { business: { ratingAvg: { sort: "desc", nulls: "last" } } },
       { createdAt: "desc" },
       { id: "desc" },
     ],
-    take: FEATURED_PRODUCTS_TAKE,
+    take: FEATURED_CANDIDATES_TAKE,
   });
+  const ranked = candidates
+    .map((product, rank) => ({
+      rank,
+      item: {
+        id: product.id,
+        name: product.name,
+        priceCents: product.priceCents,
+        imageUrl: product.imageUrl,
+        businessId: product.businessId,
+        businessName: product.business.name,
+        distanceKm: nearestStockKm(product.stocks, origin),
+      },
+    }))
+    .sort(
+      (a, b) =>
+        compareDistance(a.item.distanceKm, b.item.distanceKm) ||
+        a.rank - b.rank,
+    )
+    .slice(0, FEATURED_PRODUCTS_TAKE)
+    .map(({ item }) => item);
 
-  return ok(
-    featured.map((product) => ({
-      id: product.id,
-      name: product.name,
-      priceCents: product.priceCents,
-      imageUrl: product.imageUrl,
-      businessId: product.businessId,
-      businessName: product.business.name,
-    })),
-    "Featured products loaded",
-  );
+  return ok(ranked, "Featured products loaded");
 }
 
 function serviceSearchItem(row: ServiceSearchRow): MarketplaceSearchItem {
@@ -244,10 +281,14 @@ function serviceSearchItem(row: ServiceSearchRow): MarketplaceSearchItem {
     businessId: row.businessId,
     businessName: row.business.name,
     imageUrl: null,
+    distanceKm: null,
   };
 }
 
-function productSearchItem(row: ProductSearchRow): MarketplaceSearchItem {
+function productSearchItem(
+  row: ProductSearchRow,
+  origin: GeoPoint | null,
+): MarketplaceSearchItem {
   return {
     kind: "product",
     id: row.id,
@@ -257,6 +298,7 @@ function productSearchItem(row: ProductSearchRow): MarketplaceSearchItem {
     businessId: row.businessId,
     businessName: row.business.name,
     imageUrl: row.imageUrl,
+    distanceKm: nearestStockKm(row.stocks, origin),
   };
 }
 
@@ -348,7 +390,7 @@ export async function searchMarketplace(
     });
     const page = rows.slice(0, remaining);
 
-    items.push(...page.map(productSearchItem));
+    items.push(...page.map((row) => productSearchItem(row, input.origin)));
 
     if (rows.length > remaining) {
       const lastProductId = page.at(-1)?.id ?? null;
