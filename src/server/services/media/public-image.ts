@@ -8,11 +8,12 @@ import { svcFail, svcOk, type ServiceResult } from "../service-result";
 import { readMediaBytes, type MediaBytes } from "./blob";
 
 /**
- * Public images of the panel (owner avatar, product photo). The Blob store is
- * private, so they are stored under `public/{scope}/{userId}/…` and served by
- * `/api/public-media/[...path]`, which only ever streams this namespace.
+ * Public images of the panel (owner avatar, business logo, product and service
+ * photos). The Blob store is private, so they are stored under
+ * `public/{scope}/{userId}/…` and served by `/api/public-media/[...path]`,
+ * which only ever streams this namespace.
  */
-export const PUBLIC_IMAGE_SCOPES = ["avatar", "product"] as const;
+export const PUBLIC_IMAGE_SCOPES = ["avatar", "logo", "catalog"] as const;
 export type PublicImageScope = (typeof PUBLIC_IMAGE_SCOPES)[number];
 
 export const PUBLIC_IMAGE_CONTENT_TYPES = [
@@ -31,7 +32,7 @@ const EXTENSIONS: Record<(typeof PUBLIC_IMAGE_CONTENT_TYPES)[number], string> =
 
 const PUBLIC_ROUTE = "/api/public-media/";
 const PATHNAME_PATTERN =
-  /^public\/(avatar|product)\/[a-z0-9]{20,32}\/[a-z0-9]{20,32}\.(jpg|png|webp)$/u;
+  /^public\/(avatar|logo|catalog)\/[a-z0-9]{20,32}\/[a-z0-9]{20,32}\.(jpg|png|webp)$/u;
 
 function isPublicImageContentType(
   value: string,
@@ -43,12 +44,28 @@ export function publicImageUrl(pathname: string): string {
   return new URL(`${PUBLIC_ROUTE}${pathname}`, env.APP_URL).toString();
 }
 
-/** Prefix every image uploaded by `userId` in `scope` is served under. */
-export function publicImageUrlPrefix(
+/** Whether `pathname` is a well-formed image `userId` uploaded in `scope`. */
+export function isOwnPublicImage(
   scope: PublicImageScope,
   userId: string,
-): string {
-  return publicImageUrl(`public/${scope}/${userId}/`);
+  pathname: string,
+): boolean {
+  return (
+    PATHNAME_PATTERN.test(pathname) &&
+    pathname.startsWith(`public/${scope}/${userId}/`)
+  );
+}
+
+/** Avatar shown in the panel: the uploaded one wins over the OAuth picture. */
+export function resolveAvatarUrl(user: {
+  avatarPathname: string | null;
+  image: string | null;
+}): string | null {
+  return user.avatarPathname ? publicImageUrl(user.avatarPathname) : user.image;
+}
+
+export function nullablePublicImageUrl(pathname: string | null): string | null {
+  return pathname ? publicImageUrl(pathname) : null;
 }
 
 export type PublicImageUpload = { pathname: string; url: string };

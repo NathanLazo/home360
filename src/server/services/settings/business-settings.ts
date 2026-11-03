@@ -8,11 +8,17 @@ import type {
 import type {
   ChangePasswordInput,
   SettingsErrorCode,
+  UpdateBusinessContactInput,
+  UpdateBusinessLogoInput,
   UpdateBusinessProfileInput,
   UpdateOwnerInput,
 } from "~/schemas/settings/business-settings.schema";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { hashPassword, verifyPassword } from "~/server/services/auth/password";
+import {
+  isOwnPublicImage,
+  nullablePublicImageUrl,
+} from "~/server/services/media/public-image";
 
 export type BusinessSettings = {
   business: {
@@ -20,6 +26,12 @@ export type BusinessSettings = {
     type: BusinessType;
     guaranteeType: GuaranteeType;
     guaranteeNotes: string | null;
+    description: string | null;
+    logoUrl: string | null;
+    phone: string | null;
+    whatsapp: string | null;
+    contactEmail: string | null;
+    website: string | null;
   };
   owner: { name: string | null; email: string | null };
 };
@@ -35,6 +47,12 @@ export async function getSettings(
       type: true,
       guaranteeType: true,
       guaranteeNotes: true,
+      description: true,
+      logoPathname: true,
+      phone: true,
+      whatsapp: true,
+      contactEmail: true,
+      website: true,
       owner: { select: { name: true, email: true } },
     },
   });
@@ -46,6 +64,12 @@ export async function getSettings(
         type: business.type,
         guaranteeType: business.guaranteeType,
         guaranteeNotes: business.guaranteeNotes,
+        description: business.description,
+        logoUrl: nullablePublicImageUrl(business.logoPathname),
+        phone: business.phone,
+        whatsapp: business.whatsapp,
+        contactEmail: business.contactEmail,
+        website: business.website,
       },
       owner: business.owner,
     },
@@ -73,6 +97,55 @@ export async function updateBusinessProfile(
   });
 
   return ok(business, "Business profile updated");
+}
+
+/** Public contact card: only the fields present in `input` are written. */
+export async function updateBusinessContact(
+  db: PrismaClient,
+  businessId: string,
+  input: UpdateBusinessContactInput,
+): Promise<TrpcResponse<{ id: string }>> {
+  const business = await db.business.update({
+    where: { id: businessId },
+    data: {
+      ...(input.description !== undefined
+        ? { description: input.description }
+        : {}),
+      ...(input.phone !== undefined ? { phone: input.phone } : {}),
+      ...(input.whatsapp !== undefined ? { whatsapp: input.whatsapp } : {}),
+      ...(input.contactEmail !== undefined
+        ? { contactEmail: input.contactEmail }
+        : {}),
+      ...(input.website !== undefined ? { website: input.website } : {}),
+    },
+    select: { id: true },
+  });
+
+  return ok(business, "Business contact updated");
+}
+
+/** Sets or clears the logo; only the owner's own uploaded logos are accepted. */
+export async function updateBusinessLogo(
+  db: PrismaClient,
+  input: UpdateBusinessLogoInput & { businessId: string; ownerId: string },
+): Promise<TrpcResponse<{ id: string; logoUrl: string | null }>> {
+  if (
+    input.logoPathname !== null &&
+    !isOwnPublicImage("logo", input.ownerId, input.logoPathname)
+  ) {
+    return fail("VALIDATION_ERROR", 422, "Logo must be uploaded first");
+  }
+
+  const business = await db.business.update({
+    where: { id: input.businessId },
+    data: { logoPathname: input.logoPathname },
+    select: { id: true, logoPathname: true },
+  });
+
+  return ok(
+    { id: business.id, logoUrl: nullablePublicImageUrl(business.logoPathname) },
+    input.logoPathname ? "Business logo updated" : "Business logo removed",
+  );
 }
 
 export async function updateOwner(

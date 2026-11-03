@@ -8,6 +8,7 @@ import { ProfileAssistantCard } from "./profile-assistant-card";
 import { ProfileBillingCard } from "./profile-billing-card";
 import { ProfileDevicesCard } from "./profile-devices-card";
 import { ProfileIdentityHeader } from "./profile-identity-header";
+import { ProfileMcpCard } from "./profile-mcp-card";
 import { ProfileNotice } from "./profile-notice";
 import { ProfileSectionNav } from "./profile-section-nav";
 import { ProfileSecurityCard } from "./profile-security-card";
@@ -117,6 +118,7 @@ export function ProfileView({
             usage={assistantAvailable ? monthUsage : null}
             onSubmit={mutations.updateAssistantPreferences}
           />
+          <ProfileMcpCard disabled={readOnly} />
           <ProfileBillingCard
             area={area}
             state={billing}

@@ -20,6 +20,7 @@ import { approximateCoordinate } from "~/server/services/geo/approximate";
 import type { GeoPoint } from "~/server/services/geo/haversine";
 
 import type { MarketplaceKind } from "./marketplace";
+import { nullablePublicImageUrl } from "~/server/services/media/public-image";
 
 const PAGE_SIZE = 20;
 /**
@@ -47,6 +48,7 @@ export type MarketplaceBusinessListItem = {
   categories: string[];
   /** First published product image (businesses have no cover upload yet). */
   coverUrl: string | null;
+  logoUrl: string | null;
   servicesCount: number;
   productsCount: number;
 };
@@ -62,6 +64,15 @@ export type MarketplaceBusinessProfile = {
   type: BusinessType;
   guaranteeType: GuaranteeType;
   guaranteeNotes: string | null;
+  description: string | null;
+  logoUrl: string | null;
+  /** Public contact card the business chose to show. */
+  contact: {
+    phone: string | null;
+    whatsapp: string | null;
+    email: string | null;
+    website: string | null;
+  };
   ratingAvg: number | null;
   ratingCount: number;
   /**
@@ -85,6 +96,8 @@ export type MarketplaceBusinessProfile = {
     category: string;
     basePriceCents: number;
     durationMinutes: number;
+    description: string | null;
+    imageUrl: string | null;
   }[];
   products: {
     id: string;
@@ -105,10 +118,13 @@ export type MarketplaceServiceDetail = {
   basePriceCents: number;
   durationMinutes: number;
   durationMaxMinutes: number | null;
+  description: string | null;
+  imageUrl: string | null;
   businessId: string;
   business: {
     id: string;
     name: string;
+    logoUrl: string | null;
     ratingAvg: number | null;
     ratingCount: number;
     guaranteeType: GuaranteeType;
@@ -216,6 +232,7 @@ export async function listMarketplaceBusinesses(
       guaranteeType: true,
       ratingAvg: true,
       ratingCount: true,
+      logoPathname: true,
       branches: {
         where: {
           status: BranchStatus.ACTIVE,
@@ -271,6 +288,7 @@ export async function listMarketplaceBusinesses(
         ]),
       ].sort((a, b) => a.localeCompare(b)),
       coverUrl: coverByBusiness.get(row.id) ?? null,
+      logoUrl: nullablePublicImageUrl(row.logoPathname),
       servicesCount: row._count.services,
       productsCount: row._count.products,
     }))
@@ -312,6 +330,12 @@ export async function getMarketplaceBusiness(
       type: true,
       guaranteeType: true,
       guaranteeNotes: true,
+      description: true,
+      logoPathname: true,
+      phone: true,
+      whatsapp: true,
+      contactEmail: true,
+      website: true,
       ratingAvg: true,
       ratingCount: true,
       branches: {
@@ -335,6 +359,8 @@ export async function getMarketplaceBusiness(
           category: true,
           basePriceCents: true,
           durationMinutes: true,
+          description: true,
+          imageUrl: true,
         },
       },
       products: {
@@ -363,6 +389,14 @@ export async function getMarketplaceBusiness(
       type: business.type,
       guaranteeType: business.guaranteeType,
       guaranteeNotes: business.guaranteeNotes,
+      description: business.description,
+      logoUrl: nullablePublicImageUrl(business.logoPathname),
+      contact: {
+        phone: business.phone,
+        whatsapp: business.whatsapp,
+        email: business.contactEmail,
+        website: business.website,
+      },
       ratingAvg: business.ratingAvg,
       ratingCount: business.ratingCount,
       branches: business.branches.map((branch) => {
@@ -420,11 +454,14 @@ export async function getMarketplaceService(
       basePriceCents: true,
       durationMinutes: true,
       durationMaxMinutes: true,
+      description: true,
+      imageUrl: true,
       businessId: true,
       business: {
         select: {
           id: true,
           name: true,
+          logoPathname: true,
           ratingAvg: true,
           ratingCount: true,
           guaranteeType: true,
@@ -437,5 +474,13 @@ export async function getMarketplaceService(
     return fail("NOT_FOUND", 404, "Service not found");
   }
 
-  return ok(service, "Marketplace service loaded");
+  const { logoPathname, ...business } = service.business;
+
+  return ok(
+    {
+      ...service,
+      business: { ...business, logoUrl: nullablePublicImageUrl(logoPathname) },
+    },
+    "Marketplace service loaded",
+  );
 }

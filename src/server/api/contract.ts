@@ -74,6 +74,8 @@ export const DOMAIN_ERROR_CODES = [
   // §3 geo: provider not configured/reachable; address outside coverage.
   "GEO_UNAVAILABLE",
   "LOCATION_OUT_OF_COVERAGE",
+  // MCP personal access tokens (Claude Code connection).
+  "MCP_TOKEN_LIMIT_REACHED",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

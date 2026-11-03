@@ -29,6 +29,7 @@ import { env } from "~/env";
 import { routing } from "~/i18n/routing";
 import { DASHBOARD_NAV } from "~/lib/dashboard-nav";
 import { requireRole } from "~/server/auth/require-role";
+import { getPanelAvatarUrl } from "~/server/services/profile/profile-summary";
 import { db } from "~/server/db";
 import { getDashboardShellData } from "~/server/services/business/dashboard-shell";
 
@@ -49,11 +50,12 @@ export default async function DashboardLayout({
 
   setRequestLocale(locale);
   const user = await requireRole(UserRole.BUSINESS, locale, "/dashboard");
-  const [shell, t, common, cookieStore] = await Promise.all([
+  const [shell, t, common, cookieStore, avatarUrl] = await Promise.all([
     getDashboardShellData(db, user.id),
     getTranslations({ locale, namespace: "dashboard" }),
     getTranslations({ locale, namespace: "common" }),
     cookies(),
+    getPanelAvatarUrl(db, user.id),
   ]);
 
   if (!shell) {
@@ -103,7 +105,7 @@ export default async function DashboardLayout({
           name: userName,
           subtitle: shell.business.name,
           seed: user.id,
-          image: user.image ?? null,
+          image: avatarUrl,
         }}
       />
       <AppShellInset>
@@ -117,7 +119,7 @@ export default async function DashboardLayout({
               id: user.id,
               name: userName,
               email: userEmail,
-              image: user.image ?? null,
+              image: avatarUrl,
               role: user.role,
             }}
             branches={shell.branches}

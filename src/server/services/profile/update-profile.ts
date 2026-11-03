@@ -5,9 +5,9 @@ import type {
   SetPasswordInput,
   UpdateAssistantPreferencesInput,
   UpdateIdentityInput,
-  UpdateImageInput,
+  UpdateAvatarInput,
 } from "~/schemas/profile/profile.schema";
-import { publicImageUrlPrefix } from "~/server/services/media/public-image";
+import { isOwnPublicImage } from "~/server/services/media/public-image";
 import { hashPassword, verifyPassword } from "~/server/services/auth/password";
 import {
   svcFail,
@@ -28,24 +28,25 @@ export async function updateIdentity(
 }
 
 /**
- * Sets or clears the avatar. Only images in the user's own public avatar
- * namespace are accepted, so the panel never renders a third-party URL.
+ * Sets or clears the uploaded avatar (`avatarPathname` wins over the OAuth
+ * `image`). Only the user's own public avatar namespace is accepted, so the
+ * panel never renders a third-party URL.
  */
-export async function updateImage(
+export async function updateAvatar(
   db: PrismaClient,
   userId: string,
-  input: UpdateImageInput,
+  input: UpdateAvatarInput,
 ): Promise<ServiceResult<null, "VALIDATION_ERROR">> {
   if (
-    input.image !== null &&
-    !input.image.startsWith(publicImageUrlPrefix("avatar", userId))
+    input.avatarPathname !== null &&
+    !isOwnPublicImage("avatar", userId, input.avatarPathname)
   ) {
-    return svcFail("VALIDATION_ERROR", "Image must be uploaded first");
+    return svcFail("VALIDATION_ERROR", "Avatar must be uploaded first");
   }
 
   await db.user.update({
     where: { id: userId },
-    data: { image: input.image },
+    data: { avatarPathname: input.avatarPathname },
     select: { id: true },
   });
 

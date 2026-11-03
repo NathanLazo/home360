@@ -125,17 +125,17 @@ export const mediaRouter = createTRPCRouter({
     }),
 
   /**
-   * Public panel image (owner avatar, product photo) uploaded server-side —
-   * used by the assistant with chat attachments. Panel roles only; product
-   * photos only for businesses. Product/profile ownership is checked by the
-   * procedure that stores the returned URL.
+   * Public panel image (avatar, business logo, catalog photo) uploaded
+   * server-side — used by the assistant and the MCP server. Panel roles only;
+   * logo and catalog photos only for businesses. The procedure that stores
+   * the result re-checks ownership.
    */
   uploadPublicImage: protectedProcedure
     .input(uploadPublicImageSchema)
     .mutation(async ({ ctx, input }) => {
       const area = panelAreaForRole(ctx.session.user.role);
 
-      if (!area || (input.scope === "product" && area !== "business")) {
+      if (!area || (input.scope !== "avatar" && area !== "business")) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 

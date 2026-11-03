@@ -398,6 +398,7 @@ model User {
   avatarPathname               String?
   aiUsage                      AiUsage[]
   stockMovements               StockMovement[]              @relation("StockMovementActor")
+  mcpTokens                    McpToken[]
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -417,6 +418,14 @@ model Business {
   status              BusinessStatus     @default(PENDING)
   guaranteeType       GuaranteeType
   guaranteeNotes      String?
+  // Public commercial profile (marketplace + assistant/MCP). Logo is served
+  // by /api/public-media from `public/logo/{ownerId}/…`.
+  description         String?
+  logoPathname        String?
+  phone               String?
+  whatsapp            String?
+  contactEmail        String?
+  website             String?
   statusReason        String?
   ownerId             String             @unique
   owner               User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -528,6 +537,9 @@ model Worker {
 model Service {
   id                 String        @id @default(cuid())
   name               String
+  description        String?
+  // Public catalog image URL (same rule as Product.imageUrl).
+  imageUrl           String?
   category           String
   basePriceCents     Int
   durationMinutes    Int
@@ -547,6 +559,7 @@ model Service {
 model Product {
   id             String          @id @default(cuid())
   name           String
+  description    String?
   sku            String
   category       String
   priceCents     Int
@@ -1257,6 +1270,24 @@ model BusinessDocument {
 
   @@index([businessId, status])
   @@index([reviewedById])
+}
+
+// Personal access token of the MCP server (/api/mcp). Only the SHA-256 hash is
+// stored; `prefix` lets the owner recognize it. The token acts as its user:
+// the same role-scoped tRPC procedures authorize every tool call.
+model McpToken {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  tokenHash  String    @unique
+  prefix     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId, revokedAt])
 }
 
 model PasswordResetToken {

@@ -27,6 +27,7 @@ import {
 } from "~/app/[locale]/dashboard/services/_components/service.schema";
 import { planChangeSchema } from "~/lib/subscription/subscription.schemas";
 import {
+  updateBusinessContactSchema,
   updateBusinessProfileSchema,
   updateOwnerSchema,
 } from "~/schemas/settings/business-settings.schema";
@@ -274,7 +275,7 @@ export function createBusinessTools(
     }),
     createProduct: tool({
       description:
-        "Create a product (price in MXN cents, optional initial stock per branch). Confirm name, SKU and price when the request was ambiguous.",
+        "Create a product (price in MXN cents, optional description and initial stock per branch). Confirm name, SKU and price when the request was ambiguous. Add the photo afterwards with setProductImage.",
       inputSchema: productCreateSchema,
       execute: (input) => runTool(() => caller.product.create(input)),
     }),
@@ -318,7 +319,7 @@ export function createBusinessTools(
     }),
     createService: tool({
       description:
-        "Create a service (base price in MXN cents, duration in minutes, assigned workers).",
+        "Create a service (base price in MXN cents, duration in minutes, optional description, assigned workers). Add the photo afterwards with setServiceImage.",
       inputSchema: serviceCreateSchema,
       execute: (input) => runTool(() => caller.service.create(input)),
     }),
@@ -412,7 +413,7 @@ export function createBusinessTools(
     }),
     getBusinessSettings: tool({
       description:
-        "Business profile: name, type, guarantee notes and owner data.",
+        "Business profile: name, type, guarantee notes, public description, logo, contact (phone, WhatsApp, email, website) and owner data.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.businessSettings.get()),
     }),
@@ -422,6 +423,13 @@ export function createBusinessTools(
       inputSchema: updateBusinessProfileSchema,
       execute: (input) =>
         runTool(() => caller.businessSettings.updateBusinessProfile(input)),
+    }),
+    updateBusinessContact: tool({
+      description:
+        "Update the public description and contact card of the business (phone, WhatsApp, email, website). Omitted fields are kept; null clears one.",
+      inputSchema: updateBusinessContactSchema,
+      execute: (input) =>
+        runTool(() => caller.businessSettings.updateContact(input)),
     }),
     updateOwnerName: tool({
       description: "Update the display name of the business owner.",

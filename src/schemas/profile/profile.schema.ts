@@ -18,12 +18,12 @@ export const updateIdentitySchema = z
   .strict();
 
 /**
- * Avatar URL of the session user, or `null` to remove it. The service only
- * accepts images this user uploaded through `media.uploadPublicImage`.
+ * Avatar pathname of the session user, or `null` to remove it. The service
+ * only accepts avatars this user uploaded through `media.uploadPublicImage`.
  */
-export const updateImageSchema = z
+export const updateAvatarSchema = z
   .object({
-    image: z.string().trim().url().max(500).nullable(),
+    avatarPathname: z.string().trim().min(1).max(200).nullable(),
   })
   .strict();
 
@@ -57,7 +57,7 @@ export const removeDeviceSchema = z
   .strict();
 
 export type UpdateIdentityInput = z.infer<typeof updateIdentitySchema>;
-export type UpdateImageInput = z.infer<typeof updateImageSchema>;
+export type UpdateAvatarInput = z.infer<typeof updateAvatarSchema>;
 export type UpdateAssistantPreferencesInput = z.infer<
   typeof updateAssistantPreferencesSchema
 >;

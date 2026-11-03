@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Prisma, PrismaClient } from "@generated/prisma";
+import { resolveAvatarUrl } from "~/server/services/media/public-image";
 import {
   DEFAULT_AGENT_MODEL_ID,
   isAgentModelId,
@@ -50,6 +51,7 @@ export async function getProfileSummary(
       name: true,
       email: true,
       image: true,
+      avatarPathname: true,
       role: true,
       locale: true,
       createdAt: true,
@@ -67,11 +69,18 @@ export async function getProfileSummary(
     return null;
   }
 
-  const { passwordHash, accounts, agentDefaultModel, pushTokens, ...rest } =
-    user;
+  const {
+    passwordHash,
+    accounts,
+    agentDefaultModel,
+    pushTokens,
+    avatarPathname,
+    ...rest
+  } = user;
 
   return {
     ...rest,
+    image: resolveAvatarUrl({ avatarPathname, image: rest.image }),
     devices: pushTokens,
     hasPassword: passwordHash !== null,
     linkedProviders: [...new Set(accounts.map((account) => account.provider))],
@@ -80,4 +89,17 @@ export async function getProfileSummary(
         ? agentDefaultModel
         : DEFAULT_AGENT_MODEL_ID,
   };
+}
+
+/** Avatar of the panel shell (sidebar, user menu): uploaded wins over OAuth. */
+export async function getPanelAvatarUrl(
+  db: PrismaClient,
+  userId: string,
+): Promise<string | null> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { avatarPathname: true, image: true },
+  });
+
+  return user ? resolveAvatarUrl(user) : null;
 }

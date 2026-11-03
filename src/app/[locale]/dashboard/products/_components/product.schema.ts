@@ -49,8 +49,11 @@ const productFields = {
     .refine((value) => value.startsWith("https://")),
 };
 
+const catalogDescription = z.string().trim().min(1).max(1_000);
+
 export const productCreateSchema = z.object({
   ...productFields,
+  description: catalogDescription.optional(),
   imageUrl: productFields.imageUrl.optional(),
   status: z.nativeEnum(ProductStatus).default(ProductStatus.DRAFT),
   stocks: productStocksSchema.default([]),
@@ -62,7 +65,8 @@ export const productUpdateSchema = z.object({
   sku: productFields.sku.optional(),
   category: productFields.category.optional(),
   priceCents: productFields.priceCents.optional(),
-  // `undefined` keeps the current image; `null` removes it.
+  // `undefined` keeps the current value; `null` removes it.
+  description: catalogDescription.nullable().optional(),
   imageUrl: productFields.imageUrl.nullable().optional(),
   stocks: productStocksSchema.optional(),
 });
