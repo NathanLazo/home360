@@ -910,7 +910,9 @@
       "kilometers": "{count} km",
       "noLocation": "Sin ubicación",
       "noLocationHint": "No recibirá solicitudes",
-      "location": "Ubicación"
+      "location": "Ubicación",
+      "warehouse": "Almacén",
+      "noLocationHintWarehouse": "No se recomendará por cercanía"
     },
     "actions": {
       "open": "Abrir acciones de {name}",
@@ -948,13 +950,27 @@
         "coverage": "Cobertura",
         "coverageDescription": "Define hasta dónde recibes solicitudes.",
         "fulfillment": "Entrega de productos",
-        "fulfillmentDescription": "Cómo reciben tus clientes los productos que compran en esta sucursal."
+        "fulfillmentDescription": "Cómo reciben tus clientes los productos que compran en esta sucursal.",
+        "location": "Ubicación",
+        "locationDescription": "Ubica el almacén para recomendar su stock a los clientes más cercanos."
       },
       "deliveryEnabled": "Envío a domicilio",
       "deliveryEnabledHelp": "Esta sucursal surte pedidos que se entregan en la dirección del cliente.",
       "pickupEnabled": "Recoger en sucursal",
       "pickupEnabledHelp": "Los clientes pueden elegir esta sucursal para recoger su pedido.",
-      "pickupNeedsCoordinates": "Agrega la ubicación de la sucursal: sin coordenadas no aparece como punto de recolección."
+      "pickupNeedsCoordinates": "Agrega la ubicación de la sucursal: sin coordenadas no aparece como punto de recolección.",
+      "kind": {
+        "legend": "Tipo de ubicación",
+        "store": {
+          "label": "Sucursal",
+          "help": "Atiende servicios, equipo y solicitudes."
+        },
+        "warehouse": {
+          "label": "Almacén",
+          "help": "Guarda stock y se recomienda por cercanía."
+        },
+        "locked": "El tipo se define al crear la ubicación."
+      }
     },
     "feedback": {
       "planLimit": "Alcanzaste el límite de sucursales de tu plan.",

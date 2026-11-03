@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  BranchKind,
   BranchStatus,
   ProductStatus,
   ServiceStatus,
@@ -86,6 +87,8 @@ export type MarketplaceBusinessProfile = {
     address: string | null;
     latitude: number | null;
     longitude: number | null;
+    /** F11: storefront or warehouse (stock only). */
+    kind: BranchKind;
     pickupEnabled: boolean;
     exactLocation: boolean;
     distanceKm: number | null;
@@ -238,6 +241,8 @@ export async function listMarketplaceBusinesses(
           status: BranchStatus.ACTIVE,
           latitude: { not: null },
           longitude: { not: null },
+          // F11: services are served from storefronts, never a warehouse.
+          ...(input.kind === "service" ? { kind: BranchKind.STORE } : {}),
         },
         select: { latitude: true, longitude: true },
       },
@@ -348,6 +353,7 @@ export async function getMarketplaceBusiness(
           latitude: true,
           longitude: true,
           pickupEnabled: true,
+          kind: true,
         },
       },
       services: {
@@ -416,6 +422,7 @@ export async function getMarketplaceBusiness(
           address: branch.pickupEnabled ? branch.address : null,
           latitude: point?.latitude ?? null,
           longitude: point?.longitude ?? null,
+          kind: branch.kind,
           pickupEnabled: branch.pickupEnabled,
           exactLocation: branch.pickupEnabled,
           distanceKm: distanceFrom(input.origin, point),

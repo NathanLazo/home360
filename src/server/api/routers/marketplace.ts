@@ -21,18 +21,21 @@ import {
   searchMarketplace,
 } from "~/server/services/catalog/marketplace";
 
-const marketplaceSearchSchema = z.object({
-  query: z.string().trim().min(1).max(100),
-  kind: z.enum(MARKETPLACE_KINDS).optional(),
-  // Compound cursor: `<kind>:<id>`; the service validates shape and ownership.
-  cursor: z.string().min(3).max(80).optional(),
-});
-
 /** Optional explicit origin; without both the default address is used. */
 const originShape = {
   lat: z.number().min(-90).max(90).optional(),
   lng: z.number().min(-180).max(180).optional(),
 };
+
+const marketplaceSearchSchema = z.object({
+  query: z.string().trim().min(1).max(100),
+  kind: z.enum(MARKETPLACE_KINDS).optional(),
+  // Compound cursor: `<kind>:<id>`; the service validates shape and ownership.
+  cursor: z.string().min(3).max(80).optional(),
+  ...originShape,
+});
+
+const featuredProductsSchema = z.object(originShape).optional();
 
 const marketplaceProductSchema = z.object({
   id: recordIdSchema,
@@ -78,19 +81,39 @@ export const marketplaceRouter = createTRPCRouter({
     }
   }),
 
-  listFeaturedProducts: userProcedure.query(async ({ ctx }) => {
-    try {
-      return await listFeaturedProducts(ctx.db);
-    } catch (error) {
-      return marketplaceFailure(error);
-    }
-  }),
+  /** F11: in-stock products, nearest store/warehouse with units first. */
+  listFeaturedProducts: userProcedure
+    .input(featuredProductsSchema)
+    .query(async ({ ctx, input }) => {
+      try {
+        const origin = await resolveMarketplaceOrigin(ctx.db, {
+          customerId: ctx.customer.id,
+          lat: input?.lat,
+          lng: input?.lng,
+        });
+
+        return await listFeaturedProducts(ctx.db, origin);
+      } catch (error) {
+        return marketplaceFailure(error);
+      }
+    }),
 
   search: userProcedure
     .input(marketplaceSearchSchema)
     .query(async ({ ctx, input }) => {
       try {
-        return await searchMarketplace(ctx.db, input);
+        const origin = await resolveMarketplaceOrigin(ctx.db, {
+          customerId: ctx.customer.id,
+          lat: input.lat,
+          lng: input.lng,
+        });
+
+        return await searchMarketplace(ctx.db, {
+          query: input.query,
+          kind: input.kind,
+          cursor: input.cursor,
+          origin,
+        });
       } catch (error) {
         return marketplaceFailure(error);
       }

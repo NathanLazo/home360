@@ -134,6 +134,37 @@ export function summarizeAvailability(
   };
 }
 
+/**
+ * F11 proximity: km to the nearest ACTIVE location (store or warehouse) that
+ * can sell the product right now (stock > 0 and delivery or pickup on).
+ * Null without an origin or when no eligible location is geocoded.
+ */
+export function nearestStockKm(
+  rows: readonly ProductBranchStockRow[],
+  origin: GeoPoint | null,
+): number | null {
+  let nearest: number | null = null;
+
+  for (const row of rows) {
+    if (row.stock <= 0 || !(canDeliver(row) || canPickup(row))) {
+      continue;
+    }
+
+    const distance = distanceFrom(origin, branchPoint(row));
+
+    if (distance !== null && (nearest === null || distance < nearest)) {
+      nearest = distance;
+    }
+  }
+
+  return nearest;
+}
+
+/** Nulls-last ascending comparison for optional distances. */
+export function compareDistance(a: number | null, b: number | null): number {
+  return (a ?? Number.POSITIVE_INFINITY) - (b ?? Number.POSITIVE_INFINITY);
+}
+
 export type BranchSelection =
   | { ok: true; branchId: string }
   | { ok: false; code: "DELIVERY_NOT_AVAILABLE" | "OUT_OF_STOCK" };

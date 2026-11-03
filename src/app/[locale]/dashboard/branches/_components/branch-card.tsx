@@ -8,6 +8,7 @@ import {
   ShoppingBagIcon,
   TruckIcon,
   UserRoundIcon,
+  WarehouseIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
@@ -38,6 +39,7 @@ export function BranchCard({
   const t = useTranslations("dashboard.branches");
   const formatter = useAppFormatter();
   const located = branch.latitude !== null && branch.longitude !== null;
+  const warehouse = branch.kind === "WAREHOUSE";
   const fulfillmentModes = [
     branch.deliveryEnabled ? t("fulfillment.delivery") : null,
     branch.pickupEnabled ? t("fulfillment.pickup") : null,
@@ -55,6 +57,12 @@ export function BranchCard({
               variantMap={{ ACTIVE: "success", PAUSED: "warning" }}
               label={t(`status.${branch.status.toLowerCase()}`)}
             />
+            {warehouse ? (
+              <Badge variant="outline" className="gap-1.5">
+                <WarehouseIcon aria-hidden="true" className="size-3" />
+                {t("card.warehouse")}
+              </Badge>
+            ) : null}
             {located ? null : (
               <Badge
                 variant="outline"
@@ -103,16 +111,18 @@ export function BranchCard({
             {branch.monthlyOrders}
           </span>
         </p>
-        <p className="flex items-center gap-2">
-          <RadiusIcon
-            aria-hidden="true"
-            className="text-muted-foreground size-4"
-          />
-          <span className="text-muted-foreground">{t("card.coverage")}</span>
-          <span className="ml-auto font-mono font-medium tabular-nums">
-            {t("card.kilometers", { count: branch.coverageRadiusKm })}
-          </span>
-        </p>
+        {warehouse ? null : (
+          <p className="flex items-center gap-2">
+            <RadiusIcon
+              aria-hidden="true"
+              className="text-muted-foreground size-4"
+            />
+            <span className="text-muted-foreground">{t("card.coverage")}</span>
+            <span className="ml-auto font-mono font-medium tabular-nums">
+              {t("card.kilometers", { count: branch.coverageRadiusKm })}
+            </span>
+          </p>
+        )}
         <p className="flex items-center gap-2">
           <LocateFixedIcon
             aria-hidden="true"
@@ -126,7 +136,11 @@ export function BranchCard({
             </span>
           ) : (
             <span className="text-warning-deep ml-auto text-right">
-              {t("card.noLocationHint")}
+              {t(
+                warehouse
+                  ? "card.noLocationHintWarehouse"
+                  : "card.noLocationHint",
+              )}
             </span>
           )}
         </p>

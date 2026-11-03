@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  BranchKind,
   BranchStatus,
   RequestStatus,
   ServiceStatus,
@@ -52,6 +53,7 @@ export async function resolveRadarBranch(
           id: input.branchId,
           businessId: input.businessId,
           status: BranchStatus.ACTIVE,
+          kind: BranchKind.STORE,
         },
         select: {
           id: true,
@@ -66,6 +68,7 @@ export async function resolveRadarBranch(
         where: {
           businessId: input.businessId,
           status: BranchStatus.ACTIVE,
+          kind: BranchKind.STORE,
           latitude: { not: null },
           longitude: { not: null },
         },
@@ -152,6 +155,7 @@ export async function isRequestVisibleOnRadar(
     where: {
       businessId: input.businessId,
       status: BranchStatus.ACTIVE,
+      kind: BranchKind.STORE,
       latitude: { not: null },
       longitude: { not: null },
     },

@@ -2,7 +2,12 @@
 
 import { useTranslations } from "next-intl";
 
-import type { BranchFormErrors, BranchFormValues } from "./branch.types";
+import { BranchKindField } from "./branch-kind-field";
+import type {
+  BranchFormErrors,
+  BranchFormValues,
+  BranchKindValue,
+} from "./branch.types";
 import { FormSection, FormSectionDivider } from "~/components/form-section";
 import { GeoCoordinateFields } from "~/components/geo-coordinate-fields";
 import { Input } from "~/components/ui/input";
@@ -12,11 +17,13 @@ import { Switch } from "~/components/ui/switch";
 export function BranchFormFields({
   values,
   errors,
+  kindLocked,
   disabled,
   onChange,
 }: {
   values: BranchFormValues;
   errors: BranchFormErrors;
+  kindLocked: boolean;
   disabled: boolean;
   onChange: (values: BranchFormValues) => void;
 }) {
@@ -29,12 +36,26 @@ export function BranchFormFields({
     return { ...values, [name]: value };
   }
 
+  const warehouse = values.kind === "WAREHOUSE";
+
+  // A new warehouse defaults to delivery-only; a store to both modes.
+  function changeKind(kind: BranchKindValue) {
+    onChange({ ...values, kind, pickupEnabled: kind === "STORE" });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <FormSection
         title={t("sections.identity")}
         description={t("sections.identityDescription")}
       >
+        <BranchKindField
+          value={values.kind}
+          locked={kindLocked}
+          disabled={disabled}
+          onChange={changeKind}
+        />
+
         <div className="grid gap-2">
           <Label htmlFor="branch-name">{t("name")}</Label>
           <Input
@@ -119,10 +140,15 @@ export function BranchFormFields({
       <FormSectionDivider />
 
       <FormSection
-        title={t("sections.coverage")}
-        description={t("sections.coverageDescription")}
+        title={t(warehouse ? "sections.location" : "sections.coverage")}
+        description={t(
+          warehouse
+            ? "sections.locationDescription"
+            : "sections.coverageDescription",
+        )}
       >
-        <div className="grid gap-2">
+        {/* A warehouse is never a radar origin: no request radius. */}
+        <div className={warehouse ? "hidden" : "grid gap-2"}>
           <Label htmlFor="branch-coverage">{t("coverage")}</Label>
           <div className="relative">
             <Input

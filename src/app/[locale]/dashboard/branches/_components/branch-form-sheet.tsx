@@ -31,6 +31,7 @@ import {
 import { parseCoordinate } from "~/lib/geo-coordinates";
 
 const EMPTY_VALUES: BranchFormValues = {
+  kind: "STORE",
   name: "",
   address: "",
   managerName: "",
@@ -70,6 +71,7 @@ export function BranchFormSheet({
     setValues(
       branch
         ? {
+            kind: branch.kind,
             name: branch.name,
             address: branch.address,
             managerName: branch.managerName ?? "",
@@ -156,6 +158,7 @@ export function BranchFormSheet({
 
     const parsed = branchCreateSchema.safeParse({
       ...common,
+      kind: values.kind,
       ...(values.managerName.trim() ? { managerName: values.managerName } : {}),
       ...(latitude !== null ? { latitude } : {}),
       ...(longitude !== null ? { longitude } : {}),
@@ -214,6 +217,7 @@ export function BranchFormSheet({
             <BranchFormFields
               values={values}
               errors={errors}
+              kindLocked={branch !== null}
               disabled={submitting}
               onChange={setValues}
             />

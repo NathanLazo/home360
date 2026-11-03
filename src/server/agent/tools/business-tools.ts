@@ -256,13 +256,14 @@ export function createBusinessTools(
       execute: () => runTool(() => caller.product.listCategories()),
     }),
     getProductStockByBranch: tool({
-      description: "Stock and low-stock threshold of one product per branch.",
+      description:
+        "Stock and low-stock threshold of one product per location (store or warehouse, with its kind).",
       inputSchema: z.object({ productId: cuid }),
       execute: (input) => runTool(() => caller.product.getStockByBranch(input)),
     }),
     listStockBranches: tool({
       description:
-        "Branches that can hold product stock (id, name, status). Use it to pick the branch of a stock adjustment or inventory import.",
+        "Locations that can hold product stock (id, name, kind STORE|WAREHOUSE, status). Stores and warehouses both hold stock; customers are recommended the nearest location with units. Use it to pick the location of a stock adjustment or inventory import.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.product.listStockBranches()),
     }),
@@ -285,7 +286,8 @@ export function createBusinessTools(
       execute: (input) => runTool(() => caller.product.update(input)),
     }),
     adjustProductStock: tool({
-      description: "Set the stock of a product per branch.",
+      description:
+        "Set the stock of a product per location (store or warehouse). Geocoded locations with stock rank the product by proximity for customers.",
       inputSchema: productAdjustStockSchema,
       execute: (input) => runTool(() => caller.product.adjustStock(input)),
     }),
@@ -339,18 +341,20 @@ export function createBusinessTools(
 
     // Branches
     listBranches: tool({
-      description: "Branches of the business with status and coverage radius.",
+      description:
+        "Locations of the business: kind (STORE = branch with services, team and request radar; WAREHOUSE = stock only), status, coordinates, coverage radius and pickup/delivery flags.",
       inputSchema: z.object({}),
       execute: () => runTool(() => caller.branch.list()),
     }),
     createBranch: tool({
       description:
-        "Create a branch. Coordinates are optional but required for the request radar. Plan limits apply.",
+        "Create a location. `kind` is STORE (default: services, workers, request radar within coverageRadiusKm) or WAREHOUSE (holds stock only; never a radar origin, no workers; delivery-only unless pickupEnabled is true). The kind cannot change later. Coordinates are optional but required for the radar, for pickup and for proximity recommendations. Plan limits apply.",
       inputSchema: branchCreateSchema,
       execute: (input) => runTool(() => caller.branch.create(input)),
     }),
     updateBranch: tool({
-      description: "Update branch fields; omitted fields are kept.",
+      description:
+        "Update location fields; omitted fields are kept. The kind (STORE/WAREHOUSE) is fixed at creation.",
       inputSchema: branchUpdateSchema,
       execute: (input) => runTool(() => caller.branch.update(input)),
     }),
@@ -369,12 +373,13 @@ export function createBusinessTools(
     }),
     createWorker: tool({
       description:
-        "Add a worker and optionally email an invitation. `locale` is the language of the invitation email. Plan limits apply.",
+        "Add a worker and optionally email an invitation. `branchId` must be a STORE (workers never belong to a warehouse). `locale` is the language of the invitation email. Plan limits apply.",
       inputSchema: workerCreateSchema,
       execute: (input) => runTool(() => caller.team.create(input)),
     }),
     updateWorker: tool({
-      description: "Update worker name, branch or specialty.",
+      description:
+        "Update worker name, branch (STORE only, never a warehouse) or specialty.",
       inputSchema: workerUpdateSchema,
       execute: (input) => runTool(() => caller.team.update(input)),
     }),

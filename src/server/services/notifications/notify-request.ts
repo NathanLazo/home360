@@ -156,6 +156,7 @@ export async function notifyNearbyBusinesses(
       FROM "Branch" AS b
       INNER JOIN "Business" AS biz ON biz."id" = b."businessId"
       WHERE b."status"::text = 'ACTIVE'
+        AND b."kind"::text = 'STORE'
         AND biz."status"::text = 'ACTIVE'
         AND b."latitude" IS NOT NULL
         AND b."longitude" IS NOT NULL

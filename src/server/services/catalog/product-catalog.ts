@@ -77,6 +77,8 @@ type ProductListResult = {
 const stockBranchSelect = {
   id: true,
   name: true,
+  // F11: STORE or WAREHOUSE; both hold stock.
+  kind: true,
   status: true,
 } satisfies Prisma.BranchSelect;
 
