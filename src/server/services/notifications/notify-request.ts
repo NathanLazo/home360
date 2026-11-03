@@ -8,6 +8,7 @@ import {
   createResendEmailClientFromApiKey,
   type EmailClient,
 } from "~/server/services/email/email-client";
+import { toRequestCategory } from "~/schemas/marketplace/request-category-match";
 import { haversineKmSql } from "~/server/services/geo/haversine";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
@@ -146,6 +147,25 @@ export async function notifyNearbyBusinesses(
       select: { notifyNewRequestRadiusKm: true },
     });
     const radiusKm = settings?.notifyNewRequestRadiusKm ?? DEFAULT_RADIUS_KM;
+    // Service categories are free text: collect every raw value that maps to
+    // the request's canonical category (same rule as the radar gate).
+    const serviceCategories = await db.service.findMany({
+      where: { status: "ACTIVE" },
+      select: { category: true },
+      distinct: ["category"],
+    });
+    const matchingCategories = serviceCategories
+      .map((row) => row.category)
+      .filter(
+        (category) =>
+          category === request.category ||
+          toRequestCategory(category) === request.category,
+      );
+
+    if (matchingCategories.length === 0) {
+      return svcOk({ businessIds: [] });
+    }
+
     const origin = {
       latitude: request.latitude,
       longitude: request.longitude,
@@ -165,7 +185,7 @@ export async function notifyNearbyBusinesses(
           FROM "Service" AS s
           WHERE s."businessId" = biz."id"
             AND s."status"::text = 'ACTIVE'
-            AND s."category" = ${request.category}
+            AND s."category" IN (${Prisma.join(matchingCategories)})
         )
         AND ${haversineKmSql(
           origin,

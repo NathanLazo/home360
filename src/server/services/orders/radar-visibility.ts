@@ -7,6 +7,7 @@ import {
   ServiceStatus,
   type PrismaClient,
 } from "@generated/prisma";
+import { toRequestCategory } from "~/schemas/marketplace/request-category-match";
 import { haversineKm, type GeoPoint } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -93,7 +94,11 @@ export async function resolveRadarBranch(
   });
 }
 
-/** ACTIVE service categories offered by the business (radar catalog gate). */
+/**
+ * Request categories covered by the business's ACTIVE services (radar
+ * catalog gate). Free-text service categories are mapped to their canonical
+ * `RequestCategory`; the raw values are kept too so exact matches still hold.
+ */
 export async function listBusinessCategories(
   db: PrismaClient,
   businessId: string,
@@ -103,8 +108,18 @@ export async function listBusinessCategories(
     select: { category: true },
     distinct: ["category"],
   });
+  const categories = new Set<string>();
 
-  return rows.map((row) => row.category);
+  for (const { category } of rows) {
+    categories.add(category);
+    const canonical = toRequestCategory(category);
+
+    if (canonical) {
+      categories.add(canonical);
+    }
+  }
+
+  return [...categories];
 }
 
 /**

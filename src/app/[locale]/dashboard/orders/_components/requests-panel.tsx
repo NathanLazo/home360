@@ -67,6 +67,8 @@ export function RequestsPanel({
     .filter(
       (branch) =>
         branch.status === "ACTIVE" &&
+        // Warehouses hold stock only (F11): never a radar origin.
+        branch.kind === "STORE" &&
         branch.latitude !== null &&
         branch.longitude !== null,
     )

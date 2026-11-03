@@ -19,6 +19,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
+import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
 
 export function ServiceFormFields({
   values,
@@ -38,6 +39,9 @@ export function ServiceFormFields({
   const t = useTranslations("dashboard.services.form");
   const set = (field: keyof ServiceFormValues, value: string | string[]) =>
     onChange({ ...values, [field]: value });
+  // Canonical marketplace categories first: they are what requests resolve
+  // to, so picking one guarantees the service reaches the radar.
+  const suggestions = [...new Set([...REQUEST_CATEGORIES, ...categories])];
   const toggleWorker = (id: string) =>
     set(
       "workerIds",
@@ -89,7 +93,7 @@ export function ServiceFormFields({
             disabled={disabled}
           />
           <datalist id="service-category-suggestions">
-            {categories.map((category) => (
+            {suggestions.map((category) => (
               <option key={category} value={category} />
             ))}
           </datalist>
