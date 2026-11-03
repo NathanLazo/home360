@@ -216,7 +216,7 @@ export function createCustomerTools(caller: AgentCaller) {
 
     searchProducts: tool({
       description:
-        "Published marketplace products whose name matches `query` (materials, parts, appliances). Prices are MXN cents.",
+        "Published marketplace products whose name matches `query` (materials, parts, appliances), each with distanceKm to the nearest store or warehouse with stock (from the default address). Prices are MXN cents.",
       inputSchema: z.object({
         query: z.string().trim().min(1).max(100),
         limit: limitSchema,
@@ -237,7 +237,29 @@ export function createCustomerTools(caller: AgentCaller) {
                 priceCents: item.priceCents,
                 businessName: item.businessName,
                 imageUrl: item.imageUrl,
+                distanceKm: item.distanceKm,
               })),
+          }));
+        }),
+    }),
+
+    recommendNearbyProducts: tool({
+      description:
+        "In-stock marketplace products ranked by the nearest store or warehouse holding units to the customer's default address (distanceKm null when it cannot be measured). Use it for suggestions when the customer has no specific product name. Prices are MXN cents.",
+      inputSchema: z.object({ limit: limitSchema }),
+      execute: ({ limit }) =>
+        runTool(async () => {
+          const featured = await caller.marketplace.listFeaturedProducts();
+
+          return mapEnvelope(featured, (result) => ({
+            items: result.slice(0, limit ?? DEFAULT_LIMIT).map((item) => ({
+              id: item.id,
+              name: item.name,
+              priceCents: item.priceCents,
+              businessName: item.businessName,
+              imageUrl: item.imageUrl,
+              distanceKm: item.distanceKm,
+            })),
           }));
         }),
     }),
