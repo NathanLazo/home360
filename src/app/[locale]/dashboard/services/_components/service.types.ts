@@ -21,6 +21,9 @@ export type ServiceFormValues = {
   price: string;
   duration: string;
   durationMax: string;
+  diagnosticEnabled: boolean;
+  diagnosticPrice: string;
+  diagnosticCredited: boolean;
   workerIds: string[];
 };
 

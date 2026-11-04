@@ -88,8 +88,20 @@ export function ServicesTable({
       header: t("columns.price"),
       className: "text-right",
       cell: (service) => (
-        <span className="block font-mono font-semibold tabular-nums">
-          {currency(service.basePriceCents)}
+        <span className="flex flex-col items-end">
+          <span className="font-mono font-semibold tabular-nums">
+            {currency(service.basePriceCents)}
+          </span>
+          {service.diagnosticPriceCents !== null ? (
+            <span className="text-muted-foreground font-mono text-xs tabular-nums">
+              {t(
+                service.diagnosticCredited
+                  ? "diagnosticCredited"
+                  : "diagnosticSeparate",
+                { price: currency(service.diagnosticPriceCents) },
+              )}
+            </span>
+          ) : null}
         </span>
       ),
     },

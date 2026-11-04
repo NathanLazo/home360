@@ -876,7 +876,16 @@
       "categoriesSearchPlaceholder": "Search category…",
       "categoriesEmpty": "No matches",
       "categoriesHint": "Pick every category this service covers; the first one is the primary. You will get requests for these categories.",
-      "categoryRemove": "Remove {category}"
+      "categoryRemove": "Remove {category}",
+      "diagnostic": {
+        "enabledLabel": "Initial diagnostic",
+        "enabledHint": "Charge a diagnostic visit before quoting the full job.",
+        "priceLabel": "Diagnostic price (MXN)",
+        "pricePlaceholder": "250.00",
+        "creditedLabel": "Deduct from the final service",
+        "creditedHintOn": "The diagnostic fee is deducted from the final quote.",
+        "creditedHintOff": "The diagnostic is charged separately from the final quote."
+      }
     },
     "feedback": {
       "created": "Service created.",
@@ -887,7 +896,9 @@
       "deleteConflict": "You can't delete this service because it has active orders.",
       "transportError": "We couldn't complete the action. Check your connection and try again."
     },
-    "categoriesMore": "+{count}"
+    "categoriesMore": "+{count}",
+    "diagnosticCredited": "Diagnostic {price} · deducted",
+    "diagnosticSeparate": "Diagnostic {price} · separate"
   },
   "branches": {
     "title": "Branches",

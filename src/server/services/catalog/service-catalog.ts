@@ -32,6 +32,8 @@ const serviceListSelect = {
   basePriceCents: true,
   durationMinutes: true,
   durationMaxMinutes: true,
+  diagnosticPriceCents: true,
+  diagnosticCredited: true,
   description: true,
   imageUrl: true,
   status: true,
@@ -175,6 +177,9 @@ export async function createService(
         basePriceCents: input.basePriceCents,
         durationMinutes: input.durationMinutes,
         durationMaxMinutes: input.durationMaxMinutes,
+        diagnosticPriceCents: input.diagnosticPriceCents ?? null,
+        diagnosticCredited:
+          input.diagnosticPriceCents !== undefined && input.diagnosticCredited,
         description: input.description ?? null,
         imageUrl: input.imageUrl ?? null,
         businessId,
@@ -195,12 +200,37 @@ export async function updateService(
   return db.$transaction(async (tx) => {
     const current = await tx.service.findFirst({
       where: { id: input.id, businessId },
-      select: { id: true, durationMinutes: true, durationMaxMinutes: true },
+      select: {
+        id: true,
+        durationMinutes: true,
+        durationMaxMinutes: true,
+        diagnosticPriceCents: true,
+        diagnosticCredited: true,
+      },
     });
 
     if (!current) {
       return fail("NOT_FOUND", 404, "Service not found");
     }
+
+    const diagnosticPriceCents =
+      input.diagnosticPriceCents === undefined
+        ? current.diagnosticPriceCents
+        : input.diagnosticPriceCents;
+    // Removing the diagnostic fee also drops the credit; asking for a credit
+    // without a fee is rejected.
+    const requestedCredit =
+      input.diagnosticCredited ?? current.diagnosticCredited;
+
+    if (input.diagnosticCredited === true && diagnosticPriceCents === null) {
+      return fail(
+        "VALIDATION_ERROR",
+        422,
+        "A credited diagnostic requires a diagnostic price",
+      );
+    }
+
+    const diagnosticCredited = diagnosticPriceCents !== null && requestedCredit;
 
     const durationMinutes = input.durationMinutes ?? current.durationMinutes;
     const durationMaxMinutes =
@@ -246,6 +276,8 @@ export async function updateService(
         ...(input.durationMaxMinutes !== undefined
           ? { durationMaxMinutes: input.durationMaxMinutes }
           : {}),
+        diagnosticPriceCents,
+        diagnosticCredited,
         ...(input.workerIds
           ? { workers: { set: input.workerIds.map((id) => ({ id })) } }
           : {}),

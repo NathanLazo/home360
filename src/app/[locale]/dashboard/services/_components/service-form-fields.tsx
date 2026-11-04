@@ -9,6 +9,7 @@ import type {
   ServiceWorker,
 } from "./service.types";
 import { ServiceCategoriesField } from "./service-categories-field";
+import { ServiceDiagnosticFields } from "./service-diagnostic-fields";
 import { FormSection, FormSectionDivider } from "~/components/form-section";
 import {
   Command,
@@ -164,6 +165,13 @@ export function ServiceFormFields({
             </UnitInput>
           </Field>
         </div>
+
+        <ServiceDiagnosticFields
+          values={values}
+          error={errors.diagnosticPrice}
+          disabled={disabled}
+          onChange={(patch) => onChange({ ...values, ...patch })}
+        />
       </FormSection>
 
       <FormSectionDivider />
