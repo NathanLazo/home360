@@ -8,6 +8,7 @@ import {
   createResendEmailClientFromApiKey,
   type EmailClient,
 } from "~/server/services/email/email-client";
+import { toRequestCategory } from "~/schemas/marketplace/request-category-match";
 import { haversineKmSql } from "~/server/services/geo/haversine";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
@@ -146,6 +147,21 @@ export async function notifyNearbyBusinesses(
       select: { notifyNewRequestRadiusKm: true },
     });
     const radiusKm = settings?.notifyNewRequestRadiusKm ?? DEFAULT_RADIUS_KM;
+    // Legacy rows (free-text `category`, empty `categories`) still match
+    // through the canonical mapping; new rows declare `categories`.
+    const legacyCategories = await db.service.findMany({
+      where: { status: "ACTIVE", categories: { isEmpty: true } },
+      select: { category: true },
+      distinct: ["category"],
+    });
+    const matchingLegacy = legacyCategories
+      .map((row) => row.category)
+      .filter((category) => toRequestCategory(category) === request.category);
+    const legacySql =
+      matchingLegacy.length === 0
+        ? Prisma.sql`FALSE`
+        : Prisma.sql`s."category" IN (${Prisma.join(matchingLegacy)})`;
+
     const origin = {
       latitude: request.latitude,
       longitude: request.longitude,
@@ -165,7 +181,10 @@ export async function notifyNearbyBusinesses(
           FROM "Service" AS s
           WHERE s."businessId" = biz."id"
             AND s."status"::text = 'ACTIVE'
-            AND s."category" = ${request.category}
+            AND (
+              ${request.category} = ANY(s."categories")
+              OR (cardinality(s."categories") = 0 AND ${legacySql})
+            )
         )
         AND ${haversineKmSql(
           origin,

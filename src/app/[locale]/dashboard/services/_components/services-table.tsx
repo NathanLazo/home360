@@ -1,5 +1,6 @@
 "use client";
 
+import { ServiceCategoryList } from "./service-category-list";
 import { LoaderCircleIcon, WrenchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
@@ -79,9 +80,7 @@ export function ServicesTable({
       key: "category",
       mobile: "meta",
       header: t("columns.category"),
-      cell: (service) => (
-        <span className="text-muted-foreground">{service.category}</span>
-      ),
+      cell: (service) => <ServiceCategoryList service={service} />,
     },
     {
       key: "price",

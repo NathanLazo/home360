@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { LoaderCircleIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useCategoryLabel } from "~/hooks/use-category-label";
 
 import { RequestPhotoPicker } from "./request-photo-picker";
 import {
@@ -73,7 +74,7 @@ export function NewRequestSheet({
   onSubmit,
 }: NewRequestSheetProps) {
   const t = useTranslations("corporate.orders.newRequest");
-  const categoryT = useTranslations("corporate.requestCategory");
+  const categoryT = useCategoryLabel();
   const photos = useRequestPhotoUpload();
   const shakeInvalid = useErrorShake();
   const [locationId, setLocationId] = useState("");

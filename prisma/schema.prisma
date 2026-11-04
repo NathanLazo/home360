@@ -548,7 +548,11 @@ model Service {
   description        String?
   // Public catalog image URL (same rule as Product.imageUrl).
   imageUrl           String?
+  // Primary category (= categories[0]); kept for listings and legacy reads.
   category           String
+  // Fixed marketplace taxonomy (REQUEST_CATEGORIES): every category the
+  // service covers. The radar and notifications match requests against it.
+  categories         String[]      @default([])
   basePriceCents     Int
   durationMinutes    Int
   durationMaxMinutes Int?

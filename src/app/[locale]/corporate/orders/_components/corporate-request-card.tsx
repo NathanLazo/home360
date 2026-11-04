@@ -2,6 +2,7 @@
 
 import { CreditCardIcon, EyeIcon, MapPinIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useCategoryLabel } from "~/hooks/use-category-label";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { CorporateQuoteRow } from "./corporate-quote-row";
@@ -47,7 +48,7 @@ export function CorporateRequestCard({
   onViewOrder,
 }: CorporateRequestCardProps) {
   const t = useTranslations("corporate.orders.requests");
-  const categoryT = useTranslations("corporate.requestCategory");
+  const categoryT = useCategoryLabel();
   const formatter = useAppFormatter();
   const acceptedOrder =
     request.quotes.find((quote) => quote.order !== null)?.order ?? null;

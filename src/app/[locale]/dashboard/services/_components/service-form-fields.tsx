@@ -8,6 +8,7 @@ import type {
   ServiceFormValues,
   ServiceWorker,
 } from "./service.types";
+import { ServiceCategoriesField } from "./service-categories-field";
 import { FormSection, FormSectionDivider } from "~/components/form-section";
 import {
   Command,
@@ -23,21 +24,21 @@ import { cn } from "~/lib/utils";
 export function ServiceFormFields({
   values,
   errors,
-  categories,
   workers,
   disabled,
   onChange,
 }: {
   values: ServiceFormValues;
   errors: ServiceFormErrors;
-  categories: string[];
   workers: ServiceWorker[];
   disabled: boolean;
   onChange: (values: ServiceFormValues) => void;
 }) {
   const t = useTranslations("dashboard.services.form");
-  const set = (field: keyof ServiceFormValues, value: string | string[]) =>
-    onChange({ ...values, [field]: value });
+  const set = (
+    field: Exclude<keyof ServiceFormValues, "categories">,
+    value: string | string[],
+  ) => onChange({ ...values, [field]: value });
   const toggleWorker = (id: string) =>
     set(
       "workerIds",
@@ -70,30 +71,12 @@ export function ServiceFormFields({
           />
         </Field>
 
-        <Field
-          label={t("categoryLabel")}
-          error={errors.category}
-          htmlFor="service-category"
-        >
-          <Input
-            id="service-category"
-            name="category"
-            list="service-category-suggestions"
-            value={values.category}
-            onChange={(event) => set("category", event.target.value)}
-            placeholder={t("categoryPlaceholder")}
-            aria-invalid={Boolean(errors.category)}
-            aria-describedby={
-              errors.category ? "service-category-error" : undefined
-            }
-            disabled={disabled}
-          />
-          <datalist id="service-category-suggestions">
-            {categories.map((category) => (
-              <option key={category} value={category} />
-            ))}
-          </datalist>
-        </Field>
+        <ServiceCategoriesField
+          value={values.categories}
+          error={errors.categories}
+          disabled={disabled}
+          onChange={(categories) => onChange({ ...values, categories })}
+        />
       </FormSection>
 
       <FormSectionDivider />

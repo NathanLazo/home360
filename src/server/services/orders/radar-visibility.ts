@@ -7,6 +7,7 @@ import {
   ServiceStatus,
   type PrismaClient,
 } from "@generated/prisma";
+import { serviceCategoriesOf } from "~/server/services/catalog/service-categories";
 import { haversineKm, type GeoPoint } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
 
@@ -93,18 +94,20 @@ export async function resolveRadarBranch(
   });
 }
 
-/** ACTIVE service categories offered by the business (radar catalog gate). */
+/**
+ * Request categories covered by the business's ACTIVE services (radar
+ * catalog gate): the declared `categories`, or the mapped legacy `category`.
+ */
 export async function listBusinessCategories(
   db: PrismaClient,
   businessId: string,
 ): Promise<string[]> {
   const rows = await db.service.findMany({
     where: { businessId, status: ServiceStatus.ACTIVE },
-    select: { category: true },
-    distinct: ["category"],
+    select: { category: true, categories: true },
   });
 
-  return rows.map((row) => row.category);
+  return [...new Set(rows.flatMap(serviceCategoriesOf))];
 }
 
 /**

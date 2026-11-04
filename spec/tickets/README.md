@@ -20,30 +20,30 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 
 ### Fase 0 — Higiene y contrato
 
-| # | Repo | Trabajo | Ticket |
-|---|------|---------|--------|
-| W1 | web | ✅ Crons en `vercel.json`, `.env.example` completo, sin `any` en sankey, backlog al día | P-WEB-01/04 |
-| M1 | móvil | ✅ Contrato de tipos versionado (sin path al repo hermano), scripts `typecheck`/`doctor`, limpieza `app.json`, EAS workflows | P-MOB-00, M7-M2 |
+| #   | Repo  | Trabajo                                                                                                                      | Ticket          |
+| --- | ----- | ---------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| W1  | web   | ✅ Crons en `vercel.json`, `.env.example` completo, sin `any` en sankey, backlog al día                                      | P-WEB-01/04     |
+| M1  | móvil | ✅ Contrato de tipos versionado (sin path al repo hermano), scripts `typecheck`/`doctor`, limpieza `app.json`, EAS workflows | P-MOB-00, M7-M2 |
 
 ### Fase 1 — Funcionalidad faltante
 
-| # | Repo | Trabajo | Ticket |
-|---|------|---------|--------|
-| W2 | web | ✅ Receipts de Expo Push diferidos: tabla `PushReceipt` + `cron/push-receipts` | P-WEB-01 |
-| W3 | web | ✅ Build de producción falla sin Stripe, Blob o AI Gateway (`src/env.js`) | P-WEB-03 |
-| W4 | web | Perfil: avatar, formulario de contraseña único, `NumberTicker`, `SubmitStatusIcon` | F9-01 |
-| W5 | web | ✅ F8-05 reescrito: solo prepago en USD (decisión owner 2026-10-18) | F8-05 |
-| W6b | web | F10 fulfillment/discovery: API + dashboard (órdenes, solicitudes, sucursales, productos) + admin (órdenes, vencimientos). En código; falta `db:push`, `PICKUP_CODE_SECRET` en Vercel y prueba manual | F10 |
-| W6c | web | F11 almacenes (`Branch.kind`) + recomendación de productos por cercanía. En código; falta `db:push` y el consumo en la app (M9) | F11 |
-| M2 | móvil | T4: calificación y % a tiempo del trabajador (API + app) | M6-M3 |
+| #   | Repo  | Trabajo                                                                                                                                                                                              | Ticket   |
+| --- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| W2  | web   | ✅ Receipts de Expo Push diferidos: tabla `PushReceipt` + `cron/push-receipts`                                                                                                                       | P-WEB-01 |
+| W3  | web   | ✅ Build de producción falla sin Stripe, Blob o AI Gateway (`src/env.js`)                                                                                                                            | P-WEB-03 |
+| W4  | web   | Perfil: avatar, formulario de contraseña único, `NumberTicker`, `SubmitStatusIcon`                                                                                                                   | F9-01    |
+| W5  | web   | ✅ F8-05 reescrito: solo prepago en USD (decisión owner 2026-10-18)                                                                                                                                  | F8-05    |
+| W6b | web   | F10 fulfillment/discovery: API + dashboard (órdenes, solicitudes, sucursales, productos) + admin (órdenes, vencimientos). En código; falta `db:push`, `PICKUP_CODE_SECRET` en Vercel y prueba manual | F10      |
+| W6c | web   | F11 almacenes (`Branch.kind`) + recomendación de productos por cercanía. En código; falta `db:push` y el consumo en la app (M9)                                                                      | F11      |
+| M2  | móvil | T4: calificación y % a tiempo del trabajador (API + app)                                                                                                                                             | M6-M3    |
 
 ### Fase 2 — Calidad, accesibilidad y diseño
 
-| # | Repo | Trabajo |
-|---|------|---------|
-| W6 | web | Auditoría DESIGN-DIRECTIVE §8 por panel (a11y, teclado, contraste, 375/768/1024, 4 estados) |
-| M3 | móvil | Auditoría §7/§8 por pantalla + `M7-findings.md`; findings M6 de grabación |
-| M4 | móvil | ⏳ Iconos provisionales de marca (home360-app#7) |
+| #   | Repo  | Trabajo                                                                                     |
+| --- | ----- | ------------------------------------------------------------------------------------------- |
+| W6  | web   | Auditoría DESIGN-DIRECTIVE §8 por panel (a11y, teclado, contraste, 375/768/1024, 4 estados) |
+| M3  | móvil | Auditoría §7/§8 por pantalla + `M7-findings.md`; findings M6 de grabación                   |
+| M4  | móvil | ⏳ Iconos provisionales de marca (home360-app#7)                                            |
 
 ### Fase 3 — Producción (owner)
 
@@ -63,3 +63,4 @@ Flujo: web → rama + PR (el owner aprueba; merge a `main` despliega). Móvil �
 - [`F8-05`](F8-05-ai-models-pricing-credits.md) — créditos IA (implementado; falta `db:push` y verificar precio de Ling)
 - [`F9-01`](F9-01-user-profile.md) — perfil por panel (avatar D2 y D4 pendientes)
 - [`F10`](F10-fulfillment-discovery.md) — fulfillment DELIVERY/PICKUP, evidencia, stock, descubrimiento y chat pre-venta (API + web en código; falta `db:push`, `PICKUP_CODE_SECRET` y E2E; móvil en `M8`)
+- [`F12`](F12-service-categories.md) — categorías fijas y multi-categoría por servicio (en código; falta `db:push`; móvil en `home360-app`)

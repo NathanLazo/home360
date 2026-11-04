@@ -167,7 +167,6 @@ export function ServicesView() {
       <ServiceFormSheet
         open={sheetOpen}
         service={editing}
-        categories={categories}
         workers={workers}
         submitting={mutations.creating || mutations.updating}
         onOpenChange={setSheetOpen}

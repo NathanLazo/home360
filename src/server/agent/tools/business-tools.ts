@@ -321,7 +321,7 @@ export function createBusinessTools(
     }),
     createService: tool({
       description:
-        "Create a service (base price in MXN cents, duration in minutes, optional description, assigned workers). Add the photo afterwards with setServiceImage.",
+        "Create a service (one or more `categories` from the fixed marketplace taxonomy — the first is the primary and they decide which customer requests reach the business —, base price in MXN cents, duration in minutes, optional description, assigned workers). Add the photo afterwards with setServiceImage.",
       inputSchema: serviceCreateSchema,
       execute: (input) => runTool(() => caller.service.create(input)),
     }),

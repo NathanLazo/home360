@@ -846,8 +846,6 @@
       "editDescription": "Update pricing, duration, and assigned workers.",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Leak repair",
-      "categoryLabel": "Category",
-      "categoryPlaceholder": "e.g. Plumbing",
       "priceLabel": "Starting price (MXN)",
       "pricePlaceholder": "350.00",
       "durationLabel": "Minimum duration (min)",
@@ -872,7 +870,13 @@
         "teamDescription": "Who can take this service."
       },
       "minutesUnit": "min",
-      "workersSelected": "{count, plural, =0 {None selected} one {# selected} other {# selected}}"
+      "workersSelected": "{count, plural, =0 {None selected} one {# selected} other {# selected}}",
+      "categoriesLabel": "Categories",
+      "categoriesSelected": "{count}/{max}",
+      "categoriesSearchPlaceholder": "Search category…",
+      "categoriesEmpty": "No matches",
+      "categoriesHint": "Pick every category this service covers; the first one is the primary. You will get requests for these categories.",
+      "categoryRemove": "Remove {category}"
     },
     "feedback": {
       "created": "Service created.",
@@ -882,7 +886,8 @@
       "deleted": "Service deleted.",
       "deleteConflict": "You can't delete this service because it has active orders.",
       "transportError": "We couldn't complete the action. Check your connection and try again."
-    }
+    },
+    "categoriesMore": "+{count}"
   },
   "branches": {
     "title": "Branches",

@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import type { ServiceFiltersState } from "./service.types";
+import { useCategoryLabel } from "~/hooks/use-category-label";
+import {
+  isRequestCategory,
+  type RequestCategory,
+} from "~/schemas/marketplace/request-categories";
 import { SearchFilterBar } from "~/components/search-filter-bar";
 import {
   Select,
@@ -15,6 +20,10 @@ import {
 
 const ALL = "__all__";
 
+function toCategory(value: string): ServiceFiltersState["category"] {
+  return isRequestCategory(value) ? value : "";
+}
+
 function toStatus(value: string): ServiceFiltersState["status"] {
   return value === "ACTIVE" || value === "PAUSED" ? value : "";
 }
@@ -25,10 +34,11 @@ export function ServiceFilters({
   onChange,
 }: {
   filters: ServiceFiltersState;
-  categories: string[];
+  categories: RequestCategory[];
   onChange: (filters: ServiceFiltersState) => void;
 }) {
   const t = useTranslations("dashboard.services");
+  const label = useCategoryLabel();
   const [searchDraft, setSearchDraft] = useState(filters.search);
 
   useEffect(() => {
@@ -54,7 +64,10 @@ export function ServiceFilters({
       <Select
         value={filters.category || ALL}
         onValueChange={(value) =>
-          onChange({ ...filters, category: value === ALL ? "" : value })
+          onChange({
+            ...filters,
+            category: value === ALL ? "" : toCategory(value),
+          })
         }
       >
         <SelectTrigger
@@ -67,7 +80,7 @@ export function ServiceFilters({
           <SelectItem value={ALL}>{t("filters.allCategories")}</SelectItem>
           {categories.map((category) => (
             <SelectItem key={category} value={category}>
-              {category}
+              {label(category)}
             </SelectItem>
           ))}
         </SelectContent>

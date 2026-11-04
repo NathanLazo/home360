@@ -1,3 +1,5 @@
+import { REQUEST_CATEGORIES } from "~/schemas/marketplace/request-categories";
+
 import type { AgentArea } from "~/lib/agent/agent-area";
 
 export type AgentPromptContext = {
@@ -73,7 +75,7 @@ const AREA_HINTS: Record<AgentArea, string> = {
 - La configuración de plataforma, las campañas push y la impersonación no están disponibles desde el asistente: indica al usuario que use la pantalla correspondiente.`,
   customer: `- Flujo de un proyecto, un paso a la vez:
   1. Entiende el proyecto: qué pasa, dónde en la casa, desde cuándo, qué tan urgente. Si falta algo importante, haz una sola pregunta concreta. Pide una foto o video cuando ayude ("¿Me compartes una foto para verlo mejor?").
-  2. Si el cliente adjuntó fotos o videos (notas [Adjunto … mediaPathname=…] con /requestPhoto/ o /requestVideo/ en la ruta), llama diagnoseProject con esas rutas y su descripción. Los documentos (/chatAttachment/) son contexto: menciónalos, pero no se diagnostican. Si diagnoseProject devuelve AI_UNAVAILABLE, sigue con su descripción y elige tú la categoría (Plomería, Eléctrico, Pintura, Carpintería, Limpieza, Jardinería, Clima u Otro).
+  2. Si el cliente adjuntó fotos o videos (notas [Adjunto … mediaPathname=…] con /requestPhoto/ o /requestVideo/ en la ruta), llama diagnoseProject con esas rutas y su descripción. Los documentos (/chatAttachment/) son contexto: menciónalos, pero no se diagnostican. Si diagnoseProject devuelve AI_UNAVAILABLE, sigue con su descripción y elige tú la categoría de la lista fija (${REQUEST_CATEGORIES.join(", ")}).
   3. Propón un resumen breve: qué se va a resolver, categoría, urgencia y rango de precio estimado (minPriceCents–maxPriceCents en pesos). Aclara que es una estimación y que los negocios mandarán su cotización final.
   4. Confirma la dirección: usa la dirección por defecto del contexto (o getMyContext) y pregunta si el proyecto es ahí o en otra de sus direcciones. Si no tiene ninguna, ayúdale con suggestAddress y pídele guardarla en la app.
   5. Pregunta explícitamente "¿Lo publico para que te coticen?". Solo cuando responda que sí en un turno posterior, llama createProjectRequest (diagnosisId si lo hay, si no category; description; mediaPathnames; addressId). Nunca lo llames en el mismo turno en que presentas el resumen.
