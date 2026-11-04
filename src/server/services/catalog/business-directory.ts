@@ -99,6 +99,10 @@ export type MarketplaceBusinessProfile = {
     category: string;
     basePriceCents: number;
     durationMinutes: number;
+    /** Initial diagnostic fee; null = quoted directly. */
+    diagnosticPriceCents: number | null;
+    /** The paid diagnostic is deducted from the final quote. */
+    diagnosticCredited: boolean;
     description: string | null;
     imageUrl: string | null;
   }[];
@@ -121,6 +125,8 @@ export type MarketplaceServiceDetail = {
   basePriceCents: number;
   durationMinutes: number;
   durationMaxMinutes: number | null;
+  diagnosticPriceCents: number | null;
+  diagnosticCredited: boolean;
   description: string | null;
   imageUrl: string | null;
   businessId: string;
@@ -377,6 +383,8 @@ export async function getMarketplaceBusiness(
           category: true,
           basePriceCents: true,
           durationMinutes: true,
+          diagnosticPriceCents: true,
+          diagnosticCredited: true,
           description: true,
           imageUrl: true,
         },
@@ -473,6 +481,8 @@ export async function getMarketplaceService(
       basePriceCents: true,
       durationMinutes: true,
       durationMaxMinutes: true,
+      diagnosticPriceCents: true,
+      diagnosticCredited: true,
       description: true,
       imageUrl: true,
       businessId: true,

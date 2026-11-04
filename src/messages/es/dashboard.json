@@ -876,7 +876,16 @@
       "categoriesSearchPlaceholder": "Buscar categoría…",
       "categoriesEmpty": "Sin coincidencias",
       "categoriesHint": "Elige todas las que cubre el servicio; la primera es la principal. Recibirás solicitudes de estas categorías.",
-      "categoryRemove": "Quitar {category}"
+      "categoryRemove": "Quitar {category}",
+      "diagnostic": {
+        "enabledLabel": "Diagnóstico inicial",
+        "enabledHint": "Cobra una visita de diagnóstico antes de cotizar el trabajo completo.",
+        "priceLabel": "Precio del diagnóstico (MXN)",
+        "pricePlaceholder": "250.00",
+        "creditedLabel": "Descontar del servicio final",
+        "creditedHintOn": "Lo pagado por el diagnóstico se descuenta de la cotización final.",
+        "creditedHintOff": "El diagnóstico se cobra aparte de la cotización final."
+      }
     },
     "feedback": {
       "created": "Servicio creado.",
@@ -887,7 +896,9 @@
       "deleteConflict": "No puedes eliminar este servicio porque tiene órdenes activas.",
       "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
     },
-    "categoriesMore": "+{count}"
+    "categoriesMore": "+{count}",
+    "diagnosticCredited": "Diagnóstico {price} · se descuenta",
+    "diagnosticSeparate": "Diagnóstico {price} · aparte"
   },
   "branches": {
     "title": "Sucursales",

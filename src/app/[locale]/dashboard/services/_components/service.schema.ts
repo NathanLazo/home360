@@ -13,6 +13,17 @@ const durationMaxSchema = z
 
 export const SERVICE_CATEGORIES_MAX = 8;
 
+/** Initial diagnostic fee: positive cents, capped at $100,000 MXN. */
+const diagnosticPriceSchema = z.number().int().positive().max(10_000_000);
+
+/** A credited diagnostic only makes sense when there is a diagnostic fee. */
+function diagnosticIsCoherent(value: {
+  diagnosticPriceCents?: number | null;
+  diagnosticCredited?: boolean;
+}): boolean {
+  return !value.diagnosticCredited || value.diagnosticPriceCents != null;
+}
+
 /** One or more categories of the fixed marketplace taxonomy, deduplicated. */
 const serviceCategoriesSchema = z
   .array(z.enum(REQUEST_CATEGORIES))
@@ -30,6 +41,9 @@ const serviceFields = {
     .positive()
     .max(24 * 60),
   durationMaxMinutes: durationMaxSchema.optional(),
+  // Null/absent = no initial diagnostic.
+  diagnosticPriceCents: diagnosticPriceSchema.optional(),
+  diagnosticCredited: z.boolean().default(false),
   workerIds: z.array(recordIdSchema).max(50).default([]),
   description: z.string().trim().min(1).max(1_000).optional(),
   // Public catalog image (Service.imageUrl): HTTPS only, like products.
@@ -49,7 +63,8 @@ export const serviceCreateSchema = z
       value.durationMaxMinutes === undefined ||
       value.durationMaxMinutes >= value.durationMinutes,
     { path: ["durationMaxMinutes"] },
-  );
+  )
+  .refine(diagnosticIsCoherent, { path: ["diagnosticCredited"] });
 
 export const serviceUpdateSchema = z
   .object({
@@ -59,6 +74,9 @@ export const serviceUpdateSchema = z
     basePriceCents: serviceFields.basePriceCents.optional(),
     durationMinutes: serviceFields.durationMinutes.optional(),
     durationMaxMinutes: durationMaxSchema.nullable().optional(),
+    // `undefined` keeps the current value; `null` removes the diagnostic.
+    diagnosticPriceCents: diagnosticPriceSchema.nullable().optional(),
+    diagnosticCredited: z.boolean().optional(),
     workerIds: z.array(recordIdSchema).max(50).optional(),
     // `undefined` keeps the current value; `null` removes it.
     description: serviceFields.description.unwrap().nullable().optional(),
@@ -71,6 +89,13 @@ export const serviceUpdateSchema = z
       value.durationMaxMinutes === null ||
       value.durationMaxMinutes >= value.durationMinutes,
     { path: ["durationMaxMinutes"] },
+  )
+  .refine(
+    (value) =>
+      !(
+        value.diagnosticCredited === true && value.diagnosticPriceCents === null
+      ),
+    { path: ["diagnosticCredited"] },
   );
 
 export const serviceListSchema = z.object({

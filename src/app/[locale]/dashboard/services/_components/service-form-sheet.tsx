@@ -37,6 +37,9 @@ const EMPTY_VALUES: ServiceFormValues = {
   price: "",
   duration: "",
   durationMax: "",
+  diagnosticEnabled: false,
+  diagnosticPrice: "",
+  diagnosticCredited: false,
   workerIds: [],
 };
 
@@ -77,6 +80,12 @@ export function ServiceFormSheet({
             durationMax: service.durationMaxMinutes
               ? String(service.durationMaxMinutes)
               : "",
+            diagnosticEnabled: service.diagnosticPriceCents !== null,
+            diagnosticPrice:
+              service.diagnosticPriceCents !== null
+                ? String(service.diagnosticPriceCents / 100)
+                : "",
+            diagnosticCredited: service.diagnosticCredited,
             workerIds: service.workers.map((worker) => worker.id),
           }
         : EMPTY_VALUES,
@@ -93,8 +102,12 @@ export function ServiceFormSheet({
       categories: values.categories,
       basePriceCents: Math.round(Number(values.price) * 100),
       durationMinutes: Number(values.duration),
+      diagnosticCredited: values.diagnosticEnabled && values.diagnosticCredited,
       workerIds: values.workerIds,
     };
+    const diagnosticPriceCents = values.diagnosticEnabled
+      ? Math.round(Number(values.diagnosticPrice) * 100)
+      : null;
     function showValidationErrors(
       issues: ReadonlyArray<{ path: Array<PropertyKey> }>,
     ) {
@@ -106,6 +119,11 @@ export function ServiceFormSheet({
           next.duration = t("form.invalidField");
         else if (field === "durationMaxMinutes")
           next.durationMax = t("form.durationRangeError");
+        else if (
+          field === "diagnosticPriceCents" ||
+          field === "diagnosticCredited"
+        )
+          next.diagnosticPrice = t("form.invalidField");
         else if (
           field === "name" ||
           field === "categories" ||
@@ -122,11 +140,14 @@ export function ServiceFormSheet({
             ? "service-duration"
             : firstField === "durationMaxMinutes"
               ? "service-duration-max"
-              : firstField === "workerIds"
-                ? "service-workers-search"
-                : firstField === "name" || firstField === "categories"
-                  ? `service-${firstField}`
-                  : null;
+              : firstField === "diagnosticPriceCents" ||
+                  firstField === "diagnosticCredited"
+                ? "service-diagnostic-price"
+                : firstField === "workerIds"
+                  ? "service-workers-search"
+                  : firstField === "name" || firstField === "categories"
+                    ? `service-${firstField}`
+                    : null;
       if (targetId) {
         window.requestAnimationFrame(() =>
           document.getElementById(targetId)?.focus(),
@@ -141,6 +162,7 @@ export function ServiceFormSheet({
         durationMaxMinutes: values.durationMax
           ? Number(values.durationMax)
           : null,
+        diagnosticPriceCents,
       });
       if (!parsed.success) {
         showValidationErrors(parsed.error.issues);
@@ -157,6 +179,7 @@ export function ServiceFormSheet({
       ...(values.durationMax
         ? { durationMaxMinutes: Number(values.durationMax) }
         : {}),
+      ...(diagnosticPriceCents !== null ? { diagnosticPriceCents } : {}),
     });
     if (!parsed.success) {
       showValidationErrors(parsed.error.issues);

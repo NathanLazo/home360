@@ -556,6 +556,11 @@ model Service {
   basePriceCents     Int
   durationMinutes    Int
   durationMaxMinutes Int?
+  // Initial diagnostic visit charged before quoting the full job. Null = the
+  // service does not require a diagnostic. When `diagnosticCredited` is true
+  // the paid diagnostic is deducted from the final quote of the same request.
+  diagnosticPriceCents Int?
+  diagnosticCredited   Boolean       @default(false)
   status             ServiceStatus @default(ACTIVE)
   businessId         String
   business           Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
