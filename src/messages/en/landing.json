@@ -200,7 +200,11 @@
       "guarantees": "Guarantees",
       "pricing": "Pricing",
       "login": "Sign in",
-      "register": "Register your business"
-    }
+      "register": "Register your business",
+      "privacy": "Privacy policy",
+      "terms": "Terms of service",
+      "support": "Support"
+    },
+    "legal": "Legal"
   }
 }

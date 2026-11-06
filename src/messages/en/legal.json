@@ -1,0 +1,133 @@
+{
+  "nav": {
+    "label": "Legal documents",
+    "home": "HOME360",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "support": "Support"
+  },
+  "updated": "Last updated: November 6, 2026",
+  "contactLine": "Email us at ",
+  "privacy": {
+    "metaTitle": "Privacy policy — HOME360",
+    "metaDescription": "What personal data HOME360 processes, why, who it is shared with and how to exercise your rights.",
+    "title": "Privacy policy",
+    "intro": "HOME360 is a home maintenance marketplace in Mexico where payment is held until the work is delivered with evidence. This policy explains what personal data we process in the app and on the web platform, why, and how to exercise your rights under Mexico's Federal Law on the Protection of Personal Data Held by Private Parties.",
+    "sections": {
+      "controller": {
+        "title": "Data controller",
+        "body": "HOME360 is responsible for processing your personal data. For any privacy matter, email support@home360.mx."
+      },
+      "data": {
+        "title": "Data we process",
+        "body": "Identity and contact: name, email, phone number and profile photo.\n\nService addresses and approximate or precise location, only while you use the app and with your permission, to fill in your address and share the technician's arrival.\n\nService content: photos, evidence videos, voice notes, chat messages and documents you attach.\n\nPayment data: processed by Stripe; HOME360 does not store card numbers.\n\nTechnical data: device identifier for push notifications, language and error logs."
+      },
+      "purposes": {
+        "title": "How we use it",
+        "body": "Required purposes: creating and protecting your account, connecting customers with verified businesses, quoting, scheduling and tracking services, holding and releasing payments in escrow, resolving disputes with the recorded evidence, sending service notifications and meeting tax and legal obligations.\n\nWe do not sell your data or use it for targeted advertising or cross-app tracking."
+      },
+      "ai": {
+        "title": "AI assistant",
+        "body": "Don Víctor, the app's concierge, uses artificial intelligence models to transcribe voice notes and analyze photos or descriptions to suggest a diagnosis. That content is sent to AI providers only to generate the answer and is not used to train models."
+      },
+      "sharing": {
+        "title": "Who we share it with",
+        "body": "The business and technician serving your request: name, exact address (only after you accept a quote) and job details.\n\nProviders that run the platform under contract: Stripe (payments), Vercel (hosting and files), Neon (database), Google (maps and sign-in), Apple (sign-in), Pusher (real-time chat), Resend (email), Expo (push notifications) and AI providers.\n\nAuthorities when a law or court order requires it."
+      },
+      "retention": {
+        "title": "Retention",
+        "body": "We keep your data while your account is active. When you delete it we erase your personal data, addresses and devices; order and payment history is kept for the period tax and legal obligations require."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "You can access, correct, cancel or object to the processing of your data, and withdraw your consent, by emailing support@home360.mx from your account email. We reply within 20 business days.\n\nYou can also delete your account at any time in the app: Profile → Delete account."
+      },
+      "security": {
+        "title": "Security",
+        "body": "We use encryption in transit, secure on-device credential storage and role-based access controls. No system is infallible; if we detect an incident that affects you, we will let you know."
+      },
+      "minors": {
+        "title": "Minors",
+        "body": "HOME360 is meant for people 18 and older. We do not knowingly collect data from minors."
+      },
+      "changes": {
+        "title": "Changes to this policy",
+        "body": "We will post any change on this page with its update date and, when relevant, let you know in the app."
+      }
+    }
+  },
+  "terms": {
+    "metaTitle": "Terms of service — HOME360",
+    "metaDescription": "HOME360 rules of use: accounts, services, escrow payments, evidence, disputes and cancellations.",
+    "title": "Terms of service",
+    "intro": "By creating an account or using HOME360 you accept these terms. If you do not agree, do not use the platform.",
+    "sections": {
+      "service": {
+        "title": "What HOME360 is",
+        "body": "HOME360 connects customers with home maintenance businesses and related products. Services are provided by the business you accept; HOME360 runs the platform, the protected payment and dispute resolution."
+      },
+      "accounts": {
+        "title": "Accounts",
+        "body": "You must be 18 or older and provide accurate information. You are responsible for activity on your account and for keeping your password safe. Businesses and their team sign up and get verified on the web platform."
+      },
+      "escrow": {
+        "title": "Protected payment",
+        "body": "When you pay for a service or product, HOME360 holds the money through Stripe and releases it to the business only when you confirm delivery or when the work evidence proves it. The total price is shown before you pay."
+      },
+      "evidence": {
+        "title": "Work evidence",
+        "body": "The technician records the service from the app. That recording is the main proof in a dispute and is only visible to the customer, the business and the HOME360 team resolving the case."
+      },
+      "cancellations": {
+        "title": "Cancellations and refunds",
+        "body": "You can cancel before the service starts and get the held amount refunded. If the work was not delivered as agreed, open a dispute from the order; HOME360 reviews the evidence and decides on release or a full or partial refund."
+      },
+      "conduct": {
+        "title": "Acceptable use",
+        "body": "You may not use the platform for fraud, harassment, illegal content, bypassing the protected payment or contacting outside the app to charge for services started in it. We may suspend accounts that break these rules."
+      },
+      "liability": {
+        "title": "Liability",
+        "body": "Each business is responsible for the quality and warranty of its work. HOME360 is responsible for operating the platform and the protected payment under applicable law."
+      },
+      "law": {
+        "title": "Governing law",
+        "body": "These terms are governed by the laws of Mexico. Disputes are subject to the competent courts of Chihuahua, Chihuahua, without prejudice to your rights under the Federal Consumer Protection Law."
+      },
+      "contact": {
+        "title": "Contact",
+        "body": "Questions about these terms: support@home360.mx."
+      }
+    }
+  },
+  "support": {
+    "metaTitle": "Support — HOME360",
+    "metaDescription": "Help with your account, protected payments, orders and disputes on HOME360.",
+    "title": "Support",
+    "intro": "Something didn't go as expected? Email us and we'll reply within 24 business hours.",
+    "emailCta": "Email support",
+    "faqTitle": "Frequently asked questions",
+    "sections": {
+      "payment": {
+        "title": "When is my payment released?",
+        "body": "When you confirm in the app that the work was done right. Until then the money is held and the business does not receive it."
+      },
+      "dispute": {
+        "title": "The work wasn't done right. What now?",
+        "body": "Open the order and choose Open a dispute. We review the service recording and resolve it with a full or partial refund when appropriate."
+      },
+      "cancel": {
+        "title": "Can I cancel?",
+        "body": "Yes, before the service starts, from the order. The held amount is refunded to the same payment method."
+      },
+      "business": {
+        "title": "I own a business. How do I sign up?",
+        "body": "Businesses sign up and get verified at home360.lat. Then you invite your technicians from the dashboard."
+      },
+      "delete": {
+        "title": "How do I delete my account?",
+        "body": "In the app: Profile → Delete account. We erase your personal data; payment history is kept as required by law."
+      }
+    }
+  }
+}
