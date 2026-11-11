@@ -4,7 +4,7 @@ import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { issueMobileToken } from "~/server/auth/mobile-token";
 import { db } from "~/server/db";
 import { verifyGoogleIdToken } from "~/server/services/auth/google-id-token";
-import { signInWithGoogle } from "~/server/services/auth/google-mobile-sign-in";
+import { signInWithSocialIdentity } from "~/server/services/auth/social-mobile-sign-in";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,7 +48,7 @@ export async function POST(request: Request): Promise<Response> {
 
     // Unknown verified emails sign up as CUSTOMER (workstream D) instead of
     // the former 404; suspended accounts answer the same generic 401.
-    const outcome = await signInWithGoogle(db, {
+    const outcome = await signInWithSocialIdentity(db, {
       token: googleToken,
       locale: parsed.data.locale,
     });

@@ -19,6 +19,7 @@ async function loadSpanishMessages() {
     push,
     agent,
     profile,
+    legal,
   ] = await Promise.all([
     import("~/messages/es/common.json"),
     import("~/messages/es/landing.json"),
@@ -31,6 +32,7 @@ async function loadSpanishMessages() {
     import("~/messages/es/push.json"),
     import("~/messages/es/agent.json"),
     import("~/messages/es/profile.json"),
+    import("~/messages/es/legal.json"),
   ]);
 
   return {
@@ -45,6 +47,7 @@ async function loadSpanishMessages() {
     push: push.default,
     agent: agent.default,
     profile: profile.default,
+    legal: legal.default,
   };
 }
 
@@ -61,6 +64,7 @@ async function loadEnglishMessages() {
     push,
     agent,
     profile,
+    legal,
   ] = await Promise.all([
     import("~/messages/en/common.json"),
     import("~/messages/en/landing.json"),
@@ -73,6 +77,7 @@ async function loadEnglishMessages() {
     import("~/messages/en/push.json"),
     import("~/messages/en/agent.json"),
     import("~/messages/en/profile.json"),
+    import("~/messages/en/legal.json"),
   ]);
 
   return {
@@ -87,6 +92,7 @@ async function loadEnglishMessages() {
     push: push.default,
     agent: agent.default,
     profile: profile.default,
+    legal: legal.default,
   };
 }
 

@@ -2,9 +2,9 @@ import "server-only";
 
 import { Prisma, UserRole, type PrismaClient } from "@generated/prisma";
 import type { MobileTokenUser } from "~/server/auth/mobile-token";
-import type { VerifiedGoogleIdToken } from "~/server/services/auth/google-id-token";
+import type { VerifiedSocialIdentity } from "~/server/services/auth/google-id-token";
 
-export type GoogleSignInOutcome =
+export type SocialSignInOutcome =
   | { kind: "SIGNED_IN"; user: MobileTokenUser; created: boolean }
   | { kind: "BLOCKED" };
 
@@ -16,16 +16,16 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 /**
- * Mobile Google sign-in with implicit sign-up (workstream D): a verified
- * Google email without an account becomes a CUSTOMER with an empty
+ * Mobile Google / Apple sign-in with implicit sign-up (workstream D): a
+ * verified provider email without an account becomes a CUSTOMER with an empty
  * `CustomerProfile` (customers are born in the app). Existing accounts keep
  * their role; suspended ones are blocked. Business, worker and corporate
  * accounts are never created here — they come from their own onboarding.
  */
-export async function signInWithGoogle(
+export async function signInWithSocialIdentity(
   db: PrismaClient,
-  input: { token: VerifiedGoogleIdToken; locale: "es" | "en" },
-): Promise<GoogleSignInOutcome> {
+  input: { token: VerifiedSocialIdentity; locale: "es" | "en" },
+): Promise<SocialSignInOutcome> {
   const existing = await db.user.findUnique({
     where: { email: input.token.email },
     select: { id: true, role: true, suspendedAt: true },

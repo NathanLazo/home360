@@ -6,6 +6,8 @@ import { LocaleSwitcher } from "~/components/locale-switcher";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
 
+const LEGAL_LINKS = ["privacy", "terms", "support"] as const;
+
 const linkClass = cn(
   "text-copy-sm text-muted-foreground hover:text-foreground rounded-sm underline-offset-4 hover:underline",
   focusRingClass,
@@ -45,7 +47,7 @@ export async function LandingFooter() {
 
           <nav
             aria-label={t("footer.navLabel")}
-            className="grid grid-cols-1 gap-8 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-8 sm:grid-cols-3"
           >
             <div className="flex flex-col gap-3">
               <h2 className="text-copy-sm text-foreground font-medium">
@@ -77,6 +79,21 @@ export async function LandingFooter() {
                     {t("footer.links.register")}
                   </Link>
                 </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <h2 className="text-copy-sm text-foreground font-medium">
+                {t("footer.legal")}
+              </h2>
+              <ul className="flex flex-col gap-2">
+                {LEGAL_LINKS.map((key) => (
+                  <li key={key}>
+                    <Link href={`/${key}`} className={linkClass}>
+                      {t(`footer.links.${key}`)}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </nav>

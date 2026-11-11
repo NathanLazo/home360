@@ -30,6 +30,8 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
+    // iOS bundle id: audience of Sign in with Apple identity tokens.
+    AUTH_APPLE_BUNDLE_ID: z.string().default("com.zen.home360"),
     // Vercel AI Gateway key. The AI SDK reads it from process.env on its own;
     // it is declared here for validation and for the availability check in
     // the AI diagnosis service.
@@ -85,6 +87,7 @@ export const env = createEnv({
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    AUTH_APPLE_BUNDLE_ID: process.env.AUTH_APPLE_BUNDLE_ID,
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
     CRON_SECRET: process.env.CRON_SECRET,
     POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,

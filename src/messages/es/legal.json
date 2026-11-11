@@ -1,0 +1,133 @@
+{
+  "nav": {
+    "label": "Documentos legales",
+    "home": "HOME360",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "support": "Soporte"
+  },
+  "updated": "Última actualización: 6 de noviembre de 2026",
+  "contactLine": "Escríbenos a ",
+  "privacy": {
+    "metaTitle": "Aviso de privacidad — HOME360",
+    "metaDescription": "Qué datos personales trata HOME360, para qué, con quién se comparten y cómo ejercer tus derechos ARCO.",
+    "title": "Aviso de privacidad",
+    "intro": "HOME360 es un marketplace de mantenimiento del hogar en México donde el pago queda retenido hasta que el trabajo se entrega con evidencia. Este aviso explica qué datos personales tratamos en la app y en la plataforma web, con qué finalidad y cómo puedes ejercer tus derechos, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.",
+    "sections": {
+      "controller": {
+        "title": "Responsable",
+        "body": "HOME360 es responsable del tratamiento de tus datos personales. Para cualquier asunto de privacidad escríbenos a support@home360.mx."
+      },
+      "data": {
+        "title": "Datos que tratamos",
+        "body": "Identificación y contacto: nombre, correo, teléfono y foto de perfil.\n\nDirecciones de servicio y ubicación aproximada o precisa, solo mientras usas la app y con tu permiso, para autollenar tu dirección y compartir la llegada del técnico.\n\nContenido del servicio: fotos, videos de evidencia, notas de voz, mensajes del chat y documentos que adjuntas.\n\nDatos de pago: los procesa Stripe; HOME360 no almacena números de tarjeta.\n\nDatos técnicos: identificador del dispositivo para notificaciones push, idioma y registros de error."
+      },
+      "purposes": {
+        "title": "Para qué los usamos",
+        "body": "Finalidades necesarias: crear y proteger tu cuenta, conectar clientes con negocios verificados, cotizar, agendar y dar seguimiento a servicios, retener y liberar pagos en escrow, resolver disputas con la evidencia grabada, enviar notificaciones del servicio y cumplir obligaciones fiscales y legales.\n\nNo vendemos tus datos ni los usamos para publicidad dirigida o rastreo entre apps de terceros."
+      },
+      "ai": {
+        "title": "Asistente con IA",
+        "body": "Don Víctor, el concierge de la app, usa modelos de inteligencia artificial para transcribir notas de voz y analizar fotos o descripciones y proponer un diagnóstico. Ese contenido se envía a proveedores de IA únicamente para generar la respuesta y no se usa para entrenar modelos."
+      },
+      "sharing": {
+        "title": "Con quién se comparten",
+        "body": "Con el negocio y el técnico que atienden tu servicio: nombre, dirección exacta (solo después de aceptar una cotización) y la información del trabajo.\n\nCon proveedores que operan la plataforma bajo contrato: Stripe (pagos), Vercel (alojamiento y archivos), Neon (base de datos), Google (mapas e inicio de sesión), Apple (inicio de sesión), Pusher (chat en tiempo real), Resend (correo), Expo (notificaciones push) y proveedores de IA.\n\nCon autoridades cuando una ley o una orden lo exija."
+      },
+      "retention": {
+        "title": "Conservación",
+        "body": "Conservamos tus datos mientras tu cuenta esté activa. Al eliminarla borramos tus datos personales, direcciones y dispositivos; el historial de órdenes y pagos se conserva por el plazo que exigen las obligaciones fiscales y legales."
+      },
+      "rights": {
+        "title": "Tus derechos ARCO",
+        "body": "Puedes acceder, rectificar, cancelar u oponerte al tratamiento de tus datos, así como revocar tu consentimiento, escribiendo a support@home360.mx desde el correo de tu cuenta. Respondemos en un máximo de 20 días hábiles.\n\nTambién puedes eliminar tu cuenta en cualquier momento desde la app: Perfil → Eliminar cuenta."
+      },
+      "security": {
+        "title": "Seguridad",
+        "body": "Usamos cifrado en tránsito, almacenamiento seguro de credenciales en el dispositivo y controles de acceso por rol. Ningún sistema es infalible; si detectamos un incidente que te afecte, te avisaremos."
+      },
+      "minors": {
+        "title": "Menores de edad",
+        "body": "HOME360 está dirigido a mayores de 18 años. No recabamos datos de menores de forma intencional."
+      },
+      "changes": {
+        "title": "Cambios a este aviso",
+        "body": "Publicaremos cualquier cambio en esta página con su fecha de actualización y, si es relevante, te avisaremos en la app."
+      }
+    }
+  },
+  "terms": {
+    "metaTitle": "Términos y condiciones — HOME360",
+    "metaDescription": "Reglas de uso de HOME360: cuentas, servicios, pago protegido en escrow, evidencia, disputas y cancelaciones.",
+    "title": "Términos y condiciones",
+    "intro": "Al crear una cuenta o usar HOME360 aceptas estos términos. Si no estás de acuerdo, no uses la plataforma.",
+    "sections": {
+      "service": {
+        "title": "Qué es HOME360",
+        "body": "HOME360 conecta a clientes con negocios de mantenimiento del hogar y productos relacionados. Los servicios los presta el negocio que aceptas; HOME360 opera la plataforma, el pago protegido y la resolución de disputas."
+      },
+      "accounts": {
+        "title": "Cuentas",
+        "body": "Debes ser mayor de 18 años y dar información veraz. Eres responsable de la actividad de tu cuenta y de mantener tu contraseña segura. Los negocios y su equipo se registran y verifican desde la plataforma web."
+      },
+      "escrow": {
+        "title": "Pago protegido",
+        "body": "Cuando pagas un servicio o producto, el dinero queda retenido por HOME360 a través de Stripe y se libera al negocio solo cuando confirmas la entrega o cuando la evidencia del trabajo lo acredita. El precio total se muestra antes de pagar."
+      },
+      "evidence": {
+        "title": "Evidencia del trabajo",
+        "body": "El técnico graba el servicio desde la app. Esa grabación es la prueba principal en caso de disputa y solo la ven el cliente, el negocio y el equipo de HOME360 que resuelve el caso."
+      },
+      "cancellations": {
+        "title": "Cancelaciones y reembolsos",
+        "body": "Puedes cancelar antes de que el servicio inicie y recibir el reembolso de lo retenido. Si el trabajo no se entregó como se acordó, abre una disputa desde la orden; HOME360 revisa la evidencia y decide la liberación o el reembolso total o parcial."
+      },
+      "conduct": {
+        "title": "Uso aceptable",
+        "body": "No está permitido usar la plataforma para fraude, acoso, contenido ilegal, evadir el pago protegido ni contactar fuera de la app para cobrar servicios iniciados en ella. Podemos suspender cuentas que incumplan estas reglas."
+      },
+      "liability": {
+        "title": "Responsabilidad",
+        "body": "Cada negocio responde por la calidad y garantía de su trabajo. HOME360 responde por la operación de la plataforma y del pago protegido en los términos de la ley aplicable."
+      },
+      "law": {
+        "title": "Ley aplicable",
+        "body": "Estos términos se rigen por las leyes de México. Para cualquier controversia, las partes se someten a los tribunales competentes de Chihuahua, Chihuahua, sin perjuicio de los derechos que te otorga la Ley Federal de Protección al Consumidor."
+      },
+      "contact": {
+        "title": "Contacto",
+        "body": "Dudas sobre estos términos: support@home360.mx."
+      }
+    }
+  },
+  "support": {
+    "metaTitle": "Soporte — HOME360",
+    "metaDescription": "Ayuda con tu cuenta, pagos protegidos, órdenes y disputas en HOME360.",
+    "title": "Soporte",
+    "intro": "¿Algo no salió como esperabas? Escríbenos y te respondemos en menos de 24 horas hábiles.",
+    "emailCta": "Escribir a soporte",
+    "faqTitle": "Preguntas frecuentes",
+    "sections": {
+      "payment": {
+        "title": "¿Cuándo se libera mi pago?",
+        "body": "Cuando confirmas en la app que el trabajo quedó bien. Hasta entonces el dinero queda retenido y el negocio no lo recibe."
+      },
+      "dispute": {
+        "title": "El trabajo no quedó bien, ¿qué hago?",
+        "body": "Abre la orden y elige Abrir disputa. Revisamos la grabación del servicio y resolvemos con reembolso total o parcial cuando corresponde."
+      },
+      "cancel": {
+        "title": "¿Puedo cancelar?",
+        "body": "Sí, antes de que el servicio inicie, desde la orden. Lo retenido se reembolsa al mismo método de pago."
+      },
+      "business": {
+        "title": "Tengo un negocio, ¿cómo me registro?",
+        "body": "Los negocios se registran y verifican en home360.lat. Después invitas a tu equipo de técnicos desde el panel."
+      },
+      "delete": {
+        "title": "¿Cómo elimino mi cuenta?",
+        "body": "En la app: Perfil → Eliminar cuenta. Borramos tus datos personales; el historial de pagos se conserva por obligación legal."
+      }
+    }
+  }
+}
