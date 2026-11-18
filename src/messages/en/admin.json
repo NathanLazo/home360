@@ -7,7 +7,8 @@
     "corporate": "Corporate",
     "assistant": "Assistant",
     "settings": "Settings",
-    "orders": "Orders"
+    "orders": "Orders",
+    "reports": "Reports"
   },
   "sidebar": {
     "placeholderName": "—",
@@ -1237,6 +1238,62 @@
       "noReviewComment": "No comment.",
       "noReview": "The customer has not left a review yet.",
       "timeline": "Log"
+    }
+  },
+  "reports": {
+    "title": "Content reports",
+    "subtitle": "Messages and conversations reported from the app. Review them within 24 hours.",
+    "statusLabel": "Report status",
+    "filters": {
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "listLabel": "Report list",
+    "loading": "Loading reports…",
+    "loadMore": "Load more",
+    "errorTitle": "We couldn't load the reports",
+    "errorDescription": "Try again in a few seconds.",
+    "empty": {
+      "open": {
+        "title": "No open reports",
+        "description": "When someone reports a message in the app it shows up here.",
+        "cta": "View resolved reports"
+      },
+      "resolved": {
+        "title": "No resolved reports yet",
+        "description": "Reports you hide or dismiss stay in this history."
+      }
+    },
+    "reasons": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Harassment or insults",
+      "INAPPROPRIATE": "Inappropriate content",
+      "FRAUD": "Fraud or off-app payment",
+      "OTHER": "Other reason"
+    },
+    "statuses": {
+      "OPEN": "Open",
+      "CONTENT_HIDDEN": "Message hidden",
+      "DISMISSED": "Dismissed"
+    },
+    "messageType": {
+      "IMAGE": "Image attachment",
+      "LOCATION": "Shared location",
+      "TEXT": "Message"
+    },
+    "wholeConversation": "Whole conversation reported",
+    "details": "Comment: {details}",
+    "reporter": "Reported by",
+    "reported": "Reported user",
+    "business": "Business",
+    "unknownUser": "No name",
+    "actions": {
+      "hide": "Hide message",
+      "dismiss": "Dismiss"
+    },
+    "toasts": {
+      "resolving": "Resolving report…",
+      "resolved": "Report resolved"
     }
   }
 }

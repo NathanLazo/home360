@@ -4,6 +4,7 @@ import { adminFinanceRouter } from "~/server/api/routers/admin/finance";
 import { adminImpersonationRouter } from "~/server/api/routers/admin/impersonation";
 import { adminOrdersRouter } from "~/server/api/routers/admin/orders";
 import { adminOverviewRouter } from "~/server/api/routers/admin/overview";
+import { adminReportsRouter } from "~/server/api/routers/admin/reports";
 import { adminSettingsRouter } from "~/server/api/routers/admin/settings";
 import { adminUsersRouter } from "~/server/api/routers/admin/users";
 import { createTRPCRouter } from "~/server/api/trpc";
@@ -20,6 +21,7 @@ export const adminRouter = createTRPCRouter({
   impersonation: adminImpersonationRouter,
   orders: adminOrdersRouter,
   overview: adminOverviewRouter,
+  reports: adminReportsRouter,
   settings: adminSettingsRouter,
   users: adminUsersRouter,
 });

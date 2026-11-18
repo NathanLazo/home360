@@ -239,6 +239,10 @@ export async function listOpenRequests(
       AND (r."expiresAt" IS NULL OR r."expiresAt" > NOW())
       AND (r."targetBusinessId" = ${input.businessId} OR ${openRadarSql})
       AND NOT EXISTS (
+        SELECT 1 FROM "CustomerBusinessBlock" AS b
+        WHERE b."customerId" = r."customerId" AND b."businessId" = ${input.businessId}
+      )
+      AND NOT EXISTS (
         SELECT 1
         FROM "Quote" AS q
         WHERE q."requestId" = r."id"

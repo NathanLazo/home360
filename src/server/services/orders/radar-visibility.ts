@@ -10,6 +10,7 @@ import {
 import { serviceCategoriesOf } from "~/server/services/catalog/service-categories";
 import { haversineKm, type GeoPoint } from "~/server/services/geo/haversine";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
+import { isPairBlocked } from "~/server/services/moderation/blocks";
 
 const PLATFORM_SETTINGS_ID = 1;
 const DEFAULT_NOTIFY_RADIUS_KM = 10;
@@ -129,6 +130,7 @@ export async function isRequestVisibleOnRadar(
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     select: {
+      customerId: true,
       category: true,
       latitude: true,
       longitude: true,
@@ -137,6 +139,16 @@ export async function isRequestVisibleOnRadar(
   });
 
   if (!request) {
+    return false;
+  }
+
+  // Blocked customer×business pairs never see each other (App Store 1.2).
+  if (
+    await isPairBlocked(db, {
+      customerId: request.customerId,
+      businessId: input.businessId,
+    })
+  ) {
     return false;
   }
 
