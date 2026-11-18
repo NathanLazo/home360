@@ -1,5 +1,5 @@
 import { hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { WorkerInvitationCard } from "./_components/worker-invitation-card";
@@ -27,7 +27,6 @@ export default async function WorkerInvitePage({
   }
 
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "auth.inviteWorker" });
   const preview =
     typeof token === "string" && token.length > 0
       ? await api.auth.getWorkerInvitation({ token }).catch(() => null)
@@ -37,7 +36,6 @@ export default async function WorkerInvitePage({
   return (
     <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
       <WorkerInvitationCard
-        logoMark={t("logoMark")}
         token={invitation && token ? token : null}
         invitation={invitation}
         locale={locale}

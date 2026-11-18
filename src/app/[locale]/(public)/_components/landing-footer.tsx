@@ -5,6 +5,7 @@ import { focusRingClass, inkSurfaceClass } from "./landing-styles";
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 const LEGAL_LINKS = ["privacy", "terms", "support"] as const;
 
@@ -30,12 +31,7 @@ export async function LandingFooter() {
         <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           <div className="flex max-w-sm flex-col gap-3">
             <div className="flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="bg-foreground text-background flex size-7 items-center justify-center rounded-sm text-sm font-semibold"
-              >
-                {t("header.logoMark")}
-              </span>
+              <BrandMark size={28} />
               <span className="text-copy text-foreground font-semibold tracking-[-0.02em]">
                 {t("header.brand")}
               </span>

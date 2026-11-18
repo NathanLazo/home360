@@ -21,6 +21,7 @@ import { SidebarActiveLens } from "~/components/sidebar-active-lens";
 import { UserAvatar } from "~/components/user-avatar";
 import { Link, usePathname } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 export type SidebarItem = {
   key: string;
@@ -90,12 +91,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
               <Link href={homeHref} aria-label={brandLabel}>
-                <span
-                  aria-hidden="true"
-                  className="metal-rim shadow-metal text-on-metal flex size-8 shrink-0 items-center justify-center rounded-md text-sm font-semibold"
-                >
-                  H
-                </span>
+                <BrandMark size={32} />
                 <span className="truncate text-sm font-semibold tracking-tight">
                   HOME360
                 </span>

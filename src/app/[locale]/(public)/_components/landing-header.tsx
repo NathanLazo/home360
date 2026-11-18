@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/sheet";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 /**
  * The landing's signature: a floating Liquid Glass dock carrying the nav and
@@ -125,12 +126,7 @@ export function LandingHeader() {
             focusRingClass,
           )}
         >
-          <span
-            aria-hidden="true"
-            className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-sm text-sm font-semibold"
-          >
-            {t("logoMark")}
-          </span>
+          <BrandMark size={28} />
           <span className="text-copy font-semibold tracking-[-0.02em]">
             {t("brand")}
           </span>

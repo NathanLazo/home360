@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { routing } from "~/i18n/routing";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 type ResetPasswordPageProps = {
   params: Promise<{ locale: string }>;
@@ -30,12 +31,7 @@ export default async function ResetPasswordPage({
     <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
       <Card className="bg-canvas-soft w-full max-w-md rounded-2xl py-8 shadow-none">
         <CardHeader className="text-center">
-          <div
-            aria-hidden="true"
-            className="bg-ink text-on-ink text-display-sm mx-auto mb-2 flex size-10 items-center justify-center rounded-md"
-          >
-            {t("logoMark")}
-          </div>
+          <BrandMark size={48} className="mx-auto mb-2" />
           <CardTitle>
             <h1 className="text-display-md text-balance">{t("title")}</h1>
           </CardTitle>

@@ -13,9 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 export type WorkerInvitationCardProps = {
-  logoMark: string;
   token: string | null;
   invitation: {
     workerName: string;
@@ -27,7 +27,6 @@ export type WorkerInvitationCardProps = {
 
 /** Invalid → form → success, in the same quiet card as reset-password. */
 export function WorkerInvitationCard({
-  logoMark,
   token,
   invitation,
   locale,
@@ -46,12 +45,7 @@ export function WorkerInvitationCard({
   return (
     <Card className="bg-canvas-soft w-full max-w-md rounded-2xl py-8 shadow-none">
       <CardHeader className="text-center">
-        <div
-          aria-hidden="true"
-          className="bg-ink text-on-ink text-display-sm mx-auto mb-2 flex size-10 items-center justify-center rounded-md"
-        >
-          {logoMark}
-        </div>
+        <BrandMark size={48} className="mx-auto mb-2" />
         <CardTitle>
           <h1 className="text-display-md text-balance">{title}</h1>
         </CardTitle>
