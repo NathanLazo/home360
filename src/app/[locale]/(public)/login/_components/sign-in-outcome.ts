@@ -17,7 +17,10 @@ import {
 export const CREDENTIALS_SIGN_IN_REDIRECT_TO = "/";
 
 export type SignInOutcome =
-  "success" | "activeSession" | "invalidCredentials" | "unexpected";
+  | "success"
+  | "activeSession"
+  | "invalidCredentials"
+  | "unexpected";
 
 /**
  * Maps the `signIn()` result to what the form should do. Only the default
