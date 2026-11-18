@@ -2,7 +2,6 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { GoogleSignInButton } from "./_components/google-sign-in-button";
 import { LoginForm } from "./_components/login-form";
 import {
   Card,
@@ -12,13 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
 import { Link } from "~/i18n/navigation";
 import { routing } from "~/i18n/routing";
 import {
   ACTIVE_SESSION_EXISTS_CODE,
   SESSION_ENDED_ERROR,
 } from "~/lib/auth/session-errors";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -50,19 +49,12 @@ export default async function LoginPage({
         : error === "OAuthAccountNotLinked"
           ? t("oauthAccountNotLinked")
           : t("oauthFailed");
-  const postLoginPath =
-    locale === routing.defaultLocale ? "/post-login" : `/${locale}/post-login`;
 
   return (
     <main className="bg-canvas flex min-h-dvh items-center justify-center px-4 py-12">
       <Card className="bg-canvas-soft w-full max-w-md rounded-2xl py-8 shadow-none">
         <CardHeader className="text-center">
-          <div
-            aria-hidden="true"
-            className="bg-ink text-on-ink text-display-sm mx-auto mb-2 flex size-10 items-center justify-center rounded-md"
-          >
-            {t("logoMark")}
-          </div>
+          <BrandMark size={48} className="mx-auto mb-2" />
           <CardTitle>
             <h1 className="text-display-md text-balance">{t("title")}</h1>
           </CardTitle>
@@ -75,18 +67,6 @@ export default async function LoginPage({
             </p>
           ) : null}
           <LoginForm callbackUrl={callbackUrl} />
-          <div className="flex items-center gap-3">
-            <Separator className="flex-1" />
-            <span className="text-muted-foreground text-xs">
-              {t("separator")}
-            </span>
-            <Separator className="flex-1" />
-          </div>
-          <GoogleSignInButton
-            callbackUrl={callbackUrl}
-            postLoginPath={postLoginPath}
-            activeSessionConflict={activeSessionConflict}
-          />
         </CardContent>
         <CardFooter className="text-muted-foreground text-copy-sm justify-center gap-1">
           <span>{t("noAccount")}</span>

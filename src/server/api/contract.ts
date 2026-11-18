@@ -76,6 +76,8 @@ export const DOMAIN_ERROR_CODES = [
   "LOCATION_OUT_OF_COVERAGE",
   // MCP personal access tokens (Claude Code connection).
   "MCP_TOKEN_LIMIT_REACHED",
+  // App Store 1.2: customer×business chat blocked by either side.
+  "CONVERSATION_BLOCKED",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

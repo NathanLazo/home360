@@ -15,6 +15,7 @@ import { marketplaceRouter } from "~/server/api/routers/marketplace";
 import { mcpRouter } from "~/server/api/routers/mcp";
 import { mediaRouter } from "~/server/api/routers/media";
 import { messagingRouter } from "~/server/api/routers/messaging";
+import { moderationRouter } from "~/server/api/routers/moderation";
 import { orderRouter } from "~/server/api/routers/order";
 import { paymentRouter } from "~/server/api/routers/payment";
 import { productRouter } from "~/server/api/routers/product";
@@ -58,6 +59,7 @@ export const appRouter = createTRPCRouter({
   mcp: mcpRouter,
   media: mediaRouter,
   messaging: messagingRouter,
+  moderation: moderationRouter,
   order: orderRouter,
   payment: paymentRouter,
   product: productRouter,

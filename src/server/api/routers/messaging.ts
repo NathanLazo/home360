@@ -55,6 +55,7 @@ const sendSchema = z.object({
 /** HTTP status per service code; a non-participant is always a generic 404. */
 const serviceErrorStatuses = {
   VALIDATION_ERROR: 422,
+  CONVERSATION_BLOCKED: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
   INTERNAL_ERROR: 500,

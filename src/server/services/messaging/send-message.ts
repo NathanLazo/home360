@@ -10,6 +10,7 @@ import {
   isConversationParticipant,
 } from "./participants";
 import { triggerPusherEvent } from "./pusher-server";
+import { isConversationBlocked } from "~/server/services/moderation/blocks";
 
 /**
  * Persists one chat message and notifies the conversation channel (M4-W1).
@@ -29,7 +30,9 @@ export async function sendMessage(
     lat?: number;
     lng?: number;
   },
-): Promise<ServiceResult<Message, "VALIDATION_ERROR">> {
+): Promise<
+  ServiceResult<Message, "VALIDATION_ERROR" | "CONVERSATION_BLOCKED">
+> {
   const participant = await isConversationParticipant(
     db,
     input.senderId,
@@ -38,6 +41,10 @@ export async function sendMessage(
 
   if (!participant) {
     return svcFail("NOT_FOUND", "Conversation not found");
+  }
+
+  if (await isConversationBlocked(db, input.conversationId)) {
+    return svcFail("CONVERSATION_BLOCKED", "Conversation is blocked");
   }
 
   if (input.type === "TEXT" && !input.body) {

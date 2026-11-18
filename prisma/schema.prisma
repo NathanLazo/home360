@@ -252,6 +252,20 @@ enum PushPlatform {
   ANDROID
 }
 
+enum ContentReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+  FRAUD
+  OTHER
+}
+
+enum ContentReportStatus {
+  OPEN
+  CONTENT_HIDDEN
+  DISMISSED
+}
+
 enum MessageType {
   TEXT
   IMAGE
@@ -406,6 +420,12 @@ model User {
   aiUsage                      AiUsage[]
   stockMovements               StockMovement[]              @relation("StockMovementActor")
   mcpTokens                    McpToken[]
+  // App Store 1.2 (UGC): chat reports filed / received and blocks set.
+  contentReportsFiled          ContentReport[]              @relation("ContentReportReporter")
+  contentReportsReceived       ContentReport[]              @relation("ContentReportReported")
+  contentReportsResolved       ContentReport[]              @relation("ContentReportResolver")
+  customerBlocks               CustomerBusinessBlock[]      @relation("CustomerBlockCustomer")
+  blocksSet                    CustomerBusinessBlock[]      @relation("CustomerBlockActor")
   createdAt                    DateTime                     @default(now())
   updatedAt                    DateTime                     @updatedAt
 }
@@ -470,6 +490,7 @@ model Business {
   loyaltyBonuses      LoyaltyBonus[]
   payoutReceipts      PayoutReceipt[]
   conversations       Conversation[]
+  customerBlocks      CustomerBusinessBlock[]
   targetedRequests    ServiceRequest[]   @relation("TargetedRequests")
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
@@ -1420,6 +1441,7 @@ model Conversation {
   customer   User?           @relation("InquiryConversations", fields: [customerId], references: [id], onDelete: Cascade)
   productId  String?
   messages   Message[]
+  reports    ContentReport[]
   createdAt  DateTime        @default(now())
 
   // One conversation per request×business pair (MA-08).
@@ -1443,6 +1465,10 @@ model Message {
   latitude       Float?
   longitude      Float?
   readAt         DateTime?
+  // Set by an admin resolving a report (App Store 1.2); hidden messages are
+  // excluded from every chat read.
+  hiddenAt       DateTime?
+  reports        ContentReport[]
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
@@ -1597,4 +1623,54 @@ model AiCreditPurchase {
 
   @@index([businessId, createdAt])
   @@index([corporateAccountId, createdAt])
+}
+
+/// App Store 1.2 (user-generated content): a chat report filed from the app.
+/// `messageId` null = the whole conversation / counterpart was reported.
+/// Resolved by an admin in /admin/reports.
+model ContentReport {
+  id             String              @id @default(cuid())
+  reporterId     String
+  reporter       User                @relation("ContentReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId      String?
+  message        Message?            @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  // Author of the reported message, or null for a conversation report.
+  reportedUserId String?
+  reportedUser   User?               @relation("ContentReportReported", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  reason         ContentReportReason
+  details        String?
+  status         ContentReportStatus @default(OPEN)
+  resolvedById   String?
+  resolvedBy     User?               @relation("ContentReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt     DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  // One report per reporter and message (a retry is idempotent).
+  @@unique([reporterId, messageId])
+  @@index([status, createdAt])
+  @@index([conversationId])
+  @@index([reportedUserId])
+}
+
+/// App Store 1.2: a customer↔business block set by either side. While it
+/// exists no chat message can be sent between them, the customer's requests
+/// leave that business's radar and no new inquiry chat can be opened.
+model CustomerBusinessBlock {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    User     @relation("CustomerBlockCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  // User who set the block; only that side can lift it.
+  blockedById String
+  blockedBy   User     @relation("CustomerBlockActor", fields: [blockedById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([customerId, businessId])
+  @@index([businessId])
+  @@index([blockedById])
 }

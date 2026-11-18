@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { LocaleSwitcher } from "~/components/locale-switcher";
 import { Link } from "~/i18n/navigation";
 import { cn } from "~/lib/utils";
+import { BrandMark } from "~/components/brand/brand-mark";
 
 export type LegalPage = "privacy" | "terms" | "support";
 
@@ -31,8 +32,9 @@ export async function LegalShell({ current, children }: LegalShellProps) {
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             href="/"
-            className="text-copy rounded-sm py-3 font-semibold tracking-[-0.02em]"
+            className="text-copy flex items-center gap-2 rounded-sm py-3 font-semibold tracking-[-0.02em]"
           >
+            <BrandMark size={24} />
             {t("home")}
           </Link>
           <nav aria-label={t("label")}>

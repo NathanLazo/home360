@@ -60,7 +60,13 @@ export async function generateMetadata({
 
   return {
     title: t("appName"),
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/brand/home360-icon.svg", type: "image/svg+xml" },
+      ],
+      apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+    },
   };
 }
 

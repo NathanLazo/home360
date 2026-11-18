@@ -7,7 +7,8 @@
     "corporate": "Corporativo",
     "assistant": "Asistente",
     "settings": "Configuración",
-    "orders": "Órdenes"
+    "orders": "Órdenes",
+    "reports": "Reportes"
   },
   "sidebar": {
     "placeholderName": "—",
@@ -1237,6 +1238,62 @@
       "noReviewComment": "Sin comentario.",
       "noReview": "El cliente aún no deja reseña.",
       "timeline": "Bitácora"
+    }
+  },
+  "reports": {
+    "title": "Reportes de contenido",
+    "subtitle": "Mensajes y conversaciones reportados desde la app. Revísalos en menos de 24 horas.",
+    "statusLabel": "Estado de los reportes",
+    "filters": {
+      "open": "Abiertos",
+      "resolved": "Resueltos"
+    },
+    "listLabel": "Lista de reportes",
+    "loading": "Cargando reportes…",
+    "loadMore": "Cargar más",
+    "errorTitle": "No pudimos cargar los reportes",
+    "errorDescription": "Vuelve a intentarlo en unos segundos.",
+    "empty": {
+      "open": {
+        "title": "No hay reportes abiertos",
+        "description": "Cuando alguien reporte un mensaje en la app aparecerá aquí.",
+        "cta": "Ver reportes resueltos"
+      },
+      "resolved": {
+        "title": "Aún no hay reportes resueltos",
+        "description": "Los reportes que ocultes o descartes quedarán en este historial."
+      }
+    },
+    "reasons": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Acoso o insultos",
+      "INAPPROPRIATE": "Contenido inapropiado",
+      "FRAUD": "Fraude o cobro fuera de la app",
+      "OTHER": "Otro motivo"
+    },
+    "statuses": {
+      "OPEN": "Abierto",
+      "CONTENT_HIDDEN": "Mensaje oculto",
+      "DISMISSED": "Descartado"
+    },
+    "messageType": {
+      "IMAGE": "Imagen adjunta",
+      "LOCATION": "Ubicación compartida",
+      "TEXT": "Mensaje"
+    },
+    "wholeConversation": "Reporte de la conversación completa",
+    "details": "Comentario: {details}",
+    "reporter": "Reportó",
+    "reported": "Reportado",
+    "business": "Negocio",
+    "unknownUser": "Sin nombre",
+    "actions": {
+      "hide": "Ocultar mensaje",
+      "dismiss": "Descartar"
+    },
+    "toasts": {
+      "resolving": "Resolviendo reporte…",
+      "resolved": "Reporte resuelto"
     }
   }
 }

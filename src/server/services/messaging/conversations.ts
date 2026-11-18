@@ -13,6 +13,7 @@ import {
   isOrderParticipant,
   participantConversationsWhere,
 } from "./participants";
+import { isPairBlocked } from "~/server/services/moderation/blocks";
 
 const CONVERSATIONS_PAGE_SIZE = 30;
 const MESSAGES_PAGE_SIZE = 30;
@@ -168,6 +169,16 @@ export async function getOrCreateInquiry(
     return svcFail("NOT_FOUND", "Business not found");
   }
 
+  // A blocked pair cannot open a new inquiry chat (App Store 1.2).
+  if (
+    await isPairBlocked(db, {
+      customerId: input.customerId,
+      businessId: business.id,
+    })
+  ) {
+    return svcFail("NOT_FOUND", "Business not found");
+  }
+
   if (input.productId) {
     const product = await db.product.findFirst({
       where: {
@@ -241,6 +252,7 @@ export async function listMyConversations(
       business: { select: { name: true } },
       customer: { select: { name: true } },
       messages: {
+        where: { hiddenAt: null },
         orderBy: { createdAt: "desc" },
         take: 1,
         select: { type: true, body: true, createdAt: true },
@@ -248,7 +260,11 @@ export async function listMyConversations(
       _count: {
         select: {
           messages: {
-            where: { senderId: { not: input.userId }, readAt: null },
+            where: {
+              senderId: { not: input.userId },
+              readAt: null,
+              hiddenAt: null,
+            },
           },
         },
       },
@@ -406,7 +422,8 @@ export async function listMessages(
   }
 
   const messages = await db.message.findMany({
-    where: { conversationId: input.conversationId },
+    // Messages hidden by moderation (App Store 1.2) never reach a client.
+    where: { conversationId: input.conversationId, hiddenAt: null },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: MESSAGES_PAGE_SIZE + 1,
     ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
