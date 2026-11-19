@@ -55,6 +55,14 @@ import {
   suspendBusinessSchema,
   suspendUserSchema,
 } from "~/app/[locale]/admin/users/_components/users.schema";
+import {
+  listPlatformProductsSchema,
+  listPlatformServicesSchema,
+} from "~/schemas/admin/platform-catalog.schema";
+import {
+  adminOrderIdSchema,
+  adminOrderListSchema,
+} from "~/server/services/admin/admin-order.schema";
 import { recordIdSchema } from "~/schemas/record-id.schema";
 import type { AgentAttachmentStore } from "../agent-attachments";
 import {
@@ -166,10 +174,39 @@ export function createAdminTools(
     // Accounts and moderation
     listUsers: tool({
       description:
-        "Paginated directory by tab (businesses, customers or workers) with search and status filters.",
+        "Paginated directory by tab (businesses, customers or workers) with search and status filters. Use tab businesses to list every business on the platform.",
       inputSchema: listUsersSchema,
       execute: (input) => runTool(() => caller.admin.users.list(input)),
     }),
+    // Platform catalog (read-only, every business)
+    listPlatformProducts: tool({
+      description:
+        "Products of every business on the platform, newest first (25 per page): business, SKU, category, price in cents, status (DRAFT/PUBLISHED) and total stock. Filter by search, businessId, category or status; pass nextCursor to page. `total` is the count for the filters.",
+      inputSchema: listPlatformProductsSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.catalog.listProducts(input)),
+    }),
+    listPlatformServices: tool({
+      description:
+        "Services of every business on the platform, newest first (25 per page): business, categories, base price in cents, duration, status (ACTIVE/PAUSED) and the initial diagnostic visit setup: diagnosticPriceCents (null = no diagnostic) and diagnosticCredited (true = the paid diagnostic is deducted from the final quote/payment of the same request; false = charged on top). Filter by search, businessId, category, status or diagnostic (configured, credited, not_credited, none); pass nextCursor to page. `total` is the count for the filters.",
+      inputSchema: listPlatformServicesSchema,
+      execute: (input) =>
+        runTool(() => caller.admin.catalog.listServices(input)),
+    }),
+    // Orders (read-only, every business)
+    listOrders: tool({
+      description:
+        "Every order on the platform, newest first: filter by status, type (SERVICE/PRODUCT) or search (folio, title, customer or business name); pass the cursor to page.",
+      inputSchema: adminOrderListSchema.unwrap(),
+      execute: (input) => runTool(() => caller.admin.orders.list(input)),
+    }),
+    getOrder: tool({
+      description:
+        "Full order detail: amounts, payment split (commission, service fee, refunds), quote (with the diagnostic terms it carried: diagnosticPriceCents, diagnosticCredited), and the diagnostic flow (isDiagnostic order, creditCents deducted from the final charge, linked diagnostic/follow-up orders), dispute, evidence and timeline.",
+      inputSchema: adminOrderIdSchema,
+      execute: (input) => runTool(() => caller.admin.orders.getById(input)),
+    }),
+
     getBusinessDetail: tool({
       description:
         "Full business file: owner, plan, branches, documents, orders summary and moderation history.",

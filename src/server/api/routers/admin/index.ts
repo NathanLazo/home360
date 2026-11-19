@@ -1,3 +1,4 @@
+import { adminCatalogRouter } from "~/server/api/routers/admin/catalog";
 import { adminCorporateRouter } from "~/server/api/routers/admin/corporate";
 import { adminDisputesRouter } from "~/server/api/routers/admin/disputes";
 import { adminFinanceRouter } from "~/server/api/routers/admin/finance";
@@ -15,6 +16,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  * so this file stays the single serial merge point of F5/F7.
  */
 export const adminRouter = createTRPCRouter({
+  catalog: adminCatalogRouter,
   corporate: adminCorporateRouter,
   disputes: adminDisputesRouter,
   finance: adminFinanceRouter,

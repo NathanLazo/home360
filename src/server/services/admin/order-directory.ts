@@ -81,6 +81,8 @@ const adminOrderDetailSelect = {
       id: true,
       amountCents: true,
       scheduledFor: true,
+      diagnosticPriceCents: true,
+      diagnosticCredited: true,
       request: { select: { id: true, addressLine: true, category: true } },
     },
   },
@@ -101,6 +103,15 @@ const adminOrderDetailSelect = {
   },
   dispute: {
     select: { id: true, status: true, resolution: true, resolvedAt: true },
+  },
+  isDiagnostic: true,
+  diagnosticCreditCents: true,
+  diagnosticOrder: {
+    select: { id: true, folio: true, amountCents: true, status: true },
+  },
+  followUpOrders: {
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    select: { id: true, folio: true, amountCents: true, status: true },
   },
   review: { select: { rating: true, comment: true, createdAt: true } },
   materials: {
@@ -139,6 +150,13 @@ export type AdminOrderList = {
   nextCursor: string | null;
 };
 
+type AdminLinkedOrder = {
+  id: string;
+  folio: number;
+  amountCents: number;
+  status: OrderStatus;
+};
+
 export type AdminOrderDetail = {
   id: string;
   folio: number;
@@ -173,7 +191,21 @@ export type AdminOrderDetail = {
     category: string;
     amountCents: number;
     scheduledFor: Date | null;
+    /** Diagnostic terms snapshotted from the service when quoted. */
+    diagnosticPriceCents: number | null;
+    diagnosticCredited: boolean;
   } | null;
+  /**
+   * Diagnostic-first flow: a DIAGNOSTIC order (isDiagnostic) charges the visit
+   * fee; the final charge is a follow-up order pointing back to it. When the
+   * diagnostic is credited, `creditCents` was deducted from that final amount.
+   */
+  diagnostic: {
+    isDiagnostic: boolean;
+    creditCents: number;
+    diagnosticOrder: AdminLinkedOrder | null;
+    followUpOrders: AdminLinkedOrder[];
+  };
   payment: {
     id: string;
     status: PaymentStatus;
@@ -371,8 +403,16 @@ export async function getAdminOrder(
           category: order.quote.request.category,
           amountCents: order.quote.amountCents,
           scheduledFor: order.quote.scheduledFor,
+          diagnosticPriceCents: order.quote.diagnosticPriceCents,
+          diagnosticCredited: order.quote.diagnosticCredited,
         }
       : null,
+    diagnostic: {
+      isDiagnostic: order.isDiagnostic,
+      creditCents: order.diagnosticCreditCents,
+      diagnosticOrder: order.diagnosticOrder,
+      followUpOrders: order.followUpOrders,
+    },
     payment: order.payment
       ? {
           id: order.payment.id,
