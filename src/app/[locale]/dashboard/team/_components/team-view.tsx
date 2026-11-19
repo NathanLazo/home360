@@ -46,7 +46,8 @@ export function TeamView() {
     mutations.creating ||
     mutations.updating ||
     mutations.deleting ||
-    mutations.resending;
+    mutations.resending ||
+    mutations.linking;
 
   function openCreate() {
     setEditing(null);
@@ -138,6 +139,9 @@ export function TeamView() {
         onCreate={openCreate}
         onEdit={openEdit}
         onResendInvitation={(worker) => mutations.resendInvitation(worker.id)}
+        onCopyInvitationLink={(worker) =>
+          mutations.copyInvitationLink(worker.id)
+        }
         onDelete={(worker) => mutations.remove(worker.id)}
       />
 

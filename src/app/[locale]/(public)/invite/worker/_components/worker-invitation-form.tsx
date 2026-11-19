@@ -11,10 +11,11 @@ import { Button } from "~/components/ui/button";
 import { acceptWorkerInvitationSchema } from "~/schemas/auth/worker-invitation.schema";
 import { api } from "~/trpc/react";
 
-type FieldKey = "name" | "password" | "confirmPassword";
+type FieldKey = "email" | "name" | "password" | "confirmPassword";
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const FIELD_IDS: Record<FieldKey, string> = {
+  email: "invite-worker-email",
   name: "invite-worker-name",
   password: "invite-worker-password",
   confirmPassword: "invite-worker-confirm-password",
@@ -22,7 +23,10 @@ const FIELD_IDS: Record<FieldKey, string> = {
 
 function isFieldKey(value: unknown): value is FieldKey {
   return (
-    value === "name" || value === "password" || value === "confirmPassword"
+    value === "email" ||
+    value === "name" ||
+    value === "password" ||
+    value === "confirmPassword"
   );
 }
 
@@ -32,7 +36,8 @@ function focusField(key: FieldKey) {
 
 export type WorkerInvitationFormProps = {
   token: string;
-  email: string;
+  /** Null for a hand-shared link: the worker enters their own email. */
+  email: string | null;
   defaultName: string;
   locale: "es" | "en";
   onAccepted: (email: string) => void;
@@ -50,12 +55,14 @@ export function WorkerInvitationForm({
   const t = useTranslations("auth.inviteWorker");
   const tErrors = useTranslations("errors");
   const [name, setName] = useState(defaultName);
+  const [ownEmail, setOwnEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const accept = api.auth.acceptWorkerInvitation.useMutation();
   const shakeInvalid = useErrorShake();
   const fieldMessages: Record<FieldKey, string> = {
+    email: t("validation.email"),
     name: t("validation.name"),
     password: t("validation.passwordLength"),
     confirmPassword: t("validation.passwordMismatch"),
@@ -67,6 +74,7 @@ export function WorkerInvitationForm({
     const parsed = acceptWorkerInvitationSchema.safeParse({
       token,
       name,
+      ...(email === null ? { email: ownEmail } : {}),
       password,
       confirmPassword,
       locale,
@@ -110,7 +118,13 @@ export function WorkerInvitationForm({
       }
 
       if (response.error === "EMAIL_TAKEN") {
-        toast.error(t("emailTaken"));
+        toast.error(email === null ? t("ownEmailTaken") : t("emailTaken"));
+        return;
+      }
+
+      if (response.error === "VALIDATION_ERROR") {
+        setErrors({ email: fieldMessages.email });
+        focusField("email");
         return;
       }
 
@@ -136,14 +150,33 @@ export function WorkerInvitationForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <WorkerInvitationField
-        id="invite-worker-email"
-        label={t("emailLabel")}
-        value={email}
-        readOnly
-        type="email"
-        autoComplete="email"
-      />
+      {email === null ? (
+        <WorkerInvitationField
+          id={FIELD_IDS.email}
+          label={t("ownEmailLabel")}
+          value={ownEmail}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          error={errors.email}
+          disabled={pending}
+          onChange={(event) => {
+            setOwnEmail(event.target.value);
+            setErrors({});
+          }}
+        />
+      ) : (
+        <WorkerInvitationField
+          id={FIELD_IDS.email}
+          label={t("emailLabel")}
+          value={email}
+          readOnly
+          type="email"
+          autoComplete="email"
+        />
+      )}
       <WorkerInvitationField
         id={FIELD_IDS.name}
         label={t("nameLabel")}

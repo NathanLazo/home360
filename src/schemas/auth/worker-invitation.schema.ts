@@ -13,6 +13,8 @@ export const acceptWorkerInvitationSchema = z
   .object({
     token: invitationTokenSchema,
     name: z.string().trim().min(2).max(100),
+    // Only read when the invitation has no email (link shared by hand).
+    email: z.string().trim().toLowerCase().email().max(254).optional(),
     password: passwordSchema,
     confirmPassword: z.string(),
     locale: z.enum(["es", "en"]).default("es"),

@@ -32,6 +32,7 @@ export function TeamTable({
   onCreate,
   onEdit,
   onResendInvitation,
+  onCopyInvitationLink,
   onDelete,
 }: {
   workers: WorkerListItem[];
@@ -40,6 +41,7 @@ export function TeamTable({
   onCreate: () => void;
   onEdit: (worker: WorkerListItem) => void;
   onResendInvitation: (worker: WorkerListItem) => Promise<boolean>;
+  onCopyInvitationLink: (worker: WorkerListItem) => Promise<boolean>;
   onDelete: (worker: WorkerListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.team");
@@ -127,6 +129,7 @@ export function TeamTable({
           busy={mutationBusy}
           onEdit={onEdit}
           onResendInvitation={onResendInvitation}
+          onCopyInvitationLink={onCopyInvitationLink}
           onDelete={onDelete}
         />
       ),

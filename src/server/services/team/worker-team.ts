@@ -20,7 +20,7 @@ import {
 } from "~/server/services/subscription/plan-limits";
 import { env } from "~/env";
 import { sendWorkerInvitation } from "~/server/services/team/send-worker-invitation";
-import { issueWorkerInvitationUrl } from "~/server/services/team/worker-invitation-token";
+import { issueWorkerInvitation } from "~/server/services/team/worker-invitation-token";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 
 /**
@@ -35,6 +35,7 @@ const workerListSelect = {
   specialty: true,
   invitedEmail: true,
   invitationStatus: true,
+  userId: true,
   availability: true,
   branch: { select: { id: true, name: true } },
   services: { select: { id: true, name: true, status: true } },
@@ -44,7 +45,9 @@ type WorkerListRow = Prisma.WorkerGetPayload<{
   select: typeof workerListSelect;
 }>;
 
-export type WorkerListItem = WorkerListRow & {
+export type WorkerListItem = Omit<WorkerListRow, "userId"> & {
+  /** Whether the worker already has a WORKER login (invitation accepted). */
+  hasAccount: boolean;
   /** Orders assigned to the worker that are scheduled (or were created) today. */
   todayOrdersCount: number;
 };
@@ -117,8 +120,9 @@ export async function listWorkers(
     business.id,
     rows.map(({ id }) => id),
   );
-  const items = rows.map((row): WorkerListItem => ({
+  const items = rows.map(({ userId, ...row }): WorkerListItem => ({
     ...row,
+    hasAccount: userId !== null,
     todayOrdersCount: todayCounts.get(row.id) ?? 0,
   }));
   const used = items.length;
@@ -348,7 +352,7 @@ async function deliverInvitation(
     });
 
     // Workstream D: single-use acceptance link (re-issued on every resend).
-    const invitationUrl = await issueWorkerInvitationUrl(db, {
+    const invitation = await issueWorkerInvitation(db, {
       workerId: input.workerId,
       appUrl: env.APP_URL,
       locale: input.locale,
@@ -359,7 +363,7 @@ async function deliverInvitation(
       workerName: input.workerName,
       businessName: business.name,
       locale: input.locale,
-      ...(invitationUrl ? { invitationUrl } : {}),
+      ...(invitation ? { invitationUrl: invitation.url } : {}),
     });
 
     return true;

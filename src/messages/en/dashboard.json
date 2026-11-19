@@ -1060,7 +1060,10 @@
       "ariaBranch": "{name}, {radius} km radius",
       "emptyTitle": "No branch has a location yet",
       "emptyDescription": "Add latitude and longitude to your branches to see their coverage and start receiving nearby requests.",
-      "missing": "{count, plural, one {# branch without location} other {# branches without location}}"
+      "missing": "{count, plural, one {# branch without location} other {# branches without location}}",
+      "wheelHint": "Use Ctrl + scroll to zoom",
+      "dragHint": "Use two fingers to move the map",
+      "attribution": "© OpenStreetMap · © CARTO"
     },
     "managerDialog": {
       "title": "Assign manager",
@@ -1302,7 +1305,9 @@
       "open": "Open actions for {name}",
       "edit": "Edit",
       "resendInvitation": "Resend invitation",
-      "delete": "Delete"
+      "delete": "Delete",
+      "copyInvitationLink": "Copy invitation link",
+      "copy": "Copy"
     },
     "delete": {
       "title": "Delete worker",
@@ -1346,14 +1351,19 @@
       "invitationResent": "Invitation resent.",
       "updated": "Worker updated.",
       "deleted": "Worker deleted.",
-      "transportError": "We couldn't complete the action. Check your connection and try again."
+      "transportError": "We couldn't complete the action. Check your connection and try again.",
+      "linkCopied": "Invitation link copied.",
+      "linkSingleUse": "Share it with the worker. It expires in 7 days and voids earlier links.",
+      "linkReady": "Invitation link ready"
     },
     "errors": {
       "PLAN_LIMIT_REACHED": "You reached your plan's worker limit. Upgrade your plan to add more.",
       "BUSINESS_NOT_ACTIVE": "Your business isn't active yet, so you can't add workers.",
       "EMAIL_SEND_FAILED": "We couldn't send the invitation. Resend it from the worker's menu.",
       "CONFLICT": "This is the only worker assigned to an active service; reassign the service first.",
-      "RESEND_CONFLICT": "This worker has no pending invitation."
+      "RESEND_CONFLICT": "This worker has no pending invitation.",
+      "EMAIL_SEND_FAILED_LINK": "We couldn't send the email. Copy the link and share it another way.",
+      "LINK_CONFLICT": "This worker already has an app account."
     },
     "availability": {
       "AVAILABLE": "Available",

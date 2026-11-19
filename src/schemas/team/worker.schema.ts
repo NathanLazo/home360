@@ -53,10 +53,16 @@ export const workerResendInvitationSchema = z
   })
   .strict();
 
+/** Same shape as a resend: the locale picks the acceptance page language. */
+export const workerInvitationLinkSchema = workerResendInvitationSchema;
+
 export type WorkerIdInput = z.infer<typeof workerIdSchema>;
 export type WorkerCreateInput = z.infer<typeof workerCreateSchema>;
 export type WorkerUpdateInput = z.infer<typeof workerUpdateSchema>;
 export type WorkerResendInvitationInput = z.infer<
   typeof workerResendInvitationSchema
+>;
+export type WorkerInvitationLinkInput = z.infer<
+  typeof workerInvitationLinkSchema
 >;
 export type EmailLocale = z.infer<typeof emailLocaleSchema>;

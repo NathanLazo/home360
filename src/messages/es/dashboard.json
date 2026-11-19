@@ -1060,7 +1060,10 @@
       "ariaBranch": "{name}, radio de {radius} km",
       "emptyTitle": "Ninguna sucursal tiene ubicación",
       "emptyDescription": "Agrega latitud y longitud a tus sucursales para ver su cobertura y empezar a recibir solicitudes cercanas.",
-      "missing": "{count, plural, one {# sucursal sin ubicación} other {# sucursales sin ubicación}}"
+      "missing": "{count, plural, one {# sucursal sin ubicación} other {# sucursales sin ubicación}}",
+      "wheelHint": "Usa Ctrl + rueda para hacer zoom",
+      "dragHint": "Usa dos dedos para mover el mapa",
+      "attribution": "© OpenStreetMap · © CARTO"
     },
     "managerDialog": {
       "title": "Asignar encargado",
@@ -1302,7 +1305,9 @@
       "open": "Abrir acciones de {name}",
       "edit": "Editar",
       "resendInvitation": "Reenviar invitación",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "copyInvitationLink": "Copiar link de invitación",
+      "copy": "Copiar"
     },
     "delete": {
       "title": "Eliminar trabajador",
@@ -1346,14 +1351,19 @@
       "invitationResent": "Invitación reenviada.",
       "updated": "Trabajador actualizado.",
       "deleted": "Trabajador eliminado.",
-      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo."
+      "transportError": "No pudimos completar la acción. Revisa tu conexión e inténtalo de nuevo.",
+      "linkCopied": "Link de invitación copiado.",
+      "linkSingleUse": "Compártelo con el trabajador. Vence en 7 días y deja sin efecto los links anteriores.",
+      "linkReady": "Link de invitación listo"
     },
     "errors": {
       "PLAN_LIMIT_REACHED": "Alcanzaste el límite de trabajadores de tu plan. Mejora tu plan para agregar más.",
       "BUSINESS_NOT_ACTIVE": "Tu negocio aún no está activo, así que no puedes agregar trabajadores.",
       "EMAIL_SEND_FAILED": "No pudimos enviar la invitación. Reenvíala desde el menú del trabajador.",
       "CONFLICT": "Es el único trabajador asignado a un servicio activo; reasigna el servicio primero.",
-      "RESEND_CONFLICT": "Este trabajador no tiene una invitación pendiente."
+      "RESEND_CONFLICT": "Este trabajador no tiene una invitación pendiente.",
+      "EMAIL_SEND_FAILED_LINK": "No pudimos enviar el correo. Copia el link y compártelo por otro medio.",
+      "LINK_CONFLICT": "Este trabajador ya tiene cuenta en la app."
     },
     "availability": {
       "AVAILABLE": "Disponible",
