@@ -5,6 +5,7 @@ import {
   HomeIcon,
   MapPinIcon,
   PackageIcon,
+  RadarIcon,
   SettingsIcon,
   SparklesIcon,
   UsersIcon,
@@ -29,6 +30,12 @@ export const DASHBOARD_NAV = [
     labelKey: "nav.products",
     href: "/dashboard/products",
     icon: PackageIcon,
+  },
+  {
+    key: "requests",
+    labelKey: "nav.requests",
+    href: "/dashboard/requests",
+    icon: RadarIcon,
   },
   {
     key: "orders",

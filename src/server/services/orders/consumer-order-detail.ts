@@ -150,7 +150,7 @@ export type ConsumerOrderDetail = {
   } | null;
   quote: {
     id: string;
-    amountCents: number;
+    amountCents: number | null;
     scheduledFor: Date | null;
     message: string | null;
     requestId: string;

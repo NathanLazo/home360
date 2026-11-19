@@ -9,10 +9,11 @@ import {
   offerFormSchema,
   type OfferFormField,
   type OfferFormValues,
-} from "./orders.schema";
-import { OfferDiagnosticNotice } from "./offer-diagnostic-notice";
+  type ParsedOffer,
+} from "./requests.schema";
+import { OfferDiagnosticField } from "./offer-diagnostic-field";
 import { OfferServiceField } from "./offer-service-field";
-import type { QuotableService, WorkerOption } from "./order.types";
+import type { QuotableService, WorkerOption } from "./request.types";
 import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -25,14 +26,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
-
-export type ParsedOffer = {
-  workerId: string;
-  serviceId?: string;
-  priceCents: number;
-  scheduledAt: Date;
-  message?: string;
-};
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -49,16 +42,41 @@ export const EMPTY_OFFER: OfferFormValues = {
   workerId: "",
   serviceId: "",
   price: "",
+  diagnosticEnabled: false,
+  diagnosticPrice: "",
+  diagnosticCredited: true,
   scheduledAt: "",
   message: "",
 };
 
+/** Diagnostic terms of a catalog service, as form values. */
+function diagnosticFromService(
+  service: QuotableService,
+): Pick<
+  OfferFormValues,
+  "diagnosticEnabled" | "diagnosticPrice" | "diagnosticCredited"
+> {
+  return service.diagnosticPriceCents === null
+    ? {
+        diagnosticEnabled: false,
+        diagnosticPrice: "",
+        diagnosticCredited: true,
+      }
+    : {
+        diagnosticEnabled: true,
+        diagnosticPrice: String(service.diagnosticPriceCents / 100),
+        diagnosticCredited: service.diagnosticCredited,
+      };
+}
+
 /**
- * Offer composer of N2 on web: technician, optional catalog service, price,
- * visit date-time and an optional note for the customer. A service with
- * diagnostic makes the price an estimate and previews the two-step charge. Validates with the same bounds the server
- * enforces before calling `quote.submit`. `initialValues` is read once:
- * callers remount with a `key` when the stored offer changes.
+ * Offer composer of N2 on web: technician, optional catalog service, an
+ * optional up-front diagnostic (prefilled from the service, editable for this
+ * offer only), price, visit date-time and a note for the customer. With a
+ * diagnostic the price becomes an optional estimate: the business may price
+ * the job after the visit. Validates with the same bounds the server enforces
+ * before calling `quote.submit`. `initialValues` is read once: callers
+ * remount with a `key` when the stored offer changes.
  */
 export function OfferForm({
   initialValues,
@@ -84,16 +102,34 @@ export function OfferForm({
     {},
   );
   const shakeInvalid = useErrorShake();
-  const fieldId = (field: OfferFormField) => `${baseId}-${field}`;
+  const fieldId = (field: keyof OfferFormValues) => `${baseId}-${field}`;
   const errorId = (field: OfferFormField) => `${baseId}-${field}-error`;
-  const diagnosticNoticeId = `${baseId}-diagnostic`;
+  const priceHintId = `${baseId}-price-hint`;
   const selectedService =
     services.find((service) => service.id === values.serviceId) ?? null;
-  const diagnosticPriceCents = selectedService?.diagnosticPriceCents ?? null;
+  const priceOptional = values.diagnosticEnabled;
 
-  function update(field: OfferFormField, value: string) {
+  function update<TField extends keyof OfferFormValues>(
+    field: TField,
+    value: OfferFormValues[TField],
+  ) {
     setValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
+  }
+
+  /** A newly linked service brings its diagnostic terms; none keeps them. */
+  function selectService(serviceId: string) {
+    const service = services.find((item) => item.id === serviceId);
+    setValues((current) => ({
+      ...current,
+      serviceId,
+      ...(service ? diagnosticFromService(service) : {}),
+    }));
+    setErrors((current) => ({
+      ...current,
+      price: undefined,
+      diagnosticPrice: undefined,
+    }));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -108,6 +144,7 @@ export function OfferForm({
         if (
           field === "workerId" ||
           field === "price" ||
+          field === "diagnosticPrice" ||
           field === "scheduledAt" ||
           field === "message"
         ) {
@@ -125,20 +162,17 @@ export function OfferForm({
       return;
     }
 
-    const { message, serviceId } = parsed.data;
-    await onSubmit({
-      workerId: parsed.data.workerId,
-      ...(serviceId.length > 0 ? { serviceId } : {}),
-      priceCents: Math.round(parsed.data.price * 100),
-      scheduledAt: parsed.data.scheduledAt,
-      ...(message.length > 0 ? { message } : {}),
-    });
+    await onSubmit(parsed.data);
   }
 
   const busy = submitting || disabled;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      onSubmit={handleSubmit}
+      className="flex min-w-0 flex-col gap-4"
+      noValidate
+    >
       <div className="flex flex-col gap-2">
         <Label htmlFor={fieldId("workerId")}>{t("workerLabel")}</Label>
         {workers.length > 0 ? (
@@ -185,29 +219,35 @@ export function OfferForm({
           value={values.serviceId}
           services={services}
           disabled={busy}
-          describedBy={
-            diagnosticPriceCents !== null ? diagnosticNoticeId : undefined
-          }
-          onChange={(serviceId) => update("serviceId", serviceId)}
+          onChange={selectService}
         />
       ) : null}
 
-      {selectedService && diagnosticPriceCents !== null ? (
-        <OfferDiagnosticNotice
-          id={diagnosticNoticeId}
-          priceCents={diagnosticPriceCents}
-          credited={selectedService.diagnosticCredited}
-        />
-      ) : null}
+      <OfferDiagnosticField
+        baseId={baseId}
+        enabled={values.diagnosticEnabled}
+        price={values.diagnosticPrice}
+        credited={values.diagnosticCredited}
+        serviceName={
+          selectedService?.diagnosticPriceCents != null
+            ? selectedService.name
+            : null
+        }
+        disabled={busy}
+        invalid={errors.diagnosticPrice === true}
+        onEnabledChange={(enabled) => {
+          update("diagnosticEnabled", enabled);
+          // Without a diagnostic the price is required again.
+          setErrors((current) => ({ ...current, diagnosticPrice: undefined }));
+        }}
+        onPriceChange={(price) => update("diagnosticPrice", price)}
+        onCreditedChange={(credited) => update("diagnosticCredited", credited)}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-2">
           <Label htmlFor={fieldId("price")}>
-            {t(
-              diagnosticPriceCents !== null
-                ? "estimatedPriceLabel"
-                : "priceLabel",
-            )}
+            {t(priceOptional ? "estimatedPriceLabel" : "priceLabel")}
           </Label>
           <Input
             id={fieldId("price")}
@@ -219,10 +259,24 @@ export function OfferForm({
             disabled={busy}
             placeholder={t("pricePlaceholder")}
             aria-invalid={errors.price}
-            aria-describedby={errors.price ? errorId("price") : undefined}
+            aria-describedby={
+              errors.price
+                ? errorId("price")
+                : priceOptional
+                  ? priceHintId
+                  : undefined
+            }
             onChange={(event) => update("price", event.target.value)}
             className="font-mono tabular-nums"
           />
+          {priceOptional && !errors.price ? (
+            <p
+              id={priceHintId}
+              className="text-muted-foreground text-xs text-pretty"
+            >
+              {t("priceOptionalHint")}
+            </p>
+          ) : null}
           {errors.price ? (
             <p
               id={errorId("price")}
@@ -233,7 +287,7 @@ export function OfferForm({
             </p>
           ) : null}
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-2">
           <Label htmlFor={fieldId("scheduledAt")}>
             {t("scheduledAtLabel")}
           </Label>
@@ -248,6 +302,7 @@ export function OfferForm({
               errors.scheduledAt ? errorId("scheduledAt") : undefined
             }
             onChange={(event) => update("scheduledAt", event.target.value)}
+            className="min-w-0"
           />
           {errors.scheduledAt ? (
             <p

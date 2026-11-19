@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import { OfferStatusBadge } from "./offer-status-badge";
-import type { RadarOwnQuote } from "./order.types";
-import { useMoney } from "./use-money";
+import type { RadarOwnQuote } from "./request.types";
+import { useMoney } from "~/hooks/use-money";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import {
   useReadOnlyNotice,
@@ -34,7 +34,7 @@ export function RequestOwnOffer({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
-    <div className="space-y-3 rounded-xl border p-4">
+    <div className="min-w-0 space-y-3 rounded-xl border p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h4 className="text-copy-sm font-medium">{t("title")}</h4>
         <OfferStatusBadge status={quote.status} label={statusT(quote.status)} />
@@ -48,7 +48,13 @@ export function RequestOwnOffer({
           )}
         </dt>
         <dd className="text-right font-mono font-semibold tabular-nums">
-          {money(quote.amountCents)}
+          {quote.amountCents === null ? (
+            <span className="text-muted-foreground font-sans font-normal">
+              {t("noEstimate")}
+            </span>
+          ) : (
+            money(quote.amountCents)
+          )}
         </dd>
         {quote.diagnosticPriceCents !== null ? (
           <>

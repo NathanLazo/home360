@@ -37,7 +37,7 @@ type MyQuotePayload = Prisma.QuoteGetPayload<{ select: typeof myQuoteSelect }>;
 export type MyQuoteItem = {
   id: string;
   status: QuoteStatus;
-  amountCents: number;
+  amountCents: number | null;
   scheduledFor: Date | null;
   message: string | null;
   createdAt: Date;

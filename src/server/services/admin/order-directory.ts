@@ -189,7 +189,7 @@ export type AdminOrderDetail = {
     id: string;
     requestId: string;
     category: string;
-    amountCents: number;
+    amountCents: number | null;
     scheduledFor: Date | null;
     /** Diagnostic terms snapshotted from the service when quoted. */
     diagnosticPriceCents: number | null;

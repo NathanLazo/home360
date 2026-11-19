@@ -3,7 +3,7 @@
 import { ImageOffIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { RadarRequestDetail } from "./order.types";
+import type { RadarRequestDetail } from "./request.types";
 
 type EvidenceItem = RadarRequestDetail["evidence"][number];
 

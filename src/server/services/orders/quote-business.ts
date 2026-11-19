@@ -27,6 +27,32 @@ export type WithdrawQuoteResult = {
   status: typeof QuoteStatus.WITHDRAWN;
 };
 
+export type QuoteDiagnosticTerms = {
+  priceCents: number;
+  /** Deducted from the final charge after the visit. */
+  credited: boolean;
+};
+
+/**
+ * Diagnostic of an offer: the explicit per-offer override when sent (`null`
+ * = none), otherwise the catalog service's terms, otherwise none.
+ */
+function resolveDiagnosticTerms(
+  override: QuoteDiagnosticTerms | null | undefined,
+  service: {
+    diagnosticPriceCents: number | null;
+    diagnosticCredited: boolean;
+  } | null,
+): QuoteDiagnosticTerms | null {
+  if (override !== undefined) return override;
+  if (service?.diagnosticPriceCents == null) return null;
+
+  return {
+    priceCents: service.diagnosticPriceCents,
+    credited: service.diagnosticCredited,
+  };
+}
+
 /** Request states in which the marketplace still accepts offers. */
 export const QUOTABLE_REQUEST_STATUSES: RequestStatus[] = [
   RequestStatus.OPEN,
@@ -71,13 +97,19 @@ export async function submitQuote(
     businessId: string;
     userId: string;
     requestId: string;
-    priceCents: number;
+    /** Estimated full job; optional only when the offer has a diagnostic. */
+    priceCents?: number;
     scheduledAt: Date;
     workerId: string;
     message?: string;
     branchId?: string;
     /** Catalog service of the offer; its diagnostic terms are snapshotted. */
     serviceId?: string;
+    /**
+     * Per-offer diagnostic override: `undefined` inherits the service's
+     * terms, `null` charges no diagnostic, an object sets this offer's own.
+     */
+    diagnostic?: QuoteDiagnosticTerms | null;
   },
 ): Promise<ServiceResult<SubmitQuoteResult, "VALIDATION_ERROR">> {
   const worker = await db.worker.findFirst({
@@ -110,6 +142,13 @@ export async function submitQuote(
 
   if (input.serviceId && !service) {
     return svcFail("NOT_FOUND", "Service not found");
+  }
+
+  const diagnostic = resolveDiagnosticTerms(input.diagnostic, service);
+
+  // Escrow needs an amount on acceptance: the diagnostic or the full job.
+  if (diagnostic === null && input.priceCents === undefined) {
+    return svcFail("VALIDATION_ERROR", "Price is required without diagnostic");
   }
 
   if (input.scheduledAt.getTime() <= Date.now()) {
@@ -163,14 +202,13 @@ export async function submitQuote(
   const terms = {
     branchId: branch.data.id,
     workerId: input.workerId,
-    amountCents: input.priceCents,
+    amountCents: input.priceCents ?? null,
     scheduledFor: input.scheduledAt,
     message: input.message ?? null,
     status: QuoteStatus.PENDING,
     serviceId: service?.id ?? null,
-    diagnosticPriceCents: service?.diagnosticPriceCents ?? null,
-    diagnosticCredited:
-      service?.diagnosticPriceCents != null && service.diagnosticCredited,
+    diagnosticPriceCents: diagnostic?.priceCents ?? null,
+    diagnosticCredited: diagnostic?.credited ?? false,
   };
 
   let quoteId: string;

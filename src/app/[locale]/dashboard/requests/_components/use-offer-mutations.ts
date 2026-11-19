@@ -3,17 +3,9 @@
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { api } from "~/trpc/react";
+import { api, type RouterInputs } from "~/trpc/react";
 
-export type SubmitOfferInput = {
-  requestId: string;
-  workerId: string;
-  priceCents: number;
-  scheduledAt: Date;
-  message?: string;
-  branchId?: string;
-  serviceId?: string;
-};
+export type SubmitOfferInput = RouterInputs["quote"]["submit"];
 
 /** Offer (quote) mutations shared by the requests and "my offers" tabs. */
 export function useOfferMutations() {

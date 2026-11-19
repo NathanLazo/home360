@@ -70,6 +70,7 @@ export default async function DashboardLayout({
     home: t("nav.home"),
     services: t("nav.services"),
     products: t("nav.products"),
+    requests: t("nav.requests"),
     orders: t("nav.orders"),
     payments: t("nav.payments"),
     subscription: t("nav.subscription"),

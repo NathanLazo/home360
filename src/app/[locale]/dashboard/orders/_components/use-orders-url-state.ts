@@ -1,38 +1,24 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
-
-import { ordersTabSchema, type OrdersTab } from "./orders.schema";
+import { useCallback } from "react";
 
 export type OrdersUrlState = {
-  tab: OrdersTab;
   orderId: string | null;
-  requestId: string | null;
-  setTab: (tab: OrdersTab) => void;
   openOrder: (orderId: string) => void;
   closeOrder: () => void;
-  openRequest: (requestId: string) => void;
-  closeRequest: () => void;
 };
 
 /**
- * Tab and open sheets live in the URL (`?tab=`, `?order=`, `?request=`) so a
- * refresh keeps the screen and the home dashboard can deep-link straight into
- * an order. The header `?branch=` param is always preserved.
+ * The open order sheet lives in the URL (`?order=`) so a refresh keeps it and
+ * the home dashboard can deep-link straight into an order. The header
+ * `?branch=` param is always preserved.
  */
 export function useOrdersUrlState(): OrdersUrlState {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const tab = useMemo(() => {
-    const parsed = ordersTabSchema.safeParse(searchParams.get("tab"));
-    return parsed.success ? parsed.data : "orders";
-  }, [searchParams]);
-
   const orderId = searchParams.get("order");
-  const requestId = searchParams.get("request");
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -47,19 +33,7 @@ export function useOrdersUrlState(): OrdersUrlState {
   );
 
   return {
-    tab,
     orderId,
-    requestId,
-    setTab: useCallback(
-      (nextTab) =>
-        replaceParams((params) => {
-          if (nextTab === "orders") params.delete("tab");
-          else params.set("tab", nextTab);
-          params.delete("order");
-          params.delete("request");
-        }),
-      [replaceParams],
-    ),
     openOrder: useCallback(
       (nextOrderId) =>
         replaceParams((params) => params.set("order", nextOrderId)),
@@ -67,15 +41,6 @@ export function useOrdersUrlState(): OrdersUrlState {
     ),
     closeOrder: useCallback(
       () => replaceParams((params) => params.delete("order")),
-      [replaceParams],
-    ),
-    openRequest: useCallback(
-      (nextRequestId) =>
-        replaceParams((params) => params.set("request", nextRequestId)),
-      [replaceParams],
-    ),
-    closeRequest: useCallback(
-      () => replaceParams((params) => params.delete("request")),
       [replaceParams],
     ),
   };

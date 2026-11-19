@@ -35,7 +35,8 @@ const QUOTE_MESSAGE_MAX = 500;
 
 const submitSchema = z.object({
   requestId: recordIdSchema,
-  priceCents: z.number().int().positive(),
+  /** Estimated full job; may be omitted when the offer has a diagnostic. */
+  priceCents: z.number().int().positive().max(1_000_000_000).optional(),
   scheduledAt: z.coerce.date(),
   workerId: recordIdSchema,
   message: z
@@ -47,6 +48,17 @@ const submitSchema = z.object({
   branchId: recordIdSchema.optional(),
   /** Catalog service; a service with diagnostic makes this a two-step offer. */
   serviceId: recordIdSchema.optional(),
+  /**
+   * Per-offer diagnostic: omitted → the service's terms; `null` → no
+   * diagnostic; object → this offer's own fee and credit rule.
+   */
+  diagnostic: z
+    .object({
+      priceCents: z.number().int().positive().max(1_000_000_000),
+      credited: z.boolean(),
+    })
+    .nullable()
+    .optional(),
 });
 
 const listMineSchema = z.object({
@@ -159,6 +171,7 @@ export const quoteRouter = createTRPCRouter({
           message: input.message,
           branchId: input.branchId,
           serviceId: input.serviceId,
+          diagnostic: input.diagnostic,
         });
 
         if (!submitted.ok) {

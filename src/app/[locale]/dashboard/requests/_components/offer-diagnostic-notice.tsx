@@ -3,7 +3,7 @@
 import { StethoscopeIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { useMoney } from "./use-money";
+import { useMoney } from "~/hooks/use-money";
 
 /**
  * Two-step charge preview of an offer whose service has a diagnostic: what
@@ -24,7 +24,7 @@ export function OfferDiagnosticNotice({
   return (
     <div
       id={id}
-      className="bg-canvas-soft flex gap-3 rounded-xl border p-4"
+      className="bg-background flex gap-3 rounded-lg border p-3"
       aria-live="polite"
     >
       <StethoscopeIcon

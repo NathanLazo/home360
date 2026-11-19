@@ -3,6 +3,7 @@
     "home": "Inicio",
     "services": "Servicios",
     "products": "Productos",
+    "requests": "Solicitudes",
     "orders": "Órdenes",
     "payments": "Pagos",
     "subscription": "Suscripción",
@@ -195,7 +196,7 @@
   },
   "orders": {
     "title": "Órdenes",
-    "subtitle": "Gestiona órdenes, responde solicitudes cercanas y da seguimiento a tus ofertas.",
+    "subtitle": "Gestiona tus órdenes y da seguimiento a cada trabajo hasta la entrega.",
     "loading": "Cargando órdenes",
     "loadMore": "Cargar más",
     "retry": "Reintentar",
@@ -373,12 +374,6 @@
         "PAYMENT_EXPIRED": "Venció el plazo de pago"
       },
       "noteGeneric": "Nota: {note}"
-    },
-    "tabs": {
-      "label": "Secciones de órdenes",
-      "orders": "Órdenes",
-      "requests": "Solicitudes",
-      "offers": "Mis ofertas"
     },
     "actions": {
       "title": "Acciones de la orden",
@@ -1501,6 +1496,18 @@
       }
     }
   },
+  "requestsPage": {
+    "title": "Solicitudes",
+    "subtitle": "Responde solicitudes cercanas y da seguimiento a tus ofertas. Las aceptadas pasan a Órdenes.",
+    "retry": "Reintentar",
+    "errorTitle": "No pudimos abrir Solicitudes",
+    "errorDescription": "Ocurrió un problema al preparar esta sección. Inténtalo de nuevo.",
+    "tabs": {
+      "label": "Secciones de solicitudes",
+      "radar": "Cerca de ti",
+      "offers": "Mis ofertas"
+    }
+  },
   "requests": {
     "loading": "Cargando solicitudes",
     "loadMore": "Cargar más",
@@ -1616,7 +1623,8 @@
       "diagnosticLabel": "Diagnóstico",
       "diagnosticCredited": "Se abona",
       "diagnosticNotCredited": "No se abona",
-      "estimatedLabel": "Precio estimado"
+      "estimatedLabel": "Precio estimado",
+      "noEstimate": "Tras el diagnóstico"
     },
     "offerForm": {
       "workerLabel": "Técnico que atenderá",
@@ -1634,11 +1642,19 @@
       "serviceLabel": "Servicio del catálogo",
       "servicePlaceholder": "Sin servicio vinculado",
       "serviceNone": "Sin servicio vinculado",
-      "estimatedPriceLabel": "Precio estimado del trabajo",
+      "estimatedPriceLabel": "Precio estimado del trabajo (opcional)",
       "diagnosticTitle": "Cobro en dos pasos",
       "diagnosticNotice": "Al aceptar, el cliente paga hoy <price>{amount}</price> de diagnóstico. El precio final lo emites después de la visita.",
       "diagnosticCredited": "El diagnóstico se abona al precio final.",
-      "diagnosticNotCredited": "El diagnóstico no se abona al precio final."
+      "diagnosticNotCredited": "El diagnóstico no se abona al precio final.",
+      "priceOptionalHint": "Déjalo vacío si cotizarás después de la visita; si lo escribes, el cliente lo ve como referencia.",
+      "diagnosticToggleLabel": "Cobrar diagnóstico inicial",
+      "diagnosticToggleHint": "El cliente paga la visita al aceptar y tú emites el cobro final después.",
+      "diagnosticPriceLabel": "Costo del diagnóstico (MXN)",
+      "diagnosticPriceError": "Escribe un costo de diagnóstico mayor a cero.",
+      "diagnosticCreditedLabel": "Descontarlo del pago final",
+      "diagnosticCreditedHint": "Si el trabajo se realiza, el diagnóstico se resta del cobro final.",
+      "diagnosticFromService": "Tomado de «{service}». Los cambios aplican solo a esta oferta."
     },
     "offers": {
       "loading": "Cargando ofertas",
@@ -1658,7 +1674,7 @@
       },
       "empty": {
         "title": "Aún no has enviado ofertas",
-        "description": "Responde solicitudes desde la pestaña Solicitudes; tus ofertas aparecerán aquí.",
+        "description": "Responde solicitudes desde la pestaña Cerca de ti; tus ofertas aparecerán aquí.",
         "filteredTitle": "No hay ofertas con ese estado",
         "filteredDescription": "Elige otro estado para ver más ofertas."
       },
@@ -1675,7 +1691,8 @@
           "confirm": "Retirar oferta",
           "cancel": "Conservar"
         }
-      }
+      },
+      "noEstimate": "Tras el diagnóstico"
     },
     "feedback": {
       "offerSent": "Oferta enviada. Te avisaremos si el cliente la acepta.",

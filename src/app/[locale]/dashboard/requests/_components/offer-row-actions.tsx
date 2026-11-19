@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { MyQuoteItem } from "./order.types";
+import type { MyQuoteItem } from "./request.types";
 import { ConfirmDialog } from "~/components/confirm-dialog";
 import {
   useReadOnlyNotice,

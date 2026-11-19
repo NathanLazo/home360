@@ -15,7 +15,7 @@ import { intlLocaleFor } from "~/i18n/intl-locale";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useState } from "react";
 
-import { ConversationPanel } from "./conversation-panel";
+import { ConversationPanel } from "~/components/dashboard/conversation/conversation-panel";
 import { OrderDetailActions } from "./order-detail-actions";
 import { OrderDetailRow } from "./order-detail-row";
 import { OrderDiagnosticSection } from "./order-diagnostic-section";

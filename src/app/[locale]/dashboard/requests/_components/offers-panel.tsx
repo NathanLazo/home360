@@ -7,7 +7,7 @@ import { OffersTable } from "./offers-table";
 import {
   quoteStatusFilterSchema,
   type QuoteStatusFilter,
-} from "./orders.schema";
+} from "./requests.schema";
 import { QuotingLockedState } from "./quoting-locked-state";
 import { RequestDetailSheet } from "./request-detail-sheet";
 import { useOfferMutations } from "./use-offer-mutations";

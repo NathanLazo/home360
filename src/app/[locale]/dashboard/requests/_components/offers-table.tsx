@@ -7,8 +7,8 @@ import { useState } from "react";
 
 import { OfferRowActions } from "./offer-row-actions";
 import { OfferStatusBadge } from "./offer-status-badge";
-import type { MyQuoteItem } from "./order.types";
-import { useMoney } from "./use-money";
+import type { MyQuoteItem } from "./request.types";
+import { useMoney } from "~/hooks/use-money";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
 import { Button } from "~/components/ui/button";
@@ -60,7 +60,13 @@ export function OffersTable({
       className: "text-right",
       cell: (quote) => (
         <span className="block font-mono font-semibold tabular-nums">
-          {money(quote.amountCents)}
+          {quote.amountCents === null ? (
+            <span className="text-muted-foreground font-sans font-normal">
+              {t("noEstimate")}
+            </span>
+          ) : (
+            money(quote.amountCents)
+          )}
         </span>
       ),
     },

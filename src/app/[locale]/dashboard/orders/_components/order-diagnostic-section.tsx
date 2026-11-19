@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { OrderDetailRow } from "./order-detail-row";
 import { OrderStatusBadge } from "./order-status-badge";
 import type { OrderDetail } from "./order.types";
-import { useMoney } from "./use-money";
+import { useMoney } from "~/hooks/use-money";
 
 type DiagnosticInfo = NonNullable<OrderDetail["diagnostic"]>;
 

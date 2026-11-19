@@ -275,7 +275,7 @@ export async function listOpenRequests(
 export type RadarOwnQuote = {
   id: string;
   status: QuoteStatus;
-  amountCents: number;
+  amountCents: number | null;
   scheduledFor: Date | null;
   message: string | null;
   workerId: string | null;

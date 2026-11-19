@@ -2,7 +2,7 @@
 
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 
-/** MXN formatter shared by the orders, requests and offers tables. */
+/** MXN formatter shared by the orders, requests and offers screens. */
 export function useMoney() {
   const formatter = useAppFormatter();
 

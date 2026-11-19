@@ -774,12 +774,15 @@ model Quote {
   // Estimated price of the full job. When the quote carries a diagnostic, the
   // customer pays only `diagnosticPriceCents` at acceptance and the business
   // issues the real final charge after the visit (order.issueFinalCharge).
-  amountCents  Int
+  // Null = no estimate yet (only allowed with a diagnostic: the business
+  // prices the job after the visit). Without diagnostic it is the escrow amount.
+  amountCents  Int?
   message      String?
   scheduledFor DateTime?
   status       QuoteStatus    @default(PENDING)
-  // Catalog service the offer is for (optional). Diagnostic terms are a
-  // snapshot of Service.diagnostic* at submit: later catalog edits never
+  // Catalog service the offer is for (optional). Diagnostic terms default to
+  // a snapshot of Service.diagnostic* at submit but the business may override
+  // them per offer (or add one without a service); later catalog edits never
   // change an offer the customer already saw.
   serviceId            String?
   service              Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
