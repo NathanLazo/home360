@@ -11,27 +11,28 @@ export const WORKER_INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1_000;
 export const hashInvitationToken = (token: string): string =>
   createHash("sha256").update(token).digest("hex");
 
+export type IssuedWorkerInvitation = { url: string; expiresAt: Date };
+
 /**
- * Issues a fresh single-use invitation token for a PENDING worker: only the
- * SHA-256 is stored and every re-issue (resend) replaces the previous hash, so
- * only the latest link works. Returns the public acceptance URL
- * `/{locale}/invite/worker?token=…`, or null when the worker is not pending.
- * The plain token is never logged.
+ * Issues a fresh single-use invitation token for a worker without an account
+ * (marking the invitation PENDING): only the SHA-256 is stored and every
+ * re-issue (resend or copied link) replaces the previous hash, so only the
+ * latest link works. Returns the public acceptance URL
+ * `/{locale}/invite/worker?token=…`, or null when the worker already has an
+ * account. The plain token is never logged.
  */
-export async function issueWorkerInvitationUrl(
+export async function issueWorkerInvitation(
   db: PrismaClient,
   input: { workerId: string; appUrl: string; locale: "es" | "en" },
-): Promise<string | null> {
+): Promise<IssuedWorkerInvitation | null> {
   const plainToken = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + WORKER_INVITATION_TTL_MS);
   const updated = await db.worker.updateMany({
-    where: {
-      id: input.workerId,
-      invitationStatus: "PENDING",
-      userId: null,
-    },
+    where: { id: input.workerId, userId: null },
     data: {
+      invitationStatus: "PENDING",
       invitationTokenHash: hashInvitationToken(plainToken),
-      invitationExpiresAt: new Date(Date.now() + WORKER_INVITATION_TTL_MS),
+      invitationExpiresAt: expiresAt,
     },
   });
 
@@ -46,5 +47,5 @@ export async function issueWorkerInvitationUrl(
   const url = new URL(pathname, input.appUrl);
   url.searchParams.set("token", plainToken);
 
-  return url.toString();
+  return { url: url.toString(), expiresAt };
 }

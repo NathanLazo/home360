@@ -20,7 +20,7 @@ export type WorkerInvitationCardProps = {
   invitation: {
     workerName: string;
     businessName: string;
-    email: string;
+    email: string | null;
   } | null;
   locale: "es" | "en";
 };

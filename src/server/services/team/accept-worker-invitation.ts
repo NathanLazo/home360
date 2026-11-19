@@ -10,7 +10,8 @@ import { hashInvitationToken } from "~/server/services/team/worker-invitation-to
 export type WorkerInvitationPreview = {
   workerName: string;
   businessName: string;
-  email: string;
+  /** Null when the owner shared the link without an email: the worker types it. */
+  email: string | null;
 };
 
 function liveInvitationWhere(token: string, now: Date) {
@@ -18,12 +19,12 @@ function liveInvitationWhere(token: string, now: Date) {
     invitationTokenHash: hashInvitationToken(token),
     invitationStatus: "PENDING",
     invitationExpiresAt: { gt: now },
-    invitedEmail: { not: null },
     userId: null,
   } satisfies Prisma.WorkerWhereInput;
 }
 
 class InvitationConsumedError extends Error {}
+class InvitationEmailMissingError extends Error {}
 
 /**
  * Public preview of a live invitation (who invites whom). A wrong, expired or
@@ -42,7 +43,7 @@ export async function getWorkerInvitationPreview(
     },
   });
 
-  if (!worker?.invitedEmail) {
+  if (!worker) {
     return fail("INVALID_TOKEN", 400, "Invitation is invalid or expired");
   }
 
@@ -77,18 +78,26 @@ export async function acceptWorkerInvitation(
         select: { id: true, invitedEmail: true },
       });
 
-      if (!worker?.invitedEmail) {
+      if (!worker) {
         return null;
+      }
+
+      // The invited email wins; a hand-shared link takes the worker's own.
+      const email = worker.invitedEmail ?? input.email;
+
+      if (!email) {
+        throw new InvitationEmailMissingError();
       }
 
       const user = await tx.user.create({
         data: {
-          email: worker.invitedEmail,
+          email,
           name: input.name,
           role: UserRole.WORKER,
           locale: input.locale,
           passwordHash,
-          emailVerified: now,
+          // Only the owner-entered address counts as verified.
+          emailVerified: worker.invitedEmail ? now : null,
         },
         select: { id: true, email: true },
       });
@@ -96,6 +105,7 @@ export async function acceptWorkerInvitation(
         where: { id: worker.id, ...liveInvitationWhere(input.token, now) },
         data: {
           userId: user.id,
+          invitedEmail: email,
           invitationStatus: "ACCEPTED",
           invitationTokenHash: null,
           invitationExpiresAt: null,
@@ -106,7 +116,7 @@ export async function acceptWorkerInvitation(
         throw new InvitationConsumedError();
       }
 
-      return { userId: user.id, email: worker.invitedEmail };
+      return { userId: user.id, email };
     });
 
     if (!accepted) {
@@ -115,6 +125,10 @@ export async function acceptWorkerInvitation(
 
     return ok(accepted, "Invitation accepted", 201);
   } catch (error) {
+    if (error instanceof InvitationEmailMissingError) {
+      return fail("VALIDATION_ERROR", 400, "Email is required");
+    }
+
     if (error instanceof InvitationConsumedError) {
       return fail("INVALID_TOKEN", 400, "Invitation is invalid or expired");
     }

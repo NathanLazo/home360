@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { EllipsisIcon, MailIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  EllipsisIcon,
+  LinkIcon,
+  MailIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { WorkerListItem } from "./team.types";
@@ -24,12 +30,14 @@ export function WorkerRowActions({
   busy,
   onEdit,
   onResendInvitation,
+  onCopyInvitationLink,
   onDelete,
 }: {
   worker: WorkerListItem;
   busy: boolean;
   onEdit: (worker: WorkerListItem) => void;
   onResendInvitation: (worker: WorkerListItem) => Promise<boolean>;
+  onCopyInvitationLink: (worker: WorkerListItem) => Promise<boolean>;
   onDelete: (worker: WorkerListItem) => Promise<boolean>;
 }) {
   const t = useTranslations("dashboard.team");
@@ -40,7 +48,9 @@ export function WorkerRowActions({
   const readOnlyTitle = isReadOnly ? readOnlyNotice : undefined;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const canResend =
-    worker.invitationStatus === "PENDING" && worker.invitedEmail !== null;
+    !worker.hasAccount &&
+    worker.invitationStatus === "PENDING" &&
+    worker.invitedEmail !== null;
 
   async function handleDelete() {
     if (await onDelete(worker)) setConfirmOpen(false);
@@ -79,6 +89,16 @@ export function WorkerRowActions({
               {t("actions.resendInvitation")}
             </DropdownMenuItem>
           ) : null}
+          {worker.hasAccount ? null : (
+            <DropdownMenuItem
+              onSelect={() => void onCopyInvitationLink(worker)}
+              disabled={busy || isReadOnly}
+              title={readOnlyTitle}
+            >
+              <LinkIcon aria-hidden="true" />
+              {t("actions.copyInvitationLink")}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"

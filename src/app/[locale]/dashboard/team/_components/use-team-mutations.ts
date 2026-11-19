@@ -18,6 +18,15 @@ type OperationResponse = {
 /** Codes that read better with module copy than with the generic `errors.json`. */
 type ErrorOverrides = Partial<Record<string, string>>;
 
+async function writeClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function useTeamMutations() {
   const t = useTranslations("dashboard.team");
   const errors = useTranslations("errors");
@@ -29,6 +38,7 @@ export function useTeamMutations() {
   const updateMutation = api.team.update.useMutation();
   const deleteMutation = api.team.delete.useMutation();
   const resendMutation = api.team.resendInvitation.useMutation();
+  const linkMutation = api.team.invitationLink.useMutation();
 
   async function finish(
     response: OperationResponse,
@@ -101,14 +111,65 @@ export function useTeamMutations() {
 
   async function resendInvitation(id: string): Promise<boolean> {
     try {
-      return await finish(
-        await resendMutation.mutateAsync({ id, locale }),
-        t("feedback.invitationResent"),
-        {
-          CONFLICT: t("errors.RESEND_CONFLICT"),
-          EMAIL_SEND_FAILED: t("errors.EMAIL_SEND_FAILED"),
+      const response = await resendMutation.mutateAsync({ id, locale });
+
+      if (response.error === "EMAIL_SEND_FAILED") {
+        // Email is down or not configured: hand over the link instead.
+        toast.error(t("errors.EMAIL_SEND_FAILED_LINK"), {
+          action: {
+            label: t("actions.copyInvitationLink"),
+            onClick: () => void copyInvitationLink(id),
+          },
+        });
+        return false;
+      }
+
+      return await finish(response, t("feedback.invitationResent"), {
+        CONFLICT: t("errors.RESEND_CONFLICT"),
+      });
+    } catch {
+      toast.error(t("feedback.transportError"));
+      return false;
+    }
+  }
+
+  async function copyInvitationLink(id: string): Promise<boolean> {
+    try {
+      const response = await linkMutation.mutateAsync({ id, locale });
+
+      if (response.error !== null || response.result === null) {
+        toast.error(
+          response.error === "CONFLICT"
+            ? t("errors.LINK_CONFLICT")
+            : errors(response.error ?? "UNKNOWN_ERROR"),
+        );
+        return false;
+      }
+
+      const { url } = response.result;
+      await utils.team.list.invalidate();
+
+      if (await writeClipboard(url)) {
+        toast.success(t("feedback.linkCopied"), {
+          description: t("feedback.linkSingleUse"),
+        });
+        return true;
+      }
+
+      // Safari drops clipboard access after an await: a click restores it.
+      toast(t("feedback.linkReady"), {
+        description: url,
+        duration: Infinity,
+        action: {
+          label: t("actions.copy"),
+          onClick: () => {
+            void writeClipboard(url).then((copied) => {
+              if (copied) toast.success(t("feedback.linkCopied"));
+            });
+          },
         },
-      );
+      });
+      return true;
     } catch {
       toast.error(t("feedback.transportError"));
       return false;
@@ -120,9 +181,11 @@ export function useTeamMutations() {
     update,
     remove,
     resendInvitation,
+    copyInvitationLink,
     creating: createMutation.isPending,
     updating: updateMutation.isPending,
     deleting: deleteMutation.isPending,
     resending: resendMutation.isPending,
+    linking: linkMutation.isPending,
   };
 }

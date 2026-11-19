@@ -67,6 +67,7 @@
     "next-intl": "^4.13.4",
     "next-themes": "^0.4.6",
     "papaparse": "^5.5.4",
+    "pigeon-maps": "^0.22.1",
     "pusher": "^5.3.4",
     "radix-ui": "^1.6.7",
     "react": "^19.0.0",

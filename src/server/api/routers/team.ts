@@ -2,6 +2,7 @@ import { env } from "~/env";
 import {
   workerCreateSchema,
   workerIdSchema,
+  workerInvitationLinkSchema,
   workerResendInvitationSchema,
   workerUpdateSchema,
 } from "~/schemas/team/worker.schema";
@@ -19,6 +20,7 @@ import {
   resendWorkerInvitation,
   updateWorker,
 } from "~/server/services/team/worker-team";
+import { createWorkerInvitationLink } from "~/server/services/team/worker-invitation-link";
 
 // The adapter is built once and injected; services never import `resend`.
 const workerInvitationEmailClient =
@@ -85,6 +87,16 @@ export const teamRouter = createTRPCRouter({
           workerInvitationEmailClient,
           input,
         );
+      } catch (error: unknown) {
+        return teamFailure(error);
+      }
+    }),
+
+  invitationLink: activeBusinessProcedure
+    .input(workerInvitationLinkSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await createWorkerInvitationLink(ctx.db, ctx.business.id, input);
       } catch (error: unknown) {
         return teamFailure(error);
       }
