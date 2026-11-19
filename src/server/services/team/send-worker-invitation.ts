@@ -5,20 +5,9 @@ import { getTranslations } from "next-intl/server";
 import type { EmailLocale } from "~/schemas/team/worker.schema";
 import type {
   EmailClient,
-  EmailMessage,
   EmailSendResult,
 } from "~/server/services/email/email-client";
-
-const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"]/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-    };
-    return entities[character] ?? character;
-  });
+import { renderEmail } from "~/server/services/email/templates/render-email";
 
 export type WorkerInvitationInput = {
   to: string;
@@ -46,39 +35,20 @@ export async function sendWorkerInvitation(
     locale: input.locale,
     namespace: "emails.workerInvitation",
   });
-  const messages = {
-    subject: t("subject", { businessName: input.businessName }),
-    greeting: t("greeting", { workerName: input.workerName }),
-    intro: t("intro", { businessName: input.businessName }),
-    instructions: t("instructions"),
-    closing: t("closing"),
-  };
-  const leading = [messages.greeting, messages.intro];
-  const trailing = [messages.instructions, messages.closing];
-  const cta = input.invitationUrl
-    ? { label: t("cta"), expires: t("expires"), url: input.invitationUrl }
-    : null;
-  const textParagraphs = [
-    ...leading,
-    ...(cta ? [`${cta.label}: ${cta.url}`, cta.expires] : []),
-    ...trailing,
-  ];
-  const htmlParagraphs = [
-    ...leading.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
-    ...(cta
-      ? [
-          `<p><a href="${escapeHtml(cta.url)}">${escapeHtml(cta.label)}</a></p>`,
-          `<p>${escapeHtml(cta.expires)}</p>`,
-        ]
-      : []),
-    ...trailing.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
-  ];
-  const message: EmailMessage = {
-    to: input.to,
-    subject: messages.subject,
-    text: textParagraphs.join("\n\n"),
-    html: htmlParagraphs.join(""),
-  };
+  const values = { businessName: input.businessName };
+  const email = await renderEmail({
+    locale: input.locale,
+    subject: t("subject", values),
+    preheader: t("preheader", values),
+    eyebrow: t("eyebrow"),
+    heading: t("greeting", { workerName: input.workerName }),
+    paragraphs: [t("intro", values), t("instructions")],
+    details: [{ label: t("businessLabel"), value: input.businessName }],
+    ...(input.invitationUrl
+      ? { action: { label: t("cta"), url: input.invitationUrl } }
+      : {}),
+    notes: [...(input.invitationUrl ? [t("expires")] : []), t("closing")],
+  });
 
-  return emailClient.send(message);
+  return emailClient.send({ to: input.to, ...email });
 }

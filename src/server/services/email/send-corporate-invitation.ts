@@ -2,31 +2,16 @@ import "server-only";
 
 import { getTranslations } from "next-intl/server";
 
-import type {
-  EmailClient,
-  EmailMessage,
-  EmailSendResult,
-} from "~/server/services/email/email-client";
-
-type CorporateInvitationLocale = "es" | "en";
-
-const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"]/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-    };
-    return entities[character] ?? character;
-  });
+import type { EmailClient, EmailSendResult } from "./email-client";
+import { renderEmail } from "./templates/render-email";
+import type { EmailLocale } from "./templates/email-template.types";
 
 export type CorporateInvitationInput = {
   to: string;
   companyName: string;
   /** F1-09 one-hour, single-use password link. Never logged. */
   invitationUrl: string;
-  locale: CorporateInvitationLocale;
+  locale: EmailLocale;
 };
 
 /**
@@ -42,25 +27,18 @@ export async function sendCorporateInvitation(
     locale: input.locale,
     namespace: "emails.corporateInvitation",
   });
-  const messages = {
-    subject: t("subject", { companyName: input.companyName }),
-    intro: t("intro", { companyName: input.companyName }),
-    cta: t("cta"),
-    expires: t("expires"),
-    closing: t("closing"),
-  };
-  const safeUrl = escapeHtml(input.invitationUrl);
-  const message: EmailMessage = {
-    to: input.to,
-    subject: messages.subject,
-    text: `${messages.intro}\n\n${messages.cta}: ${input.invitationUrl}\n\n${messages.expires}\n\n${messages.closing}`,
-    html: [
-      `<p>${escapeHtml(messages.intro)}</p>`,
-      `<p><a href="${safeUrl}">${escapeHtml(messages.cta)}</a></p>`,
-      `<p>${escapeHtml(messages.expires)}</p>`,
-      `<p>${escapeHtml(messages.closing)}</p>`,
-    ].join(""),
-  };
+  const values = { companyName: input.companyName };
+  const email = await renderEmail({
+    locale: input.locale,
+    subject: t("subject", values),
+    preheader: t("preheader", values),
+    eyebrow: t("eyebrow"),
+    heading: t("heading"),
+    paragraphs: [t("intro", values)],
+    details: [{ label: t("companyLabel"), value: input.companyName }],
+    action: { label: t("cta"), url: input.invitationUrl },
+    notes: [t("expires"), t("closing")],
+  });
 
-  return emailClient.send(message);
+  return emailClient.send({ to: input.to, ...email });
 }

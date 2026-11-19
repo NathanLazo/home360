@@ -1,7 +1,5 @@
 import "server-only";
 
-import { getTranslations } from "next-intl/server";
-
 import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import {
@@ -9,12 +7,9 @@ import {
   type EmailClient,
 } from "~/server/services/email/email-client";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
+import { buildNewRequestEmail } from "./new-request-email";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
-import {
-  findRequestAudience,
-  type AudienceMember,
-  type AudienceReason,
-} from "./request-audience";
+import { findRequestAudience, type AudienceMember } from "./request-audience";
 
 /** Business notifications go out in the platform's default locale. */
 const NOTIFICATION_LOCALE = "es";
@@ -28,13 +23,6 @@ const emailClient: EmailClient | null =
   env.RESEND_API_KEY && env.EMAIL_FROM
     ? createResendEmailClientFromApiKey(env.RESEND_API_KEY, env.EMAIL_FROM)
     : null;
-
-/** i18n key per reason under `emails.newRequestNearby`. */
-const REASON_KEY = {
-  MATCH: "match",
-  ZONE: "zone",
-  CATEGORY: "category",
-} as const satisfies Record<AudienceReason, string>;
 
 /**
  * Push only for MATCH: it is the only reason whose deep link lands on a
@@ -88,10 +76,6 @@ async function sendEmails(
     where: { id: { in: [...reasonById.keys()] } },
     select: { id: true, name: true, owner: { select: { email: true } } },
   });
-  const t = await getTranslations({
-    locale: NOTIFICATION_LOCALE,
-    namespace: "emails.newRequestNearby",
-  });
 
   for (const business of businesses) {
     const to = business.owner.email;
@@ -101,15 +85,16 @@ async function sendEmails(
       continue;
     }
 
-    const key = REASON_KEY[reason];
-    const values = { businessName: business.name, category: input.category };
-
     try {
-      await emailClient.send({
-        to,
-        subject: t(`${key}.subject`, values),
-        text: `${t(`${key}.intro`, values)}\n\n${t(`${key}.cta`)}`,
+      const email = await buildNewRequestEmail({
+        locale: NOTIFICATION_LOCALE,
+        appUrl: env.APP_URL,
+        reason,
+        businessName: business.name,
+        category: input.category,
       });
+
+      await emailClient.send({ to, ...email });
     } catch {
       console.error(
         `[notify-request] EMAIL_DELIVERY_FAILED business ${business.id}`,
