@@ -16,8 +16,20 @@
     "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
   },
   "newRequestNearby": {
-    "subject": "Nueva solicitud de {category} cerca de tu sucursal",
-    "intro": "{businessName}: hay una nueva solicitud de {category} dentro de tu zona de cobertura en Home360.",
-    "cta": "Entra a la app de Home360 para ver el detalle y enviar tu cotización."
+    "match": {
+      "subject": "Un cliente cerca busca {category}",
+      "intro": "{businessName}: un cliente abrió un diagnóstico de {category} dentro de tu zona de cobertura en Home360. Es justo lo que ofreces.",
+      "cta": "Entra a la app de Home360 para ver el detalle y enviar tu cotización."
+    },
+    "zone": {
+      "subject": "Alguien busca {category} en tu zona",
+      "intro": "{businessName}: un cliente dentro de tu zona de cobertura busca {category} en Home360.",
+      "cta": "Si lo ofreces, agrega {category} a tu catálogo en el panel de Home360 para poder cotizar solicitudes como esta."
+    },
+    "category": {
+      "subject": "Alguien busca {category}, lo que tú ofreces",
+      "intro": "{businessName}: un cliente busca {category}, igual que los servicios o productos de tu catálogo, pero fuera de tu radio de cobertura.",
+      "cta": "Amplía el radio de cobertura de tu sucursal en el panel de Home360 para recibir y cotizar solicitudes como esta."
+    }
   }
 }
