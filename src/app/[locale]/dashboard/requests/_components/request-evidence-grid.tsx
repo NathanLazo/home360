@@ -3,14 +3,10 @@
 import { ImageOffIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { isVideoEvidence } from "./request-evidence.utils";
 import type { RadarRequestDetail } from "./request.types";
 
 type EvidenceItem = RadarRequestDetail["evidence"][number];
-
-/** Request media pathnames embed their kind as the second segment (M0-W3). */
-function isVideo(item: EvidenceItem): boolean {
-  return item.pathname.split("/")[1] === "requestVideo";
-}
 
 const TILE_CLASS =
   "bg-canvas-soft focus-visible:ring-ring block overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none";
@@ -35,13 +31,13 @@ export function RequestEvidenceGrid({
   return (
     <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       {evidence.map((item, index) => {
-        const label = t(isVideo(item) ? "videoLabel" : "photoLabel", {
+        const label = t(isVideoEvidence(item) ? "videoLabel" : "photoLabel", {
           number: index + 1,
         });
 
         return (
-          <li key={item.pathname}>
-            {isVideo(item) ? (
+          <li key={item.pathname} className="relative">
+            {isVideoEvidence(item) ? (
               <video
                 src={item.url}
                 controls
@@ -66,6 +62,12 @@ export function RequestEvidenceGrid({
                 />
               </a>
             )}
+            <span
+              aria-hidden="true"
+              className="bg-background/85 text-foreground pointer-events-none absolute top-2 left-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full border px-1.5 font-mono text-xs font-medium tabular-nums backdrop-blur-sm"
+            >
+              {index + 1}
+            </span>
           </li>
         );
       })}

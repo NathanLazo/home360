@@ -1513,6 +1513,7 @@
     "loadMore": "Cargar más",
     "notAvailable": "—",
     "noDiagnosis": "Sin diagnóstico",
+    "mediaCount": "{count, plural, one {# archivo} other {# archivos}}",
     "noZone": "Zona no indicada",
     "queryErrorTitle": "No pudimos cargar las solicitudes",
     "distanceValue": "{km} km",

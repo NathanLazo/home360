@@ -1513,6 +1513,7 @@
     "loadMore": "Load more",
     "notAvailable": "—",
     "noDiagnosis": "No diagnosis",
+    "mediaCount": "{count, plural, one {# file} other {# files}}",
     "noZone": "Area not provided",
     "queryErrorTitle": "We couldn't load the requests",
     "distanceValue": "{km} km",

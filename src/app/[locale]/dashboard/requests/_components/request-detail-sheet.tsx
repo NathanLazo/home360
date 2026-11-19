@@ -284,7 +284,7 @@ export function RequestDetailSheet({
                   <SparklesIcon aria-hidden="true" className="size-3.5" />
                   {t("aiTitle")}
                 </h3>
-                <p className="text-copy-sm leading-relaxed">
+                <p className="text-copy-sm leading-relaxed text-pretty break-words whitespace-pre-line">
                   {request.aiDiagnosis ?? t("noDiagnosis")}
                 </p>
                 <RequestDiagnosisNotes notes={request.customerNotes} />

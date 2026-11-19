@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 
 import type { RadarRequestItem } from "./request.types";
+import { RequestThumbnail } from "./request-thumbnail";
 import { useMoney } from "~/hooks/use-money";
 import { DataTable, type DataTableColumn } from "~/components/data-table";
 import { EmptyState } from "~/components/empty-state";
@@ -38,21 +39,24 @@ export function RequestsTable({
       key: "title",
       mobile: "title",
       header: t("columns.request"),
-      className: "min-w-64",
+      className: "min-w-72",
       cell: (request) => (
-        <div className="min-w-0 space-y-0.5">
-          <p className="flex min-w-0 items-center gap-2">
-            <span className="truncate font-medium">{request.title}</span>
-            {request.targeted ? (
-              <Badge variant="outline" className="shrink-0 gap-1">
-                <CrosshairIcon aria-hidden="true" />
-                {t("targeted")}
-              </Badge>
-            ) : null}
-          </p>
-          <p className="text-muted-foreground truncate text-xs">
-            {request.aiDiagnosis ?? t("noDiagnosis")}
-          </p>
+        <div className="flex max-w-md min-w-0 items-center gap-3">
+          <RequestThumbnail evidence={request.evidence} />
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-medium">{request.title}</span>
+              {request.targeted ? (
+                <Badge variant="outline" className="shrink-0 gap-1">
+                  <CrosshairIcon aria-hidden="true" />
+                  {t("targeted")}
+                </Badge>
+              ) : null}
+            </p>
+            <p className="text-muted-foreground line-clamp-2 text-xs leading-snug font-normal break-words whitespace-normal">
+              {request.aiDiagnosis ?? t("noDiagnosis")}
+            </p>
+          </div>
         </div>
       ),
     },
@@ -60,13 +64,14 @@ export function RequestsTable({
       key: "category",
       mobile: "meta",
       header: t("columns.category"),
+      className: "hidden lg:table-cell",
       cell: (request) => <Badge variant="secondary">{request.category}</Badge>,
     },
     {
       key: "zone",
       mobile: "meta",
       header: t("columns.zone"),
-      className: "min-w-36",
+      className: "hidden min-w-36 xl:table-cell",
       cell: (request) => (
         <span className="text-muted-foreground">
           {request.zone.neighborhood ?? t("noZone")}
@@ -135,7 +140,7 @@ export function RequestsTable({
       key: "date",
       mobile: "meta",
       header: t("columns.date"),
-      className: "min-w-32",
+      className: "hidden min-w-32 md:table-cell",
       cell: (request) => (
         <time
           dateTime={request.createdAt.toISOString()}
