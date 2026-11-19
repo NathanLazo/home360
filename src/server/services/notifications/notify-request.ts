@@ -2,28 +2,26 @@ import "server-only";
 
 import { getTranslations } from "next-intl/server";
 
-import { Prisma, type PrismaClient } from "@generated/prisma";
+import type { PrismaClient } from "@generated/prisma";
 import { env } from "~/env";
 import {
   createResendEmailClientFromApiKey,
   type EmailClient,
 } from "~/server/services/email/email-client";
-import { toRequestCategory } from "~/schemas/marketplace/request-category-match";
-import { haversineKmSql } from "~/server/services/geo/haversine";
 import { sendLocalizedPushToUser } from "~/server/services/push/messages";
 import { svcFail, svcOk, type ServiceResult } from "../service-result";
-
-const PLATFORM_SETTINGS_ID = 1;
-
-/** Fallback when the settings row has not been seeded yet. */
-const DEFAULT_RADIUS_KM = 10;
+import {
+  findRequestAudience,
+  type AudienceMember,
+  type AudienceReason,
+} from "./request-audience";
 
 /** Business notifications go out in the platform's default locale. */
 const NOTIFICATION_LOCALE = "es";
 
 export type NotifyNearbyResult = {
-  /** ACTIVE businesses with an ACTIVE branch inside the radius that offer the request category. */
-  businessIds: string[];
+  /** Every notified business with the reason it was told about the request. */
+  audience: AudienceMember[];
 };
 
 const emailClient: EmailClient | null =
@@ -31,17 +29,36 @@ const emailClient: EmailClient | null =
     ? createResendEmailClientFromApiKey(env.RESEND_API_KEY, env.EMAIL_FROM)
     : null;
 
+/** i18n key per reason under `emails.newRequestNearby`. */
+const REASON_KEY = {
+  MATCH: "match",
+  ZONE: "zone",
+  CATEGORY: "category",
+} as const satisfies Record<AudienceReason, string>;
+
+/**
+ * Push only for MATCH: it is the only reason whose deep link lands on a
+ * request the business can actually see and quote on the radar.
+ */
 async function sendPush(
   db: PrismaClient,
   requestId: string,
-  businessIds: string[],
+  audience: AudienceMember[],
 ): Promise<void> {
+  const businessIds = audience
+    .filter((member) => member.reason === "MATCH")
+    .map((member) => member.businessId);
+
+  if (businessIds.length === 0) {
+    return;
+  }
+
   const businesses = await db.business.findMany({
     where: { id: { in: businessIds } },
     select: { ownerId: true },
   });
 
-  await Promise.all(
+  await Promise.allSettled(
     businesses.map(({ ownerId }) =>
       sendLocalizedPushToUser(db, ownerId, {
         message: "requestNearby",
@@ -52,20 +69,23 @@ async function sendPush(
 }
 
 /**
- * Best-effort email to the business owners; a provider failure for one
- * recipient never blocks the rest (nor the request creation, since the whole
- * service is fire-and-forget).
+ * Best-effort email to each business owner, worded by reason; a provider
+ * failure for one recipient never blocks the rest (nor the request creation,
+ * since the whole service is fire-and-forget).
  */
 async function sendEmails(
   db: PrismaClient,
-  input: { businessIds: string[]; category: string },
+  input: { audience: AudienceMember[]; category: string },
 ): Promise<void> {
-  if (!emailClient || input.businessIds.length === 0) {
+  if (!emailClient || input.audience.length === 0) {
     return;
   }
 
+  const reasonById = new Map(
+    input.audience.map((member) => [member.businessId, member.reason]),
+  );
   const businesses = await db.business.findMany({
-    where: { id: { in: input.businessIds } },
+    where: { id: { in: [...reasonById.keys()] } },
     select: { id: true, name: true, owner: { select: { email: true } } },
   });
   const t = await getTranslations({
@@ -75,16 +95,20 @@ async function sendEmails(
 
   for (const business of businesses) {
     const to = business.owner.email;
+    const reason = reasonById.get(business.id);
 
-    if (!to) {
+    if (!to || !reason) {
       continue;
     }
+
+    const key = REASON_KEY[reason];
+    const values = { businessName: business.name, category: input.category };
 
     try {
       await emailClient.send({
         to,
-        subject: t("subject", { category: input.category }),
-        text: `${t("intro", { businessName: business.name, category: input.category })}\n\n${t("cta")}`,
+        subject: t(`${key}.subject`, values),
+        text: `${t(`${key}.intro`, values)}\n\n${t(`${key}.cta`)}`,
       });
     } catch {
       console.error(
@@ -94,12 +118,23 @@ async function sendEmails(
   }
 }
 
+async function notify(
+  db: PrismaClient,
+  input: { requestId: string; category: string; audience: AudienceMember[] },
+): Promise<void> {
+  await Promise.allSettled([
+    sendEmails(db, { audience: input.audience, category: input.category }),
+    sendPush(db, input.requestId, input.audience),
+  ]);
+}
+
 /**
- * Finds the ACTIVE businesses whose catalog covers the request category and
- * that have an ACTIVE branch within `PlatformSettings.notifyNewRequestRadiusKm`
- * of the request location (Haversine evaluated in SQL), then notifies them
- * (email now, push in M7-W1). Never throws: `request.create` calls it
- * fire-and-forget and only logs the failure.
+ * Tells business owners a customer opened a request to quotes. A business is
+ * notified when the request falls inside its branch coverage radius, when its
+ * catalog (services or published products) covers the request category, or
+ * both — each with its own email copy (see `findRequestAudience`). Targeted
+ * requests (D10-11) reach only their business. Never throws: `request.create`
+ * calls it fire-and-forget and only logs the failure.
  */
 export async function notifyNearbyBusinesses(
   db: PrismaClient,
@@ -109,6 +144,7 @@ export async function notifyNearbyBusinesses(
     const request = await db.serviceRequest.findUnique({
       where: { id: requestId },
       select: {
+        customerId: true,
         category: true,
         latitude: true,
         longitude: true,
@@ -127,79 +163,29 @@ export async function notifyNearbyBusinesses(
         where: { id: request.targetBusinessId, status: "ACTIVE" },
         select: { id: true },
       });
-      const businessIds = target ? [target.id] : [];
+      const audience: AudienceMember[] = target
+        ? [{ businessId: target.id, reason: "MATCH" }]
+        : [];
 
-      await Promise.allSettled([
-        sendEmails(db, { businessIds, category: request.category }),
-        sendPush(db, requestId, businessIds),
-      ]);
+      await notify(db, { requestId, category: request.category, audience });
 
-      return svcOk({ businessIds });
+      return svcOk({ audience });
     }
 
     if (request.latitude === null || request.longitude === null) {
       // Nothing to match against without a location; not an error.
-      return svcOk({ businessIds: [] });
+      return svcOk({ audience: [] });
     }
 
-    const settings = await db.platformSettings.findUnique({
-      where: { id: PLATFORM_SETTINGS_ID },
-      select: { notifyNewRequestRadiusKm: true },
+    const audience = await findRequestAudience(db, {
+      customerId: request.customerId,
+      category: request.category,
+      point: { latitude: request.latitude, longitude: request.longitude },
     });
-    const radiusKm = settings?.notifyNewRequestRadiusKm ?? DEFAULT_RADIUS_KM;
-    // Legacy rows (free-text `category`, empty `categories`) still match
-    // through the canonical mapping; new rows declare `categories`.
-    const legacyCategories = await db.service.findMany({
-      where: { status: "ACTIVE", categories: { isEmpty: true } },
-      select: { category: true },
-      distinct: ["category"],
-    });
-    const matchingLegacy = legacyCategories
-      .map((row) => row.category)
-      .filter((category) => toRequestCategory(category) === request.category);
-    const legacySql =
-      matchingLegacy.length === 0
-        ? Prisma.sql`FALSE`
-        : Prisma.sql`s."category" IN (${Prisma.join(matchingLegacy)})`;
 
-    const origin = {
-      latitude: request.latitude,
-      longitude: request.longitude,
-    };
+    await notify(db, { requestId, category: request.category, audience });
 
-    const rows = await db.$queryRaw<Array<{ businessId: string }>>(Prisma.sql`
-      SELECT DISTINCT b."businessId" AS "businessId"
-      FROM "Branch" AS b
-      INNER JOIN "Business" AS biz ON biz."id" = b."businessId"
-      WHERE b."status"::text = 'ACTIVE'
-        AND b."kind"::text = 'STORE'
-        AND biz."status"::text = 'ACTIVE'
-        AND b."latitude" IS NOT NULL
-        AND b."longitude" IS NOT NULL
-        AND EXISTS (
-          SELECT 1
-          FROM "Service" AS s
-          WHERE s."businessId" = biz."id"
-            AND s."status"::text = 'ACTIVE'
-            AND (
-              ${request.category} = ANY(s."categories")
-              OR (cardinality(s."categories") = 0 AND ${legacySql})
-            )
-        )
-        AND ${haversineKmSql(
-          origin,
-          Prisma.raw('b."latitude"'),
-          Prisma.raw('b."longitude"'),
-        )} <= ${radiusKm}
-    `);
-    const businessIds = rows.map((row) => row.businessId);
-
-    await Promise.allSettled([
-      sendEmails(db, { businessIds, category: request.category }),
-      sendPush(db, requestId, businessIds),
-    ]);
-
-    return svcOk({ businessIds });
+    return svcOk({ audience });
   } catch {
     return svcFail("INTERNAL_ERROR", "Nearby business notification failed");
   }
