@@ -14,6 +14,7 @@
   "INVALID_TARGET": "The payment details are not valid.",
   "REFUND_EXCEEDS_LIMIT": "The refund exceeds the available amount.",
   "CORPORATE_PRICING_NOT_AVAILABLE": "Corporate pricing is not available yet.",
+  "ALREADY_SUBSCRIBED": "Your business already has an active plan. Change it from the plan cards.",
   "NO_SUBSCRIPTION": "This business does not have a subscription yet.",
   "PLAN_NOT_FOUND": "We could not find the selected plan.",
   "PLAN_NOT_SYNCED": "This plan is not available for purchase yet.",

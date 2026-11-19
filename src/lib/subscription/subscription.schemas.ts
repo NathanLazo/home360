@@ -14,6 +14,7 @@ import { planCodeSchema } from "./plan-codes";
  * result of `previewChange`, never inside an error.
  */
 export const subscriptionErrorCodes = [
+  "ALREADY_SUBSCRIBED",
   "NO_SUBSCRIPTION",
   "PLAN_NOT_FOUND",
   "PLAN_NOT_SYNCED",

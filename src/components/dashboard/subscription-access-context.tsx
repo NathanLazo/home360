@@ -16,6 +16,7 @@ export type ReadOnlyReason =
   | "businessPending"
   | "businessSuspended"
   | "businessRejected"
+  | "subscriptionMissing"
   | "subscriptionCanceled";
 
 type SubscriptionAccessContextValue = {
@@ -46,6 +47,13 @@ export function resolveReadOnlyReason(
 ): ReadOnlyReason | null {
   if (businessStatus !== null && businessStatus !== "ACTIVE") {
     return BUSINESS_READ_ONLY_REASON[businessStatus];
+  }
+
+  // An approved business without a plan yet: `activeBusinessProcedure`
+  // rejects it until the Checkout binds one. Only known once the business
+  // status is resolved, so a missing layout value never locks anything.
+  if (businessStatus === "ACTIVE" && subscriptionStatus === null) {
+    return "subscriptionMissing";
   }
 
   return subscriptionStatus === "CANCELED" ? "subscriptionCanceled" : null;

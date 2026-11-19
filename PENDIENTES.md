@@ -99,27 +99,39 @@ saldo Connect y no modifica el ledger local de un pago liberado. El soporte de r
 posteriores a la liberación requiere un ticket independiente que implemente y reconcilie
 Stripe Transfer Reversal antes de habilitar ese flujo.
 
-## 8. Cobro de la suscripción: Stripe Billing Customer Portal
+## 8. Cobro de la suscripción: Stripe Checkout + Billing Customer Portal
 
-Aprobado por Roger el 2026-08-10. Cierra el gate #4 de `spec/tickets/README.md` y el
-hallazgo #13 de `F3-F4-findings.md`; de paso resuelve el #16 (cancelación/reactivación).
+Aprobado por Roger el 2026-08-10; **revisado por el owner el 2026-11-19**. Cierra el gate #4
+de `spec/tickets/README.md` y el hallazgo #13 de `F3-F4-findings.md`; de paso resuelve el
+#16 (cancelación/reactivación).
 
-- **Captura del método de pago**: pantalla hosted de Stripe (Billing Customer Portal).
-  HOME360 nunca renderiza Elements ni toca datos de tarjeta.
-- **Alta**: `stripe.subscriptions.create` con `collection_method: "charge_automatically"`,
-  `payment_behavior: "default_incomplete"` y
-  `payment_settings.save_default_payment_method: "on_subscription"`. La suscripción nace
-  `incomplete` → mapea a `PAST_DUE` local, con banner y CTA al Portal.
-- **Momento de creación**: al aprobar el negocio (F5-05), best-effort y post-commit, sin
-  esperar a que exista método de pago. `ensureBillingSubscription` es reparador.
-- **Fallo del primer cobro**: no bloquea la operación. `PAST_DUE` deja el dashboard
+- **Motivo de la revisión**: el alta `default_incomplete` al aprobar dejaba al negocio con
+  "pago pendiente" sin haber elegido plan, y Stripe expira una suscripción `incomplete` a
+  las ~23 h (`incomplete_expired` → `CANCELED` local → solo lectura). Tampoco había dónde
+  canjear un código de descuento.
+- **Aprobar ≠ suscribir**: aprobar solo mueve el negocio PENDING → ACTIVE. El admin ya no
+  elige plan y no se crea nada en Stripe.
+- **Alta**: el negocio elige su plan en W7 y paga en **Stripe Checkout** (`mode:
+  "subscription"`, `allow_promotion_codes: true`, `payment_method_collection:
+  "if_required"`). HOME360 nunca renderiza Elements ni toca datos de tarjeta. Un cupón del
+  100 % activa la suscripción sin tarjeta; al vencer el descuento, el negocio agrega su
+  tarjeta desde el Portal.
+- **Vinculación**: `checkout.session.completed` (mode `subscription`) crea o actualiza la
+  `Subscription` local. El negocio se resuelve por `Business.stripeCustomerId`, nunca por
+  metadata. Si reemplaza un alta legada `incomplete`, esa se cancela.
+- **Sin plan = solo lectura**: un negocio ACTIVE sin suscripción (o `CANCELED`, o un alta
+  legada que nunca pagó) ve el banner "Elige tu plan"; `activeBusinessProcedure` lo
+  rechaza hasta que el webhook vincula el plan. `createCheckoutSession` es
+  `businessProcedure` precisamente para que pueda salir de ese estado.
+- **Fallo de un cobro posterior**: no bloquea la operación. `PAST_DUE` deja el dashboard
   plenamente operativo (contrato de `spec/04` §2); solo `CANCELED` degrada a solo lectura.
-- **Cancelar y reactivar**: exclusivamente desde el Portal. No se agregan
-  `cancelAtPeriodEnd` ni `canceledAt` al schema y la app no expone ninguna acción de
-  cancelación; `customer.subscription.*` sincroniza el estado local.
-- **Acceso**: `subscription.createPortalSession` es `businessProcedure`, no
-  `activeBusinessProcedure`: un negocio con la suscripción `CANCELED` debe poder entrar al
-  Portal a regularizar, y `activeBusinessProcedure` lo rechaza por diseño (F4-07).
+- **Cambio de plan**: `changePlan` sobre la suscripción existente (prorrateo), sin
+  Checkout.
+- **Cancelar, reactivar y método de pago**: exclusivamente desde el Portal. No se agregan
+  `cancelAtPeriodEnd` ni `canceledAt` al schema; `customer.subscription.*` sincroniza el
+  estado local, ignorando eventos de una suscripción remota reemplazada.
+- **Acceso al Portal**: `subscription.createPortalSession` es `businessProcedure`: un
+  negocio con la suscripción `CANCELED` debe poder entrar a regularizar.
 
 ## Pendiente independiente para F5
 
@@ -151,5 +163,5 @@ Crear o reabrir una disputa debe ocurrir en una transacción serializable que es
 | Captura sin suscripción activa | Rechazar con `BUSINESS_NOT_ACTIVE` |
 | Tarifa plana en refund | Total: completa; parcial: solo porción explícita autorizada |
 | Refund de pago `RELEASED` | Rechazar; Transfer Reversal queda en ticket separado |
-| Cobro de suscripción | Billing Customer Portal; alta `default_incomplete` |
+| Cobro de suscripción | El negocio elige y paga en Checkout (con códigos); Portal para tarjeta y facturas |
 | Cancelar/reactivar suscripción | Solo desde el Portal; sin campos ni acciones nuevas |

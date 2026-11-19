@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { WorkerAvailability } from "@generated/prisma";
-import { planCodeSchema } from "~/lib/subscription/plan-codes";
 import { recordIdSchema } from "~/schemas/record-id.schema";
 import { infiniteQueryDirectionSchema } from "~/schemas/pagination.schema";
 
@@ -69,7 +68,6 @@ export const moderationReasonSchema = z.string().trim().min(5).max(500);
 export const approveBusinessSchema = z
   .object({
     businessId: recordIdSchema,
-    planCode: planCodeSchema,
   })
   .strict();
 

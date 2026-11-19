@@ -7,9 +7,11 @@ import { handleInvoiceFinalized } from "./invoice-finalized";
 import { handleInvoicePaid } from "./invoice-paid";
 import { handleInvoicePaymentFailed } from "./invoice-payment-failed";
 import { handleInvoiceVoided } from "./invoice-voided";
+import { handleSubscriptionCheckoutCompleted } from "./subscription-checkout-completed";
 
 /** Billing events (F4). Escrow and Connect events live in the F3 registration. */
 export const billingHandlers: Record<string, StripeEventHandler> = {
+  "checkout.session.completed": handleSubscriptionCheckoutCompleted,
   "invoice.paid": handleInvoicePaid,
   "invoice.payment_failed": handleInvoicePaymentFailed,
   "invoice.finalized": handleInvoiceFinalized,

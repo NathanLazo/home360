@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
+import {
+  PlanCheckoutButton,
+  type PlanCheckoutAction,
+} from "./plan-checkout-button";
 import { PlanFeatureList } from "./plan-feature-list";
 import type { PlanListItem } from "./subscription.types";
 import { useCurrencyFormatter } from "./use-currency-formatter";
@@ -28,6 +32,8 @@ type PlanCardProps = {
   onSelectPlan: (planCode: PlanListItem["code"]) => void;
   onManagePlan: () => void;
   managing: boolean;
+  /** Set while the business has no billable plan: every card opens Checkout. */
+  checkout: PlanCheckoutAction | null;
 };
 
 /**
@@ -43,6 +49,7 @@ export function PlanCard({
   onSelectPlan,
   onManagePlan,
   managing,
+  checkout,
 }: PlanCardProps) {
   const t = useTranslations("dashboard.subscription");
   const currency = useCurrencyFormatter();
@@ -52,6 +59,16 @@ export function PlanCard({
     currentPriceCents !== null && plan.priceCents > currentPriceCents;
 
   function renderAction() {
+    if (checkout) {
+      return (
+        <PlanCheckoutButton
+          plan={plan}
+          recommended={recommended}
+          action={checkout}
+        />
+      );
+    }
+
     // "Manage plan" stays enabled even in read-only: the Billing Portal is the
     // only way a canceled business can add a card or resume (PENDIENTES.md §8).
     if (plan.isCurrent) {
@@ -96,14 +113,16 @@ export function PlanCard({
 
   return (
     <Card
-      className={cn(plan.isCurrent && "border-hairline-strong shadow-float")}
+      className={cn(
+        plan.isCurrent && !checkout && "border-hairline-strong shadow-float",
+      )}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle>
             <h2>{plan.name}</h2>
           </CardTitle>
-          {plan.isCurrent ? (
+          {plan.isCurrent && !checkout ? (
             // Same static-chrome chip as the sidebar plan: "yours" reads as metal.
             <Badge className="bg-metal text-on-metal shadow-hairline">
               {t("currentPlanTag")}

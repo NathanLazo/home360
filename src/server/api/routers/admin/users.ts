@@ -13,7 +13,6 @@ import {
   suspendUserSchema,
   USERS_CSV_ROW_CAP,
 } from "~/app/[locale]/admin/users/_components/users.schema";
-import { PLAN_CODES, planCodeSchema } from "~/lib/subscription/plan-codes";
 import { fail, normalizeError, ok } from "~/server/api/contract";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { approveBusiness } from "~/server/services/admin/approve-business";
@@ -36,8 +35,6 @@ import {
   listUsers,
   readCsvRows,
 } from "~/server/services/admin/user-directory";
-import { ensureBillingSubscription } from "~/server/services/subscription/billing";
-import { getStripe } from "~/server/services/stripe/client";
 
 function normalizedFailure(error: unknown, message: string) {
   const normalized = normalizeError(error);
@@ -98,65 +95,12 @@ export const adminUsersRouter = createTRPCRouter({
       }
     }),
 
-  /**
-   * Approval plans are read here instead of reusing `subscription.listPlans`:
-   * that procedure is guarded for the BUSINESS role. The Stripe price id is
-   * never exposed, only whether the plan is sellable.
-   */
-  listApprovalPlans: adminProcedure.query(async ({ ctx }) => {
-    try {
-      const plans = await ctx.db.plan.findMany({
-        where: { code: { in: [...PLAN_CODES] } },
-        orderBy: { priceCents: "asc" },
-        select: {
-          code: true,
-          priceCents: true,
-          commissionPct: true,
-          stripePriceId: true,
-        },
-      });
-
-      return ok(
-        // Narrowing `code` here keeps `PlanCode` all the way to the dialog
-        // instead of leaking the raw String column into the client.
-        plans.flatMap(({ code, stripePriceId, ...plan }) => {
-          const parsed = planCodeSchema.safeParse(code);
-
-          return parsed.success
-            ? [
-                {
-                  ...plan,
-                  code: parsed.data,
-                  isAvailable: stripePriceId !== null,
-                },
-              ]
-            : [];
-        }),
-        "Approval plans loaded",
-      );
-    } catch (error) {
-      return normalizedFailure(error, "Approval plans query failed");
-    }
-  }),
-
   approveBusiness: adminProcedure
     .input(approveBusinessSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await approveBusiness(
-          {
-            db: ctx.db,
-            ensureBillingSubscription: async (billingInput) => {
-              const billing = await ensureBillingSubscription(
-                { db: ctx.db, stripe: getStripe() },
-                billingInput,
-              );
-
-              return billing.ok
-                ? { ok: true }
-                : { ok: false, code: billing.code };
-            },
-          },
+          { db: ctx.db },
           { ...input, adminId: ctx.session.user.id },
         );
 

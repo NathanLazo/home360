@@ -138,6 +138,7 @@ export default async function DashboardLayout({
               <BusinessStatusBanner status={shell.business.status} />
               {shell.business.status === "ACTIVE" ? (
                 <SubscriptionStatusBanner
+                  needsPlan={shell.needsPlan}
                   status={shell.subscription?.status ?? null}
                   renewsAt={shell.subscription?.renewsAt ?? null}
                 />

@@ -189,11 +189,7 @@
       "guarantee": "Guarantee",
       "documents": "Documents",
       "noDocuments": "This business has not uploaded any documents yet.",
-      "plan": "Initial plan",
-      "planPlaceholder": "Select a plan",
-      "planOption": "{code} · {price}/month · {commission}% commission",
-      "planHint": "Plans without a published Stripe price cannot be selected yet.",
-      "plansErrorTitle": "We could not load the plans",
+      "planHint": "Once approved, the business picks and pays its own plan from its dashboard, where it can also redeem a discount code.",
       "cancel": "Cancel",
       "confirm": "Approve business"
     },

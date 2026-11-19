@@ -5,12 +5,17 @@ import { CreditCardIcon, RotateCcwIcon, TriangleAlertIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { ChangePlanDialog } from "./change-plan-dialog";
+import { ChoosePlanIntro } from "./choose-plan-intro";
 import { CurrentPlanBanner } from "./current-plan-banner";
 import { InvoicesSection } from "./invoices-section";
 import { PlanCards } from "./plan-cards";
 import type { PlanListItem } from "./subscription.types";
+import { useCheckoutReturn } from "./use-checkout-return";
 import { useSubscriptionMutations } from "./use-subscription-mutations";
-import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
+import {
+  useReadOnlyNotice,
+  useSubscriptionAccess,
+} from "~/components/dashboard/subscription-access-context";
 import { EmptyState } from "~/components/empty-state";
 import { PageHeader } from "~/components/page-header";
 import { Button } from "~/components/ui/button";
@@ -20,9 +25,15 @@ import { api } from "~/trpc/react";
 export function SubscriptionView() {
   const t = useTranslations("dashboard.subscription");
   const errorsT = useTranslations("errors");
-  const { openBillingPortal, openingBillingPortal } =
-    useSubscriptionMutations();
-  const { isReadOnly } = useSubscriptionAccess();
+  const {
+    openBillingPortal,
+    openingBillingPortal,
+    startCheckout,
+    checkoutPlanCode,
+  } = useSubscriptionMutations();
+  const { isReadOnly, businessStatus } = useSubscriptionAccess();
+  const readOnlyNotice = useReadOnlyNotice();
+  useCheckoutReturn();
 
   const [targetPlanCode, setTargetPlanCode] = useState<
     PlanListItem["code"] | null
@@ -46,6 +57,11 @@ export function SubscriptionView() {
   const plansError =
     plansResponse?.error ?? (plansQuery.error ? "UNKNOWN_ERROR" : null);
 
+  // No billable plan yet (never subscribed, canceled, or a legacy alta that
+  // was never paid): every plan card opens Stripe Checkout instead.
+  const currentLoaded = !currentQuery.isPending && currentError === null;
+  const needsPlan = currentLoaded && (current === null || current.needsPlan);
+
   const targetPlanName =
     plans.find((plan) => plan.code === targetPlanCode)?.name ?? null;
 
@@ -60,15 +76,17 @@ export function SubscriptionView() {
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void openBillingPortal()}
-            disabled={openingBillingPortal}
-          >
-            <CreditCardIcon aria-hidden="true" />
-            {t("actions.manageBilling")}
-          </Button>
+          needsPlan ? undefined : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void openBillingPortal()}
+              disabled={openingBillingPortal}
+            >
+              <CreditCardIcon aria-hidden="true" />
+              {t("actions.manageBilling")}
+            </Button>
+          )
         }
       />
 
@@ -90,17 +108,11 @@ export function SubscriptionView() {
         />
       ) : null}
 
-      {/* No subscription is a legitimate state, not an error: the plan is
-          created when an admin approves the business (F5-05). */}
-      {!currentQuery.isPending && currentError === null && !current ? (
-        <EmptyState
-          icon={CreditCardIcon}
-          title={t("noSubscriptionTitle")}
-          description={t("noSubscriptionDescription")}
-        />
-      ) : null}
+      {needsPlan ? <ChoosePlanIntro /> : null}
 
-      {current ? <CurrentPlanBanner subscription={current} /> : null}
+      {current && !needsPlan ? (
+        <CurrentPlanBanner subscription={current} />
+      ) : null}
 
       {plansQuery.isPending ? (
         <div className="grid gap-4 md:grid-cols-3" aria-busy="true">
@@ -135,6 +147,18 @@ export function SubscriptionView() {
           onSelectPlan={handleSelectPlan}
           onManagePlan={() => void openBillingPortal()}
           managing={openingBillingPortal}
+          checkout={
+            needsPlan
+              ? {
+                  onChoose: (planCode) => void startCheckout(planCode),
+                  pendingPlanCode: checkoutPlanCode,
+                  // Only a non-approved business is blocked: missing or
+                  // canceled plans are exactly what Checkout fixes.
+                  blockedReason:
+                    businessStatus === "ACTIVE" ? undefined : readOnlyNotice,
+                }
+              : null
+          }
         />
       ) : null}
 

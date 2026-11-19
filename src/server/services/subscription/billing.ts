@@ -8,18 +8,11 @@ import {
   svcOk,
   type ServiceResult,
 } from "~/server/services/service-result";
-import {
-  getRenewsAt,
-  mapStripeSubscriptionStatus,
-} from "./subscription-status";
 
 export type BillingDeps = {
   db: PrismaClient;
   stripe: Stripe;
 };
-
-export type EnsureSubscriptionErrorCode =
-  "NO_SUBSCRIPTION" | "PLAN_NOT_SYNCED" | "NOT_FOUND";
 
 /**
  * Creates or returns the Stripe Billing customer of a business.
@@ -96,115 +89,27 @@ export async function ensureStripeCustomer(
 }
 
 /**
- * Brings the Stripe Billing subscription of a business into existence.
+ * Returns the remote subscription the business is billed through.
  *
- * Repair-style service: `approveBusiness` (F5-05) creates the local row and
- * calls this best-effort after the commit, and any later flow may call it again
- * without creating a second remote subscription.
- *
- * Billing model approved in `PENDIENTES.md` §8 (Stripe Billing Customer
- * Portal): the subscription is created with `charge_automatically` and
- * `default_incomplete`, so it is born `incomplete` (→ local `PAST_DUE`) and
- * starts charging as soon as the business adds a card in the hosted Portal.
- * HOME360 never renders card fields.
+ * Read-only: since `PENDIENTES.md` §8 (revised 2026-11-19) a subscription is
+ * only ever created by the business itself through Checkout
+ * (`createSubscriptionCheckout`), so a business without one gets
+ * `NO_SUBSCRIPTION` and is sent to pick a plan.
  */
-export async function ensureBillingSubscription(
-  deps: BillingDeps,
+export async function getBillingSubscriptionId(
+  deps: Pick<BillingDeps, "db">,
   input: { businessId: string },
-): Promise<
-  ServiceResult<
-    { stripeSubscriptionId: string; renewsAt: Date; created: boolean },
-    EnsureSubscriptionErrorCode
-  >
-> {
+): Promise<ServiceResult<{ stripeSubscriptionId: string }, "NO_SUBSCRIPTION">> {
   const subscription = await deps.db.subscription.findUnique({
     where: { businessId: input.businessId },
-    select: {
-      id: true,
-      status: true,
-      stripeSubscriptionId: true,
-      renewsAt: true,
-      plan: { select: { code: true, stripePriceId: true } },
-    },
+    select: { stripeSubscriptionId: true },
   });
 
-  if (!subscription) {
-    return svcFail("NO_SUBSCRIPTION", "Business has no local subscription");
+  if (!subscription?.stripeSubscriptionId) {
+    return svcFail("NO_SUBSCRIPTION", "Business has no Stripe subscription");
   }
 
-  if (subscription.stripeSubscriptionId) {
-    return svcOk({
-      stripeSubscriptionId: subscription.stripeSubscriptionId,
-      renewsAt: subscription.renewsAt,
-      created: false,
-    });
-  }
-
-  // Detected before touching Stripe: Roger has not run `sync-stripe-plans`.
-  if (!subscription.plan.stripePriceId) {
-    return svcFail("PLAN_NOT_SYNCED", "Plan has no Stripe price");
-  }
-
-  const customer = await ensureStripeCustomer(deps, {
-    businessId: input.businessId,
-  });
-
-  if (!customer.ok) {
-    return customer;
-  }
-
-  try {
-    const created = await deps.stripe.subscriptions.create(
-      {
-        customer: customer.data.stripeCustomerId,
-        items: [{ price: subscription.plan.stripePriceId }],
-        collection_method: "charge_automatically",
-        payment_behavior: "default_incomplete",
-        payment_settings: {
-          save_default_payment_method: "on_subscription",
-        },
-        metadata: {
-          businessId: input.businessId,
-          subscriptionId: subscription.id,
-          planCode: subscription.plan.code,
-        },
-      },
-      // Derived from the local id: a retry after a crash returns the same
-      // remote subscription instead of creating a second one.
-      { idempotencyKey: `billing-subscription-${subscription.id}` },
-    );
-
-    const renewsAt = getRenewsAt(created) ?? subscription.renewsAt;
-
-    await deps.db.subscription.updateMany({
-      where: { id: subscription.id, stripeSubscriptionId: null },
-      data: {
-        stripeSubscriptionId: created.id,
-        status: mapStripeSubscriptionStatus(created.status),
-        renewsAt,
-      },
-    });
-
-    return svcOk({
-      stripeSubscriptionId: created.id,
-      renewsAt,
-      created: true,
-    });
-  } catch (error) {
-    if (error instanceof Stripe.errors.StripeError) {
-      console.error("[billing] SUBSCRIPTION_CREATE_FAILED", {
-        businessId: input.businessId,
-        code: error.code,
-      });
-
-      return svcFail(
-        "STRIPE_ERROR",
-        "Stripe subscription could not be created",
-      );
-    }
-
-    throw error;
-  }
+  return svcOk({ stripeSubscriptionId: subscription.stripeSubscriptionId });
 }
 
 /**

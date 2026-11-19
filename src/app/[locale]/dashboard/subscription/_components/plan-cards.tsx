@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { PlanCard } from "./plan-card";
+import type { PlanCheckoutAction } from "./plan-checkout-button";
 import type { PlanListItem } from "./subscription.types";
 
 type PlanCardsProps = {
@@ -12,7 +13,11 @@ type PlanCardsProps = {
   onSelectPlan: (planCode: PlanListItem["code"]) => void;
   onManagePlan: () => void;
   managing: boolean;
+  checkout: PlanCheckoutAction | null;
 };
+
+/** First pick suggested to a business without a plan: the middle tier. */
+const CHECKOUT_RECOMMENDED_CODE: PlanListItem["code"] = "standard";
 
 /** Grid of the three plans, in commercial order as the server returns them. */
 export function PlanCards({
@@ -22,12 +27,14 @@ export function PlanCards({
   onSelectPlan,
   onManagePlan,
   managing,
+  checkout,
 }: PlanCardsProps) {
   const t = useTranslations("dashboard.subscription");
   // The next tier up is the one upgrade the page recommends; it alone gets
   // the metal ring, never every pricier card.
-  const recommendedCode =
-    currentPriceCents === null
+  const recommendedCode = checkout
+    ? CHECKOUT_RECOMMENDED_CODE
+    : currentPriceCents === null
       ? null
       : (plans
           .filter((plan) => plan.priceCents > currentPriceCents)
@@ -49,6 +56,7 @@ export function PlanCards({
           onSelectPlan={onSelectPlan}
           onManagePlan={onManagePlan}
           managing={managing}
+          checkout={checkout}
         />
       ))}
     </section>

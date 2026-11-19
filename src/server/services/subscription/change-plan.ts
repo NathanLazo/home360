@@ -9,7 +9,7 @@ import {
   svcOk,
   type ServiceResult,
 } from "~/server/services/service-result";
-import { ensureBillingSubscription } from "./billing";
+import { getBillingSubscriptionId } from "./billing";
 import {
   checkDowngradeFit,
   type LimitedResource,
@@ -192,7 +192,7 @@ async function computeProration(
 ): Promise<
   ServiceResult<{ prorationCents: number; effectiveAt: Date }, PreviewErrorCode>
 > {
-  const ensured = await ensureBillingSubscription(deps, { businessId });
+  const ensured = await getBillingSubscriptionId(deps, { businessId });
 
   if (!ensured.ok) {
     return ensured;
@@ -324,7 +324,7 @@ export async function changePlan(
     return proration;
   }
 
-  const ensured = await ensureBillingSubscription(deps, {
+  const ensured = await getBillingSubscriptionId(deps, {
     businessId: input.businessId,
   });
 

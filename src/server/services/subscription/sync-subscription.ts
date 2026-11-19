@@ -50,6 +50,19 @@ export async function syncSubscriptionFromStripe(
   const isSameRemote = local.stripeSubscriptionId === stripeSubscription.id;
   const status = mapStripeSubscriptionStatus(stripeSubscription.status);
 
+  // Matched only through the customer: a different remote subscription of the
+  // same business. A new Checkout replacing the bound one is adopted, but a
+  // replaced or never-paid one (canceled, expired, `incomplete`) must not
+  // overwrite the subscription the business actually uses.
+  const isOtherRemote = local.stripeSubscriptionId !== null && !isSameRemote;
+
+  if (
+    isOtherRemote &&
+    (status === "CANCELED" || stripeSubscription.status === "incomplete")
+  ) {
+    return svcOk({ subscriptionId: local.id });
+  }
+
   if (isSameRemote && local.status === "CANCELED" && status !== "CANCELED") {
     console.warn("[billing] IGNORED_REACTIVATION_EVENT", {
       subscriptionId: local.id,
