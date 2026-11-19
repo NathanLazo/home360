@@ -1,35 +1,63 @@
 {
   "workerInvitation": {
     "subject": "{businessName} added you to their team on Home360",
-    "greeting": "Hi {workerName},",
+    "preheader": "Create your account and get the app to see your assigned services.",
+    "eyebrow": "Team invitation",
+    "greeting": "Hi, {workerName}",
     "intro": "{businessName} added you as a team member on Home360.",
-    "instructions": "Download the Home360 mobile app and sign in with this email address to see the services assigned to you.",
-    "closing": "If you were not expecting this invitation, you can ignore this message.",
-    "cta": "Create your worker account",
-    "expires": "The link expires in 7 days and can only be used once."
+    "instructions": "Create your account, download the Home360 mobile app and sign in with this email address to see the services assigned to you.",
+    "businessLabel": "Business",
+    "cta": "Create my account",
+    "expires": "The link expires in 7 days and can only be used once.",
+    "closing": "If you were not expecting this invitation, you can ignore this message."
   },
   "corporateInvitation": {
     "subject": "Your {companyName} corporate account on Home360",
-    "intro": "A corporate account for {companyName} was created on Home360 and you are its owner.",
-    "cta": "Create your password to sign in",
+    "preheader": "Create your password to start managing {companyName}.",
+    "eyebrow": "Corporate account",
+    "heading": "Your corporate account is ready",
+    "intro": "We created a corporate account for {companyName} on Home360 and you are its owner.",
+    "companyLabel": "Company",
+    "cta": "Create my password",
     "expires": "The link is valid for 1 hour and can only be used once. If it expires, ask the Home360 team to resend the invitation.",
     "closing": "If you were not expecting this invitation, you can ignore this message."
   },
   "newRequestNearby": {
+    "eyebrow": "New request",
+    "categoryLabel": "Category",
+    "matchLabel": "Match",
+    "footer": "You are receiving this because {businessName} is registered on Home360 as a provider.",
     "match": {
-      "subject": "A customer nearby needs {category}",
-      "intro": "{businessName}: a customer opened a {category} diagnosis inside your coverage area on Home360. It is exactly what you offer.",
-      "cta": "Open the Home360 app to review the details and send your quote."
+      "subject": "New request near you · {category}",
+      "preheader": "It matches your catalog and sits inside your area. Quote first.",
+      "heading": "A customer nearby needs what you offer",
+      "intro": "{businessName}, a customer opened a request inside your coverage area and it matches your catalog.",
+      "next": "Review the details and send your quote: the payment stays protected until you deliver the work with evidence.",
+      "matchValue": "Area and catalog",
+      "cta": "View request"
     },
     "zone": {
-      "subject": "Someone in your area needs {category}",
-      "intro": "{businessName}: a customer inside your coverage area is looking for {category} on Home360.",
-      "cta": "If you offer it, add {category} to your catalog in the Home360 dashboard to quote requests like this one."
+      "subject": "New request in your area · {category}",
+      "preheader": "A customer nearby needs a service that is not in your catalog yet.",
+      "heading": "A customer in your area is looking for help",
+      "intro": "{businessName}, a customer inside your coverage area opened a request that is not in your catalog yet.",
+      "next": "If you offer this service, add it to your catalog to receive and quote requests like this one.",
+      "matchValue": "Area only",
+      "cta": "Update my catalog"
     },
     "category": {
-      "subject": "Someone needs {category}, which you offer",
-      "intro": "{businessName}: a customer is looking for {category}, like the services or products in your catalog, but outside your coverage radius.",
-      "cta": "Widen your branch coverage radius in the Home360 dashboard to receive and quote requests like this one."
+      "subject": "Demand for what you offer · {category}",
+      "preheader": "A customer needs a service from your catalog, outside your coverage radius.",
+      "heading": "There is demand for what you offer, a bit farther away",
+      "intro": "{businessName}, a customer is looking for a service in your catalog, but outside your branches' coverage radius.",
+      "next": "Widen your coverage radius to receive and quote requests like this one.",
+      "matchValue": "Catalog only",
+      "cta": "Adjust coverage"
     }
+  },
+  "layout": {
+    "brand": "Home360",
+    "linkFallback": "Button not working? Copy and paste this link into your browser:",
+    "footer": "Home360 · Home maintenance with protected payments. This is an automated email; no need to reply."
   }
 }

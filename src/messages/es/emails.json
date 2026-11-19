@@ -1,35 +1,63 @@
 {
   "workerInvitation": {
     "subject": "{businessName} te agregó a su equipo en Home360",
-    "greeting": "Hola {workerName}:",
+    "preheader": "Crea tu cuenta y descarga la app para ver tus servicios asignados.",
+    "eyebrow": "Invitación de equipo",
+    "greeting": "Hola, {workerName}",
     "intro": "{businessName} te agregó como parte de su equipo en Home360.",
-    "instructions": "Descarga la app móvil de Home360 e inicia sesión con este correo para ver los servicios que tienes asignados.",
-    "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje.",
-    "cta": "Crea tu cuenta de trabajador",
-    "expires": "El enlace vence en 7 días y solo puede usarse una vez."
+    "instructions": "Crea tu cuenta, descarga la app móvil de Home360 e inicia sesión con este correo para ver los servicios que tienes asignados.",
+    "businessLabel": "Negocio",
+    "cta": "Crear mi cuenta",
+    "expires": "El enlace vence en 7 días y solo puede usarse una vez.",
+    "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
   },
   "corporateInvitation": {
     "subject": "Tu cuenta corporativa de {companyName} en Home360",
-    "intro": "Se creó una cuenta corporativa para {companyName} en Home360 y tú eres la persona responsable.",
-    "cta": "Crea tu contraseña para entrar",
+    "preheader": "Crea tu contraseña para empezar a gestionar {companyName}.",
+    "eyebrow": "Cuenta corporativa",
+    "heading": "Tu cuenta corporativa está lista",
+    "intro": "Creamos una cuenta corporativa para {companyName} en Home360 y tú eres la persona responsable.",
+    "companyLabel": "Empresa",
+    "cta": "Crear mi contraseña",
     "expires": "El enlace es válido por 1 hora y solo puede usarse una vez. Si vence, pide al equipo de Home360 que reenvíe la invitación.",
     "closing": "Si no esperabas esta invitación, puedes ignorar este mensaje."
   },
   "newRequestNearby": {
+    "eyebrow": "Nueva solicitud",
+    "categoryLabel": "Categoría",
+    "matchLabel": "Coincidencia",
+    "footer": "Recibes este aviso porque {businessName} está registrado en Home360 como proveedor.",
     "match": {
-      "subject": "Un cliente cerca busca {category}",
-      "intro": "{businessName}: un cliente abrió un diagnóstico de {category} dentro de tu zona de cobertura en Home360. Es justo lo que ofreces.",
-      "cta": "Entra a la app de Home360 para ver el detalle y enviar tu cotización."
+      "subject": "Nueva solicitud cerca de ti · {category}",
+      "preheader": "Coincide con tu catálogo y está dentro de tu zona. Cotiza antes que nadie.",
+      "heading": "Un cliente cerca necesita lo que ofreces",
+      "intro": "{businessName}, un cliente abrió una solicitud dentro de tu zona de cobertura y coincide con tu catálogo.",
+      "next": "Revisa el detalle y envía tu cotización: el pago queda protegido hasta que entregues el trabajo con evidencia.",
+      "matchValue": "Zona y catálogo",
+      "cta": "Ver solicitud"
     },
     "zone": {
-      "subject": "Alguien busca {category} en tu zona",
-      "intro": "{businessName}: un cliente dentro de tu zona de cobertura busca {category} en Home360.",
-      "cta": "Si lo ofreces, agrega {category} a tu catálogo en el panel de Home360 para poder cotizar solicitudes como esta."
+      "subject": "Nueva solicitud en tu zona · {category}",
+      "preheader": "Un cliente cerca busca un servicio que aún no está en tu catálogo.",
+      "heading": "Hay un cliente buscando ayuda en tu zona",
+      "intro": "{businessName}, un cliente dentro de tu zona de cobertura abrió una solicitud que todavía no está en tu catálogo.",
+      "next": "Si ofreces este servicio, agrégalo a tu catálogo para recibir y cotizar solicitudes como esta.",
+      "matchValue": "Solo zona",
+      "cta": "Actualizar mi catálogo"
     },
     "category": {
-      "subject": "Alguien busca {category}, lo que tú ofreces",
-      "intro": "{businessName}: un cliente busca {category}, igual que los servicios o productos de tu catálogo, pero fuera de tu radio de cobertura.",
-      "cta": "Amplía el radio de cobertura de tu sucursal en el panel de Home360 para recibir y cotizar solicitudes como esta."
+      "subject": "Demanda de lo que ofreces · {category}",
+      "preheader": "Un cliente busca un servicio de tu catálogo, fuera de tu radio de cobertura.",
+      "heading": "Hay demanda de lo que ofreces, un poco más lejos",
+      "intro": "{businessName}, un cliente busca un servicio que tienes en tu catálogo, pero está fuera del radio de cobertura de tus sucursales.",
+      "next": "Amplía el radio de cobertura para recibir y cotizar solicitudes como esta.",
+      "matchValue": "Solo catálogo",
+      "cta": "Ajustar cobertura"
     }
+  },
+  "layout": {
+    "brand": "Home360",
+    "linkFallback": "¿El botón no funciona? Copia y pega este enlace en tu navegador:",
+    "footer": "Home360 · Mantenimiento del hogar con pago protegido. Este es un correo automático; no es necesario responder."
   }
 }
