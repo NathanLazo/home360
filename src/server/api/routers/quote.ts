@@ -45,6 +45,8 @@ const submitSchema = z.object({
     .optional()
     .transform((value) => (value === "" ? undefined : value)),
   branchId: recordIdSchema.optional(),
+  /** Catalog service; a service with diagnostic makes this a two-step offer. */
+  serviceId: recordIdSchema.optional(),
 });
 
 const listMineSchema = z.object({
@@ -156,6 +158,7 @@ export const quoteRouter = createTRPCRouter({
           workerId: input.workerId,
           message: input.message,
           branchId: input.branchId,
+          serviceId: input.serviceId,
         });
 
         if (!submitted.ok) {

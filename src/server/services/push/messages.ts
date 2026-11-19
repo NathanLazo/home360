@@ -34,7 +34,9 @@ export type PushMessageKey =
   | "orderOutForDelivery"
   | "orderDelivered"
   | "orderPaymentExpired"
-  | "paidOrderCancelledByCustomer";
+  | "paidOrderCancelledByCustomer"
+  // Diagnostic-first services: the job charge after the diagnostic visit.
+  | "finalChargeIssued";
 
 export type LocalizedPushInput = {
   message: PushMessageKey;

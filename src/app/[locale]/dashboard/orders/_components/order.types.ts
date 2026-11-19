@@ -22,6 +22,10 @@ export type RadarRequestDetail = NonNullable<
 >;
 export type RadarOwnQuote = NonNullable<RadarRequestDetail["ownQuote"]>;
 
+export type QuotableService = NonNullable<
+  RouterOutputs["service"]["listQuotable"]["result"]
+>[number];
+
 export type MyQuoteList = NonNullable<QuoteOutput["listMine"]["result"]>;
 export type MyQuoteItem = MyQuoteList["items"][number];
 

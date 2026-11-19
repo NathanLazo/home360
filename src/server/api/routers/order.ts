@@ -12,6 +12,7 @@ import {
 import { acceptProductOrder } from "~/server/services/orders/accept-product";
 import { assignOrderWorker } from "~/server/services/orders/assign-worker";
 import { cancelOrder } from "~/server/services/orders/cancel-order";
+import { issueFinalCharge } from "~/server/services/orders/diagnostic-final-charge";
 import {
   getOrderById,
   listOrders,
@@ -20,6 +21,7 @@ import {
   orderAssignWorkerSchema,
   orderCancelSchema,
   orderIdSchema,
+  orderIssueFinalChargeSchema,
   orderListSchema,
   orderMarkDeliveredSchema,
   orderRedeemPickupSchema,
@@ -52,6 +54,10 @@ const serviceErrorStatuses = {
   TOO_MANY_REQUESTS: 429,
   // F10 review M5: a photo already attached to another order.
   EVIDENCE_REUSED: 409,
+  // Diagnostic-first services.
+  DIAGNOSTIC_NOT_READY: 409,
+  FINAL_CHARGE_EXISTS: 409,
+  FINAL_CHARGE_BELOW_CREDIT: 422,
 } as const satisfies Record<string, number>;
 
 type ServiceErrorCode = keyof typeof serviceErrorStatuses;
@@ -131,6 +137,32 @@ export const orderRouter = createTRPCRouter({
         }
 
         return ok(cancelled.data, "Order cancelled");
+      } catch (error) {
+        return orderFailure(error);
+      }
+    }),
+
+  /**
+   * Diagnostic-first service: after the visit the business prices the job.
+   * Creates the follow-up PENDING order (final − credited diagnostic) that
+   * the customer pays through the regular escrow checkout.
+   */
+  issueFinalCharge: activeBusinessProcedure
+    .input(orderIssueFinalChargeSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const issued = await issueFinalCharge(ctx.db, {
+          businessId: ctx.business.id,
+          actorUserId: ctx.session.user.id,
+          diagnosticOrderId: input.id,
+          finalAmountCents: input.finalAmountCents,
+        });
+
+        if (!issued.ok) {
+          return serviceFailure(issued.code, "Final charge failed");
+        }
+
+        return ok(issued.data, "Final charge issued", 201);
       } catch (error) {
         return orderFailure(error);
       }

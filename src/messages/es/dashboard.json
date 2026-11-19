@@ -311,7 +311,21 @@
         "evidencePhoto": "Foto de entrega {number}",
         "openPhoto": "Abrir {label}",
         "noteTitle": "Nota de entrega"
-      }
+      },
+      "diagnosticTitle": "Diagnóstico",
+      "stageDiagnostic": "Visita de diagnóstico",
+      "stageFinalCharge": "Cargo final",
+      "creditTermLabel": "Abono al precio final",
+      "credited": "Sí, se abona",
+      "notCredited": "No se abona",
+      "estimatedJobLabel": "Precio estimado",
+      "finalChargeLabel": "Cargo final",
+      "finalChargePending": "Aún no emitido",
+      "finalChargeOrder": "Orden #{folio}",
+      "diagnosticOrderLabel": "Viene del diagnóstico",
+      "diagnosticPaidLabel": "Diagnóstico pagado",
+      "creditAppliedLabel": "Abono aplicado",
+      "finalJobLabel": "Precio final del trabajo"
     },
     "timeline": {
       "label": "Bitácora de la orden",
@@ -416,6 +430,10 @@
         "awaitingCustomerConfirmation": {
           "title": "Esperando la confirmación del cliente",
           "description": "El cliente revisa la evidencia desde su app. Si no responde, el pago se libera automáticamente al vencer el plazo."
+        },
+        "issueFinalCharge": {
+          "title": "Emite el cargo final",
+          "description": "Con el diagnóstico hecho, captura el precio del trabajo. El cliente lo paga con pago protegido antes de que inicie la instalación."
         }
       },
       "cancelDialog": {
@@ -447,7 +465,8 @@
         "delivered": "Entrega registrada. Le pedimos al cliente que la confirme.",
         "readyForPickup": "Avisamos al cliente que su pedido está listo.",
         "pickupRedeemed": "Orden #{folio} entregada. Pago liberado.",
-        "pickupRedeemedPending": "Orden #{folio} entregada. El pago se liberará en unos minutos."
+        "pickupRedeemedPending": "Orden #{folio} entregada. El pago se liberará en unos minutos.",
+        "finalChargeIssued": "Cargo final emitido. Le avisamos al cliente para que lo pague."
       },
       "markOutForDelivery": "Marcar en camino",
       "markDelivered": "Marcar entregado",
@@ -507,6 +526,21 @@
           "TOO_MANY_REQUESTS": "Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.",
           "CONFLICT": "Este pedido ya no se puede entregar: revisa si está en disputa o ya se completó."
         }
+      },
+      "issueFinalCharge": "Emitir cargo final",
+      "finalChargeDialog": {
+        "title": "Cargo final · orden #{folio}",
+        "description": "Captura el precio total del trabajo. Se crea una orden nueva que el cliente paga con pago protegido antes de iniciar.",
+        "amountLabel": "Precio final del trabajo",
+        "amountPlaceholder": "0.00",
+        "amountError": "Escribe un precio mayor que el diagnóstico abonado.",
+        "estimateHint": "Estimado en tu oferta: {amount}",
+        "finalLine": "Precio final",
+        "creditLine": "Diagnóstico abonado",
+        "noCreditLine": "Diagnóstico (no se abona)",
+        "totalLine": "El cliente paga",
+        "confirm": "Emitir cargo",
+        "cancel": "Cancelar"
       }
     },
     "conversation": {
@@ -533,6 +567,10 @@
         "DELIVERY": "Entrega a domicilio",
         "PICKUP": "Recoger en sucursal"
       }
+    },
+    "stages": {
+      "diagnostic": "Diagnóstico",
+      "finalCharge": "Cargo final"
     }
   },
   "payments": {
@@ -1550,7 +1588,11 @@
         "description": "El cliente dejará de verla. Podrás reenviarla mientras la solicitud siga abierta.",
         "confirm": "Retirar oferta",
         "cancel": "Conservar"
-      }
+      },
+      "diagnosticLabel": "Diagnóstico",
+      "diagnosticCredited": "Se abona",
+      "diagnosticNotCredited": "No se abona",
+      "estimatedLabel": "Precio estimado"
     },
     "offerForm": {
       "workerLabel": "Técnico que atenderá",
@@ -1564,7 +1606,15 @@
       "scheduledAtError": "Elige una fecha y hora futuras.",
       "messageLabel": "Mensaje para el cliente (opcional)",
       "messagePlaceholder": "Incluye qué cubre el precio, materiales o garantía…",
-      "messageCount": "{count}/{max}"
+      "messageCount": "{count}/{max}",
+      "serviceLabel": "Servicio del catálogo",
+      "servicePlaceholder": "Sin servicio vinculado",
+      "serviceNone": "Sin servicio vinculado",
+      "estimatedPriceLabel": "Precio estimado del trabajo",
+      "diagnosticTitle": "Cobro en dos pasos",
+      "diagnosticNotice": "Al aceptar, el cliente paga hoy <price>{amount}</price> de diagnóstico. El precio final lo emites después de la visita.",
+      "diagnosticCredited": "El diagnóstico se abona al precio final.",
+      "diagnosticNotCredited": "El diagnóstico no se abona al precio final."
     },
     "offers": {
       "loading": "Cargando ofertas",

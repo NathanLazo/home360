@@ -12,6 +12,7 @@ export type SubmitOfferInput = {
   scheduledAt: Date;
   message?: string;
   branchId?: string;
+  serviceId?: string;
 };
 
 /** Offer (quote) mutations shared by the requests and "my offers" tabs. */

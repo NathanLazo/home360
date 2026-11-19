@@ -311,7 +311,21 @@
         "evidencePhoto": "Delivery photo {number}",
         "openPhoto": "Open {label}",
         "noteTitle": "Delivery note"
-      }
+      },
+      "diagnosticTitle": "Diagnostic",
+      "stageDiagnostic": "Diagnostic visit",
+      "stageFinalCharge": "Final charge",
+      "creditTermLabel": "Credit toward final price",
+      "credited": "Yes, credited",
+      "notCredited": "Not credited",
+      "estimatedJobLabel": "Estimated price",
+      "finalChargeLabel": "Final charge",
+      "finalChargePending": "Not issued yet",
+      "finalChargeOrder": "Order #{folio}",
+      "diagnosticOrderLabel": "From diagnostic",
+      "diagnosticPaidLabel": "Diagnostic paid",
+      "creditAppliedLabel": "Credit applied",
+      "finalJobLabel": "Final job price"
     },
     "timeline": {
       "label": "Order timeline",
@@ -416,6 +430,10 @@
         "awaitingCustomerConfirmation": {
           "title": "Waiting for the customer to confirm",
           "description": "The customer reviews the evidence in their app. If they do not reply, the payment is released automatically when the window ends."
+        },
+        "issueFinalCharge": {
+          "title": "Issue the final charge",
+          "description": "With the diagnostic done, enter the job price. The customer pays it with protected payment before the installation starts."
         }
       },
       "cancelDialog": {
@@ -447,7 +465,8 @@
         "delivered": "Delivery recorded. We asked the customer to confirm it.",
         "readyForPickup": "We let the customer know their order is ready.",
         "pickupRedeemed": "Order #{folio} handed over. Payment released.",
-        "pickupRedeemedPending": "Order #{folio} handed over. The payment is released in a few minutes."
+        "pickupRedeemedPending": "Order #{folio} handed over. The payment is released in a few minutes.",
+        "finalChargeIssued": "Final charge issued. We let the customer know so they can pay it."
       },
       "markOutForDelivery": "Mark out for delivery",
       "markDelivered": "Mark delivered",
@@ -507,6 +526,21 @@
           "TOO_MANY_REQUESTS": "Too many failed attempts. Wait a few minutes before trying again.",
           "CONFLICT": "This order can no longer be handed over: check whether it is in dispute or already completed."
         }
+      },
+      "issueFinalCharge": "Issue final charge",
+      "finalChargeDialog": {
+        "title": "Final charge · order #{folio}",
+        "description": "Enter the full job price. A new order is created that the customer pays with protected payment before the work starts.",
+        "amountLabel": "Final job price",
+        "amountPlaceholder": "0.00",
+        "amountError": "Enter a price higher than the credited diagnostic.",
+        "estimateHint": "Estimated in your offer: {amount}",
+        "finalLine": "Final price",
+        "creditLine": "Credited diagnostic",
+        "noCreditLine": "Diagnostic (not credited)",
+        "totalLine": "Customer pays",
+        "confirm": "Issue charge",
+        "cancel": "Cancel"
       }
     },
     "conversation": {
@@ -533,6 +567,10 @@
         "DELIVERY": "Home delivery",
         "PICKUP": "Pickup at branch"
       }
+    },
+    "stages": {
+      "diagnostic": "Diagnostic",
+      "finalCharge": "Final charge"
     }
   },
   "payments": {
@@ -1550,7 +1588,11 @@
         "description": "The customer will stop seeing it. You can resend it while the request is still open.",
         "confirm": "Withdraw offer",
         "cancel": "Keep it"
-      }
+      },
+      "diagnosticLabel": "Diagnostic",
+      "diagnosticCredited": "Credited",
+      "diagnosticNotCredited": "Not credited",
+      "estimatedLabel": "Estimated price"
     },
     "offerForm": {
       "workerLabel": "Technician who will do the job",
@@ -1564,7 +1606,15 @@
       "scheduledAtError": "Choose a future date and time.",
       "messageLabel": "Message to the customer (optional)",
       "messagePlaceholder": "Include what the price covers, materials or warranty…",
-      "messageCount": "{count}/{max}"
+      "messageCount": "{count}/{max}",
+      "serviceLabel": "Catalog service",
+      "servicePlaceholder": "No linked service",
+      "serviceNone": "No linked service",
+      "estimatedPriceLabel": "Estimated job price",
+      "diagnosticTitle": "Two-step charge",
+      "diagnosticNotice": "On acceptance the customer pays <price>{amount}</price> for the diagnostic today. You issue the final price after the visit.",
+      "diagnosticCredited": "The diagnostic is credited toward the final price.",
+      "diagnosticNotCredited": "The diagnostic is not credited toward the final price."
     },
     "offers": {
       "loading": "Loading offers",

@@ -4,6 +4,7 @@ import {
   Prisma,
   QuoteStatus,
   RequestStatus,
+  ServiceStatus,
   type PrismaClient,
 } from "@generated/prisma";
 import { getOrCreateForRequest } from "~/server/services/messaging/conversations";
@@ -75,6 +76,8 @@ export async function submitQuote(
     workerId: string;
     message?: string;
     branchId?: string;
+    /** Catalog service of the offer; its diagnostic terms are snapshotted. */
+    serviceId?: string;
   },
 ): Promise<ServiceResult<SubmitQuoteResult, "VALIDATION_ERROR">> {
   const worker = await db.worker.findFirst({
@@ -88,6 +91,25 @@ export async function submitQuote(
 
   if (worker.businessId !== input.businessId) {
     return svcFail("VALIDATION_ERROR", "Worker does not belong to business");
+  }
+
+  const service = input.serviceId
+    ? await db.service.findFirst({
+        where: {
+          id: input.serviceId,
+          businessId: input.businessId,
+          status: ServiceStatus.ACTIVE,
+        },
+        select: {
+          id: true,
+          diagnosticPriceCents: true,
+          diagnosticCredited: true,
+        },
+      })
+    : null;
+
+  if (input.serviceId && !service) {
+    return svcFail("NOT_FOUND", "Service not found");
   }
 
   if (input.scheduledAt.getTime() <= Date.now()) {
@@ -145,6 +167,10 @@ export async function submitQuote(
     scheduledFor: input.scheduledAt,
     message: input.message ?? null,
     status: QuoteStatus.PENDING,
+    serviceId: service?.id ?? null,
+    diagnosticPriceCents: service?.diagnosticPriceCents ?? null,
+    diagnosticCredited:
+      service?.diagnosticPriceCents != null && service.diagnosticCredited,
   };
 
   let quoteId: string;

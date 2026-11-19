@@ -2,6 +2,7 @@ import type { OrderDetail } from "./order.types";
 
 export type OrderNextStep =
   | "awaitingPayment"
+  | "issueFinalCharge"
   | "acceptProduct"
   | "assignWorker"
   | "serviceScheduled"
@@ -26,6 +27,7 @@ export type OrderPrimaryAction =
   | "markReadyForPickup"
   | "redeemPickup"
   | "assignWorker"
+  | "issueFinalCharge"
   | null;
 
 type EventType = OrderDetail["events"][number]["type"];
@@ -55,6 +57,9 @@ function awaitingConfirmation(order: OrderDetail): boolean {
  * from here: the server computes `order.actions` (web and mobile share it).
  */
 export function getOrderNextStep(order: OrderDetail): OrderNextStep {
+  // Diagnostic visit done (or under way): pricing the job is what's next.
+  if (order.actions.issueFinalCharge) return "issueFinalCharge";
+
   switch (order.status) {
     case "PENDING":
       return "awaitingPayment";
@@ -91,6 +96,7 @@ export function getOrderNextStep(order: OrderDetail): OrderNextStep {
 export function getOrderPrimaryAction(order: OrderDetail): OrderPrimaryAction {
   const { actions } = order;
 
+  if (actions.issueFinalCharge) return "issueFinalCharge";
   if (actions.acceptProduct) return "acceptProduct";
   if (actions.markDelivered) return "markDelivered";
   if (actions.markReadyForPickup) return "markReadyForPickup";

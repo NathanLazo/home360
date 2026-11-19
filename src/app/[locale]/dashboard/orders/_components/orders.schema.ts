@@ -25,6 +25,8 @@ export const OFFER_MESSAGE_MAX = 500;
  */
 export const offerFormSchema = z.object({
   workerId: recordIdSchema,
+  /** Empty string = no linked catalog service. */
+  serviceId: z.union([recordIdSchema, z.literal("")]),
   price: z.coerce.number().positive().max(10_000_000),
   scheduledAt: z
     .string()
@@ -37,6 +39,7 @@ export const offerFormSchema = z.object({
 
 export type OfferFormValues = {
   workerId: string;
+  serviceId: string;
   price: string;
   scheduledAt: string;
   message: string;

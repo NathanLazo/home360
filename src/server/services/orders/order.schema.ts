@@ -77,3 +77,19 @@ export const orderRedeemPickupSchema = z.object({
 });
 
 export type OrderRedeemPickupInput = z.infer<typeof orderRedeemPickupSchema>;
+
+/** Upper bound shared with the offer form (10 M MXN). */
+export const FINAL_CHARGE_MAX_CENTS = 1_000_000_000;
+
+/**
+ * Final charge of a diagnostic order: the full job price in cents. The
+ * credited diagnostic (if any) is deducted on the server.
+ */
+export const orderIssueFinalChargeSchema = z.object({
+  id: recordIdSchema,
+  finalAmountCents: z.number().int().positive().max(FINAL_CHARGE_MAX_CENTS),
+});
+
+export type OrderIssueFinalChargeInput = z.infer<
+  typeof orderIssueFinalChargeSchema
+>;

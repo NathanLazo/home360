@@ -7,6 +7,7 @@ import {
   LoaderCircleIcon,
   MessageSquareIcon,
   PackageCheckIcon,
+  ReceiptTextIcon,
   ScanLineIcon,
   StoreIcon,
   TruckIcon,
@@ -16,6 +17,7 @@ import { useTranslations } from "next-intl";
 
 import { OrderAssignWorkerDialog } from "./order-assign-worker-dialog";
 import { OrderCancelDialog } from "./order-cancel-dialog";
+import { OrderFinalChargeDialog } from "./order-final-charge-dialog";
 import {
   cancelRefunds,
   getOrderNextStep,
@@ -33,7 +35,13 @@ import {
 import { Button } from "~/components/ui/button";
 
 type OpenDialog =
-  "cancel" | "assign" | "delivered" | "readyForPickup" | "redeem" | null;
+  | "cancel"
+  | "assign"
+  | "delivered"
+  | "readyForPickup"
+  | "redeem"
+  | "finalCharge"
+  | null;
 
 type ActionKey =
   | "acceptProduct"
@@ -41,7 +49,8 @@ type ActionKey =
   | "markDelivered"
   | "markReadyForPickup"
   | "redeemPickup"
-  | "assignWorker";
+  | "assignWorker"
+  | "issueFinalCharge";
 
 type ActionDescriptor = {
   key: ActionKey;
@@ -85,13 +94,23 @@ export function OrderDetailActions({
     mutations.markingOutForDelivery ||
     mutations.markingDelivered ||
     mutations.markingReadyForPickup ||
-    mutations.redeeming;
+    mutations.redeeming ||
+    mutations.issuingFinalCharge;
   const closeDialog = (open: boolean) => {
     if (!open) setDialog(null);
   };
 
   const descriptors: ActionDescriptor[] = [];
 
+  if (actions.issueFinalCharge) {
+    descriptors.push({
+      key: "issueFinalCharge",
+      label: t("issueFinalCharge"),
+      icon: ReceiptTextIcon,
+      pending: mutations.issuingFinalCharge,
+      onClick: () => setDialog("finalCharge"),
+    });
+  }
   if (actions.acceptProduct) {
     descriptors.push({
       key: "acceptProduct",
@@ -276,6 +295,20 @@ export function OrderDetailActions({
           })
         }
       />
+      {order.diagnostic?.stage === "diagnostic" ? (
+        <OrderFinalChargeDialog
+          open={dialog === "finalCharge"}
+          folio={order.folio}
+          diagnosticCents={order.amountCents}
+          credited={order.diagnostic.credited}
+          estimatedJobCents={order.diagnostic.estimatedJobCents}
+          loading={mutations.issuingFinalCharge}
+          onOpenChange={closeDialog}
+          onConfirm={(finalAmountCents) =>
+            mutations.issueFinalCharge(order.id, finalAmountCents)
+          }
+        />
+      ) : null}
       <OrderRedeemPickupDialog
         open={dialog === "redeem"}
         loading={mutations.redeeming}

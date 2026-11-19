@@ -40,10 +40,34 @@ export function RequestOwnOffer({
         <OfferStatusBadge status={quote.status} label={statusT(quote.status)} />
       </div>
       <dl className="text-copy-sm grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
-        <dt className="text-muted-foreground">{t("priceLabel")}</dt>
+        <dt className="text-muted-foreground">
+          {t(
+            quote.diagnosticPriceCents !== null
+              ? "estimatedLabel"
+              : "priceLabel",
+          )}
+        </dt>
         <dd className="text-right font-mono font-semibold tabular-nums">
           {money(quote.amountCents)}
         </dd>
+        {quote.diagnosticPriceCents !== null ? (
+          <>
+            <dt className="text-muted-foreground">{t("diagnosticLabel")}</dt>
+            <dd className="text-right">
+              <span className="font-mono tabular-nums">
+                {money(quote.diagnosticPriceCents)}
+              </span>
+              <span className="text-muted-foreground">
+                {" · "}
+                {t(
+                  quote.diagnosticCredited
+                    ? "diagnosticCredited"
+                    : "diagnosticNotCredited",
+                )}
+              </span>
+            </dd>
+          </>
+        ) : null}
         <dt className="text-muted-foreground">{t("scheduledLabel")}</dt>
         <dd className="text-right">
           {quote.scheduledFor

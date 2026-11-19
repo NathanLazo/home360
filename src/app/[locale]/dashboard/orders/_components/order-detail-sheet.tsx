@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import { ConversationPanel } from "./conversation-panel";
 import { OrderDetailActions } from "./order-detail-actions";
 import { OrderDetailRow } from "./order-detail-row";
+import { OrderDiagnosticSection } from "./order-diagnostic-section";
 import { OrderFulfillmentSection } from "./order-fulfillment-section";
 import { OrderStatusBadge } from "./order-status-badge";
 import { OrderTimeline } from "./order-timeline";
@@ -275,6 +276,16 @@ export function OrderDetailSheet({
                   </div>
                 ) : null}
               </section>
+
+              {order.diagnostic ? (
+                <>
+                  <Separator />
+                  <OrderDiagnosticSection
+                    amountCents={order.amountCents}
+                    diagnostic={order.diagnostic}
+                  />
+                </>
+              ) : null}
 
               {order.type === "PRODUCT" ? (
                 <>
