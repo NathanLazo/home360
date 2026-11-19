@@ -5,7 +5,7 @@ import { LoaderCircleIcon, ReceiptTextIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { finalChargeBreakdown, parsePesosToCents } from "./final-charge.utils";
-import { useMoney } from "./use-money";
+import { useMoney } from "~/hooks/use-money";
 import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import {

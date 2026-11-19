@@ -1,4 +1,4 @@
-import type { MyQuoteItem } from "./order.types";
+import type { MyQuoteItem } from "./request.types";
 import {
   StatusBadge,
   type StatusBadgeVariant,

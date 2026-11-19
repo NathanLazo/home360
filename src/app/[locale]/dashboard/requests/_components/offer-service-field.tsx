@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import type { QuotableService } from "./order.types";
+import type { QuotableService } from "./request.types";
 import { Label } from "~/components/ui/label";
 import {
   Select,

@@ -3,6 +3,7 @@
     "home": "Home",
     "services": "Services",
     "products": "Products",
+    "requests": "Requests",
     "orders": "Orders",
     "payments": "Payments",
     "subscription": "Subscription",
@@ -195,7 +196,7 @@
   },
   "orders": {
     "title": "Orders",
-    "subtitle": "Manage orders, answer nearby requests and follow up on your offers.",
+    "subtitle": "Manage your orders and follow each job through to delivery.",
     "loading": "Loading orders",
     "loadMore": "Load more",
     "retry": "Try again",
@@ -373,12 +374,6 @@
         "PAYMENT_EXPIRED": "Payment window expired"
       },
       "noteGeneric": "Note: {note}"
-    },
-    "tabs": {
-      "label": "Order sections",
-      "orders": "Orders",
-      "requests": "Requests",
-      "offers": "My offers"
     },
     "actions": {
       "title": "Order actions",
@@ -1501,6 +1496,18 @@
       }
     }
   },
+  "requestsPage": {
+    "title": "Requests",
+    "subtitle": "Answer nearby requests and track your offers. Accepted ones move to Orders.",
+    "retry": "Retry",
+    "errorTitle": "We couldn't open Requests",
+    "errorDescription": "Something went wrong preparing this section. Try again.",
+    "tabs": {
+      "label": "Request sections",
+      "radar": "Near you",
+      "offers": "My offers"
+    }
+  },
   "requests": {
     "loading": "Loading requests",
     "loadMore": "Load more",
@@ -1616,7 +1623,8 @@
       "diagnosticLabel": "Diagnostic",
       "diagnosticCredited": "Credited",
       "diagnosticNotCredited": "Not credited",
-      "estimatedLabel": "Estimated price"
+      "estimatedLabel": "Estimated price",
+      "noEstimate": "After the diagnostic"
     },
     "offerForm": {
       "workerLabel": "Technician who will do the job",
@@ -1634,11 +1642,19 @@
       "serviceLabel": "Catalog service",
       "servicePlaceholder": "No linked service",
       "serviceNone": "No linked service",
-      "estimatedPriceLabel": "Estimated job price",
+      "estimatedPriceLabel": "Estimated job price (optional)",
       "diagnosticTitle": "Two-step charge",
       "diagnosticNotice": "On acceptance the customer pays <price>{amount}</price> for the diagnostic today. You issue the final price after the visit.",
       "diagnosticCredited": "The diagnostic is credited toward the final price.",
-      "diagnosticNotCredited": "The diagnostic is not credited toward the final price."
+      "diagnosticNotCredited": "The diagnostic is not credited toward the final price.",
+      "priceOptionalHint": "Leave it empty if you'll price the job after the visit; if you fill it, the customer sees it as a reference.",
+      "diagnosticToggleLabel": "Charge an initial diagnostic",
+      "diagnosticToggleHint": "The customer pays for the visit on acceptance and you issue the final charge afterwards.",
+      "diagnosticPriceLabel": "Diagnostic fee (MXN)",
+      "diagnosticPriceError": "Enter a diagnostic fee greater than zero.",
+      "diagnosticCreditedLabel": "Deduct it from the final payment",
+      "diagnosticCreditedHint": "If the job goes ahead, the diagnostic is subtracted from the final charge.",
+      "diagnosticFromService": "Taken from “{service}”. Changes apply to this offer only."
     },
     "offers": {
       "loading": "Loading offers",
@@ -1658,7 +1674,7 @@
       },
       "empty": {
         "title": "You haven't sent offers yet",
-        "description": "Answer requests from the Requests tab; your offers will show up here.",
+        "description": "Answer requests from the Near you tab; your offers will show up here.",
         "filteredTitle": "No offers with that status",
         "filteredDescription": "Choose another status to see more offers."
       },
@@ -1675,7 +1691,8 @@
           "confirm": "Withdraw offer",
           "cancel": "Keep it"
         }
-      }
+      },
+      "noEstimate": "After the diagnostic"
     },
     "feedback": {
       "offerSent": "Offer sent. We'll let you know if the customer accepts it.",

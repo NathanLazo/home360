@@ -205,7 +205,8 @@
       "pay": "Pay",
       "viewOrder": "View order",
       "quotesLabel": "Offers received",
-      "waitingForQuotes": "No offers yet. We'll let you know when a provider quotes."
+      "waitingForQuotes": "No offers yet. We'll let you know when a provider quotes.",
+      "quoteAfterDiagnostic": "Price after the diagnostic"
     },
     "feedback": {
       "requestCreated": "Request sent to nearby providers.",

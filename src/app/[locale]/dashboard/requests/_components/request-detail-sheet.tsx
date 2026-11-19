@@ -13,14 +13,14 @@ import { useTranslations } from "next-intl";
 import { useAppFormatter } from "~/i18n/use-app-formatter";
 import { useEffect, useState } from "react";
 
-import { ConversationPanel } from "./conversation-panel";
+import { ConversationPanel } from "~/components/dashboard/conversation/conversation-panel";
 import { EMPTY_OFFER, OfferForm, toDateTimeLocal } from "./offer-form";
-import type { RadarRequestDetail, WorkerOption } from "./order.types";
-import type { OfferFormValues } from "./orders.schema";
+import type { RadarRequestDetail, WorkerOption } from "./request.types";
+import type { OfferFormValues } from "./requests.schema";
 import { RequestDiagnosisNotes } from "./request-diagnosis-notes";
 import { RequestEvidenceGrid } from "./request-evidence-grid";
 import { RequestOwnOffer } from "./request-own-offer";
-import { useMoney } from "./use-money";
+import { useMoney } from "~/hooks/use-money";
 import { useOfferMutations } from "./use-offer-mutations";
 import { useSubscriptionAccess } from "~/components/dashboard/subscription-access-context";
 import { Badge } from "~/components/ui/badge";
@@ -46,7 +46,14 @@ function offerDefaults(request: RadarRequestDetail | null): OfferFormValues {
   return {
     workerId: quote.workerId ?? "",
     serviceId: quote.serviceId ?? "",
-    price: String(quote.amountCents / 100),
+    price: quote.amountCents === null ? "" : String(quote.amountCents / 100),
+    diagnosticEnabled: quote.diagnosticPriceCents !== null,
+    diagnosticPrice:
+      quote.diagnosticPriceCents === null
+        ? ""
+        : String(quote.diagnosticPriceCents / 100),
+    diagnosticCredited:
+      quote.diagnosticPriceCents === null ? true : quote.diagnosticCredited,
     // A past visit time must be re-picked before re-sending.
     scheduledAt:
       quote.scheduledFor && quote.scheduledFor.getTime() > Date.now()
@@ -169,7 +176,7 @@ export function RequestDetailSheet({
           </SheetClose>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
           {query.isPending && open ? <SheetSkeleton /> : null}
 
           {!query.isPending && errorCode !== null ? (

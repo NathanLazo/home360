@@ -48,8 +48,11 @@ export type QuoteListItem = {
   businessId: string;
   /** Request×business pre-order conversation, when one exists (D10-12). */
   conversationId: string | null;
-  /** Estimated job price (the full price when there is no diagnostic). */
-  amountCents: number;
+  /**
+   * Estimated job price (the full price when there is no diagnostic). Null
+   * only with a diagnostic: the business prices the job after the visit.
+   */
+  amountCents: number | null;
   diagnostic: QuoteDiagnostic | null;
   scheduledFor: Date | null;
   message: string | null;
@@ -82,7 +85,7 @@ export type QuoteDetail = {
   business: QuoteBusinessProfile;
   diagnostic: QuoteDiagnostic | null;
   /** Estimated full job (informative when a diagnostic is charged first). */
-  estimatedJobCents: number;
+  estimatedJobCents: number | null;
   // No "materials" line: Quote does not reference products and quote.submit
   // does not capture them (MA-07). With a diagnostic, labor is the diagnostic
   // fee: it is what the customer pays now.
@@ -123,15 +126,29 @@ function toQuoteDiagnostic(quote: {
       };
 }
 
+/** What the customer pays on acceptance: the diagnostic or the full job. */
+function upfrontCents(quote: {
+  amountCents: number | null;
+  diagnostic: QuoteDiagnostic | null;
+}): number {
+  return (
+    quote.diagnostic?.priceCents ??
+    quote.amountCents ??
+    Number.POSITIVE_INFINITY
+  );
+}
+
 function sortQuotes(quotes: ScoredQuote[], sort: QuoteSort): ScoredQuote[] {
   const bySort: Record<QuoteSort, (a: ScoredQuote, b: ScoredQuote) => number> =
     {
-      recommended: (a, b) => b.score - a.score || a.amountCents - b.amountCents,
-      cheapest: (a, b) => a.amountCents - b.amountCents || b.score - a.score,
+      recommended: (a, b) =>
+        b.score - a.score || upfrontCents(a) - upfrontCents(b),
+      cheapest: (a, b) =>
+        upfrontCents(a) - upfrontCents(b) || b.score - a.score,
       bestRated: (a, b) =>
         (b.business.ratingAvg ?? -1) - (a.business.ratingAvg ?? -1) ||
         b.business.ratingCount - a.business.ratingCount ||
-        a.amountCents - b.amountCents,
+        upfrontCents(a) - upfrontCents(b),
     };
 
   return [...quotes].sort(bySort[sort]);
@@ -325,6 +342,10 @@ export async function getMyQuote(
 
   const laborCents = quote.diagnosticPriceCents ?? quote.amountCents;
 
+  if (laborCents === null) {
+    return svcFail("CONFLICT", "Quote has no chargeable amount");
+  }
+
   return svcOk({
     id: quote.id,
     status: quote.status,
@@ -416,6 +437,14 @@ export async function acceptQuote(
       return svcFail("REQUEST_EXPIRED", "Request has expired");
     }
 
+    // A diagnostic-first quote charges only the diagnostic now; otherwise the
+    // full job. Checked before any write: the transaction commits on return.
+    const upfrontAmountCents = quote.diagnosticPriceCents ?? quote.amountCents;
+
+    if (upfrontAmountCents === null) {
+      return svcFail("CONFLICT", "Quote has no chargeable amount");
+    }
+
     // Conditional claim: a concurrent accept of the same quote loses here
     // instead of double-creating the Order.
     const claimed = await tx.quote.updateMany({
@@ -448,7 +477,7 @@ export async function acceptQuote(
         type: OrderType.SERVICE,
         title: quote.request.title,
         status: OrderStatus.PENDING,
-        amountCents: quote.diagnosticPriceCents ?? quote.amountCents,
+        amountCents: upfrontAmountCents,
         isDiagnostic,
         serviceId: quote.serviceId,
         customerId: input.customerId,

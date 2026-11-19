@@ -205,7 +205,8 @@
       "pay": "Pagar",
       "viewOrder": "Ver orden",
       "quotesLabel": "Ofertas recibidas",
-      "waitingForQuotes": "Aún no hay ofertas. Te avisaremos cuando un proveedor cotice."
+      "waitingForQuotes": "Aún no hay ofertas. Te avisaremos cuando un proveedor cotice.",
+      "quoteAfterDiagnostic": "Precio tras el diagnóstico"
     },
     "feedback": {
       "requestCreated": "Solicitud enviada a proveedores cercanos.",

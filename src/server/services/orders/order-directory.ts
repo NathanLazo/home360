@@ -228,7 +228,7 @@ export type OrderDetail = {
   quote: {
     id: string;
     requestId: string;
-    amountCents: number;
+    amountCents: number | null;
     scheduledFor: Date | null;
     message: string | null;
   } | null;

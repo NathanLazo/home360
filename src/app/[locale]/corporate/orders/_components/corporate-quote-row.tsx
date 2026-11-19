@@ -68,7 +68,9 @@ export function CorporateQuoteRow({
       </div>
       <div className="flex items-center gap-3 sm:shrink-0">
         <span className="font-mono font-medium tabular-nums">
-          {formatter.number(quote.amountCents / 100, CURRENCY)}
+          {quote.amountCents === null
+            ? t("quoteAfterDiagnostic")
+            : formatter.number(quote.amountCents / 100, CURRENCY)}
         </span>
         {quote.status === "PENDING" && canAccept ? (
           <Button
