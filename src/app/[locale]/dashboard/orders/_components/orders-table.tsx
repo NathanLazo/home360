@@ -62,7 +62,16 @@ export function OrdersTable({
       mobile: "title",
       header: t("columns.order"),
       className: "min-w-56",
-      cell: (order) => <span className="font-medium">{order.title}</span>,
+      cell: (order) => (
+        <span className="inline-flex flex-wrap items-center gap-2">
+          <span className="font-medium">{order.title}</span>
+          {order.stage !== "standard" ? (
+            <span className="bg-metal text-label rounded-full px-2 py-0.5 font-medium">
+              {t(`stages.${order.stage}`)}
+            </span>
+          ) : null}
+        </span>
+      ),
     },
     {
       key: "type",

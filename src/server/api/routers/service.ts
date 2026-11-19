@@ -19,6 +19,7 @@ import {
   deleteService,
   importServiceRows,
   listServiceCategories,
+  listQuotableServices,
   listServices,
   listServiceWorkers,
   setServiceStatus,
@@ -45,6 +46,15 @@ export const serviceRouter = createTRPCRouter({
         return serviceFailure(error);
       }
     }),
+
+  /** ACTIVE services with diagnostic terms, for the offer composer. */
+  listQuotable: businessProcedure.query(async ({ ctx }) => {
+    try {
+      return await listQuotableServices(ctx.db, ctx.business.id);
+    } catch (error) {
+      return serviceFailure(error);
+    }
+  }),
 
   listCategories: businessProcedure.query(async ({ ctx }) => {
     try {

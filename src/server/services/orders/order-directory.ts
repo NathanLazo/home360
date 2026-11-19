@@ -1,15 +1,15 @@
 import "server-only";
 
-import type {
+import {
   OrderStatus,
-  OrderType,
-  PaymentStatus,
-  DisputeStatus,
-  FulfillmentMethod,
-  OrderEventType,
-  PaymentMethod,
-  Prisma,
-  PrismaClient,
+  type OrderType,
+  type PaymentStatus,
+  type DisputeStatus,
+  type FulfillmentMethod,
+  type OrderEventType,
+  type PaymentMethod,
+  type Prisma,
+  type PrismaClient,
 } from "@generated/prisma";
 import { fail, ok, type TrpcResponse } from "~/server/api/contract";
 import { assertBranchInBusiness } from "~/server/services/business/branch-access";
@@ -24,6 +24,7 @@ import {
   effectiveFulfillmentMethod,
   getBusinessOrderActions,
 } from "~/server/services/orders/order-actions";
+import { canIssueFinalCharge } from "~/server/services/orders/diagnostic-final-charge";
 
 const PAGE_SIZE = 20;
 const MAX_PRISMA_INT = 2_147_483_647;
@@ -36,6 +37,8 @@ const orderListSelect = {
   amountCents: true,
   status: true,
   fulfillmentMethod: true,
+  isDiagnostic: true,
+  diagnosticOrderId: true,
   createdAt: true,
   customer: { select: { name: true } },
   branch: { select: { name: true } },
@@ -63,6 +66,21 @@ const orderDetailSelect = {
   deliveryEvidenceUrls: true,
   deliveryNote: true,
   pickedUpAt: true,
+  isDiagnostic: true,
+  diagnosticCreditCents: true,
+  diagnosticOrder: { select: { id: true, folio: true, amountCents: true } },
+  followUpOrders: {
+    where: { status: { not: OrderStatus.CANCELLED } },
+    select: {
+      id: true,
+      folio: true,
+      status: true,
+      amountCents: true,
+      diagnosticCreditCents: true,
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 1,
+  },
   createdAt: true,
   updatedAt: true,
   customer: { select: { id: true, name: true, email: true } },
@@ -75,6 +93,7 @@ const orderDetailSelect = {
     select: {
       id: true,
       amountCents: true,
+      diagnosticCredited: true,
       scheduledFor: true,
       message: true,
       request: { select: { id: true, addressLine: true } },
@@ -134,8 +153,38 @@ export type OrderListItem = {
   status: OrderStatus;
   /** PRODUCT only (D10-1); null for SERVICE. */
   fulfillmentMethod: FulfillmentMethod | null;
+  /** Diagnostic-first services: diagnostic visit vs. its final charge. */
+  stage: OrderServiceStage;
   createdAt: Date;
 };
+
+/** `standard` = single charge; otherwise the two-step diagnostic flow. */
+export type OrderServiceStage = "standard" | "diagnostic" | "finalCharge";
+
+/**
+ * Diagnostic-first flow as the business sees it. On the diagnostic order:
+ * its terms plus the final charge once issued. On the final charge: the
+ * diagnostic it came from and the credit already deducted.
+ */
+export type OrderDiagnosticInfo =
+  | {
+      stage: "diagnostic";
+      credited: boolean;
+      /** Estimated job price the offer promised. */
+      estimatedJobCents: number | null;
+      finalCharge: {
+        id: string;
+        folio: number;
+        status: OrderStatus;
+        amountCents: number;
+        creditCents: number;
+      } | null;
+    }
+  | {
+      stage: "finalCharge";
+      diagnosticOrder: { id: string; folio: number; amountCents: number };
+      creditCents: number;
+    };
 
 type OrderListResult = {
   items: OrderListItem[];
@@ -193,6 +242,7 @@ export type OrderDetail = {
     createdAt: Date;
   } | null;
   review: { rating: number; comment: string | null } | null;
+  diagnostic: OrderDiagnosticInfo | null;
   materials: Array<{
     id: string;
     name: string;
@@ -222,6 +272,7 @@ export type BusinessOrderActions = {
   redeemPickup: boolean;
   assignWorker: boolean;
   cancel: boolean;
+  issueFinalCharge: boolean;
 };
 
 type SignedOrderMedia = {
@@ -230,6 +281,47 @@ type SignedOrderMedia = {
   afterUrls: string[];
   deliveryEvidence: SignedMedia[];
 };
+
+function serviceStageOf(order: {
+  isDiagnostic: boolean;
+  diagnosticOrderId: string | null;
+}): OrderServiceStage {
+  if (order.isDiagnostic) return "diagnostic";
+  return order.diagnosticOrderId !== null ? "finalCharge" : "standard";
+}
+
+function toDiagnosticInfo(
+  order: OrderDetailPayload,
+): OrderDiagnosticInfo | null {
+  if (order.isDiagnostic) {
+    const finalCharge = order.followUpOrders[0] ?? null;
+
+    return {
+      stage: "diagnostic",
+      credited: order.quote?.diagnosticCredited ?? false,
+      estimatedJobCents: order.quote?.amountCents ?? null,
+      finalCharge: finalCharge
+        ? {
+            id: finalCharge.id,
+            folio: finalCharge.folio,
+            status: finalCharge.status,
+            amountCents: finalCharge.amountCents,
+            creditCents: finalCharge.diagnosticCreditCents,
+          }
+        : null,
+    };
+  }
+
+  if (order.diagnosticOrder) {
+    return {
+      stage: "finalCharge",
+      diagnosticOrder: order.diagnosticOrder,
+      creditCents: order.diagnosticCreditCents,
+    };
+  }
+
+  return null;
+}
 
 function toOrderListItem(order: OrderListPayload): OrderListItem {
   return {
@@ -246,6 +338,7 @@ function toOrderListItem(order: OrderListPayload): OrderListItem {
       order.type,
       order.fulfillmentMethod,
     ),
+    stage: serviceStageOf(order),
     createdAt: order.createdAt,
   };
 }
@@ -298,6 +391,7 @@ function toOrderDetail(
       : null,
     payment: order.payment,
     review: order.review,
+    diagnostic: toDiagnosticInfo(order),
     materials: order.materials.map((material) => ({
       id: material.id,
       name: material.name,
@@ -312,15 +406,23 @@ function toOrderDetail(
       createdAt: event.createdAt,
       actorName: event.actor?.name ?? null,
     })),
-    actions: getBusinessOrderActions({
-      type: order.type,
-      status: order.status,
-      fulfillmentMethod: order.fulfillmentMethod,
-      paymentStatus: order.payment?.status ?? null,
-      hasDispute: order.dispute !== null,
-      pickedUpAt: order.pickedUpAt,
-      events: order.events,
-    }),
+    actions: {
+      ...getBusinessOrderActions({
+        type: order.type,
+        status: order.status,
+        fulfillmentMethod: order.fulfillmentMethod,
+        paymentStatus: order.payment?.status ?? null,
+        hasDispute: order.dispute !== null,
+        pickedUpAt: order.pickedUpAt,
+        events: order.events,
+      }),
+      issueFinalCharge: canIssueFinalCharge({
+        isDiagnostic: order.isDiagnostic,
+        status: order.status,
+        hasDispute: order.dispute !== null,
+        hasActiveFollowUp: order.followUpOrders.length > 0,
+      }),
+    },
   };
 }
 

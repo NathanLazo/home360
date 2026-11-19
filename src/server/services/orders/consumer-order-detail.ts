@@ -44,6 +44,15 @@ const consumerOrderSelect = {
   deliveryEvidenceUrls: true,
   deliveryNote: true,
   pickedUpAt: true,
+  isDiagnostic: true,
+  diagnosticCreditCents: true,
+  diagnosticOrder: { select: { id: true, folio: true, amountCents: true } },
+  followUpOrders: {
+    where: { status: { not: OrderStatus.CANCELLED } },
+    select: { id: true, folio: true, status: true, amountCents: true },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 1,
+  },
   corporateLocation: { select: { id: true, name: true } },
   business: {
     select: {
@@ -68,6 +77,7 @@ const consumerOrderSelect = {
     select: {
       id: true,
       amountCents: true,
+      diagnosticCredited: true,
       scheduledFor: true,
       message: true,
       request: {
@@ -146,6 +156,30 @@ export type ConsumerOrderDetail = {
     requestId: string;
     category: string;
   } | null;
+  /**
+   * Diagnostic-first services. `diagnostic`: this order is the diagnostic
+   * visit; `finalCharge` links the job charge once the business issued it.
+   * `finalCharge` stage: this order is the job charge and `creditCents` of the
+   * paid diagnostic were already deducted from its labor.
+   */
+  diagnostic:
+    | {
+        stage: "diagnostic";
+        credited: boolean;
+        estimatedJobCents: number | null;
+        finalCharge: {
+          id: string;
+          folio: number;
+          status: OrderStatus;
+          amountCents: number;
+        } | null;
+      }
+    | {
+        stage: "finalCharge";
+        diagnosticOrder: { id: string; folio: number; amountCents: number };
+        creditCents: number;
+      }
+    | null;
   evidence: {
     before: SignedEvidence[];
     after: SignedEvidence[];
@@ -336,6 +370,20 @@ export async function getConsumerOrderDetail(
           category: order.quote.request.category,
         }
       : null,
+    diagnostic: order.isDiagnostic
+      ? {
+          stage: "diagnostic",
+          credited: order.quote?.diagnosticCredited ?? false,
+          estimatedJobCents: order.quote?.amountCents ?? null,
+          finalCharge: order.followUpOrders[0] ?? null,
+        }
+      : order.diagnosticOrder
+        ? {
+            stage: "finalCharge",
+            diagnosticOrder: order.diagnosticOrder,
+            creditCents: order.diagnosticCreditCents,
+          }
+        : null,
     evidence: {
       before,
       after,

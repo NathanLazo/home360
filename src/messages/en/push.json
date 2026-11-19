@@ -94,5 +94,9 @@
   "paidOrderCancelledByCustomer": {
     "title": "Order cancelled by the customer",
     "body": "The customer cancelled a paid order before it started. The payment was fully refunded."
+  },
+  "finalChargeIssued": {
+    "title": "Your final charge is ready",
+    "body": "The business finished the diagnostic and issued the job charge. Pay it so the work can start."
   }
 }

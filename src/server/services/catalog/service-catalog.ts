@@ -119,6 +119,34 @@ export async function listServices(
   );
 }
 
+const quotableServiceSelect = {
+  id: true,
+  name: true,
+  diagnosticPriceCents: true,
+  diagnosticCredited: true,
+} satisfies Prisma.ServiceSelect;
+
+export type QuotableService = Prisma.ServiceGetPayload<{
+  select: typeof quotableServiceSelect;
+}>;
+
+/**
+ * ACTIVE services the business can attach to an offer, with their diagnostic
+ * terms (the offer form previews the two-step charge before sending).
+ */
+export async function listQuotableServices(
+  db: PrismaClient,
+  businessId: string,
+): Promise<TrpcResponse<QuotableService[]>> {
+  const services = await db.service.findMany({
+    where: { businessId, status: "ACTIVE" },
+    orderBy: [{ name: "asc" }, { id: "asc" }],
+    select: quotableServiceSelect,
+  });
+
+  return ok(services, "Quotable services loaded");
+}
+
 /** Categories used by the business catalog, in taxonomy order. */
 export async function listServiceCategories(
   db: PrismaClient,

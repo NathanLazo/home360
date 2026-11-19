@@ -10,7 +10,9 @@ import {
   type OfferFormField,
   type OfferFormValues,
 } from "./orders.schema";
-import type { WorkerOption } from "./order.types";
+import { OfferDiagnosticNotice } from "./offer-diagnostic-notice";
+import { OfferServiceField } from "./offer-service-field";
+import type { QuotableService, WorkerOption } from "./order.types";
 import { useErrorShake } from "~/components/motion";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -26,6 +28,7 @@ import { Textarea } from "~/components/ui/textarea";
 
 export type ParsedOffer = {
   workerId: string;
+  serviceId?: string;
   priceCents: number;
   scheduledAt: Date;
   message?: string;
@@ -44,20 +47,23 @@ export function toDateTimeLocal(date: Date): string {
 
 export const EMPTY_OFFER: OfferFormValues = {
   workerId: "",
+  serviceId: "",
   price: "",
   scheduledAt: "",
   message: "",
 };
 
 /**
- * Offer composer of N2 on web: technician, price, visit date-time and an
- * optional note for the customer. Validates with the same bounds the server
+ * Offer composer of N2 on web: technician, optional catalog service, price,
+ * visit date-time and an optional note for the customer. A service with
+ * diagnostic makes the price an estimate and previews the two-step charge. Validates with the same bounds the server
  * enforces before calling `quote.submit`. `initialValues` is read once:
  * callers remount with a `key` when the stored offer changes.
  */
 export function OfferForm({
   initialValues,
   workers,
+  services,
   submitting,
   disabled,
   submitLabel,
@@ -65,6 +71,7 @@ export function OfferForm({
 }: {
   initialValues: OfferFormValues;
   workers: WorkerOption[];
+  services: QuotableService[];
   submitting: boolean;
   disabled: boolean;
   submitLabel: string;
@@ -79,6 +86,10 @@ export function OfferForm({
   const shakeInvalid = useErrorShake();
   const fieldId = (field: OfferFormField) => `${baseId}-${field}`;
   const errorId = (field: OfferFormField) => `${baseId}-${field}-error`;
+  const diagnosticNoticeId = `${baseId}-diagnostic`;
+  const selectedService =
+    services.find((service) => service.id === values.serviceId) ?? null;
+  const diagnosticPriceCents = selectedService?.diagnosticPriceCents ?? null;
 
   function update(field: OfferFormField, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -114,9 +125,10 @@ export function OfferForm({
       return;
     }
 
-    const message = parsed.data.message;
+    const { message, serviceId } = parsed.data;
     await onSubmit({
       workerId: parsed.data.workerId,
+      ...(serviceId.length > 0 ? { serviceId } : {}),
       priceCents: Math.round(parsed.data.price * 100),
       scheduledAt: parsed.data.scheduledAt,
       ...(message.length > 0 ? { message } : {}),
@@ -167,9 +179,36 @@ export function OfferForm({
         ) : null}
       </div>
 
+      {services.length > 0 ? (
+        <OfferServiceField
+          id={fieldId("serviceId")}
+          value={values.serviceId}
+          services={services}
+          disabled={busy}
+          describedBy={
+            diagnosticPriceCents !== null ? diagnosticNoticeId : undefined
+          }
+          onChange={(serviceId) => update("serviceId", serviceId)}
+        />
+      ) : null}
+
+      {selectedService && diagnosticPriceCents !== null ? (
+        <OfferDiagnosticNotice
+          id={diagnosticNoticeId}
+          priceCents={diagnosticPriceCents}
+          credited={selectedService.diagnosticCredited}
+        />
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor={fieldId("price")}>{t("priceLabel")}</Label>
+          <Label htmlFor={fieldId("price")}>
+            {t(
+              diagnosticPriceCents !== null
+                ? "estimatedPriceLabel"
+                : "priceLabel",
+            )}
+          </Label>
           <Input
             id={fieldId("price")}
             type="number"

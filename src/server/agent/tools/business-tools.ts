@@ -466,7 +466,7 @@ export function createBusinessTools(
     }),
     submitQuote: tool({
       description:
-        "Send a quote for a radar request: price in MXN cents, scheduled date-time (ISO 8601), worker and optional message. Confirm price and date with the user before calling.",
+        "Send a quote for a radar request: price in MXN cents, scheduled date-time (ISO 8601), worker and optional message. Optional serviceId (catalog service): when that service has a diagnostic fee, the customer pays only the diagnostic on acceptance, the price is the estimated job, and the final charge is issued after the visit with issueFinalCharge. Confirm price and date with the user before calling.",
       inputSchema: z.object({
         requestId: cuid,
         priceCents: z.number().int().positive(),
@@ -474,6 +474,7 @@ export function createBusinessTools(
         workerId: cuid,
         message: z.string().trim().max(500).optional(),
         branchId,
+        serviceId: cuid.optional(),
       }),
       execute: ({ scheduledAt, ...rest }) =>
         runTool(() =>

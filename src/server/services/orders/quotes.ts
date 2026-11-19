@@ -24,6 +24,16 @@ const UNKNOWN_DISTANCE_KM = 10;
 
 const MAX_RATING = 5;
 
+/**
+ * Diagnostic-first offer: the customer pays `priceCents` on acceptance and
+ * the business issues the final charge after the visit. `credited` means the
+ * paid diagnostic is deducted from that final charge.
+ */
+export type QuoteDiagnostic = {
+  priceCents: number;
+  credited: boolean;
+};
+
 export type QuoteBusinessSummary = {
   name: string;
   ratingAvg: number | null;
@@ -38,7 +48,9 @@ export type QuoteListItem = {
   businessId: string;
   /** Request×business pre-order conversation, when one exists (D10-12). */
   conversationId: string | null;
+  /** Estimated job price (the full price when there is no diagnostic). */
   amountCents: number;
+  diagnostic: QuoteDiagnostic | null;
   scheduledFor: Date | null;
   message: string | null;
   /** Branch↔request Haversine; null when either side has no coordinates. */
@@ -68,8 +80,12 @@ export type QuoteDetail = {
   scheduledFor: Date | null;
   message: string | null;
   business: QuoteBusinessProfile;
+  diagnostic: QuoteDiagnostic | null;
+  /** Estimated full job (informative when a diagnostic is charged first). */
+  estimatedJobCents: number;
   // No "materials" line: Quote does not reference products and quote.submit
-  // does not capture them (MA-07).
+  // does not capture them (MA-07). With a diagnostic, labor is the diagnostic
+  // fee: it is what the customer pays now.
   breakdown: {
     laborCents: number;
     serviceFeeCents: number;
@@ -93,6 +109,18 @@ function recommendationScore(
   const ratingScore = (ratingAvg ?? 0) / MAX_RATING;
 
   return ratingScore / (1 + (distanceKm ?? UNKNOWN_DISTANCE_KM));
+}
+
+function toQuoteDiagnostic(quote: {
+  diagnosticPriceCents: number | null;
+  diagnosticCredited: boolean;
+}): QuoteDiagnostic | null {
+  return quote.diagnosticPriceCents === null
+    ? null
+    : {
+        priceCents: quote.diagnosticPriceCents,
+        credited: quote.diagnosticCredited,
+      };
 }
 
 function sortQuotes(quotes: ScoredQuote[], sort: QuoteSort): ScoredQuote[] {
@@ -143,6 +171,8 @@ export async function listQuotesByRequest(
       status: true,
       businessId: true,
       amountCents: true,
+      diagnosticPriceCents: true,
+      diagnosticCredited: true,
       scheduledFor: true,
       message: true,
       business: {
@@ -189,6 +219,7 @@ export async function listQuotesByRequest(
       businessId: row.businessId,
       conversationId: conversationByBusiness.get(row.businessId) ?? null,
       amountCents: row.amountCents,
+      diagnostic: toQuoteDiagnostic(row),
       scheduledFor: row.scheduledFor,
       message: row.message,
       distanceKm,
@@ -224,6 +255,8 @@ export async function getMyQuote(
       id: true,
       status: true,
       amountCents: true,
+      diagnosticPriceCents: true,
+      diagnosticCredited: true,
       scheduledFor: true,
       message: true,
       businessId: true,
@@ -290,6 +323,8 @@ export async function getMyQuote(
       ? null
       : Math.round((onTimeOrders / eligibleOrders.length) * 100);
 
+  const laborCents = quote.diagnosticPriceCents ?? quote.amountCents;
+
   return svcOk({
     id: quote.id,
     status: quote.status,
@@ -298,15 +333,17 @@ export async function getMyQuote(
     orderId: quote.order?.id ?? null,
     scheduledFor: quote.scheduledFor,
     message: quote.message,
+    diagnostic: toQuoteDiagnostic(quote),
+    estimatedJobCents: quote.amountCents,
     business: {
       ...quote.business,
       completedOrders,
       onTimePct,
     },
     breakdown: {
-      laborCents: quote.amountCents,
+      laborCents,
       serviceFeeCents: settings.customerServiceFeeCents,
-      totalCents: quote.amountCents + settings.customerServiceFeeCents,
+      totalCents: laborCents + settings.customerServiceFeeCents,
     },
   });
 }
@@ -337,6 +374,8 @@ export async function acceptQuote(
         id: true,
         status: true,
         amountCents: true,
+        serviceId: true,
+        diagnosticPriceCents: true,
         requestId: true,
         businessId: true,
         branchId: true,
@@ -401,13 +440,17 @@ export async function acceptQuote(
       data: { status: RequestStatus.ACCEPTED },
     });
 
-    // serviceId stays null: Quote has no Service FK to copy (see M3 findings).
+    // A diagnostic-first quote charges only the diagnostic now; the final
+    // charge is a follow-up order issued after the visit.
+    const isDiagnostic = quote.diagnosticPriceCents !== null;
     const order = await tx.order.create({
       data: {
         type: OrderType.SERVICE,
         title: quote.request.title,
         status: OrderStatus.PENDING,
-        amountCents: quote.amountCents,
+        amountCents: quote.diagnosticPriceCents ?? quote.amountCents,
+        isDiagnostic,
+        serviceId: quote.serviceId,
         customerId: input.customerId,
         businessId: quote.businessId,
         branchId: quote.branchId,

@@ -94,5 +94,9 @@
   "paidOrderCancelledByCustomer": {
     "title": "El cliente canceló la orden",
     "body": "El cliente canceló una orden pagada antes de iniciar. El pago se reembolsó completo."
+  },
+  "finalChargeIssued": {
+    "title": "Tu cargo final está listo",
+    "body": "El negocio terminó el diagnóstico y emitió el cargo del trabajo. Págalo para que inicie."
   }
 }

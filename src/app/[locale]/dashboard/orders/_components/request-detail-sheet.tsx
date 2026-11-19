@@ -45,6 +45,7 @@ function offerDefaults(request: RadarRequestDetail | null): OfferFormValues {
 
   return {
     workerId: quote.workerId ?? "",
+    serviceId: quote.serviceId ?? "",
     price: String(quote.amountCents / 100),
     // A past visit time must be re-picked before re-sending.
     scheduledAt:
@@ -93,6 +94,10 @@ export function RequestDetailSheet({
   const { isReadOnly } = useSubscriptionAccess();
   const open = requestId !== null;
   const mutations = useOfferMutations();
+  const servicesQuery = api.service.listQuotable.useQuery(undefined, {
+    enabled: open,
+  });
+  const services = servicesQuery.data?.result ?? [];
   const query = api.radar.getRequest.useQuery(
     { id: requestId ?? "", ...(branchId ? { branchId } : {}) },
     { enabled: open },
@@ -342,6 +347,7 @@ export function RequestDetailSheet({
                     key={offerFormKey}
                     initialValues={offerDefaults(request)}
                     workers={workers}
+                    services={services}
                     submitting={mutations.submitting}
                     disabled={isReadOnly}
                     submitLabel={submitLabel}

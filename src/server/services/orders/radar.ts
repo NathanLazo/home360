@@ -281,6 +281,10 @@ export type RadarOwnQuote = {
   workerId: string | null;
   workerName: string | null;
   branchId: string | null;
+  /** Catalog service of the offer and its diagnostic snapshot, if any. */
+  serviceId: string | null;
+  diagnosticPriceCents: number | null;
+  diagnosticCredited: boolean;
   updatedAt: Date;
 };
 
@@ -348,6 +352,9 @@ export async function getRadarRequest(
           scheduledFor: true,
           message: true,
           branchId: true,
+          serviceId: true,
+          diagnosticPriceCents: true,
+          diagnosticCredited: true,
           updatedAt: true,
           worker: { select: { id: true, fullName: true } },
         },
@@ -438,6 +445,9 @@ export async function getRadarRequest(
           workerId: ownQuote.worker?.id ?? null,
           workerName: ownQuote.worker?.fullName ?? null,
           branchId: ownQuote.branchId,
+          serviceId: ownQuote.serviceId,
+          diagnosticPriceCents: ownQuote.diagnosticPriceCents,
+          diagnosticCredited: ownQuote.diagnosticCredited,
           updatedAt: ownQuote.updatedAt,
         }
       : null,

@@ -78,6 +78,10 @@ export const DOMAIN_ERROR_CODES = [
   "MCP_TOKEN_LIMIT_REACHED",
   // App Store 1.2: customer×business chat blocked by either side.
   "CONVERSATION_BLOCKED",
+  // Diagnostic-first services: final charge after the diagnostic visit.
+  "DIAGNOSTIC_NOT_READY",
+  "FINAL_CHARGE_EXISTS",
+  "FINAL_CHARGE_BELOW_CREDIT",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

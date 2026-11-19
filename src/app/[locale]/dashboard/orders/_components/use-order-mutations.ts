@@ -24,6 +24,7 @@ export function useOrderMutations() {
   const deliveredMutation = api.order.markDelivered.useMutation();
   const readyForPickupMutation = api.order.markReadyForPickup.useMutation();
   const redeemMutation = api.order.redeemPickup.useMutation();
+  const finalChargeMutation = api.order.issueFinalCharge.useMutation();
 
   async function refresh() {
     await Promise.all([
@@ -116,6 +117,12 @@ export function useOrderMutations() {
         () => readyForPickupMutation.mutateAsync({ id: orderId }),
         t("readyForPickup"),
       ),
+    issueFinalCharge: (orderId: string, finalAmountCents: number) =>
+      run(
+        () =>
+          finalChargeMutation.mutateAsync({ id: orderId, finalAmountCents }),
+        t("finalChargeIssued"),
+      ),
     redeemPickup,
     accepting: acceptMutation.isPending,
     cancelling: cancelMutation.isPending,
@@ -124,5 +131,6 @@ export function useOrderMutations() {
     markingDelivered: deliveredMutation.isPending,
     markingReadyForPickup: readyForPickupMutation.isPending,
     redeeming: redeemMutation.isPending,
+    issuingFinalCharge: finalChargeMutation.isPending,
   };
 }
