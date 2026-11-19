@@ -26,8 +26,6 @@
     "errorDescription": "Try again in a moment.",
     "currentErrorTitle": "We could not load your plan",
     "plansErrorTitle": "We could not load the plans",
-    "noSubscriptionTitle": "Your plan starts when your account is approved",
-    "noSubscriptionDescription": "Once the HOME360 team approves your business, your plan and invoices will show up here.",
     "features": {
       "commission": "{percent}% commission per sale",
       "branches": "Branches: {value}",
@@ -41,7 +39,17 @@
       "value": "{used} of {max}",
       "valueUnlimited": "{used} · no limit"
     },
+    "choosePlan": {
+      "title": "Choose your plan to get started",
+      "description": "Your business is approved. Pick the plan that fits you best and complete the payment on Stripe to activate your dashboard.",
+      "promoHint": "Have a discount code? Enter it on the payment page."
+    },
+    "checkout": {
+      "success": "Done, we are activating your plan. It may take a few seconds to show up.",
+      "canceled": "The payment was not completed. You can choose your plan whenever you are ready."
+    },
     "actions": {
+      "choose": "Choose {plan}",
       "manage": "Manage plan",
       "manageBilling": "Manage billing",
       "upgrade": "Upgrade plan",
@@ -55,6 +63,7 @@
         "businessPending": "Available once we approve your business. Your application is under review.",
         "businessSuspended": "Your business is suspended; you cannot create or edit records.",
         "businessRejected": "Your application was not approved; you cannot create or edit records.",
+        "subscriptionMissing": "Choose your plan to create and edit records.",
         "subscriptionCanceled": "Your account is read-only because your subscription is canceled."
       }
     },
@@ -92,6 +101,11 @@
     }
   },
   "subscriptionBanner": {
+    "choosePlan": {
+      "title": "Choose your plan to activate your account",
+      "description": "Your business is approved. Pick a plan and complete the payment to start operating; if you have a discount code, enter it when you pay.",
+      "cta": "Choose plan"
+    },
     "pastDue": {
       "title": "Your subscription has a pending payment",
       "description": "Update your payment method to keep your account current. You can keep operating as usual meanwhile.",

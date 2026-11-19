@@ -6,6 +6,7 @@ import type {
   SubscriptionStatus,
 } from "@generated/prisma";
 import { countActiveOrders } from "~/server/services/business/order-activity";
+import { requiresPlanSelection } from "~/server/services/subscription/plan-selection";
 
 export type DashboardShellData = {
   business: {
@@ -19,6 +20,8 @@ export type DashboardShellData = {
     status: SubscriptionStatus;
     renewsAt: Date;
   } | null;
+  /** The business has to pick and pay a plan through Checkout (§8). */
+  needsPlan: boolean;
   branches: Array<{ id: string; name: string }>;
   activeOrdersCount: number;
 };
@@ -34,7 +37,14 @@ export async function getDashboardShellData(
       name: true,
       status: true,
       // Same query as the shell: the banner costs no extra round trip.
-      subscription: { select: { status: true, renewsAt: true } },
+      subscription: {
+        select: {
+          status: true,
+          renewsAt: true,
+          stripeSubscriptionId: true,
+          _count: { select: { invoices: { where: { status: "PAID" } } } },
+        },
+      },
     },
   });
 
@@ -42,7 +52,22 @@ export async function getDashboardShellData(
     return null;
   }
 
-  const { subscription, ...business } = record;
+  const { subscription: subscriptionRecord, ...business } = record;
+  const needsPlan = requiresPlanSelection(
+    subscriptionRecord
+      ? {
+          status: subscriptionRecord.status,
+          stripeSubscriptionId: subscriptionRecord.stripeSubscriptionId,
+          paidInvoiceCount: subscriptionRecord._count.invoices,
+        }
+      : null,
+  );
+  const subscription = subscriptionRecord
+    ? {
+        status: subscriptionRecord.status,
+        renewsAt: subscriptionRecord.renewsAt,
+      }
+    : null;
 
   const [branches, activeOrdersCount] = await Promise.all([
     db.branch.findMany({
@@ -53,5 +78,5 @@ export async function getDashboardShellData(
     countActiveOrders(db, business.id),
   ]);
 
-  return { business, subscription, branches, activeOrdersCount };
+  return { business, subscription, needsPlan, branches, activeOrdersCount };
 }

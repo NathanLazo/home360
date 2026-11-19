@@ -189,11 +189,7 @@
       "guarantee": "Garantía",
       "documents": "Documentos",
       "noDocuments": "Este negocio aún no ha subido documentos.",
-      "plan": "Plan inicial",
-      "planPlaceholder": "Selecciona un plan",
-      "planOption": "{code} · {price}/mes · {commission}% de comisión",
-      "planHint": "Los planes sin precio publicado en Stripe no pueden seleccionarse todavía.",
-      "plansErrorTitle": "No pudimos cargar los planes",
+      "planHint": "Al aprobarlo, el negocio elegirá y pagará su propio plan desde su panel; ahí también puede canjear un código de descuento.",
       "cancel": "Cancelar",
       "confirm": "Aprobar negocio"
     },

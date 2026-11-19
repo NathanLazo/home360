@@ -14,6 +14,7 @@
   "INVALID_TARGET": "Los datos del cobro no son válidos.",
   "REFUND_EXCEEDS_LIMIT": "El reembolso supera el monto disponible.",
   "CORPORATE_PRICING_NOT_AVAILABLE": "Los precios corporativos aún no están disponibles.",
+  "ALREADY_SUBSCRIBED": "Tu negocio ya tiene un plan activo. Cámbialo desde las tarjetas de planes.",
   "NO_SUBSCRIPTION": "Este negocio todavía no tiene una suscripción.",
   "PLAN_NOT_FOUND": "No encontramos el plan seleccionado.",
   "PLAN_NOT_SYNCED": "Este plan aún no está disponible para contratarse.",

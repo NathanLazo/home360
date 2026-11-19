@@ -20,6 +20,8 @@ import {
 } from "~/server/api/trpc";
 import { getStripe } from "~/server/services/stripe/client";
 import { createBillingPortalSession } from "~/server/services/subscription/billing";
+import { requiresPlanSelection } from "~/server/services/subscription/plan-selection";
+import { createSubscriptionCheckout } from "~/server/services/subscription/subscription-checkout";
 import {
   changePlan,
   previewPlanChange,
@@ -36,6 +38,8 @@ const INVOICE_PAGE_SIZE = 10;
  * 404, state conflicts 409 and Stripe outages 502.
  */
 const serviceErrorStatuses = {
+  ALREADY_SUBSCRIBED: 409,
+  BUSINESS_NOT_ACTIVE: 403,
   CONFLICT: 409,
   NO_SUBSCRIPTION: 409,
   NOT_FOUND: 404,
@@ -71,6 +75,10 @@ function unexpectedFailure(
     normalized.status,
     message,
   );
+}
+
+function subscriptionPageUrl(locale: Locale): string {
+  return `${env.APP_URL}/${locale}/dashboard/subscription`;
 }
 
 /**
@@ -116,12 +124,14 @@ export const subscriptionRouter = createTRPCRouter({
         select: {
           status: true,
           renewsAt: true,
+          stripeSubscriptionId: true,
           plan: { select: planSelect },
+          _count: { select: { invoices: { where: { status: "PAID" } } } },
         },
       });
 
-      // Not an error: a business approved before F4, or still pending, simply
-      // has no plan yet.
+      // Not an error: an approved business picks its own plan through
+      // Checkout (`createCheckoutSession`), so until then it has none.
       if (!subscription) {
         return ok(null, "Business has no subscription");
       }
@@ -133,6 +143,11 @@ export const subscriptionRouter = createTRPCRouter({
           status: subscription.status,
           renewsAt: subscription.renewsAt,
           plan: subscription.plan,
+          needsPlan: requiresPlanSelection({
+            status: subscription.status,
+            stripeSubscriptionId: subscription.stripeSubscriptionId,
+            paidInvoiceCount: subscription._count.invoices,
+          }),
           usage: buildPlanUsageReport(usage, subscription.plan),
         },
         "Subscription loaded",
@@ -280,7 +295,7 @@ export const subscriptionRouter = createTRPCRouter({
         { db: ctx.db, stripe: getStripe() },
         {
           businessId: ctx.business.id,
-          returnUrl: `${env.APP_URL}/${locale}/dashboard/subscription`,
+          returnUrl: subscriptionPageUrl(locale),
         },
       );
 
@@ -293,4 +308,39 @@ export const subscriptionRouter = createTRPCRouter({
       return unexpectedFailure(error, "Billing portal session failed");
     }
   }),
+
+  /**
+   * Opens the Stripe Checkout where the business picks and pays its own plan
+   * and can redeem a promotion code (`PENDIENTES.md` §8, revised 2026-11-19).
+   *
+   * A `businessProcedure` on purpose: an approved business without a plan is
+   * read-only for `activeBusinessProcedure`, and this is the way out. The
+   * service still rejects a business that is not `ACTIVE`.
+   */
+  createCheckoutSession: businessProcedure
+    .input(planChangeSchema)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const locale = localeFromHeaders(ctx.headers);
+        const pageUrl = subscriptionPageUrl(locale);
+        const session = await createSubscriptionCheckout(
+          { db: ctx.db, stripe: getStripe() },
+          {
+            businessId: ctx.business.id,
+            planCode: input.planCode,
+            locale,
+            successUrl: `${pageUrl}?checkout=success`,
+            cancelUrl: `${pageUrl}?checkout=canceled`,
+          },
+        );
+
+        if (!session.ok) {
+          return serviceFailure(session.code, "Checkout session failed");
+        }
+
+        return ok(session.data, "Checkout session created");
+      } catch (error) {
+        return unexpectedFailure(error, "Checkout session failed");
+      }
+    }),
 });

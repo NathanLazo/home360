@@ -183,14 +183,9 @@ export function createAdminTools(
       execute: (input) =>
         runTool(() => caller.admin.users.getCustomerDetail(input)),
     }),
-    listApprovalPlans: tool({
-      description: "Plans available when approving a business.",
-      inputSchema: z.object({}),
-      execute: () => runTool(() => caller.admin.users.listApprovalPlans()),
-    }),
     approveBusiness: tool({
       description:
-        "Approve a pending business on a plan (this creates its subscription). Confirm business and plan with the user first.",
+        "Approve a pending business. It then picks and pays its own plan from its dashboard. Confirm the business with the user first.",
       inputSchema: approveBusinessSchema,
       execute: (input) =>
         runTool(() => caller.admin.users.approveBusiness(input)),

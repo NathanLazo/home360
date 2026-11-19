@@ -32,6 +32,8 @@ export function useSubscriptionMutations() {
   const changePlanMutation = api.subscription.changePlan.useMutation();
   const portalSessionMutation =
     api.subscription.createPortalSession.useMutation();
+  const checkoutSessionMutation =
+    api.subscription.createCheckoutSession.useMutation();
 
   async function changePlan(planCode: PlanListItem["code"]): Promise<boolean> {
     try {
@@ -75,7 +77,32 @@ export function useSubscriptionMutations() {
     }
   }
 
+  /**
+   * Sends the business to the Stripe Checkout of the plan it picked, where it
+   * pays or redeems a promotion code. Hosted by Stripe: full navigation.
+   */
+  async function startCheckout(planCode: PlanListItem["code"]): Promise<void> {
+    try {
+      const response = await checkoutSessionMutation.mutateAsync({ planCode });
+      const session = unwrap(response);
+
+      if (!session) {
+        reportFailure(response.error);
+        return;
+      }
+
+      window.location.href = session.url;
+    } catch {
+      reportFailure(null);
+    }
+  }
+
   return {
+    startCheckout,
+    // The variable carries the plan being opened so only its button spins.
+    checkoutPlanCode: checkoutSessionMutation.isPending
+      ? (checkoutSessionMutation.variables?.planCode ?? null)
+      : null,
     changePlan,
     changingPlan: changePlanMutation.isPending,
     openBillingPortal,

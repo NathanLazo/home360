@@ -243,9 +243,9 @@ export const businessProcedure = protectedProcedure.use(
 /**
  * F4 extends this guard with the subscription state (spec/04 §2).
  *
- * `CANCELED` degrades the business to read-only, and a missing subscription
- * breaks the F5-05 invariant that an ACTIVE business always has one, so neither
- * may move money or mutate the catalogue. `PAST_DUE` passes: arrears show a
+ * `CANCELED` degrades the business to read-only, and so does a missing
+ * subscription: an approved business picks and pays its own plan through
+ * Checkout (`PENDIENTES.md` §8, revised 2026-11-19) before it can operate. `PAST_DUE` passes: arrears show a
  * banner but never block operations. The check lives here and only here; the UI
  * tells the two reasons apart through `subscription.getCurrent`, which
  * `businessProcedure` still allows.

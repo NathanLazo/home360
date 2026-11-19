@@ -26,8 +26,6 @@
     "errorDescription": "Vuelve a intentarlo en un momento.",
     "currentErrorTitle": "No pudimos cargar tu plan",
     "plansErrorTitle": "No pudimos cargar los planes",
-    "noSubscriptionTitle": "Tu plan se activa al aprobar tu cuenta",
-    "noSubscriptionDescription": "Cuando el equipo de HOME360 apruebe tu negocio verás aquí tu plan y tus facturas.",
     "features": {
       "commission": "Comisión de {percent}% por venta",
       "branches": "Sucursales: {value}",
@@ -41,7 +39,17 @@
       "value": "{used} de {max}",
       "valueUnlimited": "{used} · sin límite"
     },
+    "choosePlan": {
+      "title": "Elige tu plan para empezar",
+      "description": "Tu negocio ya está aprobado. Elige el plan que mejor te quede y completa el pago en Stripe para activar tu panel.",
+      "promoHint": "¿Tienes un código de descuento? Ingrésalo en la pantalla de pago."
+    },
+    "checkout": {
+      "success": "Listo, estamos activando tu plan. Puede tardar unos segundos en reflejarse.",
+      "canceled": "No se completó el pago. Puedes elegir tu plan cuando quieras."
+    },
     "actions": {
+      "choose": "Elegir {plan}",
       "manage": "Administrar plan",
       "manageBilling": "Administrar facturación",
       "upgrade": "Mejorar plan",
@@ -55,6 +63,7 @@
         "businessPending": "Disponible cuando aprobemos tu negocio. Tu solicitud está en revisión.",
         "businessSuspended": "Tu negocio está suspendido; no puedes crear ni modificar registros.",
         "businessRejected": "Tu solicitud no fue aprobada; no puedes crear ni modificar registros.",
+        "subscriptionMissing": "Elige tu plan para poder crear y modificar registros.",
         "subscriptionCanceled": "Tu cuenta está en solo lectura porque tu suscripción está cancelada."
       }
     },
@@ -92,6 +101,11 @@
     }
   },
   "subscriptionBanner": {
+    "choosePlan": {
+      "title": "Elige tu plan para activar tu cuenta",
+      "description": "Tu negocio está aprobado. Elige un plan y completa el pago para empezar a operar; si tienes un código de descuento, lo ingresas al pagar.",
+      "cta": "Elegir plan"
+    },
     "pastDue": {
       "title": "Tu suscripción tiene un pago pendiente",
       "description": "Actualiza tu método de pago para mantener tu cuenta al corriente. Mientras tanto puedes seguir operando con normalidad.",

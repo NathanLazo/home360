@@ -1,8 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useAppFormatter } from "~/i18n/use-app-formatter";
-import { useEffect, useState } from "react";
 
 import { ConfirmButtonContent } from "../../_components/confirm-button-content";
 import { GuaranteeBadge } from "./guarantee-badge";
@@ -17,20 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
-import { planCodeSchema, type PlanCode } from "~/lib/subscription/plan-codes";
 import { unwrapEnvelope } from "~/lib/trpc-envelope";
 import { api } from "~/trpc/react";
-
-const PREFERRED_PLAN: PlanCode = "standard";
 
 export type ApproveBusinessDialogProps = {
   businessId: string | null;
@@ -38,7 +25,7 @@ export type ApproveBusinessDialogProps = {
   loading: boolean;
   /** The server confirmed; the dialog holds briefly on the check. */
   succeeded?: boolean;
-  onConfirm: (input: { businessId: string; planCode: PlanCode }) => void;
+  onConfirm: (input: { businessId: string }) => void;
 };
 
 /**
@@ -63,44 +50,6 @@ export function ApproveBusinessDialog({
   const doneT = useTranslations("admin.feedback.done");
   const documentTypeT = useTranslations("admin.documentTypes");
   const documentStatusT = useTranslations("admin.documentStatus");
-  const formatter = useAppFormatter();
-  const [planCode, setPlanCode] = useState<PlanCode | null>(null);
-
-  const plansQuery = api.admin.users.listApprovalPlans.useQuery(undefined, {
-    enabled: open,
-  });
-  const plans = unwrapEnvelope(plansQuery);
-
-  // The default plan is picked from what the platform can actually sell today:
-  // "standard" when available, otherwise the first sellable plan.
-  useEffect(() => {
-    if (plans.status !== "success" || planCode !== null) {
-      return;
-    }
-
-    const available = plans.data.filter((plan) => plan.isAvailable);
-    const preferred = available.find((plan) => plan.code === PREFERRED_PLAN);
-    const fallback = available[0];
-    const chosen = preferred ?? fallback;
-
-    if (chosen) {
-      setPlanCode(chosen.code);
-    }
-  }, [plans, planCode]);
-
-  useEffect(() => {
-    if (!open) {
-      setPlanCode(null);
-    }
-  }, [open]);
-
-  const currency = (cents: number) =>
-    formatter.number(cents / 100, {
-      style: "currency",
-      currency: "MXN",
-      maximumFractionDigits: 0,
-    });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -163,47 +112,9 @@ export function ApproveBusinessDialog({
               )}
             </section>
 
-            <section className="flex flex-col gap-2">
-              <Label htmlFor="approve-plan">{t("plan")}</Label>
-              {plans.status === "pending" ? (
-                <Skeleton className="h-10 w-full rounded-sm" />
-              ) : null}
-              {plans.status === "error" ? (
-                <SectionError
-                  title={t("plansErrorTitle")}
-                  code={plans.code}
-                  onRetry={() => void plansQuery.refetch()}
-                />
-              ) : null}
-              {plans.status === "success" ? (
-                <Select
-                  value={planCode ?? undefined}
-                  onValueChange={(value) =>
-                    setPlanCode(planCodeSchema.parse(value))
-                  }
-                >
-                  <SelectTrigger id="approve-plan">
-                    <SelectValue placeholder={t("planPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {plans.data.map((plan) => (
-                      <SelectItem
-                        key={plan.code}
-                        value={plan.code}
-                        disabled={!plan.isAvailable}
-                      >
-                        {t("planOption", {
-                          code: plan.code,
-                          price: currency(plan.priceCents),
-                          commission: plan.commissionPct,
-                        })}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : null}
-              <p className="text-muted-foreground text-xs">{t("planHint")}</p>
-            </section>
+            <p className="text-muted-foreground text-copy-sm">
+              {t("planHint")}
+            </p>
           </div>
         ) : null}
 
@@ -220,11 +131,11 @@ export function ApproveBusinessDialog({
             type="button"
             metal="live"
             metalActive={!succeeded}
-            disabled={loading || !business || planCode === null}
+            disabled={loading || !business}
             aria-disabled={succeeded || undefined}
             onClick={() => {
-              if (!succeeded && business && planCode !== null) {
-                onConfirm({ businessId: business.id, planCode });
+              if (!succeeded && business) {
+                onConfirm({ businessId: business.id });
               }
             }}
           >
