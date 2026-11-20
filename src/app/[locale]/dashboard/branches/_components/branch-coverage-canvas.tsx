@@ -7,7 +7,7 @@ import { useMemo } from "react";
 
 import { BranchCoverageLayer } from "./branch-coverage-layer";
 import { fitCoverageView, type LocatedBranch } from "./branch-coverage.utils";
-import { cartoTiles } from "./branch-map-tiles";
+import { basemapTiles } from "./branch-map-tiles";
 import { useElementSize } from "./use-element-size";
 import { usePrefersReducedMotion } from "~/hooks/use-prefers-reduced-motion";
 
@@ -31,7 +31,7 @@ export function BranchCoverageCanvas({
     [branches, width, height],
   );
   const provider = useMemo(
-    () => cartoTiles(resolvedTheme === "dark" ? "dark" : "light"),
+    () => basemapTiles(resolvedTheme === "dark" ? "dark" : "light"),
     [resolvedTheme],
   );
 
@@ -46,7 +46,6 @@ export function BranchCoverageCanvas({
           defaultCenter={view.center}
           defaultZoom={view.zoom}
           provider={provider}
-          dprs={[1, 2]}
           animate={!reducedMotion}
           metaWheelZoom
           metaWheelZoomWarning={t("wheelHint")}

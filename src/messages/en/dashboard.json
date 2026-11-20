@@ -1058,7 +1058,7 @@
       "missing": "{count, plural, one {# branch without location} other {# branches without location}}",
       "wheelHint": "Use Ctrl + scroll to zoom",
       "dragHint": "Use two fingers to move the map",
-      "attribution": "© OpenStreetMap · © CARTO"
+      "attribution": "© Esri · HERE · Garmin · © OpenStreetMap"
     },
     "managerDialog": {
       "title": "Assign manager",
