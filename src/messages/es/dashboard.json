@@ -1058,7 +1058,7 @@
       "missing": "{count, plural, one {# sucursal sin ubicación} other {# sucursales sin ubicación}}",
       "wheelHint": "Usa Ctrl + rueda para hacer zoom",
       "dragHint": "Usa dos dedos para mover el mapa",
-      "attribution": "© OpenStreetMap · © CARTO"
+      "attribution": "© Esri · HERE · Garmin · © OpenStreetMap"
     },
     "managerDialog": {
       "title": "Asignar encargado",
