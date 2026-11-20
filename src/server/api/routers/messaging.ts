@@ -75,6 +75,9 @@ function unexpectedFailure(
   error: unknown,
   message: string,
 ): TrpcResponse<never> {
+  // Unexpected failures must reach the runtime logs; the envelope alone hides
+  // them from observability.
+  console.error(`[messaging] ${message}`, error);
   const normalized = normalizeError(error);
   return fail(normalized.code, normalized.status, message);
 }

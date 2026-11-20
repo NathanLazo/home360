@@ -20,8 +20,15 @@ export async function isPairBlocked(
   db: PrismaClient,
   pair: Pair,
 ): Promise<boolean> {
+  // Build the compound key explicitly: callers may pass a wider object
+  // (e.g. ConversationParties) and Prisma rejects unknown key fields.
   const block = await db.customerBusinessBlock.findUnique({
-    where: { customerId_businessId: pair },
+    where: {
+      customerId_businessId: {
+        customerId: pair.customerId,
+        businessId: pair.businessId,
+      },
+    },
     select: { id: true },
   });
 
